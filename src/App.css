@@ -1,5 +1,11 @@
 .App {
-  text-align: center;
+  /* text-align: center; */
+  /* padding-bottom: 5%; */
+  display: grid;
+  gap: 1rem;
+  /* grid-template-areas: 
+  "sidenav main"; */
+  grid-template-columns: auto 1fr;
 }
 
 .App-logo {
@@ -13,9 +19,74 @@
   }
 }
 
-.App-header {
+body
+{
   background-color: #282c34;
-  min-height: 100vh;
+}
+
+h1{
+  color: white;
+}
+
+ul{
+  margin: 0;
+  padding: 0;
+}
+
+li.old {
+  opacity: 1;
+  transition: opacity 0.5s ease-in-out;
+  animation-name: fade-out;
+  animation-duration: 0.5s;
+  animation-fill-mode: forwards;
+  animation-delay: 0s;
+}
+
+li.new {
+
+  border: 2px solid grey;
+  border-radius: 5px;
+  padding:10px 10px;
+  margin:20px 20px 0px 0px;
+
+  opacity: 0;
+  transition: opacity 1s ease-in-out;
+  animation-name: fade-in;
+  animation-duration: 1s;
+  animation-fill-mode: forwards;
+  animation-delay: 0s;
+}
+
+
+
+@keyframes fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+@keyframes fade-out {
+  from { opacity: 1; }
+  to { opacity: 0; }
+}
+
+.ActivityDetail
+{
+  font-size: large;
+  padding-bottom: 5px;
+}
+
+.ActivityTime
+{
+  /* text-align: right; */
+  font-size: small;
+  font-style: italic;
+  color: lightgray;
+}
+
+
+.App-header {
+ 
+  /* min-height: 100vh; */
+  padding-bottom: 10px;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -28,6 +99,7 @@
   color: #61dafb;
 }
 
+
 @keyframes App-logo-spin {
   from {
     transform: rotate(0deg);
@@ -36,3 +108,31 @@
     transform: rotate(360deg);
   }
 }
+
+
+
+.Activity 
+{
+
+  /* max-width: 50%; */
+  /* border: 1px solid white; */
+  border-radius: 5px;
+  /* margin-left: 50px;
+  margin-right: 50px; */
+
+  /* grid-area: "⌛"; */
+ 
+  /* background-color: #282c34; */
+}
+
+.Activity ul
+{
+  list-style-type: none !important;
+  color: white;
+  /* background-color: #282c34; */
+}
+ /* *
+ {
+  outline: 1px solid green;
+ }
+ */

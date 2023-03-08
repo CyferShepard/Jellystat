@@ -1,0 +1,39 @@
+.overview{
+    color: black;
+    margin-top: 20px;
+    font-family: 'Railway', sans-serif;
+    font-weight: bold;
+}
+
+.card
+{
+    /* width: 400px; */
+    margin-right: 20px;
+    height: 170px;
+    background: linear-gradient(60deg, #AA5CC3 , #00A4DC);
+    border-radius: 4px;
+    text-align: center;
+
+}
+
+.item-card-count
+{
+    font-size: 40px;
+    padding-top: 20px;
+    padding-bottom: 10px;
+}
+
+
+
+.item-count
+{
+    font-size: 32px;
+    display: inline-block;
+    padding-left: 30px;
+    padding-right: 30px;
+}
+
+p
+{
+    margin: 0;
+}

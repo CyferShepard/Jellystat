@@ -1,0 +1,54 @@
+.Users
+{
+    color: white;
+    padding-right: 20px;
+    padding-bottom: 50px;
+}
+
+.user-activity-table {
+    border-collapse: collapse;
+    border-radius: 5px;
+    /* margin: 25px 0; */
+    font-size: 0.9em;
+    font-family: sans-serif;
+    min-width: 400px;
+    box-shadow: 0 0 20px rgba(255, 255, 255, 0.15);
+
+    width: 100%;
+
+}
+
+ th,
+td {
+    padding: 12px 15px;
+    /* text-align: left; */
+    border-bottom: 1px solid rgba(255, 255, 255, 0.15);
+}
+
+th {
+    background-color: rgba(0, 0, 0, 0.5);
+    cursor: pointer;
+}
+
+th:hover {
+    border-bottom: 1px solid rgba(255, 255, 255, 0.5);
+}
+
+
+
+tbody tr:last-of-type {
+    border-bottom: 2px solid #009879;
+}
+
+
+.card-user-image
+{
+    border-radius: 50%;
+    width: 30px;
+    height: 30px;
+    object-fit: cover;
+
+}
+
+
+
