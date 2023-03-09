@@ -3,11 +3,12 @@ import React, { useState, useEffect } from 'react';
 import Config from '../../lib/config';
 import API from '../../classes/jellyfin-api';
 
-import "../css/sessions.css"
+
+import "../css/recent.css"
 // import "../../App.css"
 
 
-import SessionCard from './session-card';
+import RecentCard from './recent-card';
 
 
 import Loading from './loading';
@@ -16,7 +17,7 @@ import Loading from './loading';
 
 
 
-function Sessions() {
+function RecentlyPlayed() {
   const [data, setData] = useState([]);
   const [base_url, setURL] = useState('');
   // const [errorHandler, seterrorHandler] = useState({ error_count: 0, error_message: '' })
@@ -25,8 +26,8 @@ function Sessions() {
   useEffect(() => {
     const _api = new API();
     const fetchData = () => {
-      _api.getSessions().then((SessionData) => {
-        setData(SessionData);
+      _api.getRecentlyPlayed('5f63950a2339462196eb8cead70cae7e',10).then((recentData) => {
+        setData(recentData);
       });
     };
 
@@ -51,11 +52,11 @@ function Sessions() {
 
   return (
 
-    <div className='sessions'>
+    <div className='recent'>
       {data &&
-        data.sort((a, b) => a.Id.padStart(12, '0').localeCompare(b.Id.padStart(12, '0'))).map(session => (
+        data.sort((a, b) => b.UserData.LastPlayedDate.localeCompare(a.UserData.LastPlayedDate)).map(recent => (
 
-          <SessionCard data={{ session: session, base_url: base_url }} />
+          <RecentCard data={{ recent: recent, base_url: base_url }} />
 
         ))}
     </div>
@@ -63,5 +64,5 @@ function Sessions() {
   );
 }
 
-export default Sessions;
+export default RecentlyPlayed;
 

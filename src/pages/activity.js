@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
-import Config from '../lib/config';
+import API from '../classes/jellyfin-api';
 
 import '../App.css'
 
@@ -10,55 +9,30 @@ import Loading from './components/loading';
 
 function Activity() {
   const [data, setData] = useState([]);
-  const [config, setConfig] = useState(null);
 
   useEffect(() => {
-
-
-    const fetchConfig = async () => {
-      try {
-        const newConfig = await Config();
-        setConfig(newConfig);
-      } catch (error) {
-        if (error.code === 'ERR_NETWORK') {
-          console.log(error);
-        }
-      }
-    };
+    let _api= new API()
 
     const fetchData = () => {
-      if (config) {
-        const url = `${config.hostUrl}/System/ActivityLog/Entries?limit=30`;
-        const apiKey = config.apiKey;
-
-        axios.get(url, {
-          headers: {
-            'X-MediaBrowser-Token': apiKey,
-          },
-        })
-          .then(newData => {
-            if (data && data.length > 0) {
-              const newDataOnly = newData.data.Items.filter(item => {
-                return !data.some(existingItem => existingItem.Id === item.Id);
-              });
-              setData([...newDataOnly, ...data.slice(0, data.length - newDataOnly.length)]);
-            } else {
-              setData(newData.data.Items);
-            }
-          })
-          .catch(error => {
-            console.log(error);
+      _api.getActivityData(30).then((ActivityData) => {
+        if (data && data.length > 0) 
+        {
+          const newDataOnly = ActivityData.Items.filter(item => {
+            return !data.some(existingItem => existingItem.Id === item.Id);
           });
-      }
+          setData([...newDataOnly, ...data.slice(0, data.length - newDataOnly.length)]);
+        } else 
+        {
+          setData(ActivityData.Items);
+        }
+      });
     };
 
-    if (!config) {
-      fetchConfig();
-    }
 
-    const intervalId = setInterval(fetchData, 2000);
+    const intervalId = setInterval(fetchData, 1000);
     return () => clearInterval(intervalId);
-  }, [data,config]);
+  }, [data]);
+
 
 
 
@@ -70,7 +44,7 @@ function Activity() {
     hour: 'numeric',
     minute: 'numeric',
     second: 'numeric',
-    hour12: true
+    hour12: false
   };
 
   if (!data || data.length === 0) {

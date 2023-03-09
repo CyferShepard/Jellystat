@@ -2,7 +2,7 @@ import  { Component } from 'react';
 import axios from 'axios';
 import Config from '../lib/config';
 
-class sync extends Component {
+class API extends Component {
   constructor(props) {
     super(props);
     this.state = {
@@ -10,6 +10,42 @@ class sync extends Component {
     };
   }
 
+
+  async getSessions() {
+    try {
+      const config = await Config();
+      const url = `${config.hostUrl}/Sessions`;
+      const response = await axios.get(url, {
+        headers: {
+          'X-MediaBrowser-Token': config.apiKey,
+        },
+      });
+      return response.data;
+    } catch (error) {
+      console.log(error);
+      return [];
+    }
+  }
+
+  async getActivityData(limit) {
+    if(limit===undefined || limit<1)
+    {
+        return[];
+    }
+    try {
+      const config = await Config();
+      const url = `${config.hostUrl}/System/ActivityLog/Entries?limit=${limit}`;
+      const response = await axios.get(url, {
+        headers: {
+          'X-MediaBrowser-Token': config.apiKey,
+        },
+      });
+      return response.data;
+    } catch (error) {
+      console.log(error);
+      return [];
+    }
+  }
 
   async getAdminUser() {
     try {
@@ -67,7 +103,24 @@ class sync extends Component {
     }
   }
 
+  async getRecentlyPlayed(userid,limit) {
+    
+    try {
+      const config = await Config();
+      const url = `${config.hostUrl}/users/${userid}/Items/Resume?limit=${limit}`;
+      const response = await axios.get(url, {
+        headers: {
+          'X-MediaBrowser-Token': config.apiKey,
+        },
+      });
+      return response.data.Items;
+    } catch (error) {
+      console.log(error);
+      return [];
+    }
+  }
+
 
 }
 
-export default sync;
+export default API;

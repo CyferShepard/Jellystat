@@ -1,16 +1,22 @@
 import React, { useState, useEffect } from 'react';
-import GetSeries from '../classes/sync';
+// import sync from '../classes/sync';
 import './css/libraries.css';
 import Loading from './components/loading';
+
+import API from '../classes/jellyfin-api';
 
 function UserData() {
   const [data, setData] = useState([]);
 
   useEffect(() => {
-    const seriesInstance = new GetSeries(); // create an instance of the GetSeries class
-    seriesInstance.getData().then((seriesData) => {
+    const seriesInstance = new API(); // create an instance of the GetSeries class
+    seriesInstance.getLibraries().then((seriesData) => {
       setData(seriesData);
     });
+
+    
+    
+    
   }, []); // run this effect only once, when the component mounts
 
   if (!data || data.length === 0) {

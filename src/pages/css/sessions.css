@@ -15,6 +15,7 @@
     color: white;
 
     background-color: grey;
+    box-shadow: 0 0 20px rgba(255, 255, 255, 0.05);
 
     max-height: 215px;
     max-width: 500px;

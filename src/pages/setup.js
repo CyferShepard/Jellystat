@@ -1,0 +1,160 @@
+import React, { useState, useEffect } from 'react';
+import axios from 'axios';
+import Config from '../lib/config';
+
+import './css/setup.css'
+
+// import Loading from './components/loading';
+
+function Setup() {
+  const [config, setConfig] = useState(null);
+  const [formValues, setFormValues] = useState({});
+  const [processing, setProcessing] = useState(false);
+  const [submitButtonText, setsubmitButtonText] = useState('Save');
+
+  function handleFormChange(event) {
+
+    setFormValues({ ...formValues, [event.target.name]: event.target.value });
+  }
+
+  async function validateSettings(_url, _apikey) {
+    // Send a GET request to /system/configuration to test copnnection
+    let isValid = false;
+    let errorMessage = '';
+    await axios.get(_url + '/system/configuration', {
+      headers: {
+        'X-MediaBrowser-Token': _apikey,
+      },
+    })
+      .then(response => {
+        // console.log('HTTP status code:', response.status); // logs the HTTP status code
+        //console.log('Response data:', response.data); // logs the response data
+
+        if (response.status === 200) {
+          isValid = true;
+        }
+
+
+      })
+      .catch(error => {
+        // console.log(error.code);
+        if (error.code === 'ERR_NETWORK') {
+          isValid = false;
+          errorMessage = `Unable to connect to Jellyfin Server`;
+        } else
+          if (error.response.status === 401) {
+            isValid = false;
+            errorMessage = `Error ${error.response.status} Not Authorized`;
+          } else
+            if (error.response.status === 404) {
+              isValid = false;
+              errorMessage = `Error ${error.response.status}: The requested URL was not found.`;
+            } else {
+              isValid = false;
+              errorMessage = `Error : ${error.response.status}`;
+            }
+
+      });
+
+    return ({ isValid: isValid, errorMessage: errorMessage });
+  }
+
+  async function handleFormSubmit(event) {
+    setProcessing(true);
+     event.preventDefault();
+
+
+    //  if(formValues.JF_HOST=='' || formValues.JF_API_KEY=='')
+    //  {
+    //   setsubmitButtonText('Plea');
+    //   return;
+    //  }
+
+
+     let validation = await validateSettings(formValues.JF_HOST, formValues.JF_API_KEY);
+
+
+    if (!validation.isValid) {
+
+      setsubmitButtonText(validation.errorMessage);
+      setProcessing(false);
+      return;
+
+    }
+
+
+    // Send a POST request to /api/setconfig/ with the updated configuration
+    axios.post('http://localhost:3003/api/setconfig/', formValues, {
+      headers: {
+        'Content-Type': 'application/json'
+      }
+    })
+      .then(response => {
+        setsubmitButtonText('Settings Saved');
+        setProcessing(false);
+        setTimeout(() => {
+          window.location.href = '/';
+        }, 1000);
+        
+        return;
+      })
+      .catch(error => {
+        setsubmitButtonText('Error Saving Settings');
+        setProcessing(false);
+        
+      });
+
+     
+
+  }
+
+
+  useEffect(() => {
+
+
+    const fetchConfig = async () => {
+      try {
+        const newConfig = await Config();
+        setConfig(newConfig);
+      } catch (error) {
+        if (error.code === 'ERR_NETWORK') {
+          console.log(error);
+        }
+      }
+    };
+
+    if (!config) {
+      fetchConfig();
+    }
+
+  }, [config]);
+
+
+
+  return (
+    <section>
+
+      <div className="form-box">
+        
+
+          <form onSubmit={handleFormSubmit} >
+            <h2>Setup</h2>
+            <div className='inputbox'>
+              <input type="text" id="JF_HOST" name="JF_HOST" value={formValues.JF_HOST || ''} onChange={handleFormChange} required/>
+              <label htmlFor="JF_HOST">Server URL</label>
+              
+            </div>
+            <div className='inputbox'>
+              <input type="text" id="JF_API_KEY" name="JF_API_KEY" value={formValues.JF_API_KEY || ''} onChange={handleFormChange} required/>
+              <label htmlFor="JF_API_KEY">API Key</label>
+            </div>
+
+            <button type="submit" className='setup-button'>{processing ? 'Validating...' : submitButtonText}</button>
+          </form>
+       
+      </div>
+    </section>
+  );
+}
+
+export default Setup;

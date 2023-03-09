@@ -5,6 +5,9 @@ import FileListFillIcon from 'remixicon-react/FileListFillIcon';
 import BarChartFillIcon from 'remixicon-react/BarChartFillIcon';
 import SettingsFillIcon from 'remixicon-react/SettingsFillIcon';
 import GalleryFillIcon from 'remixicon-react/GalleryFillIcon';
+import UserFillIcon from 'remixicon-react/UserFillIcon';
+
+import ReactjsFillIcon from 'remixicon-react/ReactjsFillIcon';
 
 export const navData = [
     {
@@ -24,23 +27,30 @@ export const navData = [
         icon: <GalleryFillIcon />,
         text: "Libraries",
         link: "libraries"
-    },
+    }    ,
     {
         id: 3,
+        icon: <UserFillIcon />,
+        text: "Recently Played",
+        link: "recent"
+    },
+    {
+        id: 4,
         icon: <BarChartFillIcon />,
         text: "User Activity",
         link: "usersactivity"
     },
     {
-        id: 4,
-        icon: <BarChartFillIcon />,
-        text: "User Data",
+        id: 5,
+        icon: <ReactjsFillIcon />,
+        text: "Library Data",
         link: "userdata"
     },
     {
-        id: 5,
+        id: 6,
         icon: <SettingsFillIcon />,
         text: "Settings",
         link: "settings"
     }
+
 ]
