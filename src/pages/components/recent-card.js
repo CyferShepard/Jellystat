@@ -52,7 +52,7 @@ function RecentCard(props) {
     <div key={props.data.recent.Id} className='recent-card' >
 
 
-      <div className='card-banner'
+      <div className='recent-card-banner'
        style={{ backgroundImage: `url(${props.data.base_url + '/Items/' + (props.data.recent.SeriesId ? props.data.recent.SeriesId : props.data.recent.Id) + '/Images/Primary?quality=50&tag=' + props.data.recent.SeriesPrimaryImageTag || props.data.recent.ImageTags.Primary})` }}
       >
         </div>
