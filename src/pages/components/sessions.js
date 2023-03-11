@@ -30,13 +30,16 @@ function Sessions() {
       });
     };
 
-
-    Config().then(config => {
-      setURL(config.hostUrl);
-    }).catch(error => {
-      console.log(error);
+    if(base_url==='')
+    {
+      Config().then(config => {
+        setURL(config.hostUrl);
+      }).catch(error => {
+        console.log(error);
+      }
+      );
     }
-    );
+
 
     const intervalId = setInterval(fetchData, 1000);
     return () => clearInterval(intervalId);

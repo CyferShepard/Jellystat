@@ -35,12 +35,13 @@ function App() {
     const fetchConfig = async () => {
         try {
             const newConfig = await Config();
-            setConfig(newConfig);
-            setLoading(false);
-        } catch (error) {
-            if (error.code === 'ERR_NETWORK') {
-                console.log(error);
+            if(newConfig !== 'ERR_NETWORK'){
+              setConfig(newConfig);
+              setLoading(false);
             }
+           
+        } catch (error) {
+
         }
     };
 

@@ -7,6 +7,7 @@ async function Config() {
     return { hostUrl: JF_HOST, apiKey: JF_API_KEY, username: APP_USER, password: APP_PASSWORD };
   } catch (error) {
     console.log(error);
+    return error.code;
   }
 }
 

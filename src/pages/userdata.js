@@ -14,10 +14,11 @@ function UserData() {
       setData(seriesData);
     });
 
+
     
     
     
-  }, []); // run this effect only once, when the component mounts
+  }, [data]); // run this effect only once, when the component mounts
 
   if (!data || data.length === 0) {
     return <Loading />;
