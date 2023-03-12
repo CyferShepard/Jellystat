@@ -1,39 +1,62 @@
-.overview{
-    color: black;
+.overview {
+    color: white;
     margin-top: 20px;
     font-family: 'Railway', sans-serif;
     font-weight: bold;
-}
-
-.card
-{
-    /* width: 400px; */
+    display: flex;
+    flex-direction: row;
+    
+  }
+  
+  .card {
+    width: 100%;
+    height: 200px;
     margin-right: 20px;
-    height: 170px;
-    background: linear-gradient(60deg, #AA5CC3 , #00A4DC);
     border-radius: 4px;
     text-align: center;
+    background-size: cover;
+    background-position: center;
+    margin-bottom: 5px;
+    background-color: black;
+  }
+  
+  .item-card-count {
 
-}
-
-.item-card-count
-{
-    font-size: 40px;
     padding-top: 20px;
     padding-bottom: 10px;
-}
+  }
 
-
-
-.item-count
-{
-    font-size: 32px;
-    display: inline-block;
+  .item-count {
+    backdrop-filter: blur(2px);
+    font-size: 20px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100%;
     padding-left: 30px;
     padding-right: 30px;
-}
-
-p
-{
+  }
+  
+  .item-count > div {
+    display: inline-block;
+    margin-right: 10px;
+    text-align: center;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+  }
+  
+  .item-count > div p {
     margin: 0;
-}
+  }
+  
+  .item-count > div:not(:last-child) {
+    margin-right: 10px;
+  }
+  
+  p {
+    margin: 0;
+  }
+  

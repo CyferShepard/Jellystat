@@ -1,0 +1,19 @@
+.console-container {
+  background-color: black;
+  color: white;
+  height: 500px;
+  overflow-y: auto;
+  margin-top: 20px;
+  padding: 10px;
+  margin-right: 10px;
+  border-radius: 4px;
+}
+
+.console-message {
+  margin-bottom: 10px;
+}
+
+.console-text {
+  margin: 0;
+  font-family: monospace;
+}

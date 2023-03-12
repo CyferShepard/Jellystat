@@ -1,60 +1,76 @@
-import "../css/libraryOverview.css"
-import React, { useState, useEffect } from 'react';
-import axios from "axios";
+import "../css/libraryOverview.css";
 import Config from "../../lib/config";
+import React, { useState, useEffect } from "react";
+import axios from "axios";
 import Loading from "./loading";
 
 export default function LibraryOverView() {
-    const [data, setData] = useState([]);
+  const [data, setData] = useState([]);
+  const [base_url, setURL] = useState("");
 
+  useEffect(() => {
+    if (base_url === "") {
+        Config()
+          .then((config) => {
+            setURL(config.hostUrl);
+          })
+          .catch((error) => {
+            console.log(error);
+          });
+      }
+    const fetchData = () => {
+      const url = `http://localhost:3003/stats/getLibraryOverview`;
+      axios
+        .get(url)
+        .then((response) => setData(response.data))
+        .catch((error) => console.log(error));
+    };
 
-    useEffect(() => {
-        Config().then(config => {
-          const url = `${config.hostUrl}/Items/counts`;
-          const fetchData = () => {
-            axios.get(url, {
-              headers: {
-                'X-MediaBrowser-Token': config.apiKey,
-              },
-            })
-              .then(response => setData(response.data))
-              .catch(error => console.log(error));
-          };
-    
-          fetchData();
-          const intervalId = setInterval(fetchData, 60000);
-          return () => clearInterval(intervalId);
-        });
-      }, []);
-
-
-
-    if (data.length === 0) {
-        return <Loading />;
+    if (!data || data.length === 0) {
+      fetchData();
     }
+  
+  }, [data,base_url]);
 
-    return (
-        <div className="overview">
-            <div className="card">
-                <div className="item-card-count">
-                    {data.MovieCount + data.EpisodeCount} Media Files
-                </div>
+  if (data.length === 0) {
+    return <Loading />;
+  }
+
+  return (
+    <div className="overview">
+      {data &&
+        data.map((stats) => (
+          <div className="card" style={{
+            backgroundImage: `url(${
+             base_url +
+              "/Items/" +
+              (stats.Isd) +
+              "/Images/Primary?quality=50"
+            })`,
+          }}
+          key={stats.Id}
+          >
+            <div className="item-count">
+              <div>
+              <p>Items in Library</p><p>{stats.Library_Count}</p>
+              </div>
+              {stats.CollectionType === "tvshows" ? (
                 <div>
-                    <div className="item-count">
-                        <p>{data.MovieCount}</p> <p>Movies</p>
-                    </div>
-                    <div className="item-count">
-                        <p>{data.BoxSetCount}</p> <p>Box Sets</p>
-                    </div>
-                    <div className="item-count">
-                        <p>{data.SeriesCount}</p> <p>Shows</p>
-                    </div>
-                    <div className="item-count">
-                        <p>{data.EpisodeCount}</p> <p>Episodes</p>
-                    </div>
+                   <p>Seasons</p><p>{stats.Season_Count}</p>
                 </div>
-
+              ) : (
+                <></>
+              )}
+              {stats.CollectionType === "tvshows" ? (
+                <div>
+                  <p>Episodes</p><p>{stats.Episode_Count}</p>
+                </div>
+              ) : (
+                <></>
+              )}
             </div>
-        </div>
-    )
+          </div>
+        ))}
+    </div>
+  );
 }
