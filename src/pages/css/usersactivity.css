@@ -13,7 +13,7 @@
     font-family: sans-serif;
     min-width: 400px;
     box-shadow: 0 0 20px rgba(255, 255, 255, 0.15);
-
+    color: white;
     width: 100%;
 
 }
@@ -22,7 +22,9 @@
 td {
     padding: 12px 15px;
     /* text-align: left; */
-    border-bottom: 1px solid rgba(255, 255, 255, 0.15);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    border-right: 1px solid rgba(255, 255, 255, 0.05);
+    border-left:1px solid rgba(255, 255, 255, 0.05);
 }
 
 th {
@@ -36,9 +38,9 @@ th:hover {
 
 
 
-tbody tr:last-of-type {
+/* tbody tr:last-of-type {
     border-bottom: 2px solid #009879;
-}
+} */
 
 
 .card-user-image
@@ -50,5 +52,16 @@ tbody tr:last-of-type {
 
 }
 
+tr:hover
+{
+    background-color: rgba(0, 0, 0, 0.2);
+}
 
 
+td:first-child {
+    border-left: none;
+  }
+  
+  td:last-child {
+    border-right: none;
+  }

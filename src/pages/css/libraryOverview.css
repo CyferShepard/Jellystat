@@ -1,62 +1,113 @@
-.overview {
-    color: white;
-    margin-top: 20px;
-    font-family: 'Railway', sans-serif;
-    font-weight: bold;
+.overview-container
+{
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(520px, 520px));
+  grid-auto-rows: 200px;/* max-width+offset so 215 + 20*/
+
+  border-radius: 4px;
+  margin-right: 20px;
+}
+
+.library-card
+{
+    width: 500px;
+    height: 180px;
     display: flex;
-    flex-direction: row;
+    color: white;
+    /* box-shadow: 0 0 20px 5px rgba(0, 0, 0, 0.5); */
+    background: linear-gradient(to right, #00A4DC, #AA5CC3);
+    background-size: cover;
+}
+
+
+
+.library-icons
+{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100%;
+
+}
+
+  .library-header {
+    display: flex;
+    justify-content: space-between;
+    color: white;
+    font-weight: 500;
+  }
+  .library-header-count {
+    color: lightgray;
+    font-weight: 300;
+
+  }
+
+  .library-item {
+    display: flex;
+    justify-content: space-between;
+    width: 100%;
+    height: 20px;
+    margin-bottom: 5px;
     
   }
   
-  .card {
+  .library-item-index {
+    padding-top: 3px;
+    font-size: 0.8em;
+    padding-right: 2px;
+    color: grey;
+
+    text-align: right;
+  }
+  .library-item-name {
+    width: 35%;
+  }
+  
+  .library-item-count {
+    width: 60%;
+    text-align: right;
+    color: #00A4DC;
+    font-weight: 500;
+    font-size: 1.1em;
+
+  }
+
+  .library-image
+  {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 180px;
+    width: 180px;
+    background-color: rgb(0, 0, 0, 0.6);
+  }
+
+  .library-banner-image
+  {
+
+    
+    height: 180px;
+    width: 120px;
+
+    
+  }
+
+  
+  .library-user-image
+  {
+
+    border-radius: 50%;
+    width: 80%;
+    object-fit: cover;
+    
+  }
+
+
+  .library{
     width: 100%;
-    height: 200px;
-    margin-right: 20px;
-    border-radius: 4px;
-    text-align: center;
-    background-size: cover;
-    background-position: center;
-    margin-bottom: 5px;
-    background-color: black;
-  }
-  
-  .item-card-count {
-
-    padding-top: 20px;
-    padding-bottom: 10px;
+    padding: 5px 20px;
+    backdrop-filter: blur(4px);
+    
+    background-color: rgb(0, 0, 0, 0.6);
   }
 
-  .item-count {
-    backdrop-filter: blur(2px);
-    font-size: 20px;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    height: 100%;
-    padding-left: 30px;
-    padding-right: 30px;
-  }
-  
-  .item-count > div {
-    display: inline-block;
-    margin-right: 10px;
-    text-align: center;
-    height: 100%;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-  }
-  
-  .item-count > div p {
-    margin: 0;
-  }
-  
-  .item-count > div:not(:last-child) {
-    margin-right: 10px;
-  }
-  
-  p {
-    margin: 0;
-  }
-  

@@ -7,7 +7,7 @@ const WebSocketComponent = () => {
 
   useEffect(() => {
     // create a new WebSocket connection
-    const socket = new WebSocket('ws://localhost:8080');
+    const socket = new WebSocket('ws://10.0.0.20:8080');
 
     // handle incoming messages
     socket.addEventListener('message', (event) => {
@@ -33,7 +33,7 @@ const WebSocketComponent = () => {
 
   return (
     <div>
-      {/* <h1>WebSocket Example</h1> */}
+      <h1>Terminal</h1>
       <div className="console-container">
         {messages.map((message, index) => (
           <div key={index} className="console-message">

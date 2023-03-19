@@ -31,6 +31,7 @@
     border: none;
     cursor: pointer;
     transition: all 0.3s ease-in-out;
+    margin-bottom: 10px;
   }
   
   .settings-form button:hover {

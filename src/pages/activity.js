@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import API from "../classes/jellyfin-api";
 
-import "../App.css";
+import "./css/activity.css";
 
 import Loading from "./components/loading";
 
@@ -12,7 +12,7 @@ function Activity() {
     let _api = new API();
 
     const fetchData = () => {
-      _api.getActivityData(30).then((ActivityData) => {
+      _api.getActivityData(15).then((ActivityData) => {
         if (data && data.length > 0) {
           const newDataOnly = ActivityData.Items.filter((item) => {
             return !data.some((existingItem) => existingItem.Id === item.Id);
@@ -46,15 +46,16 @@ function Activity() {
   }
 
   return (
-    <div className="Activity">
-      <h1>Activity Log</h1>
+    <div>
+      <h1>Activity</h1>
+      <div className="Activity">
       <ul>
         {data &&
           data.map((item) => (
             <li
               key={item.Id}
               className={
-                data.findIndex((items) => items.Id === item.Id) <= 30
+                data.findIndex((items) => items.Id === item.Id) <= 15
                   ? "new"
                   : "old"
               }
@@ -68,6 +69,8 @@ function Activity() {
             </li>
           ))}
       </ul>
+      <div/>
+    </div>
     </div>
   );
 }

@@ -3,7 +3,14 @@ import React, { useState, useEffect } from 'react';
 import './css/libraries.css';
 import Loading from './components/loading';
 
+// import PlaybackActivity from './components/playbackactivity';
+
+// import StatCards from './components/StatsCards';
+
+import LibraryOverView from './components/libraryOverview';
+
 import API from '../classes/jellyfin-api';
+
 
 function UserData() {
   const [data, setData] = useState([]);
@@ -26,15 +33,19 @@ function UserData() {
 
   return (
     <div className='Activity'>
-      <h1>Libraries</h1>
+      {/* <h1>Libraries</h1>
       <ul>
         {data.map((series) => (
           <li key={series.Id}>
             <div className='ActivityDetail'>{series.Name}</div>
           </li>
         ))}
-      </ul>
+      </ul> */}
+{/* <PlaybackActivity/> */}
+  <LibraryOverView/>
+
     </div>
+
   );
 }
 

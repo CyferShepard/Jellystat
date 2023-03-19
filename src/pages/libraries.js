@@ -3,12 +3,41 @@ import axios from "axios";
 import Config from "../lib/config";
 
 import "./css/libraries.css";
+import "./css/usersactivity.css";
 
 import Loading from "./components/loading";
 
+// import PlaybackActivity from "./components/playbackactivity";
+
 function Libraries() {
   const [data, setData] = useState([]);
+  const [items, setItems] = useState([]);
   const [config, setConfig] = useState(null);
+
+  async function fetchLibraryData(libraryId) {
+    console.log("data: "+libraryId);
+    if (config) {
+      const url = `/api/getLibraryItems`;
+      await axios
+      .post(url, {}, {
+        headers: {
+          "id": libraryId,
+        }
+      })
+      .then((response) => {
+        console.log("data");
+        setItems(response.data);
+        console.log(response);
+      })
+      .catch((error) => {
+        console.log(error);
+      });
+    }
+
+    
+
+   
+  }
 
   useEffect(() => {
     const fetchConfig = async () => {
@@ -22,7 +51,7 @@ function Libraries() {
       }
     };
 
-    const fetchData = () => {
+    const fetchLibraries = () => {
       if (config) {
         const url = `${config.hostUrl}/Library/MediaFolders`;
         const apiKey = config.apiKey;
@@ -43,21 +72,27 @@ function Libraries() {
           });
       }
     };
+ 
 
     if (!config) {
       fetchConfig();
     }
 
     if (data.length === 0) {
-      fetchData();
+      fetchLibraries();
     }
 
-    const intervalId = setInterval(fetchData, 60000 * 60);
+    const intervalId = setInterval(fetchLibraries, 60000 * 60);
     return () => clearInterval(intervalId);
   }, [data, config]);
 
   if (!data || data.length === 0) {
     return <Loading />;
+  }
+  const handleClick = (event) => {
+    fetchLibraryData(event.target.value);
+    console.log(event.target.value);
+    // console.log('Button clicked!');
   }
 
   return (
@@ -71,22 +106,42 @@ function Libraries() {
             )
             .map((item) => (
               <li key={item.Id}>
-                {/* <div className='ActivityDetail'> {item.Name}</div> */}
-                <div className="library-banner">
-                  <img
-                    className="library-banner-image"
-                    src={
-                      config.hostUrl +
-                      "/Items/" +
-                      item.Id +
-                      "/Images/Primary?quality=50"
-                    }
-                    alt=""
-                  ></img>
-                </div>
+                <div className='ActivityDetail'> {item.Name}</div>
+          <button  onClick={handleClick} value= {item.Id}> {item.Name}</button>
+
               </li>
             ))}
       </ul>
+      <h1>Library Data</h1>
+      <table className="user-activity-table">
+        <thead>
+          <tr>
+            <th >Id</th>
+            <th>Name</th>
+            <th>Type</th>
+
+          </tr>
+        </thead>
+        <tbody>
+          {items.map((item) => (
+            <tr key={item.Id}>
+              <td>{item.Id}</td>
+              <td>{item.Name}</td>
+              <td>{item.Type}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+      {/* <ul>
+        {items &&
+          items.map((item) => (
+              <li key={item.Id}>
+                <p className='ActivityDetail'> {item.Name}</p>
+                <p className='ActivityDetail'> {item.Id}</p>
+
+              </li>
+            ))}
+      </ul> */}
     </div>
   );
 }

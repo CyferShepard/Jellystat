@@ -4,6 +4,8 @@ const cors = require('cors');
 const apiRouter = require('./api');
 const syncRouter = require('./sync');
 const statsRouter = require('./stats');
+const ActivityMonitor=require('./watchdog/ActivityMonitor');
+ActivityMonitor.ActivityMonitor(1000);
 
 const app = express();
 const PORT = process.env.PORT || 3003;

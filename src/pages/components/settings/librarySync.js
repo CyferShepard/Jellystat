@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import axios from "axios";
 // import Config from "../../../lib/config";
 // import Loading from "../loading";
@@ -6,33 +6,47 @@ import axios from "axios";
 import "../../css/settings.css";
 
 export default function LibrarySync() {
-
+  const [processing, setProcessing] = useState(false);
     async function writeSeasonsAndEpisodes() {
-        // Send a GET request to /system/configuration to test copnnection
-        let isValid = false;
-        let errorMessage = "";
+
+
+        setProcessing(true);
+
         await axios
-          .get("http://localhost:3003/sync/writeSeasonsAndEpisodes")
+        .get("/sync/writeLibraryItems")
+        .then((response) => {
+          if (response.status === 200) {
+            // isValid = true;
+          }
+        })
+        .catch((error) => {
+           console.log(error);
+        });
+
+    
+        await axios
+          .get("/sync/writeSeasonsAndEpisodes")
           .then((response) => {
             if (response.status === 200) {
-              isValid = true;
+              // isValid = true;
             }
           })
           .catch((error) => {
              console.log(error);
           });
-    
-        return { isValid: isValid, errorMessage: errorMessage };
+          setProcessing(false);
+        // return { isValid: isValid, errorMessage: errorMessage };
       }
 
     const handleClick = () => {
+
         writeSeasonsAndEpisodes();
         console.log('Button clicked!');
       }
     
       return (
-        <div>
-          <button onClick={handleClick}>Run Sync</button>
+        <div className="settings-form">
+          <button style={{backgroundColor: !processing? '#2196f3':'darkgrey',cursor: !processing? 'pointer':'default'  }} disabled={processing} onClick={handleClick}>Run Sync</button>
         </div>
       );
 

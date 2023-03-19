@@ -79,7 +79,7 @@ export default function SettingsConfig() {
 
     // Send a POST request to /api/setconfig/ with the updated configuration
     axios
-      .post("http://localhost:3003/api/setconfig/", formValues, {
+      .post("/api/setconfig/", formValues, {
         headers: {
           "Content-Type": "application/json",
         },

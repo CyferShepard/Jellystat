@@ -19,7 +19,9 @@ function Sessions() {
     const _api = new API();
     const fetchData = () => {
       _api.getSessions().then((SessionData) => {
-        setData(SessionData);
+        let results=SessionData.filter((session) => session.NowPlayingItem);
+        setData(results);
+
       });
     };
 
@@ -35,22 +37,34 @@ function Sessions() {
 
     const intervalId = setInterval(fetchData, 1000);
     return () => clearInterval(intervalId);
-  }, []);
+  }, [base_url]);
 
-  if (!data || data.length === 0) {
+  if (!data) {
     return <Loading />;
   }
 
+  if (data.length === 0) {
+    return(<div>
+      <h1>Sessions</h1>
+      <div style={{color:"grey", fontSize:"0.8em", fontStyle:"italic"}}>
+      No Active Sessions Found
+      </div>
+    </div>);
+  }
+
   return (
-    <div className="sessions">
-      {data &&
-        data
-          .sort((a, b) =>
-            a.Id.padStart(12, "0").localeCompare(b.Id.padStart(12, "0"))
-          )
-          .map((session) => (
-            <SessionCard data={{ session: session, base_url: base_url }} />
-          ))}
+    <div>
+      <h1>Sessions</h1>
+      <div className="sessions">
+        {data &&
+          data
+            .sort((a, b) =>
+              a.Id.padStart(12, "0").localeCompare(b.Id.padStart(12, "0"))
+            )
+            .map((session) => (
+              <SessionCard key={session.Id} data={{ session: session, base_url: base_url }} />
+            ))}
+      </div>
     </div>
   );
 }

@@ -12,7 +12,7 @@ router.get("/test", async (req, res) => {
 
 router.get("/getconfig", async (req, res) => {
   const { rows } = await db.query('SELECT * FROM app_config where "ID"=1');
-  console.log(`ENDPOINT CALLED: /getconfig: ` + rows);
+  // console.log(`ENDPOINT CALLED: /getconfig: ` + rows);
   // console.log(`ENDPOINT CALLED: /setconfig: `+rows.length);
   res.send(rows);
 });
@@ -43,7 +43,20 @@ router.get("/getAllFromJellyfin", async (req, res) => {
 
   res.send(results);
 
-  console.log(`ENDPOINT CALLED: /getAllFromJellyfin: `);
+  // console.log(`ENDPOINT CALLED: /getAllFromJellyfin: `);
+});
+
+
+router.post("/getLibraryItems", async (req, res) => {
+  const  Id  = req.headers['id'];
+
+  const { rows } = await db.query(
+    `SELECT * FROM jf_library_items where "ParentId"='${Id}'`
+  );
+  console.log({ Id: Id });
+  res.send(rows);
+
+  console.log(`ENDPOINT CALLED: /getLibraryItems: `);
 });
 
 module.exports = router;

@@ -7,7 +7,16 @@
     display: flex;
     justify-content: center;
     align-items: center;
-    /* background-color: rgba(255, 255, 255, 0.8); */
+    z-index: 9999;
+  }
+  .component-loading {
+
+    height: inherit;
+    width: inherit;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: rgba(0, 0, 0, 0.8);
     z-index: 9999;
   }
   

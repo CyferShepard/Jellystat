@@ -98,7 +98,7 @@ function sessionCard(props) {
 
   return (
     <div
-      key={props.data.session.Id}
+
       className="session-card"
       style={{
         backgroundImage: `url(${
