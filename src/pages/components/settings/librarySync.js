@@ -1,16 +1,26 @@
 import React, { useState } from "react";
 import axios from "axios";
-// import Config from "../../../lib/config";
-// import Loading from "../loading";
+
 
 import "../../css/settings.css";
 
 export default function LibrarySync() {
   const [processing, setProcessing] = useState(false);
-    async function writeSeasonsAndEpisodes() {
+    async function beginSync() {
 
 
         setProcessing(true);
+
+        await axios
+        .get("/sync/writeLibraries")
+        .then((response) => {
+          if (response.status === 200) {
+            // isValid = true;
+          }
+        })
+        .catch((error) => {
+           console.log(error);
+        });
 
         await axios
         .get("/sync/writeLibraryItems")
@@ -34,13 +44,25 @@ export default function LibrarySync() {
           .catch((error) => {
              console.log(error);
           });
+
+
+          await axios
+          .get("/sync/writeUsers")
+          .then((response) => {
+            if (response.status === 200) {
+              // isValid = true;
+            }
+          })
+          .catch((error) => {
+             console.log(error);
+          });
           setProcessing(false);
         // return { isValid: isValid, errorMessage: errorMessage };
       }
 
     const handleClick = () => {
 
-        writeSeasonsAndEpisodes();
+         beginSync();
         console.log('Button clicked!');
       }
     

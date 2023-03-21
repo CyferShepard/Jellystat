@@ -1,14 +1,16 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import Config from "../../../lib/config";
+import StatComponent from "./statsComponent";
 
 
 import ComponentLoading from "../ComponentLoading";
 
 import AccountCircleFillIcon from "remixicon-react/AccountCircleFillIcon";
 
-function MostActiveUsers() {
+function MostActiveUsers(props) {
   const [data, setData] = useState([]);
+  const [days, setDays] = useState(30); 
   const [imgError, setImgError] = useState(false);
 
   const [config, setConfig] = useState(null);
@@ -31,7 +33,11 @@ function MostActiveUsers() {
         const url = `/stats/getMostActiveUsers`;
 
         axios
-          .get(url)
+        .post(url, {days:props.days}, {
+          headers: {
+            "Content-Type": "application/json",
+          },
+        })
           .then((data) => {
             setData(data.data);
           })
@@ -50,9 +56,15 @@ function MostActiveUsers() {
       fetchLibraries();
     }
 
+    if (days !== props.days) {
+      setDays(props.days);
+      fetchLibraries();
+    }
+
+
     const intervalId = setInterval(fetchLibraries, 60000 * 5);
     return () => clearInterval(intervalId);
-  }, [data, config]);
+  }, [data, config, days,props.days]);
 
 
 
@@ -95,30 +107,7 @@ function MostActiveUsers() {
         ></img>
         }
     </div>
-    <div className="stats">
-    <div className="stats-header">
-      
-      <div>MOST ACTIVE USERS</div>
-      <div className="stats-header-plays">Plays</div>
-    </div>
-
-    <div className = "stats-list">
-
-        {data &&
-          data
-            .map((item,index) => (
-
-                <div className='stat-item' key={item.UserId}>
-                    <p className="stat-item-index">{(index+1)}</p>
-                    <p className="stat-item-name">{item.UserName}</p>
-                    <p className="stat-item-count"> {item.Plays}</p>
-                </div>
-
-            ))}
-
-      </div>
-    </div>
-    
+    <StatComponent data={data} heading={"MOST ACTIVE USERS"} units={"Plays"}/>
 
     </div>
   );

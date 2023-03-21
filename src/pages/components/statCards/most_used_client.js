@@ -1,58 +1,49 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
-import Config from "../../../lib/config";
+
+import StatComponent from "./statsComponent";
 
 
 import ComponentLoading from "../ComponentLoading";
-
 import ComputerLineIcon from "remixicon-react/ComputerLineIcon";
 
-function MostUsedClient() {
+function MostUsedClient(props) {
   const [data, setData] = useState([]);
-//   const [base_url, setURL] = useState("");
-
-  const [config, setConfig] = useState(null);
+  const [days, setDays] = useState(30); 
 
 
   useEffect(() => {
-    const fetchConfig = async () => {
-      try {
-        const newConfig = await Config();
-        setConfig(newConfig);
-      } catch (error) {
-        if (error.code === "ERR_NETWORK") {
-          console.log(error);
-        }
-      }
-    };
 
     const fetchLibraries = () => {
-      if (config) {
         const url = `/stats/getMostUsedClient`;
 
         axios
-          .get(url)
+        .post(url, {days:props.days}, {
+          headers: {
+            "Content-Type": "application/json",
+          },
+        })
           .then((data) => {
             setData(data.data);
           })
           .catch((error) => {
             console.log(error);
           });
-      }
     };
  
-
-    if (!config) {
-      fetchConfig();
-    }
 
     if (!data || data.length===0) {
       fetchLibraries();
     }
+    if (days !== props.days) {
+      setDays(props.days);
+      fetchLibraries();
+    }
+
 
     const intervalId = setInterval(fetchLibraries, 60000 * 5);
     return () => clearInterval(intervalId);
-  }, [data, config]);
+  }, [data, days,props.days]);
 
   if (!data) {
     return(
@@ -75,30 +66,7 @@ function MostUsedClient() {
         <ComputerLineIcon size={'80%'}/>
         </div>
     </div>
-    <div className="stats">
-    <div className="stats-header">
-      
-      <div>MOST USED CLIENTS</div>
-      <div className="stats-header-plays">Plays</div>
-    </div>
-
-    <div className = "stats-list">
-
-        {data &&
-          data
-            .map((item,index) => (
-
-                <div className='stat-item' key={item.Client}>
-                    <p className="stat-item-index">{(index+1)}</p>
-                    <p className="stat-item-name">{item.Client}</p>
-                    <p className="stat-item-count"> {item.Plays}</p>
-                </div>
-
-            ))}
-
-      </div>
-    </div>
-    
+    <StatComponent data={data} heading={"MOST USED CLIENTS"} units={"Plays"}/>
 
     </div>
   );

@@ -3,17 +3,16 @@ import axios from "axios";
 import Config from "../../../lib/config";
 
 import ComponentLoading from "../ComponentLoading";
-
 import StatComponent from "./statsComponent";
 
 // import PlaybackActivity from "./components/playbackactivity";
 
-function MVSeries(props) {
+function MPMusic(props) {
   const [data, setData] = useState([]);
   const [days, setDays] = useState(30); 
+//   const [base_url, setURL] = useState("");
 
   const [config, setConfig] = useState(null);
-
 
   useEffect(() => {
     const fetchConfig = async () => {
@@ -26,17 +25,17 @@ function MVSeries(props) {
         }
       }
     };
-
+  
     const fetchLibraries = () => {
       if (config) {
-        const url = `/stats/getMostViewedSeries`;
-
+        const url = `/stats/getMostPopularMusic`;
+       
         axios
-        .post(url, {days:props.days}, {
-          headers: {
-            "Content-Type": "application/json",
-          },
-        })
+          .post(url, { days: props.days }, {
+            headers: {
+              "Content-Type": "application/json",
+            },
+          })
           .then((data) => {
             setData(data.data);
           })
@@ -45,21 +44,20 @@ function MVSeries(props) {
           });
       }
     };
- 
-
+  
     if (!config) {
       fetchConfig();
     }
-
-    if (!data || data.length===0) {
+  
+    if (!data || data.length === 0) {
       fetchLibraries();
     }
+
     if (days !== props.days) {
       setDays(props.days);
       fetchLibraries();
     }
   
-
     const intervalId = setInterval(fetchLibraries, 60000 * 5);
     return () => clearInterval(intervalId);
   }, [data, config, days,props.days]);
@@ -74,6 +72,7 @@ function MVSeries(props) {
   if (data.length === 0) {
     return  <></>;
   }
+
 
 
   return (
@@ -100,11 +99,11 @@ function MVSeries(props) {
         ></img>
 
     </div>
-    <StatComponent data={data} heading={"MOST VIEWED SERIES"} units={"Plays"}/>
+    <StatComponent data={data} heading={"MOST POPULAR MUSIC"} units={"Users"}/>
     
 
     </div>
   );
 }
 
-export default MVSeries;
+export default MPMusic;

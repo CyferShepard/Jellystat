@@ -4,7 +4,7 @@ import './css/libraries.css';
 import Loading from './components/loading';
 
 // import PlaybackActivity from './components/playbackactivity';
-
+import Activity from './activity';
 // import StatCards from './components/StatsCards';
 
 import LibraryOverView from './components/libraryOverview';
@@ -12,7 +12,7 @@ import LibraryOverView from './components/libraryOverview';
 import API from '../classes/jellyfin-api';
 
 
-function UserData() {
+function Testing() {
   const [data, setData] = useState([]);
 
   useEffect(() => {
@@ -49,4 +49,4 @@ function UserData() {
   );
 }
 
-export default UserData;
+export default Testing;

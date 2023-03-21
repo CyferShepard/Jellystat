@@ -14,6 +14,7 @@
         "SeasonId", 
         "SeriesName",
         "PlaybackDuration",
+        "PlayMethod",
         "ActivityDateInserted",
       ]; 
 
@@ -33,6 +34,7 @@
         SeasonId: item.NowPlayingItem.SeasonId || null, 
         SeriesName: item.NowPlayingItem.SeriesName || null,
         PlaybackDuration: item.PlaybackDuration !== undefined ? item.PlaybackDuration: 0,
+        PlayMethod: item.PlayState.PlayMethod  !== undefined ?  item.PlayState.PlayMethod : item.PlayMethod ,
         ActivityDateInserted: item.ActivityDateInserted !== undefined ?  item.ActivityDateInserted: new Date().toISOString(),
       });
 

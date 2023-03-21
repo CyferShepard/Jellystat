@@ -1,0 +1,36 @@
+.navbar {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  background-color: rgb(10,25,41);
+  height: 50px;
+}
+
+
+.navitem {
+  display: flex;
+  align-items: center;
+  height: 100%;
+  color: white;
+  font-size: 16px;
+  text-decoration: none;
+  padding: 0 20px;
+  transition: background-color 0.2s ease-in-out;
+}
+
+
+.nav-text {
+  margin-left: 10px;
+}
+
+.active
+{
+  background-color: #308df046 !important;
+  transition: background-color 0.2s ease-in-out;
+}
+
+.navitem:hover {
+  background-color: #326aa541;
+
+}
+

@@ -1,11 +1,13 @@
 .Heading
 {
   display: flex;
+  margin-bottom: 10px;
 }
 
 .Heading h1
 {
   padding-right: 10px;
+  margin: 0;
 }
 
 .stat-cards-container
@@ -127,10 +129,11 @@
   height: 35px;
   color: white;
   display: flex;
-  background-color: rgb(0, 99, 248,0.6);
+  background-color: rgb(0, 0, 0,0.2);
   border-radius: 4px;
   font-size: 1.2em;
-  align-self: center;
+  align-self: flex-end;
+  justify-content: space-evenly;
 }
 
 
@@ -165,6 +168,6 @@ input[type=number] {
 .date-range .header,
 .date-range .trailer
 {
-  padding: 5px;
-  text-align: center;
+  padding-inline: 10px;
+  align-self: center;
 }

@@ -45,6 +45,20 @@ router.post("/getMostViewedMovies", async (req, res) => {
 
 });
 
+router.post("/getMostViewedMusic", async (req, res) => {
+  const {days} = req.body;
+  let _days=days;
+  if(days===undefined)
+  {
+    _days=30;
+  }
+  const { rows } = await db.query(
+    `select * from fs_most_played_items(${_days},'Audio') limit 5`
+  );
+  res.send(rows);
+
+});
+
 
 
 router.post("/getMostViewedLibraries", async (req, res) => {
@@ -61,15 +75,36 @@ router.post("/getMostViewedLibraries", async (req, res) => {
 
 });
 
-router.get("/getMostUsedClient", async (req, res) => {
-  const { rows } = await db.query('SELECT * FROM js_most_used_clients limit 5');
+
+
+router.post("/getMostUsedClient", async (req, res) => {
+  const {days} = req.body;
+  let _days=days;
+  if(days===undefined)
+  {
+    _days=30;
+  }
+  const { rows } = await db.query(
+    `select * from fs_most_used_clients(${_days}) limit 5`
+  );
   res.send(rows);
 });
 
-router.get("/getMostActiveUsers", async (req, res) => {
-  const { rows } = await db.query('SELECT * FROM js_most_active_user limit 5');
+
+
+router.post("/getMostActiveUsers", async (req, res) => {
+  const {days} = req.body;
+  let _days=days;
+  if(days===undefined)
+  {
+    _days=30;
+  }
+  const { rows } = await db.query(
+    `select * from fs_most_active_user(${_days}) limit 5`
+  );
   res.send(rows);
 });
+
 
 
 router.post("/getMostPopularMovies", async (req, res) => {
@@ -95,9 +130,24 @@ router.post("/getMostPopularSeries", async (req, res) => {
   {
     _days=30;
   }
-  console.log(`select * from fs_most_popular_items(${_days},'Series') limit 5`);
+ 
   const { rows } = await db.query(
     `select * from fs_most_popular_items(${_days},'Series') limit 5`
+  );
+  res.send(rows);
+
+});
+
+router.post("/getMostPopularMusic", async (req, res) => {
+  const {days} = req.body;
+  let _days=days;
+  if(days===undefined)
+  {
+    _days=30;
+  }
+ 
+  const { rows } = await db.query(
+    `select * from fs_most_popular_items(${_days},'Audio') limit 5`
   );
   res.send(rows);
 
@@ -106,6 +156,12 @@ router.post("/getMostPopularSeries", async (req, res) => {
 
 router.get("/getPlaybackActivity", async (req, res) => {
   const { rows } = await db.query('SELECT * FROM jf_playback_activity');
+  res.send(rows);
+  // console.log(`ENDPOINT CALLED: /getPlaybackActivity`);
+});
+
+router.get("/getAllUserActivity", async (req, res) => {
+  const { rows } = await db.query('SELECT * FROM jf_all_user_activity');
   res.send(rows);
   // console.log(`ENDPOINT CALLED: /getPlaybackActivity`);
 });

@@ -7,9 +7,12 @@ import MostUsedClient from "./statCards/most_used_client";
 import MostActiveUsers from "./statCards/most_active_users";
 import MPSeries from "./statCards/mp_series";
 import MPMovies from "./statCards/mp_movies";
+import MVMusic from "./statCards/mv_music";
+import MPMusic from "./statCards/mp_music";
+
 import "../css/statCard.css";
 
-function StatCards() {
+function WatchStatistics() {
   const [days, setDays] = useState(30);
   const [input, setInput] = useState(30);
 
@@ -50,12 +53,15 @@ function StatCards() {
         <MPMovies days={days} />
         <MVSeries days={days} />
         <MPSeries days={days} />
+        <MVMusic days={days}/>
+        <MPMusic days={days}/>
         <MVLibraries days={days} />
         <MostUsedClient days={days} />
         <MostActiveUsers days={days} />
+
       </div>
     </div>
   );
 }
 
-export default StatCards;
+export default WatchStatistics;

@@ -1,0 +1,160 @@
+.Users
+{
+    color: white;
+    padding-right: 20px;
+    padding-bottom: 50px;
+}
+
+.user-activity-table {
+    border-collapse: collapse;
+    border-radius: 5px;
+    /* margin: 25px 0; */
+    font-size: 0.9em;
+    font-family: sans-serif;
+    min-width: 400px;
+    /* box-shadow: 0 0 20px rgba(255, 255, 255, 0.15); */
+    background-color: rgba(0, 0, 0, 0.2);
+    color: white;
+    width: 100%;
+
+}
+
+ th,
+ td
+  {
+    padding: 10px 15px;
+    /* text-align: left; */
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    border-right: 1px solid rgba(255, 255, 255, 0.05);
+    border-left:1px solid rgba(255, 255, 255, 0.05);
+}
+
+td a{
+  text-decoration: none;
+  color: white;
+}
+
+td:hover a{
+
+  color: rgb(0, 164, 219);
+}
+
+th {
+    background-color: rgba(0, 0, 0, 0.8);
+    cursor: pointer;
+}
+
+th:hover {
+    border-bottom: 1px solid rgba(255, 255, 255, 0.5);
+}
+
+
+
+/* tbody tr:last-of-type {
+    border-bottom: 2px solid #009879;
+} */
+
+
+.card-user-image
+{
+    border-radius: 50%;
+    width: 30px;
+    height: 30px;
+    object-fit: cover;
+
+}
+
+tbody tr:hover
+{
+    background-color: rgba(0, 0, 0, 0.4);
+}
+
+
+td:first-child {
+    border-left: none;
+  }
+  
+  td:last-child {
+    border-right: none;
+  }
+
+
+  .pagination {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    margin-top: 1rem;
+  }
+  
+  .page-btn {
+    padding: 5px 10px;
+    border: none;
+    border-radius: 5px;
+    margin-inline: 5px;
+    background-color: rgb(10,25,41);
+    color: white;
+    cursor: pointer;
+  }
+  
+  .page-btn:hover {
+    background-color: #333;
+    color: #fff;
+  }
+  
+  .page-btn:disabled {
+    opacity: 0.5;
+    cursor: default;
+  }
+  
+  .page-number {
+    margin-inline: 10px;
+    font-weight: bold;
+  }
+  
+  
+.pagination-range
+{
+  width: 130px;
+  height: 35px;
+  color: white;
+  display: flex;
+  background-color: rgb(0, 0, 0,0.2);
+  border-radius: 4px;
+  font-size: 1.2em;
+  align-self: flex-end;
+  justify-content: space-between;
+}
+
+.pagination-range select
+{
+  
+  height: 35px;
+  outline: none;
+  border: none;
+  border-radius: 4px;
+  background-color: rgb(255, 255, 255, 0.1);
+  color:white;
+  font-size: 1em;
+  
+
+}
+.pagination-range .header
+{
+  padding-inline: 10px;
+  align-self: center;
+}
+
+
+select option {
+  background-color: #4a4a4a;
+  outline: unset;
+  width: 100%;
+  border: none;
+  
+}
+
+.pagination-range .items
+{
+  background-color: rgb(255, 255, 255, 0.1);
+ padding-inline: 10px;
+}

@@ -3,6 +3,7 @@ import axios from "axios";
 import Config from "../../../lib/config";
 
 import ComponentLoading from "../ComponentLoading";
+import StatComponent from "./statsComponent";
 
 // import PlaybackActivity from "./components/playbackactivity";
 
@@ -13,7 +14,6 @@ function MPSeries(props) {
 
   const [config, setConfig] = useState(null);
 
-  console.log('PROPS: '+ days);
   useEffect(() => {
     const fetchConfig = async () => {
       try {
@@ -99,29 +99,7 @@ function MPSeries(props) {
         ></img>
 
     </div>
-    <div className="stats">
-    <div className="stats-header">
-      
-      <div>MOST POPULAR SERIES</div>
-      <div className="stats-header-plays">Users</div>
-    </div>
-
-    <div className = "stats-list">
-
-        {data &&
-          data
-            .map((item,index) => (
-
-                <div className='stat-item' key={item.Id}>
-                    <p className="stat-item-index">{(index+1)}</p>
-                    <p className="stat-item-name">{item.Name}</p>
-                    <p className="stat-item-count"> {item.unique_viewers}</p>
-                </div>
-
-            ))}
-
-      </div>
-    </div>
+    <StatComponent data={data} heading={"MOST POPULAR SERIES"} units={"Users"}/>
     
 
     </div>

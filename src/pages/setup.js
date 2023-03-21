@@ -15,6 +15,59 @@ function Setup() {
   function handleFormChange(event) {
     setFormValues({ ...formValues, [event.target.name]: event.target.value });
   }
+  async function beginSync() {
+
+
+    setProcessing(true);
+
+    await axios
+    .get("/sync/writeLibraries")
+    .then((response) => {
+      if (response.status === 200) {
+        // isValid = true;
+      }
+    })
+    .catch((error) => {
+       console.log(error);
+    });
+
+    await axios
+    .get("/sync/writeLibraryItems")
+    .then((response) => {
+      if (response.status === 200) {
+        // isValid = true;
+      }
+    })
+    .catch((error) => {
+       console.log(error);
+    });
+
+
+    await axios
+      .get("/sync/writeSeasonsAndEpisodes")
+      .then((response) => {
+        if (response.status === 200) {
+          // isValid = true;
+        }
+      })
+      .catch((error) => {
+         console.log(error);
+      });
+
+
+      await axios
+      .get("/sync/writeUsers")
+      .then((response) => {
+        if (response.status === 200) {
+          // isValid = true;
+        }
+      })
+      .catch((error) => {
+         console.log(error);
+      });
+      setProcessing(false);
+    // return { isValid: isValid, errorMessage: errorMessage };
+  }
 
   async function validateSettings(_url, _apikey) {
     // Send a GET request to /system/configuration to test copnnection
@@ -73,12 +126,13 @@ function Setup() {
           "Content-Type": "application/json",
         },
       })
-      .then((response) => {
+      .then(async (response) => {
         setsubmitButtonText("Settings Saved");
         setProcessing(false);
         setTimeout(() => {
           window.location.href = "/";
         }, 1000);
+        await beginSync();
 
         return;
       })

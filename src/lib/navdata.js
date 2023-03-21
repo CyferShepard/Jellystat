@@ -18,36 +18,24 @@ export const navData = [
     },
     {
         id: 1,
-        icon: <FileListFillIcon />,
-        text: "Activity",
-        link: "activity"
+        icon: <UserFillIcon />,
+        text: "Users",
+        link: "users"
     },
     {
         id: 2,
         icon: <GalleryFillIcon />,
         text: "Libraries",
         link: "libraries"
-    }    ,
-    {
-        id: 3,
-        icon: <UserFillIcon />,
-        text: "Recently Played",
-        link: "recent"
     },
     {
         id: 4,
-        icon: <BarChartFillIcon />,
-        text: "User Activity",
-        link: "usersactivity"
+        icon: <ReactjsFillIcon />,
+        text: "Component Testing Playground",
+        link: "testing"
     },
     {
         id: 5,
-        icon: <ReactjsFillIcon />,
-        text: "Library Data",
-        link: "userdata"
-    },
-    {
-        id: 6,
         icon: <SettingsFillIcon />,
         text: "Settings",
         link: "settings"

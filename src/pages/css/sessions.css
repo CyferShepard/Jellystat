@@ -1,4 +1,9 @@
 .sessions {
+    margin-bottom: 10px;
+
+}
+
+.sessions-container {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(520px, 520px));
     grid-auto-rows: 235px;/* max-width+offset so 215 + 20*/
@@ -8,7 +13,6 @@
     margin-right: 20px;
 
 }
-
 
 .session-card {
     display: flex;

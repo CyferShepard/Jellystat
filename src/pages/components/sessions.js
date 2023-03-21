@@ -6,7 +6,7 @@ import API from "../../classes/jellyfin-api";
 import "../css/sessions.css";
 // import "../../App.css"
 
-import SessionCard from "./session-card";
+import SessionCard from "./sessions/session-card";
 
 import Loading from "./loading";
 
@@ -44,7 +44,8 @@ function Sessions() {
   }
 
   if (data.length === 0) {
-    return(<div>
+    return(
+    <div className="sessions">
       <h1>Sessions</h1>
       <div style={{color:"grey", fontSize:"0.8em", fontStyle:"italic"}}>
       No Active Sessions Found
@@ -53,9 +54,9 @@ function Sessions() {
   }
 
   return (
-    <div>
+    <div className="sessions">
       <h1>Sessions</h1>
-      <div className="sessions">
+      <div className="sessions-container">
         {data &&
           data
             .sort((a, b) =>

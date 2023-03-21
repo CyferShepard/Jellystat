@@ -1,11 +1,7 @@
-.App {
-  /* text-align: center; */
-  /* padding-bottom: 5%; */
-  display: grid;
-  gap: 1rem;
-  /* grid-template-areas: 
-  "sidenav main"; */
-  grid-template-columns: auto 1fr;
+
+
+main{
+  padding-inline: 10px;
 }
 
 .App-logo {

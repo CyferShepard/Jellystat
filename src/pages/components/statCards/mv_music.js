@@ -3,12 +3,10 @@ import axios from "axios";
 import Config from "../../../lib/config";
 
 import ComponentLoading from "../ComponentLoading";
-
 import StatComponent from "./statsComponent";
 
-// import PlaybackActivity from "./components/playbackactivity";
 
-function MVSeries(props) {
+function MVMovies(props) {
   const [data, setData] = useState([]);
   const [days, setDays] = useState(30); 
 
@@ -29,7 +27,7 @@ function MVSeries(props) {
 
     const fetchLibraries = () => {
       if (config) {
-        const url = `/stats/getMostViewedSeries`;
+        const url = `/stats/getMostViewedMusic`;
 
         axios
         .post(url, {days:props.days}, {
@@ -76,6 +74,7 @@ function MVSeries(props) {
   }
 
 
+
   return (
     <div className="stats-card"
     style={{
@@ -100,11 +99,11 @@ function MVSeries(props) {
         ></img>
 
     </div>
-    <StatComponent data={data} heading={"MOST VIEWED SERIES"} units={"Plays"}/>
+    <StatComponent data={data} heading={"MOST PLAYED MUSIC"} units={"Plays"}/>
     
 
     </div>
   );
 }
 
-export default MVSeries;
+export default MVMovies;

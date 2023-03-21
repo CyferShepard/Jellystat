@@ -3,7 +3,7 @@ import axios from "axios";
 import Config from "../lib/config";
 
 import "./css/libraries.css";
-import "./css/usersactivity.css";
+import "./css/users.css";
 
 import Loading from "./components/loading";
 

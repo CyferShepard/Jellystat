@@ -13,21 +13,23 @@ import Loading from './pages/components/loading';
 import Setup from './pages/setup';
 
 
-import SideNav from './pages/components/sidenav';
+import Navbar from './pages/components/navbar';
 import Home from './pages/home';
 import Settings from './pages/settings';
-import Activity from './pages/activity';
-import UserActivity from './pages/useractivity';
+import Users from './pages/users';
+import UserInfo from './pages/user-info';
 import Libraries from './pages/libraries';
+import ErrorPage from './pages/components/error';
 
 import RecentlyPlayed from './pages/components/recentlyplayed';
 
-import UserData from './pages/userdata';
+import Testing from './pages/testing';
 
 function App() {
 
   const [config, setConfig] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [errorFlag, seterrorFlag] = useState(false);
 
   useEffect(() => {
 
@@ -37,8 +39,10 @@ function App() {
             const newConfig = await Config();
             if(newConfig !== 'ERR_NETWORK'){
               setConfig(newConfig);
-              setLoading(false);
+            }else{
+              seterrorFlag(true);
             }
+            setLoading(false);
            
         } catch (error) {
 
@@ -55,6 +59,10 @@ if (loading) {
   return <Loading />;
 }
 
+if (errorFlag) {
+  return <ErrorPage message={"Error: Unable to connect to Jellystat Backend"} />;
+}
+
 if (!config || config.apiKey ==null) {
   return <Setup />;
 }
@@ -63,16 +71,16 @@ if (!config || config.apiKey ==null) {
 
   return (
     <div className="App">
-      <SideNav />
+      <Navbar />
       <div>
       <main>
         <Routes>
         <Route path="/" element={<Home />} />
           <Route path="/settings" element={<Settings />} />
-          <Route path="/activity" element={<Activity />} />
+          <Route path="/users" element={<Users />} />
+          <Route path="/user-info/:UserId" element={<UserInfo />} />
           <Route path="/libraries" element={<Libraries />} />
-          <Route path="/usersactivity" element={<UserActivity />} />
-          <Route path="/userdata" element={<UserData />} />
+          <Route path="/testing" element={<Testing />} />
           <Route path="/recent" element={<RecentlyPlayed />} />
         </Routes>
       </main>

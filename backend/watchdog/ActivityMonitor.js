@@ -10,6 +10,10 @@ async function ActivityMonitor(interval) {
   const { rows: config } = await db.query(
     'SELECT * FROM app_config where "ID"=1'
   );
+  if(config.length===0)
+  {
+    return;
+  }
   const base_url = config[0].JF_HOST;
   const apiKey = config[0].JF_API_KEY;
 

@@ -3,9 +3,10 @@ import axios from "axios";
 import Config from "../../../lib/config";
 
 import ComponentLoading from "../ComponentLoading";
+import StatComponent from "./statsComponent";
 
 
-function MVMovies(props) {
+function MVMusic(props) {
   const [data, setData] = useState([]);
   const [days, setDays] = useState(30); 
 
@@ -98,33 +99,11 @@ function MVMovies(props) {
         ></img>
 
     </div>
-    <div className="stats">
-    <div className="stats-header">
-      
-      <div>MOST VIEWED MOVIES</div>
-      <div className="stats-header-plays">Plays</div>
-    </div>
-
-    <div className = "stats-list">
-
-        {data &&
-          data
-            .map((item,index) => (
-
-                <div className='stat-item' key={item.Id}>
-                    <p className="stat-item-index">{(index+1)}</p>
-                    <p className="stat-item-name">{item.Name}</p>
-                    <p className="stat-item-count"> {item.Plays}</p>
-                </div>
-
-            ))}
-
-      </div>
-    </div>
+    <StatComponent data={data} heading={"MOST VIEWED MOVIES"} units={"Plays"}/>
     
 
     </div>
   );
 }
 
-export default MVMovies;
+export default MVMusic;

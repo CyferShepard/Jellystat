@@ -20,8 +20,17 @@ router.get("/getconfig", async (req, res) => {
 router.post("/setconfig", async (req, res) => {
   const { JF_HOST, JF_API_KEY } = req.body;
 
+  const { rows:getConfig } = await db.query('SELECT * FROM app_config where "ID"=1');
+
+  let query='UPDATE app_config SET "JF_HOST"=$1, "JF_API_KEY"=$2 where "ID"=1';
+  if(getConfig.length===0)
+  {
+    query='INSERT INTO app_config ("JF_HOST","JF_API_KEY","APP_USER","APP_PASSWORD") VALUES ($1,$2,null,null)';
+  }
+
+
   const { rows } = await db.query(
-    'UPDATE app_config SET "JF_HOST"=$1, "JF_API_KEY"=$2 where "ID"=1',
+    query,
     [JF_HOST, JF_API_KEY]
   );
   console.log({ JF_HOST: JF_HOST, JF_API_KEY: JF_API_KEY });

@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useRef } from 'react';
 import '../../css/websocket/websocket.css';
 
-const WebSocketComponent = () => {
+const TerminalComponent = () => {
   const [messages, setMessages] = useState([]);
   const messagesEndRef = useRef(null);
 
@@ -46,4 +46,4 @@ const WebSocketComponent = () => {
   );
 };
 
-export default WebSocketComponent;
+export default TerminalComponent;

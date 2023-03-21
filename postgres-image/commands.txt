@@ -1,0 +1,3 @@
+docker run --name jellystat-postgres -e POSTGRES_PASSWORD=fy1W0POt5$ -p 25432:5432 -d jellystat-postgres 
+
+docker build -t jellystat-postgres .

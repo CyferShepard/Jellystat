@@ -13,6 +13,7 @@ const jf_activity_watchdog_columns = [
     "SeasonId", 
     "SeriesName",
     "PlaybackDuration",
+    "PlayMethod",
     "ActivityDateInserted",
   ]; 
 
@@ -32,6 +33,7 @@ const jf_activity_watchdog_columns = [
     SeasonId: item.NowPlayingItem.SeasonId || null, 
     SeriesName: item.NowPlayingItem.SeriesName || null,
     PlaybackDuration: item.PlaybackDuration !== undefined ? item.PlaybackDuration: 0,
+    PlayMethod:item.PlayState.PlayMethod,
     ActivityDateInserted: item.ActivityDateInserted !== undefined ?  item.ActivityDateInserted: new Date().toISOString(),
   });
 
