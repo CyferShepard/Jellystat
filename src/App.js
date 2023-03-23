@@ -17,7 +17,7 @@ import Navbar from './pages/components/navbar';
 import Home from './pages/home';
 import Settings from './pages/settings';
 import Users from './pages/users';
-import UserInfo from './pages/user-info';
+import UserInfo from './pages/components/user-info';
 import Libraries from './pages/libraries';
 import ErrorPage from './pages/components/error';
 
@@ -37,7 +37,7 @@ function App() {
     const fetchConfig = async () => {
         try {
             const newConfig = await Config();
-            if(newConfig !== 'ERR_NETWORK'){
+            if(!newConfig.response){
               setConfig(newConfig);
             }else{
               seterrorFlag(true);
@@ -45,7 +45,7 @@ function App() {
             setLoading(false);
            
         } catch (error) {
-
+          console.log(error);
         }
     };
 

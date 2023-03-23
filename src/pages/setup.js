@@ -3,6 +3,7 @@ import axios from "axios";
 import Config from "../lib/config";
 
 import "./css/setup.css";
+import LibrarySync from "./components/settings/librarySync";
 
 // import Loading from './components/loading';
 
@@ -18,55 +19,9 @@ function Setup() {
   async function beginSync() {
 
 
-    setProcessing(true);
-
-    await axios
-    .get("/sync/writeLibraries")
-    .then((response) => {
-      if (response.status === 200) {
-        // isValid = true;
-      }
-    })
-    .catch((error) => {
-       console.log(error);
-    });
-
-    await axios
-    .get("/sync/writeLibraryItems")
-    .then((response) => {
-      if (response.status === 200) {
-        // isValid = true;
-      }
-    })
-    .catch((error) => {
-       console.log(error);
-    });
-
-
-    await axios
-      .get("/sync/writeSeasonsAndEpisodes")
-      .then((response) => {
-        if (response.status === 200) {
-          // isValid = true;
-        }
-      })
-      .catch((error) => {
-         console.log(error);
-      });
-
-
-      await axios
-      .get("/sync/writeUsers")
-      .then((response) => {
-        if (response.status === 200) {
-          // isValid = true;
-        }
-      })
-      .catch((error) => {
-         console.log(error);
-      });
+      setProcessing(true);
+      await LibrarySync.beginSync();
       setProcessing(false);
-    // return { isValid: isValid, errorMessage: errorMessage };
   }
 
   async function validateSettings(_url, _apikey) {

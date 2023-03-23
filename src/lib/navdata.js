@@ -1,8 +1,8 @@
 
 
 import HomeFillIcon from 'remixicon-react/HomeFillIcon';
-import FileListFillIcon from 'remixicon-react/FileListFillIcon';
-import BarChartFillIcon from 'remixicon-react/BarChartFillIcon';
+// import FileListFillIcon from 'remixicon-react/FileListFillIcon';
+// import BarChartFillIcon from 'remixicon-react/BarChartFillIcon';
 import SettingsFillIcon from 'remixicon-react/SettingsFillIcon';
 import GalleryFillIcon from 'remixicon-react/GalleryFillIcon';
 import UserFillIcon from 'remixicon-react/UserFillIcon';

@@ -22,7 +22,7 @@ function WatchStatistics() {
         setInput(1);
         setDays(0);
       } else {
-        setDays(parseInt(input) - 1);
+        setDays(parseInt(input));
       }
 
       console.log(days);

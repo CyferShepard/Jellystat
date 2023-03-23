@@ -4,7 +4,7 @@ import Config from "../lib/config";
 import { Link } from 'react-router-dom';
 import AccountCircleFillIcon from "remixicon-react/AccountCircleFillIcon";
 
-import "./css/users.css";
+import "./css/users/users.css";
 
 import Loading from "./components/loading";
 

@@ -28,6 +28,8 @@
   },
   "scripts": {
     "start": "react-scripts start",
+    "start-server": "cd backend && node server.js",
+    "start-app": "concurrently \"npm run start-server\" \"npm start\"",
     "build": "react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject"

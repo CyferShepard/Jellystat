@@ -27,7 +27,7 @@ function LibraryStatComponent(props) {
               <div className="library-item" key={item.Id}>
                 <p className="library-item-index">{index + 1}</p>
                 <p className="library-item-name">{item.Name}</p>
-                <p className="library-item-count">{item.CollectionType =='tvshows'? (item.Library_Count+' / '+item.Season_Count+' / '+item.Episode_Count): item.Library_Count}</p>
+                <p className="library-item-count">{item.CollectionType ==='tvshows'? (item.Library_Count+' / '+item.Season_Count+' / '+item.Episode_Count): item.Library_Count}</p>
               </div>
             ))}
       </div>

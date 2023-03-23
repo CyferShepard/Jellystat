@@ -7,9 +7,12 @@ const { jf_activity_watchdog_columns, jf_activity_watchdog_mapping } = require('
 async function ActivityMonitor(interval) {
   console.log("Activity Interval: " + interval);
 
+  
   const { rows: config } = await db.query(
     'SELECT * FROM app_config where "ID"=1'
   );
+
+  
   if(config.length===0)
   {
     return;

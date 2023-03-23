@@ -1,0 +1,48 @@
+.global-stats-container
+{
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(320px, 320px));
+    grid-auto-rows: 120px;
+    background-color: rgb(0, 0, 0,0.2);
+    padding: 20px;
+    border-radius: 4px;
+    font-size: 1.3em;
+}
+
+.global-stats
+{
+    color: white;
+    width: 300px;
+    height: 100px;
+    padding: 5px;
+
+}
+
+.play-duration-stats
+{
+    padding-top: 20px;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+}
+
+.stat-value
+{
+    text-align: right;
+    color: #00A4DC;
+    font-weight: 500;
+    font-size: 1.1em;
+    margin: 0;
+}
+.stat-unit
+{
+    padding-inline: 5px;
+    margin: 0;
+}
+
+.time-part
+{
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+}
