@@ -1,14 +1,14 @@
 import React, { useState, useEffect } from "react";
 // import axios from 'axios';
-import Config from "../../lib/config";
-import API from "../../classes/jellyfin-api";
+import Config from "../../../lib/config";
+import API from "../../../classes/jellyfin-api";
 
-import "../css/sessions.css";
+import "../../css/sessions.css";
 // import "../../App.css"
 
-import SessionCard from "./sessions/session-card";
+import SessionCard from "./session-card";
 
-import Loading from "./loading";
+import Loading from "../general/loading";
 
 function Sessions() {
   const [data, setData] = useState([]);

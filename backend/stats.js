@@ -197,16 +197,29 @@ router.post("/getUserDetails", async (req, res) => {
 
 router.post("/getGlobalUserStats", async (req, res) => {
   try {
-    const { days,userid } = req.body;
-    let _days = days;
-    if (days === undefined) {
-      _days = 1;
+    const { hours,userid } = req.body;
+    let _hours = hours;
+    if (hours === undefined) {
+      _hours = 24;
     }
-    console.log(`select * from fs_user_stats(${_days-1},'${userid}')`);
+    console.log(`select * from fs_user_stats(${_hours},'${userid}')`);
     const { rows } = await db.query(
-      `select * from fs_user_stats(${_days-1},'${userid}')`
+      `select * from fs_user_stats(${_hours},'${userid}')`
     );
     res.send(rows[0]);
+  } catch (error) {
+    console.log(error);
+    res.send(error);
+  }
+});
+
+router.post("/getUserLastPlayed", async (req, res) => {
+  try {
+    const { userid } = req.body;
+    const { rows } = await db.query(
+      `select * from fs_last_user_activity('${userid}') limit 15`
+    );
+    res.send(rows);
   } catch (error) {
     console.log(error);
     res.send(error);

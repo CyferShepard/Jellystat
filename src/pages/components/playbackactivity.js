@@ -4,7 +4,7 @@ import axios from "axios";
 
 // import AccountCircleFillIcon from "remixicon-react/AccountCircleFillIcon";
 
-import "../css/usersactivity.css";
+import "../css/users/users.css";
 
 import Loading from "./loading";
 

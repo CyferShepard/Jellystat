@@ -2,6 +2,7 @@ import { useParams } from 'react-router-dom';
 
 import GlobalStats from './user-info/globalStats';
 import UserDetails from './user-info/user-details';
+import LastPlayed from './user-info/lastplayed';
 
 
 
@@ -14,6 +15,7 @@ function UserInfo() {
     <div>
        <UserDetails UserId={UserId}/>
        <GlobalStats UserId={UserId}/>
+       <LastPlayed UserId={UserId}/>
     </div>
   );
 }

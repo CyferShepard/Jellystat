@@ -1,15 +1,13 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 
-
-import ComponentLoading from "../ComponentLoading";
 import StatComponent from "./statsComponent";
 
 import TvLineIcon from "remixicon-react/TvLineIcon";
 import FilmLineIcon from "remixicon-react/FilmLineIcon";
 
 function MVLibraries(props) {
-  const [data, setData] = useState([]);
+  const [data, setData] = useState();
   const [days, setDays] = useState(30); 
 
 
@@ -35,7 +33,7 @@ function MVLibraries(props) {
  
 
 
-    if (!data || data.length===0) {
+    if (!data) {
       fetchLibraries();
     }
     if (days !== props.days) {
@@ -47,14 +45,7 @@ function MVLibraries(props) {
     return () => clearInterval(intervalId);
   }, [data, days,props.days]);
 
-  if (!data) {
-    return(
-      <div className="stats-card">
-      <ComponentLoading />
-      </div>
-    );
-  }
-  if (data.length === 0) {
+  if (!data || data.length === 0) {
     return  <></>;
   }
 

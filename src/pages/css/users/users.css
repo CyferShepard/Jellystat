@@ -22,11 +22,9 @@
  th,
  td
   {
-    padding: 10px 15px;
-    /* text-align: left; */
+    padding: 15px 15px;
     border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-    border-right: 1px solid rgba(255, 255, 255, 0.05);
-    border-left:1px solid rgba(255, 255, 255, 0.05);
+
 }
 
 td a{
@@ -91,13 +89,13 @@ td:first-child {
     border: none;
     border-radius: 5px;
     margin-inline: 5px;
-    background-color: rgb(10,25,41);
+    background-color: rgb(90 45 165);
     color: white;
     cursor: pointer;
   }
   
-  .page-btn:hover {
-    background-color: #333;
+  .page-btn:enabled:hover {
+    background-color: rgb(66, 35, 114);
     color: #fff;
   }
   
@@ -118,7 +116,7 @@ td:first-child {
   height: 35px;
   color: white;
   display: flex;
-  background-color: rgb(0, 0, 0,0.2);
+  background-color: rgb(100, 100, 100,0.3);
   border-radius: 4px;
   font-size: 1.2em;
   align-self: flex-end;

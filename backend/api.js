@@ -66,6 +66,21 @@ router.post("/setconfig", async (req, res) => {
 //   // console.log(`ENDPOINT CALLED: /getAllFromJellyfin: `);
 // });
 
+router.get("/getLibraries", async (req, res) => {
+  try{
+    const { rows } = await db.query(
+      `SELECT * FROM jf_libraries`
+    );
+    res.send(rows);
+  
+
+  }catch(error)
+  {
+    console.log(error);
+  }
+
+});
+
 
 router.post("/getLibraryItems", async (req, res) => {
   try{

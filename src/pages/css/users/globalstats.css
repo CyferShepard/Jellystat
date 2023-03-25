@@ -1,9 +1,9 @@
 .global-stats-container
 {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(320px, 320px));
+    grid-template-columns: repeat(auto-fit, minmax(350px, 400px));
     grid-auto-rows: 120px;
-    background-color: rgb(0, 0, 0,0.2);
+    background-color: rgb(100, 100, 100,0.2);
     padding: 20px;
     border-radius: 4px;
     font-size: 1.3em;
@@ -12,7 +12,9 @@
 .global-stats
 {
     color: white;
-    width: 300px;
+    width: fit-content;
+    max-width: 400px;
+    min-width: 350px;
     height: 100px;
     padding: 5px;
 

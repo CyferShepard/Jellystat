@@ -4,11 +4,11 @@ import axios from "axios";
 import StatComponent from "./statsComponent";
 
 
-import ComponentLoading from "../ComponentLoading";
+
 import ComputerLineIcon from "remixicon-react/ComputerLineIcon";
 
 function MostUsedClient(props) {
-  const [data, setData] = useState([]);
+  const [data, setData] = useState();
   const [days, setDays] = useState(30); 
 
 
@@ -32,7 +32,7 @@ function MostUsedClient(props) {
     };
  
 
-    if (!data || data.length===0) {
+    if (!data) {
       fetchLibraries();
     }
     if (days !== props.days) {
@@ -45,16 +45,10 @@ function MostUsedClient(props) {
     return () => clearInterval(intervalId);
   }, [data, days,props.days]);
 
-  if (!data) {
-    return(
-      <div className="stats-card">
-      <ComponentLoading />
-      </div>
-    );
-  }
-  if (data.length === 0) {
+  if (!data || data.length === 0) {
     return  <></>;
   }
+
 
 
   return (

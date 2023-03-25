@@ -17,11 +17,12 @@ main{
 
 body
 {
-  background-color: #282c34;
+  background-color: #17151a;
 }
 
 h1{
   color: white;
+  font-weight: lighter;
 }
 
 

@@ -29,7 +29,7 @@ function WatchStatistics() {
     }
   };
   return (
-    <div>
+    <div className="watch-stats">
       <div className="Heading">
         <h1>Watch Statistics</h1>
         <div className="date-range">

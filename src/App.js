@@ -8,20 +8,19 @@ import {
 
 import Config from './lib/config';
 
-import Loading from './pages/components/loading';
+import Loading from './pages/components/general/loading';
 
 import Setup from './pages/setup';
 
 
-import Navbar from './pages/components/navbar';
+import Navbar from './pages/components/general/navbar';
 import Home from './pages/home';
 import Settings from './pages/settings';
 import Users from './pages/users';
 import UserInfo from './pages/components/user-info';
 import Libraries from './pages/libraries';
-import ErrorPage from './pages/components/error';
+import ErrorPage from './pages/components/general/error';
 
-import RecentlyPlayed from './pages/components/recentlyplayed';
 
 import Testing from './pages/testing';
 
@@ -78,10 +77,9 @@ if (!config || config.apiKey ==null) {
         <Route path="/" element={<Home />} />
           <Route path="/settings" element={<Settings />} />
           <Route path="/users" element={<Users />} />
-          <Route path="/user-info/:UserId" element={<UserInfo />} />
+          <Route path="/users/:UserId" element={<UserInfo />} />
           <Route path="/libraries" element={<Libraries />} />
           <Route path="/testing" element={<Testing />} />
-          <Route path="/recent" element={<RecentlyPlayed />} />
         </Routes>
       </main>
       </div>

@@ -1,7 +1,7 @@
 
 import { NavLink } from "react-router-dom";
-import { navData } from "../../lib/navdata";
-import  "../css/navbar.css"
+import { navData } from "../../../lib/navdata";
+import  "../../css/navbar.css"
 
 
 

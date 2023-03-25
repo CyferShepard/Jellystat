@@ -6,7 +6,7 @@ import AccountCircleFillIcon from "remixicon-react/AccountCircleFillIcon";
 
 import "./css/users/users.css";
 
-import Loading from "./components/loading";
+import Loading from "./components/general/loading";
 
 function Users() {
   const [data, setData] = useState([]);
@@ -37,7 +37,23 @@ function Users() {
     return sortedData;
   }
 
-  function formatTime(time) {
+  function formatTotalWatchTime(seconds) {
+    const hours = Math.floor(seconds / 3600); // 1 hour = 3600 seconds
+    const minutes = Math.floor((seconds % 3600) / 60); // 1 minute = 60 seconds
+    let formattedTime='';
+    if(hours)
+    {
+      formattedTime+=`${hours} hours`;
+    }
+    if(minutes)
+    {
+      formattedTime+=` ${minutes} minutes`;
+    }
+  
+    return formattedTime ;
+  }
+
+  function formatLastSeenTime(time) {
     const units = {
       days: ['Day', 'Days'],
       hours: ['Hour', 'Hours'],
@@ -56,6 +72,8 @@ function Users() {
   
     return `${formattedTime}ago`;
   }
+
+
 
   useEffect(() => {
     const fetchConfig = async () => {
@@ -159,12 +177,12 @@ function Users() {
                   <AccountCircleFillIcon color="#fff" size={30} />
                 )}
               </td>
-             <td> <Link to={`/user-info/${item.UserId}`}>{item.UserName}</Link></td>
+             <td> <Link to={`/users/${item.UserId}`}>{item.UserName}</Link></td>
               <td>{item.LastWatched || 'never'}</td>
               <td>{item.LastClient || 'n/a'}</td>
               <td>{item.TotalPlays}</td>
-              <td>{item.TotalWatchTime || 0}</td>
-              <td>{item.LastSeen ? formatTime(item.LastSeen) : 'never'}</td>
+              <td>{formatTotalWatchTime(item.TotalWatchTime) || 0}</td>
+              <td>{item.LastSeen ? formatLastSeenTime(item.LastSeen) : 'never'}</td>
             </tr>
           ))}
         </tbody>

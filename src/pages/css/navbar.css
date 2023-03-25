@@ -2,7 +2,8 @@
   display: flex;
   justify-content: flex-end;
   align-items: center;
-  background-color: rgb(10,25,41);
+  background-color: #5a2da5;
+  /* background: linear-gradient(to right, #AA5CC3,#00A4DC); */
   height: 50px;
 }
 
@@ -25,12 +26,14 @@
 
 .active
 {
-  background-color: #308df046 !important;
+  /* background-color: #308df046 !important; */
+  background-color: rgba(0,0,0,0.6);
   transition: background-color 0.2s ease-in-out;
 }
 
 .navitem:hover {
-  background-color: #326aa541;
+  /* background-color: #326aa541; */
+  background-color: rgba(0,0,0,0.4);
 
 }
 

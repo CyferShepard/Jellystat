@@ -1,3 +1,8 @@
+
+.watch-stats
+{
+  
+}
 .Heading
 {
   display: flex;
@@ -15,8 +20,6 @@
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(520px, 520px));
   grid-auto-rows: 200px;/* max-width+offset so 215 + 20*/
-
-  border-radius: 4px;
   margin-right: 20px;
   margin-top: 4px;
 }
@@ -30,6 +33,7 @@
     /* box-shadow: 0 0 20px 5px rgba(0, 0, 0, 0.5); */
     background: linear-gradient(to right, #00A4DC, #AA5CC3);
     background-size: cover;
+    border-radius: 4px;
 }
 
 
@@ -86,22 +90,25 @@
 
   .popular-image
   {
-    display: flex;
-    justify-content: center;
-    align-items: center;
     height: 180px;
     width: 175px;
     background-color: rgb(0, 0, 0, 0.6);
+    border-radius:4px 0 0 4px;
   }
 
   .popular-banner-image
   {
-
-    
+    border-radius:4px 0 0 4px;
     height: 180px;
     width: 120px;
+  }
+  
+  .popular-user-image-container
+  {
+    display: flex;
+    justify-content: center;
+    align-items: center;
 
-    
   }
 
   
@@ -119,7 +126,7 @@
     width: 100%;
     padding: 5px 20px;
     backdrop-filter: blur(4px);
-    
+    border-radius: 0 4px 4px 0 ;
     background-color: rgb(0, 0, 0, 0.6);
   }
 
@@ -129,7 +136,7 @@
   height: 35px;
   color: white;
   display: flex;
-  background-color: rgb(0, 0, 0,0.2);
+  background-color: rgb(100, 100, 100,0.3);
   border-radius: 4px;
   font-size: 1.2em;
   align-self: flex-end;
@@ -170,4 +177,16 @@ input[type=number] {
 {
   padding-inline: 10px;
   align-self: center;
+}
+
+
+.stat-item-name a
+{
+  text-decoration: none;
+  color: white;
+}
+
+.stat-item-name a:hover
+{
+  color: rgb(0, 164, 219);
 }

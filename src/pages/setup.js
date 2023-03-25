@@ -3,7 +3,7 @@ import axios from "axios";
 import Config from "../lib/config";
 
 import "./css/setup.css";
-import LibrarySync from "./components/settings/librarySync";
+// import LibrarySync from "./components/settings/librarySync";
 
 // import Loading from './components/loading';
 
@@ -20,7 +20,16 @@ function Setup() {
 
 
       setProcessing(true);
-      await LibrarySync.beginSync();
+      await axios
+      .get("/sync/beingSync")
+      .then((response) => {
+        if (response.status === 200) {
+          // isValid = true;
+        }
+      })
+      .catch((error) => {
+         console.log(error);
+      });
       setProcessing(false);
   }
 

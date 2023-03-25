@@ -1,13 +1,15 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import Config from "../../../lib/config";
-import Loading from "../loading";
+import Loading from "../general/loading";
+
+
 
 import "../../css/settings.css";
 
 export default function SettingsConfig() {
 
-      // const [config, setConfig] = useState({});
+  const [showKey, setKeyState] = useState(false);
   const [formValues, setFormValues] = useState({});
   const [isSubmitted, setisSubmitted] = useState("");
   const [loadSate, setloadSate] = useState("Loading");
@@ -111,9 +113,11 @@ export default function SettingsConfig() {
 
 
     return (
+      <div className="general-settings-page">
+        <h1>General Settings</h1>
         <form onSubmit={handleFormSubmit} className="settings-form">
-          <div>
-            <label htmlFor="JF_HOST">Jellyfin Server</label>
+          <div className="form-row">
+            <label htmlFor="JF_HOST">Jellyfin URL</label>
             <input
               type="text"
               id="JF_HOST"
@@ -122,15 +126,16 @@ export default function SettingsConfig() {
               onChange={handleFormChange}
             />
           </div>
-          <div>
+          <div className="form-row">
             <label htmlFor="JF_API_KEY">API Key</label>
             <input
-              type="text"
+              type={showKey ? "text" : "password"}
               id="JF_API_KEY"
               name="JF_API_KEY"
               value={formValues.JF_API_KEY || ""}
               onChange={handleFormChange}
             />
+            <button className="show-key" type="button" onClick={() => setKeyState(!showKey)}>Show Key</button>
           </div>
     
           {isSubmitted !== "" ? (
@@ -145,8 +150,9 @@ export default function SettingsConfig() {
             <></>
           )}
     
-          <button type="submit">Save</button>
+          <button className="settings-submit-button" type="submit">Save</button>
         </form>
+      </div>
       );
 
 

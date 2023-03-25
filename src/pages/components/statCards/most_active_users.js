@@ -4,12 +4,11 @@ import Config from "../../../lib/config";
 import StatComponent from "./statsComponent";
 
 
-import ComponentLoading from "../ComponentLoading";
 
 import AccountCircleFillIcon from "remixicon-react/AccountCircleFillIcon";
 
 function MostActiveUsers(props) {
-  const [data, setData] = useState([]);
+  const [data, setData] = useState();
   const [days, setDays] = useState(30); 
   const [imgError, setImgError] = useState(false);
 
@@ -52,7 +51,7 @@ function MostActiveUsers(props) {
       fetchConfig();
     }
 
-    if (!data || data.length===0) {
+    if (!data) {
       fetchLibraries();
     }
 
@@ -72,14 +71,8 @@ function MostActiveUsers(props) {
     setImgError(true);
   };
 
-  if (!data) {
-    return(
-      <div className="stats-card">
-      <ComponentLoading />
-      </div>
-    );
-  }
-  if (data.length === 0) {
+
+  if (!data || data.length === 0) {
     return  <></>;
   }
 
@@ -88,7 +81,7 @@ function MostActiveUsers(props) {
     <div className="stats-card"
     >
     
-    <div className="popular-image">
+    <div className="popular-image popular-user-image-container">
     {imgError ?
 
       <AccountCircleFillIcon size={'80%'}/>

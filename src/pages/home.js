@@ -2,7 +2,7 @@ import React from 'react'
 
 import './css/home.css'
 
-import Sessions from './components/sessions'
+import Sessions from './components/sessions/sessions'
 import WatchStatistics from './components/WatchStatistics'
 import LibraryOverView from './components/libraryOverview'
 

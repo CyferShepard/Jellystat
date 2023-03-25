@@ -14,25 +14,25 @@ function GlobalStats(props) {
     const fetchData = async () => {
       try {
         const dayData = await axios.post(`/stats/getGlobalUserStats`, {
-          days: 1,
+          hours: (24*1),
           userid: props.UserId,
         });
         setDayStats(dayData.data);
 
         const weekData = await axios.post(`/stats/getGlobalUserStats`, {
-          days: 7,
+          hours: (24*7),
           userid: props.UserId,
         });
         setWeekStats(weekData.data);
 
         const monthData = await axios.post(`/stats/getGlobalUserStats`, {
-          days: 30,
+          hours: (24*30),
           userid: props.UserId,
         });
         setMonthStats(monthData.data);
 
         const allData = await axios.post(`/stats/getGlobalUserStats`, {
-          days: 999,
+          hours: (24*999),
           userid: props.UserId,
         });
         setAllStats(allData.data);

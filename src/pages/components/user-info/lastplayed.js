@@ -1,12 +1,13 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
-import AccountCircleFillIcon from "remixicon-react/AccountCircleFillIcon";
+
+import LastPlayedItem from "./lastplayed/last-played-item";
+
 import Config from "../../../lib/config";
 import "../../css/users/user-details.css";
 
-function UserDetails(props) {
+function LastPlayed(props) {
   const [data, setData] = useState();
-  const [imgError, setImgError] = useState(false);
   const [config, setConfig] = useState();
 
 
@@ -23,10 +24,10 @@ function UserDetails(props) {
 
     const fetchData = async () => {
       try {
-        const userData = await axios.post(`/stats/getUserDetails`, {
+        const itemData = await axios.post(`/stats/getUserLastPlayed`, {
           userid: props.UserId,
         });
-        setData(userData.data);
+        setData(itemData.data);
       } catch (error) {
         console.log(error);
       }
@@ -44,36 +45,24 @@ function UserDetails(props) {
     return () => clearInterval(intervalId);
   }, [data,config, props.UserId]);
 
-  const handleImageError = () => {
-    setImgError(true);
-  };
+  console.log(data);
 
   if (!data || !config) {
     return <></>;
   }
 
   return (
-    <div className="user-detail-container">
-      <div className="user-image-container">
-        {imgError ? (
-          <AccountCircleFillIcon size={"100%"} />
-        ) : (
-          <img
-            className="user-image"
-            src={
-              config.hostUrl +
-              "/Users/" +
-              data.Id +
-              "/Images/Primary?fillHeight=100&fillWidth=100&quality=90"
-            }
-            onError={handleImageError}
-            alt=""
-          ></img>
-        )}
-      </div>
-      <p className="user-name">{data.Name}</p>
+    <div className="last-played">
+        <h1>Last Watched</h1>
+        <div className="last-played-container">
+        {data.map((item) => (
+                    <LastPlayedItem data={item} base_url={config.hostUrl} key={item.Id+item.EpisodeNumber}/>
+          ))}
+
+        </div>
+
     </div>
   );
 }
 
-export default UserDetails;
+export default LastPlayed;

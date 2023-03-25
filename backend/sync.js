@@ -107,9 +107,8 @@ class sync {
 }
 ////////////////////////////////////////API Methods
 
-///////////////////////////////////////Write Users
-router.get("/writeUsers", async (req, res) => {
-
+async function syncUserData()
+{
   const { rows } = await db.query('SELECT * FROM app_config where "ID"=1');
   if (rows[0].JF_HOST === null || rows[0].JF_API_KEY === null) {
     res.send({ error: "Config Details Not Found" });
@@ -158,13 +157,11 @@ router.get("/writeUsers", async (req, res) => {
     }
   
   }
+}
 
-  res.send();
-});
-
-///////////////////////////////////////writeLibraries
-router.get("/writeLibraries", async (req, res) => {
-
+async function syncLibraryFolders()
+{
+  
   const { rows } = await db.query('SELECT * FROM app_config where "ID"=1');
   if (rows[0].JF_HOST === null || rows[0].JF_API_KEY === null) {
     res.send({ error: "Config Details Not Found" });
@@ -213,17 +210,11 @@ router.get("/writeLibraries", async (req, res) => {
     }
   
   } 
-
-  res.send();
-
-});
-
-//////////////////////////////////////////////////////writeLibraryItems
-router.get("/writeLibraryItems", async (req, res) => {
-
+}
+async function syncLibraryItems()
+{
   const { rows: config } = await db.query('SELECT * FROM app_config where "ID"=1' );
-  const { rows: cleanup } = await db.query('DELETE FROM jf_playback_activity where "NowPlayingItemId" not in (select "Id" from jf_library_items)' );
-  sendMessageToClients({ color: "orange", Message: cleanup.length+" orphaned activity logs removed" });
+
 
   if (config[0].JF_HOST === null || config[0].JF_API_KEY === null) {
     res.send({ error: "Config Details Not Found" });
@@ -260,6 +251,7 @@ router.get("/writeLibraryItems", async (req, res) => {
   let dataToInsert = [];
   //filter fix if jf_libraries is empty
 
+
   if (existingIds.length === 0) {
     dataToInsert = await data.map(jf_library_items_mapping);
   } else {
@@ -270,6 +262,7 @@ router.get("/writeLibraryItems", async (req, res) => {
 
 
   if (dataToInsert.length !== 0) {
+    
     let result = await db.insertBulk("jf_library_items",dataToInsert,jf_library_items_columns);
     if (result.Result === "SUCCESS") {
       insertCounter += dataToInsert.length;
@@ -295,12 +288,13 @@ router.get("/writeLibraryItems", async (req, res) => {
   sendMessageToClients({color: "orange",Message: deleteCounter + " Library Items Removed.",});
   sendMessageToClients({ color: "yellow", Message: "Item Sync Complete" });
 
-  res.send();
+    const { rows: cleanup } = await db.query('DELETE FROM jf_playback_activity where "NowPlayingItemId" not in (select "Id" from jf_library_items)' );
+    sendMessageToClients({ color: "orange", Message: cleanup.length+" orphaned activity logs removed" });
 
-});
+}
 
-//////////////////////////////////////////////////////writeSeasonsAndEpisodes
-router.get("/writeSeasonsAndEpisodes", async (req, res) => {
+async function syncShowItems()
+{
   sendMessageToClients({ color: "lawngreen", Message: "Syncing... 2/2" });
   sendMessageToClients({color: "yellow", Message: "Beginning Seasons and Episode sync",});
 
@@ -423,6 +417,46 @@ router.get("/writeSeasonsAndEpisodes", async (req, res) => {
   sendMessageToClients({color: "dodgerblue",Message: insertEpisodeCount + " Episodes inserted.",});
   sendMessageToClients({color: "orange",Message: deleteEpisodeCount + " Episodes Removed.",});
   sendMessageToClients({ color: "lawngreen", Message: "Sync Complete" });
+}
+
+////////////////////////////////////////API Calls
+
+///////////////////////////////////////Sync All
+router.get("/beingSync", async (req, res) => {
+  await syncUserData();
+  await syncLibraryFolders();
+  await syncLibraryItems();
+  await syncShowItems();
+
+  res.send();
+
+});
+
+///////////////////////////////////////Write Users
+router.get("/writeUsers", async (req, res) => {
+  await syncUserData();
+  res.send();
+});
+
+///////////////////////////////////////writeLibraries
+router.get("/writeLibraries", async (req, res) => {
+
+  await syncLibraryFolders();
+  res.send();
+
+});
+
+//////////////////////////////////////////////////////writeLibraryItems
+router.get("/writeLibraryItems", async (req, res) => {
+
+  await syncLibraryItems();
+  res.send();
+
+});
+
+//////////////////////////////////////////////////////writeSeasonsAndEpisodes
+router.get("/writeSeasonsAndEpisodes", async (req, res) => {
+  await syncShowItems();
   res.send();
 
 });

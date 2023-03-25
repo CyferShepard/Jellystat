@@ -1,4 +1,5 @@
 import React from "react";
+import { Link } from 'react-router-dom';
 
 import AccountCircleFillIcon from "remixicon-react/AccountCircleFillIcon";
 import PlayFillIcon from "remixicon-react/PlayFillIcon";
@@ -107,11 +108,7 @@ function sessionCard(props) {
           (props.data.session.NowPlayingItem.SeriesId
             ? props.data.session.NowPlayingItem.SeriesId
             : props.data.session.NowPlayingItem.Id) +
-          "/Images/Backdrop/0?maxWidth=1000&tag=" +
-          (props.data.session.NowPlayingItem.SeriesId
-            ? props.data.session.NowPlayingItem.ParentBackdropImageTags[0]
-            : props.data.session.NowPlayingItem.BackdropImageTags[0]) +
-          "&quality=50"
+          "/Images/Backdrop?fillHeight=320&fillWidth=213&quality=50"
         })`,
       }}
     >
@@ -124,9 +121,7 @@ function sessionCard(props) {
               (props.data.session.NowPlayingItem.SeriesId
                 ? props.data.session.NowPlayingItem.SeriesId
                 : props.data.session.NowPlayingItem.Id) +
-              "/Images/Primary?quality=50&tag=" +
-              props.data.session.NowPlayingItem.SeriesPrimaryImageTag ||
-            props.data.session.NowPlayingItem.ImageTags.Primary
+              "/Images/Primary?quality=50"
           }
           alt=""
         ></img>
@@ -183,7 +178,7 @@ function sessionCard(props) {
           ) : (
             <AccountCircleFillIcon />
           )}
-          <div className="card-username"> {props.data.session.UserName}</div>
+          <div className="card-username"><Link to={`/users/${props.data.session.UserId}`}>{props.data.session.UserName}</Link> </div>
         </div>
 
         <div className="card-play-state">

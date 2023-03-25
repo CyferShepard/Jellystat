@@ -1,7 +1,7 @@
 import "../css/libraryOverview.css";
 import React, { useState, useEffect } from "react";
 import axios from "axios";
-import Loading from "./loading";
+import Loading from "./general/loading";
 
 import LibraryStatComponent from "./libraryStatCard/library-stat-component";
 

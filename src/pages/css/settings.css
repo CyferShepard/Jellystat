@@ -1,29 +1,26 @@
+.show-key
+{
+  margin-bottom: 20px;;
+}
+
+.form-row
+{
+  margin-top: 20px;
+  display: grid;
+  grid-template-columns: repeat(4,minmax(0,1fr));
+  align-items: flex-start;
+  gap: 20px;
+}
+
 .settings-form {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
+
     color: white;
+    width: 100%;
+
   }
-  
-  .settings-form div {
-    display: flex;
-    flex-direction: column;
-    margin-bottom: 20px;
-    width: 50%;
-  }
-  
-  .settings-form label {
-    font-weight: bold;
-    margin-bottom: 5px;
-  }
-  
-  .settings-form input {
-    padding: 5px;
-    border-radius: 5px;
-    border: 1px solid #ccc;
-  }
-  
-  .settings-form button {
+
+  .settings-submit-button
+  {
     background-color: #2196f3;
     color: white;
     padding: 10px 20px;
@@ -33,11 +30,42 @@
     transition: all 0.3s ease-in-out;
     margin-bottom: 10px;
   }
-  
+
+  /* .settings-form div {
+    display: flex;
+    flex-direction: column;
+    margin-bottom: 20px;
+    width: 50%;
+  } */
+
+  .form-row label {
+    font-weight: bold;
+    font-size: 18px;
+  }
+
+  .form-row input {
+    padding: 5px;
+    border-radius: 5px;
+    border: none;
+    grid-column: span 2/span 2;
+    max-width: 700px;
+  }
+
+  /* .settings-form button {
+    background-color: #2196f3;
+    color: white;
+    padding: 10px 20px;
+    border-radius: 5px;
+    border: none;
+    cursor: pointer;
+    transition: all 0.3s ease-in-out;
+    margin-bottom: 10px;
+  } */
+
   .settings-form button:hover {
     background-color: #0d8bf2;
   }
-  
+
   .submit
   {
     font-weight: bold;

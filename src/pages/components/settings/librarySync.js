@@ -12,7 +12,7 @@ export default function LibrarySync() {
         setProcessing(true);
 
         await axios
-        .get("/sync/writeLibraries")
+        .get("/sync/beingSync")
         .then((response) => {
           if (response.status === 200) {
             // isValid = true;
@@ -21,41 +21,6 @@ export default function LibrarySync() {
         .catch((error) => {
            console.log(error);
         });
-
-        await axios
-        .get("/sync/writeLibraryItems")
-        .then((response) => {
-          if (response.status === 200) {
-            // isValid = true;
-          }
-        })
-        .catch((error) => {
-           console.log(error);
-        });
-
-    
-        await axios
-          .get("/sync/writeSeasonsAndEpisodes")
-          .then((response) => {
-            if (response.status === 200) {
-              // isValid = true;
-            }
-          })
-          .catch((error) => {
-             console.log(error);
-          });
-
-
-          await axios
-          .get("/sync/writeUsers")
-          .then((response) => {
-            if (response.status === 200) {
-              // isValid = true;
-            }
-          })
-          .catch((error) => {
-             console.log(error);
-          });
           setProcessing(false);
         // return { isValid: isValid, errorMessage: errorMessage };
       }

@@ -1,13 +1,13 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import Config from "../../../lib/config";
+import ItemImage from "./ItemImageComponent";
 
-import ComponentLoading from "../ComponentLoading";
 import StatComponent from "./statsComponent";
 
 
 function MVMovies(props) {
-  const [data, setData] = useState([]);
+  const [data, setData] = useState();
   const [days, setDays] = useState(30); 
 
   const [config, setConfig] = useState(null);
@@ -49,7 +49,7 @@ function MVMovies(props) {
       fetchConfig();
     }
 
-    if (!data || data.length===0) {
+    if (!data) {
       fetchLibraries();
     }
     if (days !== props.days) {
@@ -62,16 +62,10 @@ function MVMovies(props) {
     return () => clearInterval(intervalId);
   }, [data, config, days,props.days]);
 
-  if (!data) {
-    return(
-      <div className="stats-card">
-      <ComponentLoading />
-      </div>
-    );
-  }
-  if (data.length === 0) {
+  if (!data || data.length === 0) {
     return  <></>;
   }
+
 
 
 
@@ -82,23 +76,11 @@ function MVMovies(props) {
          config.hostUrl +
           "/Items/" +
           (data[0].Id) +
-          "/Images/Backdrop/0?maxWidth=1000&quality=50"
+          "/Images/Backdrop/?fillWidth=300&quality=10"
         })`}}
     >
     
-    <div className="popular-image">
-    <img
-          className="popular-banner-image"
-          src={
-            config.hostUrl +
-              "/Items/" +
-              (data[0].Id) +
-              "/Images/Primary?quality=50"
-          }
-          alt=""
-        ></img>
-
-    </div>
+    <ItemImage data={data[0]} base_url={config.hostUrl}/>
     <StatComponent data={data} heading={"MOST PLAYED MUSIC"} units={"Plays"}/>
     
 

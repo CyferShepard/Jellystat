@@ -17,6 +17,7 @@
         "ImageTagsThumb",
         "BackdropImageTags",
         "ParentId",
+        "PrimaryImageHash",
       ];
 
       const jf_library_items_mapping = (item) => ({
@@ -41,6 +42,7 @@
           item.ImageTags && item.ImageTags.Thumb ? item.ImageTags.Thumb : null,
         BackdropImageTags: item.BackdropImageTags[0],
         ParentId: item.ParentId,
+        PrimaryImageHash: item.ImageTags.Primary? item.ImageBlurHashes.Primary[item.ImageTags["Primary"]] : null,
       });
 
   module.exports = {
