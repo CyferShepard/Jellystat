@@ -2,8 +2,8 @@ import React, { useState, useEffect } from "react";
 import axios from "axios";
 import Config from "../lib/config";
 
-import "./css/libraries.css";
-import "./css/users/users.css";
+import "./css/library/libraries.css";
+// import "./css/users/users.css";
 
 import Loading from "./components/general/loading";
 import LibraryCard from "./components/library/library-card";
@@ -28,7 +28,7 @@ function Libraries() {
     };
 
     const fetchLibraries = () => {
-      const url = `/api/getLibraries`;
+      const url = `/stats/getLibraryStats`;
       axios
         .get(url)
         .then((data) => {
@@ -59,13 +59,13 @@ function Libraries() {
   }
 
   return (
-    <div className="Activity">
+    <div className="libraries">
       <h1>Libraries</h1>
-      <div>
+      <div className="libraries-container">
       {data &&
           data.map((item) => (
 
-              <LibraryCard data={item} base_url={config.hostUrl}/>
+              <LibraryCard key={item.Id} data={item} base_url={config.hostUrl}/>
 
             ))}
       </div>

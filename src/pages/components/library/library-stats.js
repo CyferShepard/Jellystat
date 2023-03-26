@@ -4,7 +4,7 @@ import "../../css/globalstats.css";
 
 import WatchTimeStats from "./globalstats/watchtimestats";
 
-function GlobalStats(props) {
+function LibraryGlobalStats(props) {
   const [dayStats, setDayStats] = useState({});
   const [weekStats, setWeekStats] = useState({});
   const [monthStats, setMonthStats] = useState({});
@@ -13,27 +13,27 @@ function GlobalStats(props) {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const dayData = await axios.post(`/stats/getGlobalUserStats`, {
+        const dayData = await axios.post(`/stats/getGlobalLibraryStats`, {
           hours: (24*1),
-          userid: props.UserId,
+          libraryid: props.LibraryId,
         });
         setDayStats(dayData.data);
 
-        const weekData = await axios.post(`/stats/getGlobalUserStats`, {
+        const weekData = await axios.post(`/stats/getGlobalLibraryStats`, {
           hours: (24*7),
-          userid: props.UserId,
+          libraryid: props.LibraryId,
         });
         setWeekStats(weekData.data);
 
-        const monthData = await axios.post(`/stats/getGlobalUserStats`, {
+        const monthData = await axios.post(`/stats/getGlobalLibraryStats`, {
           hours: (24*30),
-          userid: props.UserId,
+          libraryid: props.LibraryId,
         });
         setMonthStats(monthData.data);
 
-        const allData = await axios.post(`/stats/getGlobalUserStats`, {
+        const allData = await axios.post(`/stats/getGlobalLibraryStats`, {
           hours: (24*999),
-          userid: props.UserId,
+          libraryid: props.LibraryId,
         });
         setAllStats(allData.data);
       } catch (error) {
@@ -44,11 +44,11 @@ function GlobalStats(props) {
     fetchData();
     const intervalId = setInterval(fetchData, 60000 * 5);
     return () => clearInterval(intervalId);
-  }, [props.UserId]);
+  }, [props.LibraryId]);
 
   return (
     <div>
-      <h1>User Stats</h1>
+      <h1>Library Stats</h1>
       <div  className="global-stats-container">
         <WatchTimeStats data={dayStats} heading={"Last 24 Hours"} />
         <WatchTimeStats data={weekStats} heading={"Last 7 Days"} />
@@ -59,4 +59,4 @@ function GlobalStats(props) {
   );
 }
 
-export default GlobalStats;
+export default LibraryGlobalStats;

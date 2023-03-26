@@ -7,7 +7,7 @@ function LibraryStatComponent(props) {
   }
 
   return (
-    <div className="library-card">
+    <div className="library-stat-card">
 
     <div className="library-image">
       <div className="library-icons">

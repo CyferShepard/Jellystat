@@ -21,7 +21,6 @@ async function ActivityMonitor(interval) {
   const apiKey = config[0].JF_API_KEY;
 
   if (base_url === null || config[0].JF_API_KEY === null) {
-    console.log("Config Details Not Found");
     return;
   }
 

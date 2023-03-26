@@ -3,14 +3,7 @@
   margin-bottom: 20px;;
 }
 
-.form-row
-{
-  margin-top: 20px;
-  display: grid;
-  grid-template-columns: repeat(4,minmax(0,1fr));
-  align-items: flex-start;
-  gap: 20px;
-}
+
 
 .settings-form {
 
@@ -31,12 +24,14 @@
     margin-bottom: 10px;
   }
 
-  /* .settings-form div {
-    display: flex;
-    flex-direction: column;
-    margin-bottom: 20px;
-    width: 50%;
-  } */
+  .form-row
+  {
+    margin-top: 20px;
+    display: grid;
+    grid-template-columns: repeat(3,minmax(0,1fr));
+    align-items: flex-start;
+    gap: 20px;
+  }
 
   .form-row label {
     font-weight: bold;
@@ -47,7 +42,6 @@
     padding: 5px;
     border-radius: 5px;
     border: none;
-    grid-column: span 2/span 2;
     max-width: 700px;
   }
 

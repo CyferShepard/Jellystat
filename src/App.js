@@ -19,6 +19,7 @@ import Settings from './pages/settings';
 import Users from './pages/users';
 import UserInfo from './pages/components/user-info';
 import Libraries from './pages/libraries';
+import LibraryInfo from './pages/components/library-info';
 import ErrorPage from './pages/components/general/error';
 
 
@@ -79,6 +80,7 @@ if (!config || config.apiKey ==null) {
           <Route path="/users" element={<Users />} />
           <Route path="/users/:UserId" element={<UserInfo />} />
           <Route path="/libraries" element={<Libraries />} />
+          <Route path="/libraries/:LibraryId" element={<LibraryInfo />} />
           <Route path="/testing" element={<Testing />} />
         </Routes>
       </main>

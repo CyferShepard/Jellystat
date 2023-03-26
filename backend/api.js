@@ -39,7 +39,6 @@ router.post("/setconfig", async (req, res) => {
       query,
       [JF_HOST, JF_API_KEY]
     );
-    console.log({ JF_HOST: JF_HOST, JF_API_KEY: JF_API_KEY });
     res.send(rows);
   }catch(error)
   {

@@ -226,5 +226,60 @@ router.post("/getUserLastPlayed", async (req, res) => {
   }
 });
 
+router.post("/getLibraryDetails", async (req, res) => {
+  try {
+    const { libraryid } = req.body;
+    const { rows } = await db.query(
+      `select * from jf_libraries where "Id"='${libraryid}'`
+    );
+    res.send(rows[0]);
+  } catch (error) {
+    console.log(error);
+    res.send(error);
+  }
+});
+
+router.post("/getGlobalLibraryStats", async (req, res) => {
+  try {
+    const { hours,libraryid } = req.body;
+    let _hours = hours;
+    if (hours === undefined) {
+      _hours = 24;
+    }
+    console.log(`select * from fs_library_stats(${_hours},'${libraryid}')`);
+    const { rows } = await db.query(
+      `select * from fs_library_stats(${_hours},'${libraryid}')`
+    );
+    res.send(rows[0]);
+  } catch (error) {
+    console.log(error);
+    res.send(error);
+  }
+});
+
+
+router.get("/getLibraryStats", async (req, res) => {
+  try {
+    const { rows } = await db.query("select * from js_library_stats_overview");
+    res.send(rows);
+  } catch (error) {
+    res.send(error);
+  }
+});
+
+router.post("/getLibraryLastPlayed", async (req, res) => {
+  try {
+    const { libraryid } = req.body;
+    const { rows } = await db.query(
+      `select * from fs_last_library_activity('${libraryid}') limit 15`
+    );
+    res.send(rows);
+  } catch (error) {
+    console.log(error);
+    res.send(error);
+  }
+});
+
+
 
 module.exports = router;
