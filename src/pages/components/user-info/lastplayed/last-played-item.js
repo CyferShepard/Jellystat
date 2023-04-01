@@ -43,6 +43,7 @@ function LastPlayedItem(props) {
                 "/Images/Primary?fillHeight=320&fillWidth=213&quality=50"}`
           }
           onLoad={() => setLoaded(true)}
+          alt=""
           style={loaded ? { backgroundImage: `url(path/to/image.jpg)` } : { display: 'none' }}
         />
       </div>

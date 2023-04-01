@@ -24,8 +24,10 @@
   {
     padding: 15px 15px;
     border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+ 
 
 }
+
 
 td a{
   text-decoration: none;
@@ -37,8 +39,11 @@ td:hover a{
   color: rgb(0, 164, 219);
 }
 
+
+
 th {
     background-color: rgba(0, 0, 0, 0.8);
+    border-right: 1px solid rgba(255, 255, 255, 0.05);
     cursor: pointer;
 }
 
@@ -121,6 +126,7 @@ td:first-child {
   font-size: 1.2em;
   align-self: flex-end;
   justify-content: space-between;
+  margin-bottom: 0.9em;
 }
 
 .pagination-range select

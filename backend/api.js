@@ -100,6 +100,36 @@ router.post("/getLibraryItems", async (req, res) => {
   console.log(`ENDPOINT CALLED: /getLibraryItems: `);
 });
 
+router.get("/getHistory", async (req, res) => {
+  try{
+   
+
+    const { rows } = await db.query(
+      `SELECT * FROM jf_playback_activity order by "ActivityDateInserted" desc`
+    );
+
+    const groupedResults = {};
+    rows.forEach(row => {
+      if (groupedResults[row.NowPlayingItemId+row.EpisodeId]) {
+        groupedResults[row.NowPlayingItemId+row.EpisodeId].results.push(row);
+      } else {
+        groupedResults[row.NowPlayingItemId+row.EpisodeId] = {
+          ...row,
+          results: []
+        };
+      }
+    });
+    
+    res.send(Object.values(groupedResults));
+    
+
+  }catch(error)
+  {
+    console.log(error);
+  }
+
+});
+
 router.get("/runWatchdog", async (req, res) => {
   let message='Watchdog Started';
   if(!process.env.WatchdogRunning )

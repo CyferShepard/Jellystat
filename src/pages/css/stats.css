@@ -1,0 +1,12 @@
+.statistics-widget
+{
+
+    height: 700px;
+    color:black !important;
+    background-color:rgba(0,0,0,0.4);
+    padding:20px;
+    margin:20px;
+    border-radius:4px;
+    /* text-align: center; */
+}
+

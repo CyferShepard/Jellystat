@@ -12,7 +12,7 @@ import MPMusic from "./statCards/mp_music";
 
 import "../css/statCard.css";
 
-function WatchStatistics() {
+function HomeStatisticCards() {
   const [days, setDays] = useState(30);
   const [input, setInput] = useState(30);
 
@@ -64,4 +64,4 @@ function WatchStatistics() {
   );
 }
 
-export default WatchStatistics;
+export default HomeStatisticCards;

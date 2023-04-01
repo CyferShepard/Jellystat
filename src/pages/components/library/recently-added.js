@@ -1,12 +1,12 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 
-import ItemCardInfo from "./LastWatched/last-watched-card";
+import RecentlyAddedCard from "./RecentlyAdded/recently-added-card";
 
 import Config from "../../../lib/config";
 import "../../css/users/user-details.css";
 
-function LibraryLastPlayed(props) {
+function RecentlyPlayed(props) {
   const [data, setData] = useState();
   const [config, setConfig] = useState();
 
@@ -24,9 +24,13 @@ function LibraryLastPlayed(props) {
 
     const fetchData = async () => {
       try {
-        const itemData = await axios.post(`/stats/getLibraryLastPlayed`, {
-          libraryid: props.LibraryId,
+        let url=`${config.hostUrl}/users/5f63950a2339462196eb8cead70cae7e/Items/latest?parentId=${props.LibraryId}`;
+        const itemData = await axios.get(url, {
+          headers: {
+            "X-MediaBrowser-Token": config.apiKey,
+          },
         });
+        console.log(itemData);
         setData(itemData.data);
       } catch (error) {
         console.log(error);
@@ -53,10 +57,10 @@ function LibraryLastPlayed(props) {
 
   return (
     <div className="last-played">
-        <h1>Last Watched</h1>
+        <h1>Recently Added</h1>
         <div className="last-played-container">
-        {data.map((item) => (
-                    <ItemCardInfo data={item} base_url={config.hostUrl} key={item.Id+item.EpisodeNumber}/>
+        {data.filter((item) => ["Series", "Movie","Audio"].includes(item.Type)).map((item) => (
+                    <RecentlyAddedCard data={item} base_url={config.hostUrl} key={item.Id}/>
           ))}
 
         </div>
@@ -65,4 +69,4 @@ function LibraryLastPlayed(props) {
   );
 }
 
-export default LibraryLastPlayed;
+export default RecentlyPlayed;

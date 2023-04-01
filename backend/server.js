@@ -20,10 +20,10 @@ app.use('/api', apiRouter); // mount the API router at /api
 app.use('/sync', syncRouter); // mount the API router at /sync
 app.use('/stats', statsRouter); // mount the API router at /stats
 
-app.listen(PORT,  () => {
+app.listen(PORT, async  () => {
   console.log(`Server listening on http://${LISTEN_IP}:${PORT}`);
   try{
-    db.initDB();
+    await db.initDB();
     ActivityMonitor.ActivityMonitor(1000);
   }catch(error)
   {

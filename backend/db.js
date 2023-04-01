@@ -71,7 +71,6 @@ async function initDB()
         pool.query(sql, (err, res) => {
             if (err) throw err;
             console.log('Database and table created');
-            pool.end();
           });
       });
     } else {

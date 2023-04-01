@@ -1,75 +1,98 @@
 import React, { useState, useEffect } from "react";
-import API from "../classes/jellyfin-api";
+
+import axios from "axios";
 
 import "./css/activity.css";
+import Config from "../lib/config";
 
-import Loading from "./components/loading";
+import ActivityTable from "./components/activity/activity-table";
+import Loading from "./components/general/loading";
 
 function Activity() {
-  const [data, setData] = useState([]);
+  const [data, setData] = useState();
+  const [config, setConfig] = useState(null);
+
+  const [itemCount,setItemCount] = useState(10);
+  
+
+
+
 
   useEffect(() => {
-    let _api = new API();
-
-    const fetchData = () => {
-      _api.getActivityData(15).then((ActivityData) => {
-        if (data && data.length > 0) {
-          const newDataOnly = ActivityData.Items.filter((item) => {
-            return !data.some((existingItem) => existingItem.Id === item.Id);
-          });
-          setData([
-            ...newDataOnly,
-            ...data.slice(0, data.length - newDataOnly.length),
-          ]);
-        } else {
-          setData(ActivityData.Items);
+    const fetchConfig = async () => {
+      try {
+        const newConfig = await Config();
+        setConfig(newConfig);
+      } catch (error) {
+        if (error.code === "ERR_NETWORK") {
+          console.log(error);
         }
-      });
+      }
     };
 
-    const intervalId = setInterval(fetchData, 1000);
+    const fetchLibraries = () => {
+      const url = `/api/getHistory`;
+      axios
+        .get(url)
+        .then((data) => {
+          console.log("data");
+          setData(data.data);
+          console.log(data);
+        })
+        .catch((error) => {
+          console.log(error);
+        });
+    };
+
+
+    if (!config) {
+      fetchConfig();
+    }
+
+    if (!data) {
+      fetchLibraries();
+    }
+
+    const intervalId = setInterval(fetchLibraries, 60000 * 60);
     return () => clearInterval(intervalId);
-  }, [data]);
+  }, [data, config]);
 
-  const options = {
-    day: "numeric",
-    month: "numeric",
-    year: "numeric",
-    hour: "numeric",
-    minute: "numeric",
-    second: "numeric",
-    hour12: false,
-  };
 
-  if (!data || data.length === 0) {
+  if (!data) {
     return <Loading />;
+  }
+
+
+  if (data.length === 0) {
+    return (<div>
+      <div className="Heading">
+      <h1>Activity</h1>
+      </div>
+      <div className="Activity">
+      <h1>No Activity to display</h1>
+      </div>
+    </div>
+    );
   }
 
   return (
     <div>
+      <div className="Heading">
       <h1>Activity</h1>
+      <div className="pagination-range">
+          <div className="header">Items</div>
+          <select value={itemCount} onChange={(event) => {setItemCount(event.target.value);}}>
+                <option value="10">10</option>
+                <option value="25">25</option>
+                <option value="50">50</option>
+                <option value="100">100</option>
+              </select>
+        </div>
+      </div>
       <div className="Activity">
-      <ul>
-        {data &&
-          data.map((item) => (
-            <li
-              key={item.Id}
-              className={
-                data.findIndex((items) => items.Id === item.Id) <= 15
-                  ? "new"
-                  : "old"
-              }
-            >
-              <div className="ActivityDetail"> {item.Name}</div>
-              <div className="ActivityTime">
-                {new Date(item.Date)
-                  .toLocaleString("en-GB", options)
-                  .replace(",", "")}
-              </div>
-            </li>
-          ))}
-      </ul>
-      <div/>
+        <ActivityTable data={data} itemCount={itemCount}/>
+
+
     </div>
     </div>
   );

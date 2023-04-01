@@ -28,7 +28,7 @@ function formatTime(time) {
   }
   
 
-function LastPlayedItem(props) {
+function LastWatchedCard(props) {
   const [loaded, setLoaded] = useState(false);
   return (
     <div className="last-card">
@@ -42,6 +42,7 @@ function LastPlayedItem(props) {
                 props.data.Id +
                 "/Images/Primary?fillHeight=320&fillWidth=213&quality=50"}`
           }
+          alt=""
           onLoad={() => setLoaded(true)}
           style={loaded ? { backgroundImage: `url(path/to/image.jpg)` } : { display: 'none' }}
         />
@@ -63,4 +64,4 @@ function LastPlayedItem(props) {
   );
 }
 
-export default LastPlayedItem;
+export default LastWatchedCard;

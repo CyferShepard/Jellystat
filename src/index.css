@@ -20,24 +20,24 @@ code {
 }
 
 
-html {
+body {
   overflow: auto; /* show scrollbar when needed */
 }
 
-html::-webkit-scrollbar {
+body::-webkit-scrollbar {
   width: 10px; /* set scrollbar width */
 }
 
-html::-webkit-scrollbar-track {
+body::-webkit-scrollbar-track {
   background-color: transparent; /* set track color */
 }
 
-html::-webkit-scrollbar-thumb {
+body::-webkit-scrollbar-thumb {
   background-color: #8888884d; /* set thumb color */
   border-radius: 5px; /* round corners */
 }
 
-html::-webkit-scrollbar-thumb:hover {
+body::-webkit-scrollbar-thumb:hover {
   background-color: #88888883; /* set thumb color */
 }
 

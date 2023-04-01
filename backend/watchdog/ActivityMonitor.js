@@ -8,24 +8,26 @@ async function ActivityMonitor(interval) {
   console.log("Activity Interval: " + interval);
 
   
-  const { rows: config } = await db.query(
-    'SELECT * FROM app_config where "ID"=1'
-  );
-
   
-  if(config.length===0)
-  {
-    return;
-  }
-  const base_url = config[0].JF_HOST;
-  const apiKey = config[0].JF_API_KEY;
-
-  if (base_url === null || config[0].JF_API_KEY === null) {
-    return;
-  }
 
   setInterval(async () => {
     try {
+      const { rows: config } = await db.query(
+        'SELECT * FROM app_config where "ID"=1'
+      );
+    
+      
+      if(config.length===0)
+      {
+        return;
+      }
+      const base_url = config[0].JF_HOST;
+      const apiKey = config[0].JF_API_KEY;
+    
+      if (base_url === null || config[0].JF_API_KEY === null) {
+        return;
+      }
+
       const url = `${base_url}/Sessions`;
       const response = await axios.get(url, {
         headers: {
@@ -165,7 +167,7 @@ async function ActivityMonitor(interval) {
 
 
     } catch (error) {
-      console.log(error);
+      // console.log(error);
       return [];
     }
   }, interval);

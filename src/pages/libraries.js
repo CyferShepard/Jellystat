@@ -12,7 +12,6 @@ import LibraryCard from "./components/library/library-card";
 
 function Libraries() {
   const [data, setData] = useState();
-  // const [items, setItems] = useState([]);
   const [config, setConfig] = useState(null);
 
   useEffect(() => {

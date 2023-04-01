@@ -13,7 +13,7 @@ import Loading from './pages/components/general/loading';
 import Setup from './pages/setup';
 
 
-import Navbar from './pages/components/general/navbar';
+// import Navbar from './pages/components/general/navbar';
 import Home from './pages/home';
 import Settings from './pages/settings';
 import Users from './pages/users';
@@ -24,6 +24,8 @@ import ErrorPage from './pages/components/general/error';
 
 
 import Testing from './pages/testing';
+import Activity from './pages/activity';
+import Statistics from './pages/statistics';
 
 function App() {
 
@@ -71,7 +73,7 @@ if (!config || config.apiKey ==null) {
 
   return (
     <div className="App">
-      <Navbar />
+      {/* <Navbar /> */}
       <div>
       <main>
         <Routes>
@@ -81,6 +83,8 @@ if (!config || config.apiKey ==null) {
           <Route path="/users/:UserId" element={<UserInfo />} />
           <Route path="/libraries" element={<Libraries />} />
           <Route path="/libraries/:LibraryId" element={<LibraryInfo />} />
+          <Route path="/statistics" element={<Statistics />} />
+          <Route path="/activity" element={<Activity />} />
           <Route path="/testing" element={<Testing />} />
         </Routes>
       </main>

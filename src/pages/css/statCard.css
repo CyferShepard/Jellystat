@@ -12,7 +12,7 @@
 .Heading h1
 {
   padding-right: 10px;
-  margin: 0;
+  /* margin: 0; */
 }
 
 .stat-cards-container
@@ -141,6 +141,7 @@
   font-size: 1.2em;
   align-self: flex-end;
   justify-content: space-evenly;
+  margin-bottom: 0.9em;
 }
 
 

@@ -108,7 +108,7 @@ function sessionCard(props) {
           (props.data.session.NowPlayingItem.SeriesId
             ? props.data.session.NowPlayingItem.SeriesId
             : props.data.session.NowPlayingItem.Id) +
-          "/Images/Backdrop?fillHeight=320&fillWidth=213&quality=50"
+          "/Images/Backdrop?fillHeight=320&fillWidth=213&quality=80"
         })`,
       }}
     >
@@ -121,7 +121,7 @@ function sessionCard(props) {
               (props.data.session.NowPlayingItem.SeriesId
                 ? props.data.session.NowPlayingItem.SeriesId
                 : props.data.session.NowPlayingItem.Id) +
-              "/Images/Primary?quality=50"
+                "/Images/Primary?fillHeight=320&fillWidth=213&quality=50"
           }
           alt=""
         ></img>

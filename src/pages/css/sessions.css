@@ -7,7 +7,7 @@
 .sessions-container {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(520px, 520px));
-    grid-auto-rows: 235px;/* max-width+offset so 215 + 20*/
+    grid-auto-rows: 200px;/* max-width+offset so 215 + 20*/
     margin-right: 20px;
 
 }
@@ -19,7 +19,7 @@
     background-color: grey;
     /* box-shadow: 0 0 20px 5px rgba(0, 0, 0, 0.8); */
 
-    max-height: 215px;
+    max-height: 180px;
     max-width: 500px;
 
     /* margin-left: 20px; */

@@ -15,6 +15,7 @@ function ItemImage(props) {
               (props.data.Id) +
               "/Images/Primary?fillHeight=320&fillWidth=213&quality=50"
           }
+          alt=""
           onLoad={() => setLoaded(true)}
         />
         </div>

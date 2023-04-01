@@ -5,7 +5,7 @@
 -- Dumped from database version 15.2 (Debian 15.2-1.pgdg110+1)
 -- Dumped by pg_dump version 15.1
 
--- Started on 2023-03-26 14:21:37 UTC
+-- Started on 2023-04-01 09:50:04 UTC
 
 SET statement_timeout = 0;
 SET lock_timeout = 0;
@@ -19,7 +19,7 @@ SET client_min_messages = warning;
 SET row_security = off;
 
 --
--- TOC entry 251 (class 1255 OID 49412)
+-- TOC entry 252 (class 1255 OID 49412)
 -- Name: fs_last_library_activity(text); Type: FUNCTION; Schema: public; Owner: postgres
 --
 
@@ -57,7 +57,7 @@ $$;
 ALTER FUNCTION public.fs_last_library_activity(libraryid text) OWNER TO postgres;
 
 --
--- TOC entry 247 (class 1255 OID 49383)
+-- TOC entry 248 (class 1255 OID 49383)
 -- Name: fs_last_user_activity(text); Type: FUNCTION; Schema: public; Owner: postgres
 --
 
@@ -93,7 +93,7 @@ $$;
 ALTER FUNCTION public.fs_last_user_activity(userid text) OWNER TO postgres;
 
 --
--- TOC entry 245 (class 1255 OID 49411)
+-- TOC entry 246 (class 1255 OID 49411)
 -- Name: fs_library_stats(integer, text); Type: FUNCTION; Schema: public; Owner: postgres
 --
 
@@ -145,7 +145,7 @@ $$;
 ALTER FUNCTION public.fs_most_active_user(days integer) OWNER TO postgres;
 
 --
--- TOC entry 249 (class 1255 OID 49386)
+-- TOC entry 250 (class 1255 OID 49386)
 -- Name: fs_most_played_items(integer, text); Type: FUNCTION; Schema: public; Owner: postgres
 --
 
@@ -186,7 +186,7 @@ $$;
 ALTER FUNCTION public.fs_most_played_items(days integer, itemtype text) OWNER TO postgres;
 
 --
--- TOC entry 250 (class 1255 OID 49394)
+-- TOC entry 251 (class 1255 OID 49394)
 -- Name: fs_most_popular_items(integer, text); Type: FUNCTION; Schema: public; Owner: postgres
 --
 
@@ -256,7 +256,7 @@ $$;
 ALTER FUNCTION public.fs_most_used_clients(days integer) OWNER TO postgres;
 
 --
--- TOC entry 248 (class 1255 OID 49385)
+-- TOC entry 249 (class 1255 OID 49385)
 -- Name: fs_most_viewed_libraries(integer); Type: FUNCTION; Schema: public; Owner: postgres
 --
 
@@ -300,7 +300,7 @@ $$;
 ALTER FUNCTION public.fs_most_viewed_libraries(days integer) OWNER TO postgres;
 
 --
--- TOC entry 246 (class 1255 OID 49364)
+-- TOC entry 247 (class 1255 OID 49364)
 -- Name: fs_user_stats(integer, text); Type: FUNCTION; Schema: public; Owner: postgres
 --
 
@@ -323,6 +323,32 @@ $$;
 
 
 ALTER FUNCTION public.fs_user_stats(hours integer, userid text) OWNER TO postgres;
+
+--
+-- TOC entry 245 (class 1255 OID 49418)
+-- Name: fs_watch_stats_over_time(integer); Type: FUNCTION; Schema: public; Owner: postgres
+--
+
+CREATE FUNCTION public.fs_watch_stats_over_time(days integer) RETURNS TABLE("Date" date, "Count" bigint, "Library" text)
+    LANGUAGE plpgsql
+    AS $$
+BEGIN
+    RETURN QUERY
+    SELECT 
+         DATE_TRUNC('day', a."ActivityDateInserted")::DATE AS "Date",
+        COUNT(*) AS "Count",
+        l."Name" as "Library"
+    FROM jf_playback_activity a
+    JOIN jf_library_items i ON i."Id" = a."NowPlayingItemId"
+    JOIN jf_libraries l ON i."ParentId" = l."Id"
+    WHERE a."ActivityDateInserted" BETWEEN NOW() - CAST(days || ' days' as INTERVAL) AND NOW()
+    GROUP BY l."Name", DATE_TRUNC('day', a."ActivityDateInserted")
+    ORDER BY "Date";
+END;
+$$;
+
+
+ALTER FUNCTION public.fs_watch_stats_over_time(days integer) OWNER TO postgres;
 
 SET default_tablespace = '';
 
@@ -662,7 +688,7 @@ CREATE VIEW public.js_library_stats_overview AS
 ALTER TABLE public.js_library_stats_overview OWNER TO postgres;
 
 --
--- TOC entry 3236 (class 2606 OID 16401)
+-- TOC entry 3237 (class 2606 OID 16401)
 -- Name: app_config app_config_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -671,7 +697,7 @@ ALTER TABLE ONLY public.app_config
 
 
 --
--- TOC entry 3238 (class 2606 OID 16419)
+-- TOC entry 3239 (class 2606 OID 16419)
 -- Name: jf_libraries jf_libraries_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -680,7 +706,7 @@ ALTER TABLE ONLY public.jf_libraries
 
 
 --
--- TOC entry 3244 (class 2606 OID 24912)
+-- TOC entry 3245 (class 2606 OID 24912)
 -- Name: jf_library_episodes jf_library_episodes_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -689,7 +715,7 @@ ALTER TABLE ONLY public.jf_library_episodes
 
 
 --
--- TOC entry 3240 (class 2606 OID 24605)
+-- TOC entry 3241 (class 2606 OID 24605)
 -- Name: jf_library_items jf_library_items_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -698,7 +724,7 @@ ALTER TABLE ONLY public.jf_library_items
 
 
 --
--- TOC entry 3242 (class 2606 OID 24737)
+-- TOC entry 3243 (class 2606 OID 24737)
 -- Name: jf_library_seasons jf_library_seasons_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -707,7 +733,7 @@ ALTER TABLE ONLY public.jf_library_seasons
 
 
 --
--- TOC entry 3246 (class 2606 OID 41737)
+-- TOC entry 3247 (class 2606 OID 41737)
 -- Name: jf_users jf_users_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -716,7 +742,7 @@ ALTER TABLE ONLY public.jf_users
 
 
 --
--- TOC entry 3390 (class 2618 OID 25163)
+-- TOC entry 3391 (class 2618 OID 25163)
 -- Name: jf_library_count_view _RETURN; Type: RULE; Schema: public; Owner: postgres
 --
 
@@ -736,7 +762,7 @@ CREATE OR REPLACE VIEW public.jf_library_count_view AS
 
 
 --
--- TOC entry 3247 (class 2606 OID 24617)
+-- TOC entry 3248 (class 2606 OID 24617)
 -- Name: jf_library_items jf_library_items_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -745,15 +771,15 @@ ALTER TABLE ONLY public.jf_library_items
 
 
 --
--- TOC entry 3398 (class 0 OID 0)
--- Dependencies: 3247
+-- TOC entry 3399 (class 0 OID 0)
+-- Dependencies: 3248
 -- Name: CONSTRAINT jf_library_items_fkey ON jf_library_items; Type: COMMENT; Schema: public; Owner: postgres
 --
 
 COMMENT ON CONSTRAINT jf_library_items_fkey ON public.jf_library_items IS 'jf_library';
 
 
--- Completed on 2023-03-26 14:21:38 UTC
+-- Completed on 2023-04-01 09:50:05 UTC
 
 --
 -- PostgreSQL database dump complete

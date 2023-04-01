@@ -280,6 +280,47 @@ router.post("/getLibraryLastPlayed", async (req, res) => {
   }
 });
 
+router.post("/getViewsOverTime", async (req, res) => {
+  try {
+    const { days } = req.body;
+    let _days = days;
+    if (days=== undefined) {
+      _days = 30;
+    }
+    const { rows } = await db.query(
+      `select * from fs_watch_stats_over_time('${_days}')`
+    );
+
+    
+const reorganizedData = {};
+
+rows.forEach((item) => {
+  const id = item.Library;
+  const count = item.Count;
+  const date = new Date(item.Date).toLocaleDateString('en-US', {
+    year: 'numeric',
+    month: 'long',
+    day: '2-digit'
+  });
+  
+  if (!reorganizedData[id]) {
+    reorganizedData[id] = {
+      id,
+      data: []
+    };
+  }
+  
+  reorganizedData[id].data.push({ x: date, y: count });
+});
+const finalData = Object.values(reorganizedData);
+    res.send(finalData);
+  } catch (error) {
+    console.log(error);
+    res.send(error);
+  }
+});
+
+
 
 
 module.exports = router;

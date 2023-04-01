@@ -12,7 +12,7 @@ function StatComponent(props) {
       <div className="stats-list">
         {props.data &&
           props.data.map((item, index) => (
-            <div className="stat-item" key={item.Id}>
+            <div className="stat-item" key={item.Id || index}>
               <p className="stat-item-index">{index + 1}</p>
               {item.UserId ? 
              <p className="stat-item-name"> <Link to={`/users/${item.UserId}`}> {item.Name}</Link> </p>
