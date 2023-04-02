@@ -25,6 +25,11 @@ function UserDetails(props) {
       try {
         const userData = await axios.post(`/stats/getUserDetails`, {
           userid: props.UserId,
+        }, {
+          headers: {
+            Authorization: `Bearer ${config.token}`,
+            "Content-Type": "application/json",
+          },
         });
         setData(userData.data);
       } catch (error) {

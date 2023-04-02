@@ -9,7 +9,7 @@ import "./css/users/users.css";
 import Loading from "./components/general/loading";
 
 function Users() {
-  const [data, setData] = useState([]);
+  const [data, setData] = useState();
   const [config, setConfig] = useState(null);
   const [sortConfig, setSortConfig] = useState({ key: null, direction: null });
   const [currentPage, setCurrentPage] = useState(1);
@@ -92,7 +92,12 @@ function Users() {
         const url = `/stats/getAllUserActivity`;
 
         axios
-          .get(url)
+          .get(url, {
+            headers: {
+              Authorization: `Bearer ${config.token}`,
+              "Content-Type": "application/json",
+            },
+          })
           .then((data) => {
             console.log(data);
             setData(data.data);
@@ -103,12 +108,14 @@ function Users() {
       }
     };
 
-    if (!config) {
-      fetchConfig();
+
+
+    if (!data && config) {
+      fetchData();
     }
 
-    if (data.length === 0) {
-      fetchData();
+    if (!config) {
+      fetchConfig();
     }
 
     const intervalId = setInterval(fetchData, 60000);

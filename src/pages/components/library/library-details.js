@@ -7,6 +7,7 @@ import FilmLineIcon from "remixicon-react/FilmLineIcon";
 
 function LibraryDetails(props) {
   const [data, setData] = useState();
+  const token = localStorage.getItem('token');
 
   useEffect(() => {
 
@@ -14,6 +15,11 @@ function LibraryDetails(props) {
       try {
         const libraryrData = await axios.post(`/stats/getLibraryDetails`, {
           libraryid: props.LibraryId,
+        }, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
         });
         setData(libraryrData.data);
       } catch (error) {
@@ -27,7 +33,7 @@ function LibraryDetails(props) {
 
     const intervalId = setInterval(fetchData, 60000 * 5);
     return () => clearInterval(intervalId);
-  }, [data, props.LibraryId]);
+  }, [data, props.LibraryId,token]);
 
 
   if (!data) {

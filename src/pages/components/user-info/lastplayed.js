@@ -26,6 +26,11 @@ function LastPlayed(props) {
       try {
         const itemData = await axios.post(`/stats/getUserLastPlayed`, {
           userid: props.UserId,
+        }, {
+          headers: {
+            Authorization: `Bearer ${config.token}`,
+            "Content-Type": "application/json",
+          },
         });
         setData(itemData.data);
       } catch (error) {
@@ -45,7 +50,6 @@ function LastPlayed(props) {
     return () => clearInterval(intervalId);
   }, [data,config, props.UserId]);
 
-  console.log(data);
 
   if (!data || !config) {
     return <></>;

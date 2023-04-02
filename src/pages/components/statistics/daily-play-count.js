@@ -7,7 +7,7 @@ import '../../css/stats.css';
 function DailyPlayStats(props) {
     const [data, setData] = useState();
   const [days, setDays] = useState(60);
-
+  const token = localStorage.getItem('token');
  
 
 
@@ -19,8 +19,9 @@ function DailyPlayStats(props) {
         const url = `/stats/getViewsOverTime`;
 
         axios
-        .post(url, {days:days}, {
+        .post(url, {days:props.days}, {
           headers: {
+            Authorization: `Bearer ${token}`,
             "Content-Type": "application/json",
           },
         })
@@ -46,7 +47,7 @@ function DailyPlayStats(props) {
 
     const intervalId = setInterval(fetchLibraries, 60000 * 5);
     return () => clearInterval(intervalId);
-  }, [data, days,props.days]);
+  }, [data, days,props.days ,token]);
 
   if (!data) {
     return  <></>;
@@ -66,13 +67,12 @@ function DailyPlayStats(props) {
   }
 
 
-
       return (
         <div className="statistics-widget" >
             <h1>Daily Play Count Per Library - {days} Days</h1>
         <ResponsiveLine
         data={data}
-        margin={{ top: 50, right: 100, bottom: 150, left: 50 }}
+        margin={{ top: 50, right: 100, bottom: 200, left: 50 }}
         xScale={{ type: 'point' }}
         yScale={{
             type: 'linear',
@@ -85,26 +85,45 @@ function DailyPlayStats(props) {
         enableSlices={"x"}
         yFormat=" >-.0f"
         curve="natural"
+        theme={{
+            axis: {
+                ticks: {
+                  line: {
+                    stroke: "white"
+                  },
+                  text: {
+                    fill: "white"
+                  }
+                }
+              },
+              grid: {
+                line: {
+                  stroke: "rgba(255,255,255,0.2)",
+                  strokeWidth: 2,
+                  strokeDasharray: "1 40"
+                }
+              }
+          }}
 
         axisBottom={{
             orient: 'bottom',
             tickSize: 5,
             tickPadding: 10,
-            tickRotation: 0,
+            tickRotation: -45,
             legend: 'Days',
             legendOffset: 36,
-            legendPosition: 'middle',
-            itemTextColor: '#fff'
+            legendPosition: 'middle'
         }}
         axisLeft={{
             orient: 'left',
             tickSize: 5,
             tickPadding: 5,
             tickRotation: 0,
-            legend: 'Views',
+            legend: 'Plays',
             legendOffset: -40,
             legendPosition: 'middle',
             itemTextColor: '#fff',
+            theme:"white"
             
         }}
         
@@ -114,7 +133,7 @@ function DailyPlayStats(props) {
         pointBorderWidth={2}
         pointBorderColor={{ from: 'serieColor' }}
         pointLabelYOffset={-12}
-        useMesh={true}
+
         legends={[
             {
 
@@ -123,7 +142,7 @@ function DailyPlayStats(props) {
                 direction: 'row',
                 justify: false,
                 translateX: 0,
-                translateY: 80,
+                translateY: 100,
                 itemsSpacing: 0,
                 itemDirection: 'left-to-right',
                 itemWidth: 80,

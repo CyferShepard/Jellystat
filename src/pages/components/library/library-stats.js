@@ -9,6 +9,7 @@ function LibraryGlobalStats(props) {
   const [weekStats, setWeekStats] = useState({});
   const [monthStats, setMonthStats] = useState({});
   const [allStats, setAllStats] = useState({});
+  const token = localStorage.getItem('token');
 
   useEffect(() => {
     const fetchData = async () => {
@@ -16,24 +17,44 @@ function LibraryGlobalStats(props) {
         const dayData = await axios.post(`/stats/getGlobalLibraryStats`, {
           hours: (24*1),
           libraryid: props.LibraryId,
+        }, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
         });
         setDayStats(dayData.data);
 
         const weekData = await axios.post(`/stats/getGlobalLibraryStats`, {
           hours: (24*7),
           libraryid: props.LibraryId,
+        }, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
         });
         setWeekStats(weekData.data);
 
         const monthData = await axios.post(`/stats/getGlobalLibraryStats`, {
           hours: (24*30),
           libraryid: props.LibraryId,
+        }, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
         });
         setMonthStats(monthData.data);
 
         const allData = await axios.post(`/stats/getGlobalLibraryStats`, {
           hours: (24*999),
           libraryid: props.LibraryId,
+        }, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
         });
         setAllStats(allData.data);
       } catch (error) {
@@ -44,7 +65,7 @@ function LibraryGlobalStats(props) {
     fetchData();
     const intervalId = setInterval(fetchData, 60000 * 5);
     return () => clearInterval(intervalId);
-  }, [props.LibraryId]);
+  }, [props.LibraryId,token]);
 
   return (
     <div>

@@ -10,6 +10,7 @@ import TvLineIcon from "remixicon-react/TvLineIcon";
 import FilmLineIcon from "remixicon-react/FilmLineIcon";
 
 export default function LibraryOverView() {
+  const token = localStorage.getItem('token');
   const SeriesIcon=<TvLineIcon size={"80%"} /> ;
   const MovieIcon=<FilmLineIcon size={"80%"} /> ;
   const [data, setData] = useState([]);
@@ -19,7 +20,12 @@ export default function LibraryOverView() {
     const fetchData = () => {
       const url = `/stats/getLibraryOverview`;
       axios
-        .get(url)
+        .get(url, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+        })
         .then((response) => setData(response.data))
         .catch((error) => console.log(error));
     };
@@ -27,7 +33,7 @@ export default function LibraryOverView() {
     if (!data || data.length === 0) {
       fetchData();
     }
-  }, [data]);
+  }, [data,token]);
 
   if (data.length === 0) {
     return <Loading />;

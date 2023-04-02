@@ -35,6 +35,7 @@ function MVMusic(props) {
         axios
         .post(url, {days:props.days}, {
           headers: {
+            Authorization: `Bearer ${config.token}`,
             "Content-Type": "application/json",
           },
         })

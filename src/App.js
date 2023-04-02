@@ -5,15 +5,18 @@ import {
   Routes,
   Route,
 } from "react-router-dom";
+import axios from 'axios';
 
 import Config from './lib/config';
 
 import Loading from './pages/components/general/loading';
 
+import Signup from './pages/signup';
 import Setup from './pages/setup';
+import Login from './pages/login';
 
 
-// import Navbar from './pages/components/general/navbar';
+import Navbar from './pages/components/general/navbar';
 import Home from './pages/home';
 import Settings from './pages/settings';
 import Users from './pages/users';
@@ -29,9 +32,11 @@ import Statistics from './pages/statistics';
 
 function App() {
 
+  const [isConfigured, setisConfigured] = useState(false);
   const [config, setConfig] = useState(null);
   const [loading, setLoading] = useState(true);
   const [errorFlag, seterrorFlag] = useState(false);
+  const token = localStorage.getItem('token');
 
   useEffect(() => {
 
@@ -42,7 +47,11 @@ function App() {
             if(!newConfig.response){
               setConfig(newConfig);
             }else{
-              seterrorFlag(true);
+              if(newConfig.response.status!==403)
+              {
+                seterrorFlag(true);
+              }
+             
             }
             setLoading(false);
            
@@ -51,11 +60,34 @@ function App() {
         }
     };
 
-    if (!config) {
+    if(!isConfigured)
+    {
+      setLoading(false);
+      axios
+      .get("/auth/isConfigured")
+      .then(async (response) => {
+        console.log(response);
+        if(response.status===200)
+        {
+          setisConfigured(true);
+         
+        }
+   
+        
+      })
+      .catch((error) => {
+        console.log(error);
+        seterrorFlag(true);
+        
+      });
+       
+    }
+
+    if (!config && isConfigured) {
         fetchConfig();
     }
 
-}, [config]);
+}, [config,isConfigured]);
 
 if (loading) {
   return <Loading />;
@@ -65,15 +97,28 @@ if (errorFlag) {
   return <ErrorPage message={"Error: Unable to connect to Jellystat Backend"} />;
 }
 
-if (!config || config.apiKey ==null) {
+if(isConfigured)
+  {
+    if ((token===undefined || token===null) || !config) {
+      return <Login />;
+    }
+  }
+  else{
+    return <Signup />;
+  }
+
+
+
+
+
+if (config  && config.apiKey ===null) {
   return <Setup />;
 }
 
-
-
+if (config  && isConfigured && token!==null){
   return (
     <div className="App">
-      {/* <Navbar /> */}
+      <Navbar />
       <div>
       <main>
         <Routes>
@@ -93,6 +138,11 @@ if (!config || config.apiKey ==null) {
     </div>
 
   );
+}
+
+
+
+
 }
 
 export default App;

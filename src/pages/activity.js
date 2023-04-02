@@ -33,7 +33,12 @@ function Activity() {
     const fetchLibraries = () => {
       const url = `/api/getHistory`;
       axios
-        .get(url)
+        .get(url, {
+          headers: {
+            Authorization: `Bearer ${config.token}`,
+            "Content-Type": "application/json",
+          },
+        })
         .then((data) => {
           console.log("data");
           setData(data.data);
@@ -45,12 +50,14 @@ function Activity() {
     };
 
 
-    if (!config) {
-      fetchConfig();
+
+
+    if (!data && config) {
+      fetchLibraries();
     }
 
-    if (!data) {
-      fetchLibraries();
+    if (!config) {
+      fetchConfig();
     }
 
     const intervalId = setInterval(fetchLibraries, 60000 * 60);

@@ -8,7 +8,7 @@ import Loading from "../general/loading";
 import "../../css/settings.css";
 
 export default function SettingsConfig() {
-
+  const [config, setConfig] = useState(null);
   const [showKey, setKeyState] = useState(false);
   const [formValues, setFormValues] = useState({});
   const [isSubmitted, setisSubmitted] = useState("");
@@ -19,6 +19,7 @@ export default function SettingsConfig() {
     Config()
       .then((config) => {
         setFormValues({ JF_HOST: config.hostUrl, JF_API_KEY: config.apiKey });
+        setConfig(config);
         setloadSate("Loaded");
       })
       .catch((error) => {
@@ -83,6 +84,7 @@ export default function SettingsConfig() {
     axios
       .post("/api/setconfig/", formValues, {
         headers: {
+          Authorization: `Bearer ${config.token}`,
           "Content-Type": "application/json",
         },
       })

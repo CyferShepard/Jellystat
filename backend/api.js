@@ -12,7 +12,7 @@ router.get("/test", async (req, res) => {
 
 router.get("/getconfig", async (req, res) => {
   try{
-    const { rows } = await db.query('SELECT * FROM app_config where "ID"=1');
+    const { rows } = await db.query('SELECT "JF_HOST","JF_API_KEY","APP_USER" FROM app_config where "ID"=1');
     res.send(rows);
 
   }catch(error)

@@ -10,7 +10,7 @@ import ComputerLineIcon from "remixicon-react/ComputerLineIcon";
 function MostUsedClient(props) {
   const [data, setData] = useState();
   const [days, setDays] = useState(30); 
-
+  const token = localStorage.getItem('token');
 
   useEffect(() => {
 
@@ -20,6 +20,7 @@ function MostUsedClient(props) {
         axios
         .post(url, {days:props.days}, {
           headers: {
+            Authorization: `Bearer ${token}`,
             "Content-Type": "application/json",
           },
         })
@@ -43,7 +44,7 @@ function MostUsedClient(props) {
 
     const intervalId = setInterval(fetchLibraries, 60000 * 5);
     return () => clearInterval(intervalId);
-  }, [data, days,props.days]);
+  }, [data, days,props.days,token]);
 
   if (!data || data.length === 0) {
     return  <></>;

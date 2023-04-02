@@ -11,7 +11,6 @@ import StatComponent from "./statsComponent";
 function MPMusic(props) {
   const [data, setData] = useState();
   const [days, setDays] = useState(30); 
-
   const [config, setConfig] = useState(null);
 
   useEffect(() => {
@@ -33,6 +32,7 @@ function MPMusic(props) {
         axios
           .post(url, { days: props.days }, {
             headers: {
+              Authorization: `Bearer ${config.token}`,
               "Content-Type": "application/json",
             },
           })

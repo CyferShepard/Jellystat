@@ -16,7 +16,7 @@ if([_POSTGRES_USER,_POSTGRES_PASSWORD,_POSTGRES_IP,_POSTGRES_PORT].includes(unde
 
 }
 
-const development=false;
+const development=true;
 const _DEV_USER='jfstat';
 const _DEV_PASSWORD = '123456';
 const _DEV_IP='10.0.0.99';

@@ -26,6 +26,11 @@ function LibraryLastPlayed(props) {
       try {
         const itemData = await axios.post(`/stats/getLibraryLastPlayed`, {
           libraryid: props.LibraryId,
+        }, {
+          headers: {
+            Authorization: `Bearer ${config.token}`,
+            "Content-Type": "application/json",
+          },
         });
         setData(itemData.data);
       } catch (error) {
@@ -33,12 +38,13 @@ function LibraryLastPlayed(props) {
       }
     };
 
-    if (!data) {
-      fetchData();
-    }
 
     if (!config) {
         fetchConfig();
+    }
+    
+    if (!data && config) {
+      fetchData();
     }
 
     const intervalId = setInterval(fetchData, 60000 * 5);

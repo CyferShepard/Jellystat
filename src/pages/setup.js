@@ -21,7 +21,12 @@ function Setup() {
 
       setProcessing(true);
       await axios
-      .get("/sync/beingSync")
+      .get("/sync/beingSync", {
+        headers: {
+          Authorization: `Bearer ${config.token}`,
+          "Content-Type": "application/json",
+        },
+      })
       .then((response) => {
         if (response.status === 200) {
           // isValid = true;
@@ -55,7 +60,7 @@ function Setup() {
           errorMessage = `Unable to connect to Jellyfin Server`;
         } else if (error.response.status === 401) {
           isValid = false;
-          errorMessage = `Error ${error.response.status} Not Authorized`;
+          errorMessage = `Error ${error.response.status} Unauthorized`;
         } else if (error.response.status === 404) {
           isValid = false;
           errorMessage = `Error ${error.response.status}: The requested URL was not found.`;
@@ -87,6 +92,7 @@ function Setup() {
     axios
       .post("/api/setconfig/", formValues, {
         headers: {
+          Authorization: `Bearer ${config.token}`,
           "Content-Type": "application/json",
         },
       })
@@ -101,7 +107,20 @@ function Setup() {
         return;
       })
       .catch((error) => {
-        setsubmitButtonText("Error Saving Settings");
+        let errorMessage = "";
+        if (error.code === "ERR_NETWORK") {
+          errorMessage = `Unable to connect to Jellyfin Server`;
+        } else if (error.response.status === 401) {
+          errorMessage = `Error ${error.response.status} Unauthorized`;
+        } else if (error.response.status === 404) {
+
+          errorMessage = `Error ${error.response.status}: The requested URL was not found.`;
+        } else {
+
+          errorMessage = `Error : ${error.response.status}`;
+        }
+        console.log(error);
+        setsubmitButtonText(errorMessage);
         setProcessing(false);
       });
   }

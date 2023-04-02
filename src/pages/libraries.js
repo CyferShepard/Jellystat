@@ -27,17 +27,25 @@ function Libraries() {
     };
 
     const fetchLibraries = () => {
-      const url = `/stats/getLibraryStats`;
-      axios
-        .get(url)
-        .then((data) => {
-          console.log("data");
-          setData(data.data);
-          console.log(data);
-        })
-        .catch((error) => {
-          console.log(error);
-        });
+      if(config)
+      {
+        const url = `/stats/getLibraryStats`;
+        axios
+          .get(url, {
+            headers: {
+              Authorization: `Bearer ${config.token}`,
+              "Content-Type": "application/json",
+            },
+          })
+          .then((data) => {
+            console.log("data");
+            setData(data.data);
+            console.log(data);
+          })
+          .catch((error) => {
+            console.log(error);
+          });
+      }
     };
 
 

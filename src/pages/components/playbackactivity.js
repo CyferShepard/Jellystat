@@ -36,16 +36,7 @@ function PlaybackActivity() {
   }
 
   useEffect(() => {
-    // const fetchConfig = async () => {
-    //   try {
-    //     const newConfig = await Config();
-    //     setConfig(newConfig);
-    //   } catch (error) {
-    //     if (error.code === "ERR_NETWORK") {
-    //       console.log(error);
-    //     }
-    //   }
-    // };
+
 
     const fetchData = () => {
       
@@ -61,9 +52,6 @@ function PlaybackActivity() {
           });
     };
 
-    // if (!config) {
-    //   fetchConfig();
-    // }
 
     if (data.length === 0) {
       fetchData();
