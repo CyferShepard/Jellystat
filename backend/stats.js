@@ -320,6 +320,80 @@ const finalData = Object.values(reorganizedData);
   }
 });
 
+router.post("/getViewsByDays", async (req, res) => {
+  try {
+    const { days } = req.body;
+    let _days = days;
+    if (days=== undefined) {
+      _days = 30;
+    }
+    const { rows } = await db.query(
+      `select * from fs_watch_stats_popular_days_of_week('${_days}')`
+    );
+
+    
+const reorganizedData = {};
+
+rows.forEach((item) => {
+
+  const id = item.Library;
+  const count = item.Count;
+  const day = item.Day;
+  
+  if (!reorganizedData[id]) {
+    reorganizedData[id] = {
+      id,
+      data: []
+    };
+  }
+
+  reorganizedData[id].data.push({ x: day, y: count });
+});
+const finalData = Object.values(reorganizedData);
+    res.send(finalData);
+  } catch (error) {
+    console.log(error);
+    res.send(error);
+  }
+});
+
+
+router.post("/getViewsByHour", async (req, res) => {
+  try {
+    const { days } = req.body;
+    let _days = days;
+    if (days=== undefined) {
+      _days = 30;
+    }
+    const { rows } = await db.query(
+      `select * from fs_watch_stats_popular_hour_of_day('${_days}')`
+    );
+
+    
+const reorganizedData = {};
+
+rows.forEach((item) => {
+
+  const id = item.Library;
+  const count = item.Count;
+  const hour = item.Hour;
+  
+  if (!reorganizedData[id]) {
+    reorganizedData[id] = {
+      id,
+      data: []
+    };
+  }
+
+  reorganizedData[id].data.push({ x: hour, y: count });
+});
+const finalData = Object.values(reorganizedData);
+    res.send(finalData);
+  } catch (error) {
+    console.log(error);
+    res.send(error);
+  }
+});
 
 
 

@@ -12,7 +12,7 @@ const db = require('./db');
 const app = express();
 const PORT = process.env.PORT || 3003;
 const LISTEN_IP = '127.0.0.1';
-const JWT_SECRET = process.env.JWT_SECRET ||'my-secret-jwt-key';
+const JWT_SECRET = process.env.JWT_SECRET;
 
 if (JWT_SECRET === undefined) {
   console.log('JWT Secret cannot be undefined');

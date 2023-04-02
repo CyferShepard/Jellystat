@@ -4,14 +4,14 @@ import { ResponsiveLine } from "@nivo/line";
 
 import "../../css/stats.css";
 
-function DailyPlayStats(props) {
+function PlayStatsByHour(props) {
   const [data, setData] = useState();
   const [days, setDays] = useState(60);
   const token = localStorage.getItem("token");
 
   useEffect(() => {
     const fetchLibraries = () => {
-      const url = `/stats/getViewsOverTime`;
+      const url = `/stats/getViewsByHour`;
 
       axios
         .post(
@@ -50,19 +50,20 @@ function DailyPlayStats(props) {
 
   if (data.length === 0) {
     return (
-      <div className="statistics-widget">
-        <h1>Daily Play Count Per Library - {days} Days</h1>
+      <div className="statistics-widget small">
+        <h1>Play Count By Hour - {days} Days</h1>
 
         <h1>No Stats to display</h1>
       </div>
     );
   }
 
+  console.log(data);
+
   return (
     <div className="statistics-widget">
-      <h1>Daily Play Count Per Library - {days} Days</h1>
-
-      <div className="graph">
+      <h1>Play Count By Hour - {days} Days</h1>
+      <div className="graph small">
         <ResponsiveLine
           data={data}
           margin={{ top: 50, right: 100, bottom: 200, left: 50 }}
@@ -77,7 +78,8 @@ function DailyPlayStats(props) {
           enableGridX={false}
           enableSlices={"x"}
           yFormat=" >-.0f"
-          curve="natural"
+          curve="linear"
+          enableArea={true}
           theme={{
             axis: {
               ticks: {
@@ -156,4 +158,4 @@ function DailyPlayStats(props) {
   );
 }
 
-export default DailyPlayStats;
+export default PlayStatsByHour;

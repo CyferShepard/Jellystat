@@ -13,6 +13,7 @@ export default function Navbar() {
 
   return (
     <div className={"navbar"}>
+      <h1 style={{marginRight:"20px"}}>Jellystat</h1>
       {navData.map((item) => {
         return (
           <NavLink key={item.id} className={"navitem"} to={item.link}>

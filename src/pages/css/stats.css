@@ -1,12 +1,32 @@
-.statistics-widget
+.graph
 {
 
     height: 700px;
     color:black !important;
-    background-color:rgba(0,0,0,0.2);
+    background-color:rgba(100,100,100,0.2);
     padding:20px;
 
     border-radius:4px;
     /* text-align: center; */
 }
 
+
+
+.small
+{
+    height: 500px;
+    
+}
+
+.statistics-graphs
+{
+    display: flex;
+    justify-content: space-between;
+
+}
+
+.statistics-widget
+{
+    flex: 1;
+    /* margin-right: 20px; */
+}

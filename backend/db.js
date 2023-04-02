@@ -16,11 +16,11 @@ if([_POSTGRES_USER,_POSTGRES_PASSWORD,_POSTGRES_IP,_POSTGRES_PORT].includes(unde
 
 }
 
-const development=true;
-const _DEV_USER='jfstat';
+const development=false;
+const _DEV_USER='postgress';
 const _DEV_PASSWORD = '123456';
-const _DEV_IP='10.0.0.99';
-const _DEV_PORT = 32778;
+const _DEV_IP='localhost';
+const _DEV_PORT = 5432;
 
 const pool = new Pool({
   user: (development ? _DEV_USER: _POSTGRES_USER),
