@@ -11,7 +11,7 @@ function Login() {
   const [config, setConfig] = useState(null);
   const [formValues, setFormValues] = useState({});
   const [processing, setProcessing] = useState(false);
-  const [submitButtonText, setsubmitButtonText] = useState("Save");
+  const [submitButtonText, setsubmitButtonText] = useState("Login");
 
   function handleFormChange(event) {
     setFormValues({ ...formValues, [event.target.name]: event.target.value });
@@ -40,7 +40,7 @@ function Login() {
       .then(async (response) => {
 
         localStorage.setItem('token',response.data.token);
-        setsubmitButtonText("Settings Saved");
+        setsubmitButtonText("Success");
         setProcessing(false);
         window.location.reload();
         return;
