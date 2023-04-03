@@ -26,6 +26,13 @@
 Check out our dockerhub to run Jellystat:
 https://hub.docker.com/r/cyfershepard/jellystat
 
+## Screenshots
+
+<img src="./screenshots/Home.PNG">
+<img src="./screenshots/Users.PNG">
+<img src="./screenshots/Activity.PNG">
+<img src="./screenshots/Libraries.PNG">
+
 ## Support
 
 - Bug reports and feature requests can be submitted via [GitHub Issues](https://github.com/CyferShepard/Jellystat/issues).
