@@ -78,7 +78,7 @@ function PlayStatsByHour(props) {
           enableGridX={false}
           enableSlices={"x"}
           yFormat=" >-.0f"
-          curve="linear"
+          curve="cardinal"
           enableArea={true}
           theme={{
             axis: {
@@ -120,7 +120,7 @@ function PlayStatsByHour(props) {
             theme: "white",
           }}
           colors={{ scheme: "category10" }}
-          pointSize={10}
+          pointSize={5}
           pointColor={{ theme: "background" }}
           pointBorderWidth={2}
           pointBorderColor={{ from: "serieColor" }}

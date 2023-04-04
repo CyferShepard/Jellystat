@@ -29,7 +29,7 @@ function Libraries() {
     const fetchLibraries = () => {
       if(config)
       {
-        const url = `/stats/getLibraryStats`;
+        const url = `/stats/getLibraryCardStats`;
         axios
           .get(url, {
             headers: {

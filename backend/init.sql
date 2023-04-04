@@ -5,7 +5,7 @@
 -- Dumped from database version 15.2 (Debian 15.2-1.pgdg110+1)
 -- Dumped by pg_dump version 15.1
 
--- Started on 2023-04-02 20:11:41 UTC
+-- Started on 2023-04-04 12:49:03 UTC
 
 SET statement_timeout = 0;
 SET lock_timeout = 0;
@@ -93,7 +93,7 @@ $$;
 ALTER FUNCTION public.fs_last_user_activity(userid text) OWNER TO postgres;
 
 --
--- TOC entry 248 (class 1255 OID 49411)
+-- TOC entry 247 (class 1255 OID 49411)
 -- Name: fs_library_stats(integer, text); Type: FUNCTION; Schema: public; Owner: postgres
 --
 
@@ -325,7 +325,7 @@ $$;
 ALTER FUNCTION public.fs_user_stats(hours integer, userid text) OWNER TO postgres;
 
 --
--- TOC entry 246 (class 1255 OID 49418)
+-- TOC entry 248 (class 1255 OID 49418)
 -- Name: fs_watch_stats_over_time(integer); Type: FUNCTION; Schema: public; Owner: postgres
 --
 
@@ -334,16 +334,35 @@ CREATE FUNCTION public.fs_watch_stats_over_time(days integer) RETURNS TABLE("Dat
     AS $$
 BEGIN
     RETURN QUERY
-    SELECT 
-         DATE_TRUNC('day', a."ActivityDateInserted")::DATE AS "Date",
-        COUNT(*) AS "Count",
-        l."Name" as "Library"
-    FROM jf_playback_activity a
-    JOIN jf_library_items i ON i."Id" = a."NowPlayingItemId"
-    JOIN jf_libraries l ON i."ParentId" = l."Id"
-    WHERE a."ActivityDateInserted" BETWEEN NOW() - CAST(days || ' days' as INTERVAL) AND NOW()
-    GROUP BY l."Name", DATE_TRUNC('day', a."ActivityDateInserted")
-    ORDER BY "Date";
+   SELECT 
+    dates."Date",
+    COALESCE(counts."Count", 0) AS "Count",
+    l."Name" as "Library"
+FROM 
+    (SELECT generate_series(
+            DATE_TRUNC('day', NOW() - CAST(days || ' days' as INTERVAL)),
+            DATE_TRUNC('day', NOW()),
+            '1 day')::DATE AS "Date"
+    ) dates
+    CROSS JOIN jf_libraries l
+    LEFT JOIN 
+        (SELECT 
+             DATE_TRUNC('day', a."ActivityDateInserted")::DATE AS "Date",
+             COUNT(*) AS "Count",
+             l."Name" as "Library"
+         FROM 
+             jf_playback_activity a
+             JOIN jf_library_items i ON i."Id" = a."NowPlayingItemId"
+             JOIN jf_libraries l ON i."ParentId" = l."Id"
+         WHERE 
+             a."ActivityDateInserted" BETWEEN NOW() - CAST(days || ' days' as INTERVAL) AND NOW()
+         GROUP BY 
+             l."Name", DATE_TRUNC('day', a."ActivityDateInserted")
+        ) counts 
+        ON counts."Date" = dates."Date" AND counts."Library" = l."Name"
+ORDER BY 
+    "Date", "Library";
+
 END;
 $$;
 
@@ -351,7 +370,7 @@ $$;
 ALTER FUNCTION public.fs_watch_stats_over_time(days integer) OWNER TO postgres;
 
 --
--- TOC entry 247 (class 1255 OID 57644)
+-- TOC entry 246 (class 1255 OID 57644)
 -- Name: fs_watch_stats_popular_days_of_week(integer); Type: FUNCTION; Schema: public; Owner: postgres
 --
 
@@ -398,23 +417,28 @@ CREATE FUNCTION public.fs_watch_stats_popular_hour_of_day(days integer) RETURNS 
     AS $$
 BEGIN
   RETURN QUERY
+ SELECT 
+  h."Hour",
+  COUNT(a."Id") ::integer AS "Count",
+  l."Name" AS "Library"
+
+FROM (
+  SELECT generate_series(0, 23) AS "Hour"
+) h
+CROSS JOIN jf_libraries l
+LEFT JOIN jf_library_items i ON i."ParentId" = l."Id"
+LEFT JOIN (
   SELECT 
-    DATE_PART('hour', hl."Hour")::INTEGER AS "Hour",
-    COALESCE(CAST(COUNT(a."NowPlayingItemId") AS INTEGER), 0) AS "Count",
-    COALESCE(l."Name", hl."Name") AS "Library"
-  FROM (
-    SELECT 
-      DATE_TRUNC('week', NOW()) + INTERVAL '1 hour' * n AS "Hour",
-      l."Name"
-    FROM generate_series(0, 167) n
-    CROSS JOIN jf_libraries l
-  ) hl
-  LEFT JOIN jf_playback_activity a ON DATE_TRUNC('hour', a."ActivityDateInserted") = hl."Hour"
-  LEFT JOIN jf_library_items i ON i."Id" = a."NowPlayingItemId"
-  LEFT JOIN jf_libraries l ON i."ParentId" = l."Id"
-  WHERE hl."Hour" BETWEEN NOW() - CAST(days || ' days' as INTERVAL) AND NOW()
-  GROUP BY DATE_PART('hour', hl."Hour"), COALESCE(l."Name", hl."Name")
-  ORDER BY DATE_PART('hour', hl."Hour"), COALESCE(l."Name", hl."Name");
+    "NowPlayingItemId",
+    DATE_PART('hour', "ActivityDateInserted") AS "Hour",
+    "Id"
+  FROM jf_playback_activity
+  WHERE "ActivityDateInserted" BETWEEN NOW() - CAST(days || ' days' AS INTERVAL) AND NOW()
+) a ON a."NowPlayingItemId" = i."Id" AND a."Hour"::integer = h."Hour"
+WHERE l."Id" IN (SELECT "Id" FROM jf_libraries)
+GROUP BY h."Hour", l."Name"
+ORDER BY l."Name", h."Hour";
+
 END;
 $$;
 
@@ -850,7 +874,7 @@ ALTER TABLE ONLY public.jf_library_items
 COMMENT ON CONSTRAINT jf_library_items_fkey ON public.jf_library_items IS 'jf_library';
 
 
--- Completed on 2023-04-02 20:11:41 UTC
+-- Completed on 2023-04-04 12:49:04 UTC
 
 --
 -- PostgreSQL database dump complete

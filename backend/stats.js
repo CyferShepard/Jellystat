@@ -258,7 +258,7 @@ router.post("/getGlobalLibraryStats", async (req, res) => {
 });
 
 
-router.get("/getLibraryStats", async (req, res) => {
+router.get("/getLibraryCardStats", async (req, res) => {
   try {
     const { rows } = await db.query("select * from js_library_stats_overview");
     res.send(rows);

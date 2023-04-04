@@ -77,7 +77,8 @@ function DailyPlayStats(props) {
           enableGridX={false}
           enableSlices={"x"}
           yFormat=" >-.0f"
-          curve="natural"
+          curve="cardinal"
+          enableArea={true}
           theme={{
             axis: {
               ticks: {

@@ -76,7 +76,7 @@ function PlayStatsByDay(props) {
           enableGridX={false}
           enableSlices={"x"}
           yFormat=" >-.0f"
-          curve="natural"
+          curve="cardinal"
           enableArea={true}
           theme={{
             axis: {
@@ -118,7 +118,7 @@ function PlayStatsByDay(props) {
             theme: "white",
           }}
           colors={{ scheme: "category10" }}
-          pointSize={10}
+          pointSize={5}
           pointColor={{ theme: "background" }}
           pointBorderWidth={2}
           pointBorderColor={{ from: "serieColor" }}

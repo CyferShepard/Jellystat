@@ -49,21 +49,6 @@ router.post("/setconfig", async (req, res) => {
   console.log(`ENDPOINT CALLED: /setconfig: `);
 });
 
-// router.get("/getAllFromJellyfin", async (req, res) => {
-//   const sync = require("./sync");
-//   const { rows } = await db.query('SELECT * FROM app_config where "ID"=1');
-//   if (rows[0].JF_HOST === null || rows[0].JF_API_KEY === null) {
-//     res.send({ error: "Config Details Not Found" });
-//     return;
-//   }
-
-//   const _sync = new sync(rows[0].JF_HOST, rows[0].JF_API_KEY);
-//   const results = await _sync.getAllItems();
-
-//   res.send(results);
-
-//   // console.log(`ENDPOINT CALLED: /getAllFromJellyfin: `);
-// });
 
 router.get("/getLibraries", async (req, res) => {
   try{
