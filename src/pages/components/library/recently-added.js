@@ -21,23 +21,39 @@ function RecentlyPlayed(props) {
             console.log(error);
         }
       };
+      
+    const fetchAdmin = async () => {
+      try {
+        let url=`/api/getAdminUsers`;
+        const adminData = await axios.get(url, {
+          headers: {
+            Authorization: `Bearer ${config.token}`,
+            "Content-Type": "application/json",
+          },
+        });
+         return adminData.data[0].Id;
+        // setData(itemData.data);
+      } catch (error) {
+        console.log(error);
+      }
+    };
 
     const fetchData = async () => {
       try {
-        let url=`${config.hostUrl}/users/5f63950a2339462196eb8cead70cae7e/Items/latest?parentId=${props.LibraryId}`;
+        let adminId=await fetchAdmin();
+        let url=`${config.hostUrl}/users/${adminId}/Items/latest?parentId=${props.LibraryId}`;
         const itemData = await axios.get(url, {
           headers: {
             "X-MediaBrowser-Token": config.apiKey,
           },
         });
-        console.log(itemData);
         setData(itemData.data);
       } catch (error) {
         console.log(error);
       }
     };
 
-    if (!data) {
+    if (!data && config) {
       fetchData();
     }
 
@@ -49,7 +65,6 @@ function RecentlyPlayed(props) {
     return () => clearInterval(intervalId);
   }, [data,config, props.LibraryId]);
 
-  console.log(data);
 
   if (!data || !config) {
     return <></>;

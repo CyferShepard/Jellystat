@@ -1,5 +1,6 @@
 // api.js
 const express = require("express");
+const axios = require("axios");
 const ActivityMonitor=require('./watchdog/ActivityMonitor');
 const db = require("./db");
 
@@ -115,6 +116,28 @@ router.get("/getHistory", async (req, res) => {
 
 });
 
+router.get("/getAdminUsers", async (req, res) => {
+  try {
+    const { rows:config } = await db.query('SELECT * FROM app_config where "ID"=1');
+    const url = `${config[0].JF_HOST}/Users`;
+    const response = await axios.get(url, {
+      headers: {
+        "X-MediaBrowser-Token": config[0].JF_API_KEY,
+      },
+    });
+    const adminUser = await response.data.filter(
+      (user) => user.Policy.IsAdministrator === true
+    );
+    res.send(adminUser);
+  } catch (error) {
+    console.log( error);
+    res.send(error);
+    
+  }
+
+});
+
+
 router.get("/runWatchdog", async (req, res) => {
   let message='Watchdog Started';
   if(!process.env.WatchdogRunning )
@@ -128,5 +151,8 @@ router.get("/runWatchdog", async (req, res) => {
     res.send(message);
   }
 });
+
+
+
 
 module.exports = router;

@@ -51,7 +51,6 @@ function LibraryLastPlayed(props) {
     return () => clearInterval(intervalId);
   }, [data,config, props.LibraryId]);
 
-  console.log(data);
 
   if (!data || !config) {
     return <></>;
@@ -62,7 +61,7 @@ function LibraryLastPlayed(props) {
         <h1>Last Watched</h1>
         <div className="last-played-container">
         {data.map((item) => (
-                    <ItemCardInfo data={item} base_url={config.hostUrl} key={item.Id+item.EpisodeNumber}/>
+                    <ItemCardInfo data={item} base_url={config.hostUrl} key={item.Id+item.SeasonNumber+item.EpisodeNumber}/>
           ))}
 
         </div>

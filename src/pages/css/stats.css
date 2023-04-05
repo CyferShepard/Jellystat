@@ -4,7 +4,7 @@
     height: 700px;
     color:black !important;
     background-color:rgba(100,100,100,0.2);
-    padding:20px;
+    padding:10px;
 
     border-radius:4px;
     /* text-align: center; */
@@ -22,11 +22,36 @@
 {
     display: flex;
     justify-content: space-between;
+    margin-bottom: 20px;
 
+
+}
+
+.main-widget
+{
+    flex: 1;
 }
 
 .statistics-widget
 {
     flex: 1;
+    max-width: 49.5%;
     /* margin-right: 20px; */
 }
+
+.chart-canvas {
+    width: 100%;
+    height: 400px;
+  }
+  
+  @media (min-width: 768px) {
+    .chart-canvas {
+      height: 500px;
+    }
+  }
+  
+  @media (min-width: 992px) {
+    .chart-canvas {
+      height: 600px;
+    }
+  }

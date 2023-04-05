@@ -5,6 +5,8 @@ import AccountCircleFillIcon from "remixicon-react/AccountCircleFillIcon";
 import PlayFillIcon from "remixicon-react/PlayFillIcon";
 import PauseFillIcon from "remixicon-react/PauseFillIcon";
 
+import { clientData } from "../../../lib/devices";
+
 function ticksToTimeString(ticks) {
   // Convert ticks to seconds
   const seconds = Math.floor(ticks / 10000000);
@@ -37,24 +39,18 @@ function sessionCard(props) {
               src={
                 props.data.base_url +
                 "/web/assets/img/devices/" +
-                (props.data.session.DeviceName.toLowerCase().includes("ios") ||
-                props.data.session.Client.toLowerCase().includes("ios")
-                  ? "ios"
-                  : props.data.session.DeviceName.toLowerCase().includes(
-                      "android"
-                    ) ||
-                    props.data.session.Client.toLowerCase().includes("android")
-                  ? "android"
-                  : props.data.session.DeviceName.replace(
-                      " ",
-                      ""
-                    ).toLowerCase()) +
+                +
+                (props.data.session.Client.toLowerCase().includes("web") ? 
+                ( clientData.find(item => props.data.session.DeviceName.toLowerCase().includes(item)) || "other")
+                :
+                ( clientData.find(item => props.data.session.Client.toLowerCase().includes(item)) || "other")
+                )
+                +
                 ".svg"
               }
               alt=""
             ></img>
             <div className="card-device-name">
-              {" "}
               {props.data.session.DeviceName}
             </div>
             <div className="card-client">
@@ -133,19 +129,14 @@ function sessionCard(props) {
             className="card-device-image"
             src={
               props.data.base_url +
-              "/web/assets/img/devices/" +
-              (props.data.session.DeviceName.toLowerCase().includes("ios") ||
-              props.data.session.Client.toLowerCase().includes("ios")
-                ? "ios"
-                : props.data.session.DeviceName.toLowerCase().includes(
-                    "android"
-                  ) ||
-                  props.data.session.Client.toLowerCase().includes("android")
-                ? "android"
-                : props.data.session.DeviceName.replace(
-                    " ",
-                    ""
-                  ).toLowerCase()) +
+              "/web/assets/img/devices/" 
+              +
+              (props.data.session.Client.toLowerCase().includes("web") ? 
+              ( clientData.find(item => props.data.session.DeviceName.toLowerCase().includes(item)) || "other")
+              :
+              ( clientData.find(item => props.data.session.Client.toLowerCase().includes(item)) || "other")
+              )
+              +
               ".svg"
             }
             alt=""

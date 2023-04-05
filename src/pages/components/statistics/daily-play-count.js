@@ -50,7 +50,7 @@ function DailyPlayStats(props) {
 
   if (data.length === 0) {
     return (
-      <div className="statistics-widget">
+      <div className="main-widget">
         <h1>Daily Play Count Per Library - {days} Days</h1>
 
         <h1>No Stats to display</h1>
@@ -59,17 +59,17 @@ function DailyPlayStats(props) {
   }
 
   return (
-    <div className="statistics-widget">
-      <h1>Daily Play Count Per Library - {days} Days</h1>
+    <div className="main-widget">
+      <h1>Daily Play Count Per Library - Last {days} Days</h1>
 
       <div className="graph">
         <ResponsiveLine
           data={data}
-          margin={{ top: 50, right: 100, bottom: 200, left: 50 }}
+          margin={{ top: 50, right: 40, bottom: 100, left: 50 }}
           xScale={{ type: "point" }}
           yScale={{
             type: "linear",
-            min: "auto",
+            min: 0,
             max: "auto",
             stacked: false,
             reverse: false,

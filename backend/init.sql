@@ -5,7 +5,7 @@
 -- Dumped from database version 15.2 (Debian 15.2-1.pgdg110+1)
 -- Dumped by pg_dump version 15.1
 
--- Started on 2023-04-04 12:49:03 UTC
+-- Started on 2023-04-05 21:14:53 UTC
 
 SET statement_timeout = 0;
 SET lock_timeout = 0;
@@ -19,7 +19,7 @@ SET client_min_messages = warning;
 SET row_security = off;
 
 --
--- TOC entry 254 (class 1255 OID 49412)
+-- TOC entry 253 (class 1255 OID 49412)
 -- Name: fs_last_library_activity(text); Type: FUNCTION; Schema: public; Owner: postgres
 --
 
@@ -57,7 +57,7 @@ $$;
 ALTER FUNCTION public.fs_last_library_activity(libraryid text) OWNER TO postgres;
 
 --
--- TOC entry 250 (class 1255 OID 49383)
+-- TOC entry 249 (class 1255 OID 49383)
 -- Name: fs_last_user_activity(text); Type: FUNCTION; Schema: public; Owner: postgres
 --
 
@@ -93,7 +93,7 @@ $$;
 ALTER FUNCTION public.fs_last_user_activity(userid text) OWNER TO postgres;
 
 --
--- TOC entry 247 (class 1255 OID 49411)
+-- TOC entry 246 (class 1255 OID 49411)
 -- Name: fs_library_stats(integer, text); Type: FUNCTION; Schema: public; Owner: postgres
 --
 
@@ -145,7 +145,7 @@ $$;
 ALTER FUNCTION public.fs_most_active_user(days integer) OWNER TO postgres;
 
 --
--- TOC entry 252 (class 1255 OID 49386)
+-- TOC entry 251 (class 1255 OID 49386)
 -- Name: fs_most_played_items(integer, text); Type: FUNCTION; Schema: public; Owner: postgres
 --
 
@@ -186,7 +186,7 @@ $$;
 ALTER FUNCTION public.fs_most_played_items(days integer, itemtype text) OWNER TO postgres;
 
 --
--- TOC entry 253 (class 1255 OID 49394)
+-- TOC entry 252 (class 1255 OID 49394)
 -- Name: fs_most_popular_items(integer, text); Type: FUNCTION; Schema: public; Owner: postgres
 --
 
@@ -256,7 +256,7 @@ $$;
 ALTER FUNCTION public.fs_most_used_clients(days integer) OWNER TO postgres;
 
 --
--- TOC entry 251 (class 1255 OID 49385)
+-- TOC entry 250 (class 1255 OID 49385)
 -- Name: fs_most_viewed_libraries(integer); Type: FUNCTION; Schema: public; Owner: postgres
 --
 
@@ -300,7 +300,7 @@ $$;
 ALTER FUNCTION public.fs_most_viewed_libraries(days integer) OWNER TO postgres;
 
 --
--- TOC entry 249 (class 1255 OID 49364)
+-- TOC entry 248 (class 1255 OID 49364)
 -- Name: fs_user_stats(integer, text); Type: FUNCTION; Schema: public; Owner: postgres
 --
 
@@ -325,7 +325,7 @@ $$;
 ALTER FUNCTION public.fs_user_stats(hours integer, userid text) OWNER TO postgres;
 
 --
--- TOC entry 248 (class 1255 OID 49418)
+-- TOC entry 247 (class 1255 OID 49418)
 -- Name: fs_watch_stats_over_time(integer); Type: FUNCTION; Schema: public; Owner: postgres
 --
 
@@ -370,7 +370,7 @@ $$;
 ALTER FUNCTION public.fs_watch_stats_over_time(days integer) OWNER TO postgres;
 
 --
--- TOC entry 246 (class 1255 OID 57644)
+-- TOC entry 254 (class 1255 OID 57644)
 -- Name: fs_watch_stats_popular_days_of_week(integer); Type: FUNCTION; Schema: public; Owner: postgres
 --
 
@@ -379,27 +379,49 @@ CREATE FUNCTION public.fs_watch_stats_popular_days_of_week(days integer) RETURNS
     AS $$
 BEGIN
 RETURN QUERY
+WITH library_days AS (
+  SELECT
+    l."Name" AS "Library",
+    d.day_of_week,
+    d.day_name
+  FROM
+    jf_libraries l,
+    (SELECT 0 AS "day_of_week", 'Sunday' AS "day_name" UNION ALL
+     SELECT 1 AS "day_of_week", 'Monday' AS "day_name" UNION ALL
+     SELECT 2 AS "day_of_week", 'Tuesday' AS "day_name" UNION ALL
+     SELECT 3 AS "day_of_week", 'Wednesday' AS "day_name" UNION ALL
+     SELECT 4 AS "day_of_week", 'Thursday' AS "day_name" UNION ALL
+     SELECT 5 AS "day_of_week", 'Friday' AS "day_name" UNION ALL
+     SELECT 6 AS "day_of_week", 'Saturday' AS "day_name"
+    ) d
+)
 SELECT 
-  TO_CHAR(d."Day", 'Day') AS "Day",
-  COUNT(a."NowPlayingItemId") AS "Count",
-  COALESCE(l."Name", 'Unknown') AS "Library"
-FROM (
-  SELECT 
-    DATE_TRUNC('week', NOW()) + n * INTERVAL '1 day' AS "Day"
-  FROM generate_series(0, 6) n
-) d
-CROSS JOIN jf_libraries l
-LEFT JOIN (
-  SELECT 
-    DATE_TRUNC('day', "ActivityDateInserted") AS "Day",
-    "NowPlayingItemId",
-    i."ParentId"
-  FROM jf_playback_activity a
-  JOIN jf_library_items i ON i."Id" = a."NowPlayingItemId"
-  WHERE a."ActivityDateInserted" BETWEEN NOW() - CAST(days || ' days' as INTERVAL) AND NOW()
-) a ON d."Day" = a."Day" AND l."Id" = a."ParentId"
-GROUP BY d."Day", l."Name"
-ORDER BY d."Day";
+    library_days.day_name AS "Day",
+	COALESCE(SUM(counts."Count"), 0)::bigint AS "Count",
+    library_days."Library" AS "Library"
+
+FROM 
+    library_days
+    LEFT JOIN 
+        (SELECT 
+             DATE_TRUNC('day', a."ActivityDateInserted")::DATE AS "Date",
+             COUNT(*) AS "Count",
+             EXTRACT(DOW FROM a."ActivityDateInserted") AS "DOW",
+             l."Name" AS "Library"
+         FROM 
+             jf_playback_activity a
+             JOIN jf_library_items i ON i."Id" = a."NowPlayingItemId"
+             JOIN jf_libraries l ON i."ParentId" = l."Id"
+         WHERE 
+             a."ActivityDateInserted" BETWEEN NOW() - CAST(days || ' days' as INTERVAL) AND NOW()
+         GROUP BY 
+             l."Name", EXTRACT(DOW FROM a."ActivityDateInserted"), DATE_TRUNC('day', a."ActivityDateInserted")
+        ) counts 
+        ON counts."DOW" = library_days.day_of_week AND counts."Library" = library_days."Library"
+GROUP BY
+    library_days.day_name, library_days.day_of_week, library_days."Library"
+ORDER BY 
+    library_days.day_of_week, library_days."Library";
 
 END;
 $$;
@@ -874,7 +896,7 @@ ALTER TABLE ONLY public.jf_library_items
 COMMENT ON CONSTRAINT jf_library_items_fkey ON public.jf_library_items IS 'jf_library';
 
 
--- Completed on 2023-04-04 12:49:04 UTC
+-- Completed on 2023-04-05 21:14:58 UTC
 
 --
 -- PostgreSQL database dump complete
