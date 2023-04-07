@@ -6,13 +6,19 @@ import "../../css/settings.css";
 
 export default function LibrarySync() {
   const [processing, setProcessing] = useState(false);
+  const token = localStorage.getItem('token');
     async function beginSync() {
 
 
         setProcessing(true);
 
         await axios
-        .get("/sync/beingSync")
+        .get("/sync/beingSync", {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+        })
         .then((response) => {
           if (response.status === 200) {
             // isValid = true;
