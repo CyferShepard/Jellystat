@@ -1,5 +1,9 @@
 import React, { useState } from "react";
 import axios from "axios";
+import  Button  from "react-bootstrap/Button";
+import Form from 'react-bootstrap/Form';
+import Row from 'react-bootstrap/Row';
+import Col from 'react-bootstrap/Col';
 
 
 import "../../css/settings.css";
@@ -39,7 +43,18 @@ export default function LibrarySync() {
     
       return (
         <div className="settings-form">
-          <button style={{backgroundColor: !processing? '#2196f3':'darkgrey',cursor: !processing? 'pointer':'default'  }} disabled={processing} onClick={handleClick}>Run Sync</button>
+          <h1 className="my-2">Tasks</h1>
+          <Row className="mb-3" controlId="form_task_sync">
+
+            <Form.Label column sm="2">
+              Syncronize with Jellyfin
+            </Form.Label>
+
+            <Col sm="10">
+            <Button variant={!processing ? "outline-primary" : "outline-light"} disabled={processing} onClick={handleClick}>Run Sync</Button>
+            </Col>
+          </Row>
+         
         </div>
       );
 

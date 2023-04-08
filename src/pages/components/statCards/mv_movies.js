@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
-import ItemImage from "./ItemImageComponent";
+
 import Config from "../../../lib/config";
+import Col from 'react-bootstrap/Col';
 
 
-
-import StatComponent from "./statsComponent";
+import ItemStatComponent from "./ItemStatComponent";
 
 
 function MVMusic(props) {
@@ -74,21 +74,9 @@ function MVMusic(props) {
 
 
   return (
-    <div className="stats-card"
-    style={{
-        backgroundImage: `url(${
-         config.hostUrl +
-          "/Items/" +
-          (data[0].Id) +
-          "/Images/Backdrop/?fillWidth=300&quality=10"
-        })`}}
-    >
-
-    <ItemImage data={data[0]} base_url={config.hostUrl}/>
-    <StatComponent data={data} heading={"MOST VIEWED MOVIES"} units={"Plays"}/>
-
-
-    </div>
+    <Col>
+    <ItemStatComponent base_url={config.hostUrl} data={data} heading={"MOST VIEWED MOVIES"} units={"Plays"}/>
+    </Col>
   );
 }
 

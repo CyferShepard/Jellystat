@@ -1,3 +1,8 @@
+.watch-stats
+{
+  margin-top: 10px;
+}
+
 .graph
 {
 
@@ -32,11 +37,20 @@
     flex: 1;
 }
 
+.main-widget h1
+{
+  margin-bottom: 10px !important;
+}
+
 .statistics-widget
 {
     flex: 1;
     max-width: 49.5%;
     /* margin-right: 20px; */
+}
+
+.statistics-widget h1{
+  margin-bottom: 10px !important;
 }
 
 .chart-canvas {

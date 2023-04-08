@@ -1,10 +1,10 @@
 .navbar {
-  display: flex;
+  /* display: flex;
   justify-content: flex-end;
-  align-items: center;
+  align-items: center; */
   background-color: #5a2da5;
   /* background: linear-gradient(to right, #AA5CC3,#00A4DC); */
-  height: 50px;
+  /* height: 50px; */
   /* position: sticky;
   top: 0; */
 }
@@ -32,6 +32,7 @@
   background-color: rgba(0,0,0,0.6);
   transition: background-color 0.2s ease-in-out;
 }
+
 
 .navitem:hover {
   /* background-color: #326aa541; */

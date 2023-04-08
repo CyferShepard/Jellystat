@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from "react";
-import ItemImage from "./ItemImageComponent";
+
 import axios from "axios";
 import Config from "../../../lib/config";
+import Col from 'react-bootstrap/Col';
 
-
-import StatComponent from "./statsComponent";
+import ItemStatComponent from "./ItemStatComponent";
 
 
 
@@ -70,21 +70,9 @@ function MPMusic(props) {
 
 
   return (
-    <div className="stats-card"
-    style={{
-        backgroundImage: `url(${
-         config.hostUrl +
-          "/Items/" +
-          (data[0].Id) +
-          "/Images/Backdrop/?fillWidth=300&quality=10"
-        })`}}
-    >
-    
-    <ItemImage data={data[0]} base_url={config.hostUrl}/>
-    <StatComponent data={data} heading={"MOST POPULAR MUSIC"} units={"Users"}/>
-    
-
-    </div>
+    <Col>
+    <ItemStatComponent  base_url={config.hostUrl} data={data} heading={"MOST POPULAR MUSIC"} units={"Users"}/>
+    </Col>
   );
 }
 

@@ -141,7 +141,7 @@ function Users() {
   return (
     <div className="Users">
       <div className="Heading">
-      <h1>All Users</h1>
+      <h1 >All Users</h1>
       <div className="pagination-range">
           <div className="header">Items</div>
           <select value={itemCount} onChange={(event) => {setItemCount(event.target.value); setCurrentPage(1);}}>

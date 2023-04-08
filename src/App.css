@@ -17,14 +17,15 @@ main{
 
 body
 {
-  background-color: #1e1c22;
+  background-color: #1e1c22 !important;
   /* background-color: #17151a; */
+  color: white;
 }
 
 h1{
   color: white;
-  font-weight: lighter;
-  margin: 0;
+  font-weight: lighter !important;
+  margin: 0 !important;
     margin-top: 0.5em;
     margin-bottom: 0.5em;
 }

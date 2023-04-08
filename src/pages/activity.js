@@ -83,7 +83,7 @@ function Activity() {
   }
 
   return (
-    <div>
+    <div className="Activity">
       <div className="Heading">
       <h1>Activity</h1>
       <div className="pagination-range">

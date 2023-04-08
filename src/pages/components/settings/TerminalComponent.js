@@ -32,8 +32,7 @@ const TerminalComponent = () => {
   }, [messages]);
 
   return (
-    <div>
-      <h1>Terminal</h1>
+    <div className='my-4'>
       <div className="console-container">
         {messages.map((message, index) => (
           <div key={index} className="console-message">

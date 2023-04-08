@@ -67,7 +67,7 @@ function Libraries() {
 
   return (
     <div className="libraries">
-      <h1>Libraries</h1>
+      <h1 className="py-4">Libraries</h1>
       <div className="libraries-container">
       {data &&
           data.map((item) => (

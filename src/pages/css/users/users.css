@@ -3,6 +3,7 @@
     color: white;
     padding-right: 20px;
     padding-bottom: 50px;
+    margin-top: 10px;
 }
 
 .user-activity-table {
@@ -87,6 +88,7 @@ td:first-child {
     align-items: center;
     justify-content: flex-end;
     margin-top: 1rem;
+    color: white;
   }
   
   .page-btn {
@@ -126,7 +128,6 @@ td:first-child {
   font-size: 1.2em;
   align-self: flex-end;
   justify-content: space-between;
-  margin-bottom: 0.9em;
 }
 
 .pagination-range select

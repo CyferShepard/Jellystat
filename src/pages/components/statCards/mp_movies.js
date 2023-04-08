@@ -1,10 +1,12 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
-import ItemImage from "./ItemImageComponent";
+import Col from 'react-bootstrap/Col';
 import Config from "../../../lib/config";
 
 
-import StatComponent from "./statsComponent";
+
+import ItemStatComponent from "./ItemStatComponent";
+import Loading from "../general/loading";
 
 function MPMovies(props) {
   const [data, setData] = useState();
@@ -68,21 +70,15 @@ function MPMovies(props) {
     return  <></>;
   }
 
-  return (
-    <div className="stats-card"
-    style={{
-        backgroundImage: `url(${
-         config.hostUrl +
-          "/Items/" +
-          (data[0].Id) +
-          "/Images/Backdrop/?fillWidth=300&quality=10"
-        })`}}
-    >
-    
-    <ItemImage data={data[0]} base_url={config.hostUrl}/>
-    <StatComponent data={data} heading={"MOST POPULAR MOVIES"} units={"Users"}/>
+  if(!config)
+  {
+    return <Loading/>;
+  }
 
-    </div>
+  return (
+  <Col>
+  <ItemStatComponent base_url={config.hostUrl} data={data} heading={"MOST POPULAR MOVIES"} units={"Users"}/>
+  </Col>
   );
 }
 
