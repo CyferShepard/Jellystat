@@ -1,6 +1,4 @@
-// db.js
 const { Pool } = require('pg');
-const fs = require('fs');
 const pgp = require("pg-promise")();
 
 
@@ -11,23 +9,17 @@ const _POSTGRES_PORT = process.env.POSTGRES_PORT;
 
 if([_POSTGRES_USER,_POSTGRES_PASSWORD,_POSTGRES_IP,_POSTGRES_PORT].includes(undefined))
 {
-  console.log('Postgres details not defined');
-  //return;
+  console.log('Error: Postgres details not defined');
+  return;
 
 }
 
-const development=false;
-const _DEV_USER='postgress';
-const _DEV_PASSWORD = '123456';
-const _DEV_IP='localhost';
-const _DEV_PORT = 5432;
-
 const pool = new Pool({
-  user: (development ? _DEV_USER: _POSTGRES_USER),
-  host:(development ? _DEV_IP: _POSTGRES_IP),
+  user: (_POSTGRES_USER),
+  host:(_POSTGRES_IP),
   database: 'jfstat',
-  password:(development ? _DEV_PASSWORD: _POSTGRES_PASSWORD),
-  port: (development ? _DEV_PORT: _POSTGRES_PORT),
+  password:(_POSTGRES_PASSWORD),
+  port: (_POSTGRES_PORT),
 });
 
 pool.on('error', (err, client) => {
@@ -36,51 +28,6 @@ pool.on('error', (err, client) => {
   //process.exit(-1);
 });
 
-async function initDB()
-{
-  const checkPool = new Pool({
-    user: (development ? _DEV_USER: _POSTGRES_USER),
-    host:(development ? _DEV_IP: _POSTGRES_IP),
-    database: 'postgres',
-    password:(development ? _DEV_PASSWORD: _POSTGRES_PASSWORD),
-    port: (development ? _DEV_PORT: _POSTGRES_PORT),
-  });
-  
-  checkPool.connect((err, client, done) => {
-  if (err) {
-    console.error('Error connecting to PostgreSQL database', err.stack);
-    return;
-  }
-
-  client.query("SELECT 1 FROM pg_database WHERE datname = 'jfstat'", (err, res) => {
-    if (err) {
-      console.error('Error executing query to check if database exists', err.stack);
-      //return;
-    }
-
-    if (res.rows.length === 0) {
-      const dbName = 'jfstat';
-      const sql = fs.readFileSync('./init.sql').toString();
-      client.query(`CREATE DATABASE ${dbName}`, (err, res) => {
-        if (err) throw err;
-        console.log(`Database ${dbName} created`);
-        done();
-      });
-
-      checkPool.end(() => {
-        pool.query(sql, (err, res) => {
-            if (err) throw err;
-            console.log('Database and table created');
-          });
-      });
-    } else {
-      console.log('Database exists');
-      done();
-    }
-  });
-});
-
-}
 async function deleteBulk(table_name, data) {
   const client = await pool.connect();
   let result='SUCCESS';
@@ -160,5 +107,5 @@ module.exports = {
   query:query,
   deleteBulk: deleteBulk,
   insertBulk: insertBulk,
-  initDB: initDB,
+  // initDB: initDB,
 };
