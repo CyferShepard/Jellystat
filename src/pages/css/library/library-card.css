@@ -1,27 +1,35 @@
+.lib-card{
+    color: white;
+    max-width: 400px;
 
-.library-card
+}
+
+.card-label
 {
-    /* border: solid 1px rgb(87, 87, 87); */
-    border-radius: 4px;
-    width: 400px;
+    color: #00A4DC;
+}
 
-    /* width: 800px; */
-
-    margin-bottom: 40px;
- 
+.card-row .col
+{
+    margin: 10px;
 }
 
 
+.library-card-image
+{
+    max-height: 170px;
+    overflow: hidden;
+
+}
 .library-card-banner
 {
-    width: 400px;
-    height: 170px;
+    object-fit: cover;
     background-color: black;
     background-repeat: no-repeat;
     background-size: cover;
-
-    border-radius: 4px 4px 0 0;
     transition: all 0.2s ease-in-out;
+
+    
 }
 
 .library-card-banner:hover
@@ -31,25 +39,7 @@
 
 .library-card-details
 {
-    background-color: rgb(100, 100, 100,0.2);
-    border-radius:0 0 4px 4px ;
-}
-
-.library-card-details div
-{
-    display: flex;
-    justify-content: space-between;
-    width: 100%;
-}
-
-.library-card-details div .label
-{
-    color: #00A4DC;
-}
-
-.library-card-details div p
-{
-    margin: 10px;
+    background-color: rgb(100, 100, 100,0.2) !important;
 }
 
 

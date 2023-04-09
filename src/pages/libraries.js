@@ -7,6 +7,9 @@ import "./css/library/libraries.css";
 
 import Loading from "./components/general/loading";
 import LibraryCard from "./components/library/library-card";
+import { CardGroup, Container } from "react-bootstrap";
+import Row from 'react-bootstrap/Row';
+import Col from 'react-bootstrap/Col';
 
 
 
@@ -68,14 +71,16 @@ function Libraries() {
   return (
     <div className="libraries">
       <h1 className="py-4">Libraries</h1>
-      <div className="libraries-container">
+
+      <Row xs={1} md={2} lg={4} className="g-4">
       {data &&
           data.map((item) => (
-
-              <LibraryCard key={item.Id} data={item} base_url={config.hostUrl}/>
+    
+                <LibraryCard key={item.Id} data={item} base_url={config.hostUrl}/>
+     
 
             ))}
-      </div>
+      </Row>
       
     </div>
   );

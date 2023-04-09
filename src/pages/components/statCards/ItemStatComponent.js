@@ -26,7 +26,7 @@ function ItemStatComponent(props) {
 
 
   return (
-    <Card  style={cardStyle}>
+    <Card  style={cardStyle} className="stat-card">
       <div  style={cardBgStyle} >
 
       

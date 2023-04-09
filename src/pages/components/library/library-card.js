@@ -2,6 +2,10 @@ import React from "react";
 import { Link } from "react-router-dom";
 import "../../css/library/library-card.css";
 
+import Card from 'react-bootstrap/Card';
+import Row from 'react-bootstrap/Row';
+import Col from 'react-bootstrap/Col';
+
 function LibraryCard(props) {
 
   function formatTotalWatchTime(seconds) {
@@ -43,71 +47,65 @@ function LibraryCard(props) {
     return `${formattedTime}ago`;
   }
   return (
-    <div className="library-card">
+      <Card className="bg-transparent lib-card border-0">
+          <Link to={`/libraries/${props.data.Id}`}>
+            <div className="library-card-image">
+              <Card.Img
+                  variant="top"
+                  className="library-card-banner"
+                  src={props.base_url + "/Items/" + props.data.Id + "/Images/Primary/?fillWidth=400&quality=90"}
+              />
+            </div>
+          </Link>
 
-       <Link to={`/libraries/${props.data.Id}`}>
-            <div
-              className="library-card-banner"
-              style={{
-                backgroundImage: `url(${
-                  props.base_url +
-                  "/Items/" +
-                  props.data.Id +
-                  "/Images/Primary/?fillWidth=400&quality=90"
-                })`,
-              }}
-            />
-      </Link>
+          <Card.Body className="library-card-details">
+            <Row className="space-between-end card-row">
+              <Col className="card-label">Library</Col>
+              <Col className="text-end">{props.data.Name}</Col>
+            </Row>
 
-      <div className="library-card-details">
-        <div>
-          <p className="label">Library</p>
-          <p>{props.data.Name}</p>
-        </div>
-        <div>
-          <p className="label">Type</p>
-          <p>{props.data.CollectionType==='tvshows' ? 'Series' : "Movies"}</p>
-        </div>
-        <div>
-          <p className="label">Total Plays</p>
-          <p>{props.data.Plays}</p>
-        </div>
-        <div>
-          <p className="label">Total Playback</p>
-          <p>{formatTotalWatchTime(props.data.total_playback_duration)}</p>
-        </div>
+            <Row className="space-between-end card-row">
+              <Col className="card-label">Type</Col>
+              <Col className="text-end">{props.data.CollectionType==='tvshows' ? 'Series' : "Movies"}</Col>
+            </Row>
 
-        <div>
-          <p className="label">Last Played</p>
-          <p>{props.data.ItemName ? props.data.ItemName : 'n/a'}</p>
-        </div>
+            <Row className="space-between-end card-row">
+              <Col className="card-label">Total Plays</Col>
+              <Col className="text-end">{props.data.Plays}</Col>
+            </Row>
 
-        <div>
-          <p className="label">Last Activity</p>
-          <p>{props.data.LastActivity ? formatLastActivityTime(props.data.LastActivity) : 'never'}</p>
-        </div>
+            <Row className="space-between-end card-row">
+              <Col className="card-label">Total Playback</Col>
+              <Col className="text-end">{formatTotalWatchTime(props.data.total_playback_duration)}</Col>
+            </Row>
 
-        <div>
-          <p className="label">{props.data.CollectionType==='tvshows' ? 'Series' : "Movies"}</p>
-          <p>{props.data.Library_Count}</p>
-        </div>
+            <Row className="space-between-end card-row">
+              <Col className="card-label">Last Played</Col>
+              <Col className="text-end">{props.data.ItemName ? props.data.ItemName : 'n/a'}</Col>
+            </Row>
 
-        <div>
-              <p className="label">Seasons</p>
-              <p>{props.data.CollectionType==='tvshows' ? props.data.Season_Count : ''}</p>
-        </div>
-        
-        <div>
-              <p className="label">Episodes</p>
-              <p>{props.data.CollectionType==='tvshows' ? props.data.Episode_Count : ''}</p>
-        </div>
-      
+            <Row className="space-between-end card-row">
+              <Col className="card-label">Last Activity</Col>
+              <Col className="text-end">{props.data.LastActivity ? formatLastActivityTime(props.data.LastActivity) : 'never'}</Col>
+            </Row>
 
+            <Row className="space-between-end card-row">
+              <Col className="card-label">{props.data.CollectionType==='tvshows' ? 'Series' : "Movies"}</Col>
+              <Col className="text-end">{props.data.Library_Count}</Col>
+            </Row>
 
-       
-       
-      </div>
-    </div>
+            <Row className="space-between-end card-row" style={{opacity:props.data.CollectionType==='tvshows' ? '1' :'0'}}>
+              <Col className="card-label">Seasons</Col>
+              <Col className="text-end">{props.data.CollectionType==='tvshows' ? props.data.Season_Count : ''}</Col>
+            </Row>
+
+            <Row className="space-between-end card-row" style={{opacity:props.data.CollectionType==='tvshows' ? '1' :'0'}}>
+              <Col className="card-label">Episodes</Col>
+              <Col className="text-end">{props.data.CollectionType==='tvshows' ? props.data.Episode_Count : ''}</Col>
+            </Row>
+          </Card.Body>
+
+      </Card>
   );
 }
 

@@ -6,6 +6,7 @@ import Form from 'react-bootstrap/Form';
 import Row from 'react-bootstrap/Row';
 import Col from 'react-bootstrap/Col';
 import Button from 'react-bootstrap/Button';
+import Alert from 'react-bootstrap/Alert';
 
 
 
@@ -94,7 +95,7 @@ export default function SettingsConfig() {
       .then((response) => {
         console.log("Config updated successfully:", response.data);
         setisSubmitted("Success");
-        setsubmissionMessage("Success Updated Configuration");
+        setsubmissionMessage("Successfully updated configuration");
       })
       .catch((error) => {
         console.log("Error updating config:", error);
@@ -135,17 +136,19 @@ export default function SettingsConfig() {
               API Key
             </Form.Label>
             <Col sm="10">
-              <Form.Control id="JF_API_KEY"  value={formValues.JF_API_KEY || ""} onChange={handleFormChange} type={showKey ? "text" : "password"} />
+              <Form.Control id="JF_API_KEY" name="JF_API_KEY"  value={formValues.JF_API_KEY || ""} onChange={handleFormChange} type={showKey ? "text" : "password"} />
             </Col>
           </Form.Group>
           {isSubmitted !== "" ? (
-            <div
-              className={
-                isSubmitted === "Failed" ? "submit error" : "submit success"
-              }
-            >
-              {submissionMessage}
-            </div>
+
+                  isSubmitted === "Failed" ?
+                        <Alert variant="danger">
+                             {submissionMessage}
+                        </Alert>
+                  :
+                        <Alert variant="success" >
+                             {submissionMessage}
+                        </Alert>
           ) : (
             <></>
           )}

@@ -15,15 +15,10 @@ export default function Navbar() {
   return (
     <BootstrapNavbar variant="dark" expand="md" className="navbar py-0">
       <Container fluid>
-        <Col xs={8} md={4}>
-          <BootstrapNavbar.Brand href="#home">Jellystat</BootstrapNavbar.Brand>
-        </Col>
-        <Col className="d-flex align-items-center justify-content-end">
-          <BootstrapNavbar.Toggle aria-controls="basic-navbar-nav" />
-        </Col>
-        <Col md={8} className="w-100">
-          <BootstrapNavbar.Collapse id="basic-navbar-nav">
-            <Nav className="ml-auto">
+      <BootstrapNavbar.Brand href="#home">Jellystat</BootstrapNavbar.Brand>
+      <BootstrapNavbar.Toggle aria-controls="responsive-navbar-nav" />
+      <BootstrapNavbar.Collapse id="responsive-navbar-nav">
+            <Nav className="ms-auto">
               {navData.map((item) => {
                 const isActive = ('/'+item.link).toLocaleLowerCase() === location.pathname.toLocaleLowerCase(); // check if the link is the current path
                 return (
@@ -44,7 +39,6 @@ export default function Navbar() {
               </Nav.Link>
             </Nav>
           </BootstrapNavbar.Collapse>
-        </Col>
       </Container>
     </BootstrapNavbar>
   );
