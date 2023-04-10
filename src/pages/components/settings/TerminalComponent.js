@@ -7,7 +7,7 @@ const TerminalComponent = () => {
 
   useEffect(() => {
     // create a new WebSocket connection
-    const socket = new WebSocket('ws://localhost:8080');
+    const socket = new WebSocket(`ws://${window.location.hostname+':'+(process.env.WS_PORT || 3004)}/ws`);
 
     // handle incoming messages
     socket.addEventListener('message', (event) => {
