@@ -4,7 +4,7 @@ const db = require("./db");
 const axios = require("axios");
 
 const ws = require("./WebsocketHandler");
-const sendMessageToClients = ws(8080);
+const sendMessageToClients = ws(process.env.WS_PORT || 3004);
 
 const router = express.Router();
 

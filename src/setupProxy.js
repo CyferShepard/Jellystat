@@ -32,7 +32,7 @@ module.exports = function(app) {
   app.use(
     '/ws',
     createProxyMiddleware({
-      target: 'ws://127.0.0.1:8080',
+      target: `ws://127.0.0.1:${process.env.WS_PORT || 3004}`,
       changeOrigin: true,
       ws: true,
     })
