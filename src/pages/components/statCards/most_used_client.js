@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
-import Col from 'react-bootstrap/Col';
 import ItemStatComponent from "./ItemStatComponent";
 
 
@@ -53,9 +52,7 @@ function MostUsedClient(props) {
 
 
   return (
-      <Col>
         <ItemStatComponent icon={  <ComputerLineIcon color="white" size={'100%'}/>} data={data} heading={"MOST USED CLIENTS"} units={"Plays"}/>
-      </Col>
   );
 }
 

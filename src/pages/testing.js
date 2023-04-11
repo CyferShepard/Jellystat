@@ -7,7 +7,8 @@ import './css/library/libraries.css';
 
 
 // import LibraryOverView from './components/libraryOverview';
-import HomeStatisticCards from './components/HomeStatisticCards';
+// import HomeStatisticCards from './components/HomeStatisticCards';
+import Sessions from './components/sessions/sessions';
 
 
 
@@ -50,7 +51,7 @@ function Testing() {
   return (
     <div className='Activity'>
 
-  <HomeStatisticCards/>
+  <Sessions/>
 
     </div>
 

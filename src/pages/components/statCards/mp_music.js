@@ -2,7 +2,6 @@ import React, { useState, useEffect } from "react";
 
 import axios from "axios";
 import Config from "../../../lib/config";
-import Col from 'react-bootstrap/Col';
 
 import ItemStatComponent from "./ItemStatComponent";
 
@@ -70,9 +69,7 @@ function MPMusic(props) {
 
 
   return (
-    <Col>
     <ItemStatComponent  base_url={config.hostUrl} data={data} heading={"MOST POPULAR MUSIC"} units={"Users"}/>
-    </Col>
   );
 }
 

@@ -1,4 +1,4 @@
-import { Nav, Navbar as BootstrapNavbar, Container, Col } from "react-bootstrap";
+import { Nav, Navbar as BootstrapNavbar, Container } from "react-bootstrap";
 import { Link, useLocation } from "react-router-dom";
 import { navData } from "../../../lib/navdata";
 import LogoutBoxLineIcon from "remixicon-react/LogoutBoxLineIcon";

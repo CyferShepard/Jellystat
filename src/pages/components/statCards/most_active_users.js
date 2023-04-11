@@ -2,7 +2,6 @@ import React, { useState, useEffect } from "react";
 import axios from "axios";
 import Config from "../../../lib/config";
 import ItemStatComponent from "./ItemStatComponent";
-import Col from 'react-bootstrap/Col';
 
 
 import AccountCircleFillIcon from "remixicon-react/AccountCircleFillIcon";
@@ -10,8 +9,6 @@ import AccountCircleFillIcon from "remixicon-react/AccountCircleFillIcon";
 function MostActiveUsers(props) {
   const [data, setData] = useState();
   const [days, setDays] = useState(30); 
-  // const [imgError, setImgError] = useState(false);
-
   const [config, setConfig] = useState(null);
 
 
@@ -79,9 +76,7 @@ function MostActiveUsers(props) {
 
 
   return (
-    <Col>
     <ItemStatComponent base_url={config.hostUrl} icon={<AccountCircleFillIcon color="white" size={"100%"}/>} data={data} heading={"MOST ACTIVE USERS"} units={"Plays"}/>
-    </Col>
   );
 }
 

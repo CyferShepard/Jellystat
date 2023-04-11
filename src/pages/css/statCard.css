@@ -1,23 +1,40 @@
-
-
+.grid-stat-cards
+{
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 520px));
+  grid-auto-rows: 200px;/* max-width+offset so 215 + 20*/
+  /* margin-right: 20px; */
+  margin-top: 4px;
+}
 .stat-card{
   border: 0 !important;
-  max-width: 300px;
-  min-height: 790px;
-
+  background-color: rgba(100 100 100 / 0.1) !important;
+  color: white;
+  max-width: 500px;
+  max-height: 180px;
+  border-radius: 4px !important;
 }
 
-.card-banner
+.stat-card-banner
+{
+  max-width: 120px !important;
+}
+
+
+.Heading
 {
   flex-direction: row;
 }
 
 .stat-card-image {
-  max-width: 100%;
-  max-height: 420px;
-  height: 100%;
+  width: 120px !important;
+  height: 180px;
+}
 
-
+.stat-card-icon
+{
+  width: 120px !important;
+  height: 180px;
 }
 
 

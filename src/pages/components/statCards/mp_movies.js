@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
-import Col from 'react-bootstrap/Col';
 import Config from "../../../lib/config";
 
 
@@ -76,9 +75,7 @@ function MPMovies(props) {
   }
 
   return (
-  <Col>
   <ItemStatComponent base_url={config.hostUrl} data={data} heading={"MOST POPULAR MOVIES"} units={"Users"}/>
-  </Col>
   );
 }
 

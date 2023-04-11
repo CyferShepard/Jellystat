@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 
 
-import Row from 'react-bootstrap/Row';
+
 
 import MVLibraries from "./statCards/mv_libraries";
 import MVMovies from "./statCards/mv_movies";
@@ -51,38 +51,7 @@ function HomeStatisticCards() {
 
         
       </div>
-      <Row xs={1} sm={2} md={3} lg={4} xl={5} className="g-4">
-
-
-        <MVMovies days={days} />
-
-
-        <MPMovies days={days} />
-
-
-        <MVSeries days={days} />
-
-
-        <MPSeries days={days} />
-
-
-        <MVMusic days={days}/>
-
-
-        <MPMusic days={days}/>
-
-
-        <MVLibraries days={days} />
-
-
-        <MostUsedClient days={days} />
-
-
-        <MostActiveUsers days={days} />
-
-
-    </Row>
-      {/* <div className="card-group">
+      <div className="grid-stat-cards">
         <MVMovies days={days} />
         <MPMovies days={days} />
         <MVSeries days={days} />
@@ -93,7 +62,8 @@ function HomeStatisticCards() {
         <MostUsedClient days={days} />
         <MostActiveUsers days={days} />
 
-      </div> */}
+
+    </div>
     </div>
   );
 }

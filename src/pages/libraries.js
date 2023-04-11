@@ -7,9 +7,7 @@ import "./css/library/libraries.css";
 
 import Loading from "./components/general/loading";
 import LibraryCard from "./components/library/library-card";
-import { CardGroup, Container } from "react-bootstrap";
-import Row from 'react-bootstrap/Row';
-import Col from 'react-bootstrap/Col';
+import  Row  from "react-bootstrap/Row";
 
 
 

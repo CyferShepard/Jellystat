@@ -53,10 +53,24 @@ function LibraryCard(props) {
               <Card.Img
                   variant="top"
                   className="library-card-banner"
-                  src={props.base_url + "/Items/" + props.data.Id + "/Images/Primary/?fillWidth=400&quality=90"}
+                  src={props.base_url + "/Items/" + props.data.Id + "/Images/Primary/?fillWidth=800&quality=50"}
               />
             </div>
           </Link>
+
+       <Link to={`/libraries/${props.data.Id}`}>
+            <div
+              className="library-card-banner"
+              style={{
+                backgroundImage: `url(${
+                  props.base_url +
+                  "/Items/" +
+                  props.data.Id +
+                  "/Images/Primary/?fillWidth=400&quality=90"
+                })`,
+              }}
+            />
+      </Link>
 
           <Card.Body className="library-card-details">
             <Row className="space-between-end card-row">

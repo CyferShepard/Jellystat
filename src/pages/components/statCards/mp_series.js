@@ -2,7 +2,6 @@ import React, { useState, useEffect } from "react";
 import axios from "axios";
 import Config from "../../../lib/config";
 import ItemStatComponent from "./ItemStatComponent";
-import Col from 'react-bootstrap/Col';
 
 
 function MPSeries(props) {
@@ -67,9 +66,7 @@ function MPSeries(props) {
 
 
   return (
-    <Col>
     <ItemStatComponent  base_url={config.hostUrl} data={data} heading={"MOST POPULAR SERIES"} units={"Users"}/>
-    </Col>
   );
 }
 
