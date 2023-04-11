@@ -21,10 +21,6 @@
 }
 
 
-.Heading
-{
-  flex-direction: row;
-}
 
 .stat-card-image {
   width: 120px !important;
@@ -60,7 +56,7 @@
 .Heading
 {
   display: flex;
-  margin-bottom: 20px;
+  flex-direction: row;
 }
 
 .Heading h1

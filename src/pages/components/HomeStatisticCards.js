@@ -33,7 +33,7 @@ function HomeStatisticCards() {
   };
   return (
     <div className="watch-stats">
-      <div className="Heading">
+      <div className="Heading my-3">
         <h1>Watch Statistics</h1>
         <div className="date-range">
           <div className="header">Last</div>

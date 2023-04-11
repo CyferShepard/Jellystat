@@ -2,7 +2,7 @@ import { useParams } from 'react-router-dom';
 
 import LibraryDetails from './library/library-details';
 import LibraryGlobalStats from './library/library-stats';
-import LibraryLastPlayed from './library/lastplayed';
+import LibraryLastWatched from './library/last-watched';
 import RecentlyPlayed from './library/recently-added';
 
 
@@ -17,7 +17,7 @@ function LibraryInfo() {
        <LibraryDetails LibraryId={LibraryId}/>
        <LibraryGlobalStats LibraryId={LibraryId}/>
        <RecentlyPlayed LibraryId={LibraryId}/>
-       <LibraryLastPlayed LibraryId={LibraryId}/>
+       <LibraryLastWatched LibraryId={LibraryId}/>
     </div>
   );
 }

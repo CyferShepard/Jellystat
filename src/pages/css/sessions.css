@@ -1,8 +1,4 @@
-.sessions {
-    margin-bottom: 10px;
 
-    
-}
 
 .sessions-container {
     display: grid;
@@ -139,7 +135,8 @@
 }
 
 .card-device-image {
-    width: 35px;
+    max-width: 35px;
+    width: 100%;
     /* margin-right: 5px; */
     /* grid-row: 1 / span 2; */
 }
@@ -169,9 +166,8 @@
     /* position: absolute; */
 }
 
-.card-play-state {
-    /* bottom: 5px; */
-    /* position: absolute; */
+.device-info {
+margin-bottom: 100%;
 }
 
 .card-ip {

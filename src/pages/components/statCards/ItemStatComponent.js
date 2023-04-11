@@ -26,7 +26,6 @@ function ItemStatComponent(props) {
     height:'100%',
   };
 
-  console.log(props.data);
 
   if (props.data.length === 0) {
     return <></>;

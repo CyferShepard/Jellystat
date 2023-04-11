@@ -11,7 +11,7 @@ import SessionCard from "./session-card";
 import Loading from "../general/loading";
 
 function Sessions() {
-  const [data, setData] = useState([]);
+  const [data, setData] = useState();
   const [base_url, setURL] = useState("");
   // const [errorHandler, seterrorHandler] = useState({ error_count: 0, error_message: '' })
 
@@ -34,6 +34,10 @@ function Sessions() {
           console.log(error);
         });
     }
+    if(!data)
+    {
+      fetchData();
+    }
 
     const intervalId = setInterval(fetchData, 1000);
     return () => clearInterval(intervalId);
@@ -45,8 +49,8 @@ function Sessions() {
 
   if (data.length === 0) {
     return(
-    <div className="sessions">
-      <h1>Sessions</h1>
+    <div>
+      <h1  className="my-3">Sessions</h1>
       <div style={{color:"grey", fontSize:"0.8em", fontStyle:"italic"}}>
       No Active Sessions Found
       </div>
@@ -54,8 +58,8 @@ function Sessions() {
   }
 
   return (
-    <div className="sessions">
-      <h1>Sessions</h1>
+    <div>
+      <h1  className="my-3">Sessions</h1>
       <div className="sessions-container">
         {data &&
           data
