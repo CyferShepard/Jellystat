@@ -41,7 +41,7 @@ function Sessions() {
 
     const intervalId = setInterval(fetchData, 1000);
     return () => clearInterval(intervalId);
-  }, [base_url]);
+  }, [data,base_url]);
 
   if (!data) {
     return <Loading />;

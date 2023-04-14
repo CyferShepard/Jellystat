@@ -280,6 +280,7 @@ router.post("/getLibraryLastPlayed", async (req, res) => {
   }
 });
 
+
 router.post("/getViewsOverTime", async (req, res) => {
   try {
     const { days } = req.body;
@@ -287,32 +288,36 @@ router.post("/getViewsOverTime", async (req, res) => {
     if (days=== undefined) {
       _days = 30;
     }
-    const { rows } = await db.query(
+    const { rows:stats } = await db.query(
       `select * from fs_watch_stats_over_time('${_days}')`
+    );
+
+    const { rows:libraries } = await db.query(
+      `select distinct "Id","Name" from jf_libraries`
     );
 
     
 const reorganizedData = {};
 
-rows.forEach((item) => {
-  const id = item.Library;
+stats.forEach((item) => {
+  const library = item.Library;
   const count = item.Count;
   const date = new Date(item.Date).toLocaleDateString('en-US', {
     year: 'numeric',
-    month: 'long',
+    month: 'short',
     day: '2-digit'
   });
-  
-  if (!reorganizedData[id]) {
-    reorganizedData[id] = {
-      id,
-      data: []
+
+
+  if (!reorganizedData[date]) {
+    reorganizedData[date] = {
+      Key:date
     };
   }
   
-  reorganizedData[id].data.push({ x: date, y: count });
+  reorganizedData[date]= { ...reorganizedData[date], [library]: count};
 });
-const finalData = Object.values(reorganizedData);
+const finalData = {libraries:libraries,stats:Object.values(reorganizedData)};
     res.send(finalData);
   } catch (error) {
     console.log(error);
@@ -327,29 +332,32 @@ router.post("/getViewsByDays", async (req, res) => {
     if (days=== undefined) {
       _days = 30;
     }
-    const { rows } = await db.query(
+    const { rows:stats } = await db.query(
       `select * from fs_watch_stats_popular_days_of_week('${_days}')`
+    );
+
+    const { rows:libraries } = await db.query(
+      `select distinct "Id","Name" from jf_libraries`
     );
 
     
 const reorganizedData = {};
 
-rows.forEach((item) => {
-
-  const id = item.Library;
+stats.forEach((item) => {
+  const library = item.Library;
   const count = item.Count;
   const day = item.Day;
-  
-  if (!reorganizedData[id]) {
-    reorganizedData[id] = {
-      id,
-      data: []
+
+
+  if (!reorganizedData[day]) {
+    reorganizedData[day] = {
+      Key:day
     };
   }
-
-  reorganizedData[id].data.push({ x: day, y: count });
+  
+  reorganizedData[day]= { ...reorganizedData[day], [library]: count};
 });
-const finalData = Object.values(reorganizedData);
+const finalData = {libraries:libraries,stats:Object.values(reorganizedData)};
     res.send(finalData);
   } catch (error) {
     console.log(error);
@@ -365,35 +373,39 @@ router.post("/getViewsByHour", async (req, res) => {
     if (days=== undefined) {
       _days = 30;
     }
-    const { rows } = await db.query(
+    const { rows:stats } = await db.query(
       `select * from fs_watch_stats_popular_hour_of_day('${_days}')`
+    );
+
+    const { rows:libraries } = await db.query(
+      `select distinct "Id","Name" from jf_libraries`
     );
 
     
 const reorganizedData = {};
 
-rows.forEach((item) => {
-
-  const id = item.Library;
+stats.forEach((item) => {
+  const library = item.Library;
   const count = item.Count;
   const hour = item.Hour;
-  
-  if (!reorganizedData[id]) {
-    reorganizedData[id] = {
-      id,
-      data: []
+
+
+  if (!reorganizedData[hour]) {
+    reorganizedData[hour] = {
+      Key:hour
     };
   }
-
-  reorganizedData[id].data.push({ x: hour, y: count });
+  
+  reorganizedData[hour]= { ...reorganizedData[hour], [library]: count};
 });
-const finalData = Object.values(reorganizedData);
+const finalData = {libraries:libraries,stats:Object.values(reorganizedData)};
     res.send(finalData);
   } catch (error) {
     console.log(error);
     res.send(error);
   }
 });
+
 
 
 
