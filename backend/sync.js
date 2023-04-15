@@ -352,7 +352,7 @@ async function syncShowItems()
             .map((value) => "'" + value + "'")
             .join(", ")})`
         )
-        .then((res) => res.rows.map((row) => row.Id));
+        .then((res) => res.rows.map((row) => row.EpisodeId));
     }
 
     //
@@ -376,7 +376,7 @@ async function syncShowItems()
       episodesToInsert = await allEpisodes.map(jf_library_episodes_mapping);
     } else {
       // otherwise, filter only new data to insert
-      episodesToInsert = await allEpisodes.filter((row) => !existingIdsEpisodes.includes(row.Id + row.SeasonId)).map(jf_library_episodes_mapping);
+      episodesToInsert = await allEpisodes.filter((row) => !existingIdsEpisodes.includes(row.Id)).map(jf_library_episodes_mapping);
     }
 
     ///insert delete seasons
@@ -417,7 +417,7 @@ async function syncShowItems()
       }
     } 
 
-    const toDeleteEpisodeIds = existingIdsEpisodes.filter((id) =>!allEpisodes.some((row) => (row.Id + row.ParentId) === id ));
+    const toDeleteEpisodeIds = existingIdsEpisodes.filter((id) =>!allEpisodes.some((row) => row.Id=== id ));
     //Bulk delete from db thats no longer on api
     if (toDeleteEpisodeIds.length > 0) {
       let result = await db.deleteBulk("jf_library_episodes",toDeleteEpisodeIds);
