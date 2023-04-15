@@ -23,6 +23,7 @@ import Users from './pages/users';
 import UserInfo from './pages/components/user-info';
 import Libraries from './pages/libraries';
 import LibraryInfo from './pages/components/library-info';
+import ItemInfo from './pages/components/item-info';
 import ErrorPage from './pages/components/general/error';
 
 
@@ -128,6 +129,7 @@ if (config  && isConfigured && token!==null){
           <Route path="/users/:UserId" element={<UserInfo />} />
           <Route path="/libraries" element={<Libraries />} />
           <Route path="/libraries/:LibraryId" element={<LibraryInfo />} />
+          <Route path="/item/:Id" element={<ItemInfo />} />
           <Route path="/statistics" element={<Statistics />} />
           <Route path="/activity" element={<Activity />} />
           <Route path="/testing" element={<Testing />} />

@@ -22,6 +22,7 @@ function UserDetails(props) {
       };
 
     const fetchData = async () => {
+      if(config){
       try {
         const userData = await axios.post(`/stats/getUserDetails`, {
           userid: props.UserId,
@@ -35,6 +36,8 @@ function UserDetails(props) {
       } catch (error) {
         console.log(error);
       }
+    }
+
     };
 
     if (!data) {

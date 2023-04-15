@@ -9,7 +9,7 @@ function DailyPlayStats(props) {
 
   const [stats, setStats] = useState();
   const [libraries, setLibraries] = useState();
-  const [days, setDays] = useState(15);
+  const [days, setDays] = useState(20);
   const token = localStorage.getItem("token");
   
 
@@ -66,7 +66,7 @@ function DailyPlayStats(props) {
   }
   return (
     <div className="main-widget">
-      <h1>Daily Play Count Per Library - Last {days} Days</h1>
+      <h2 className="text-start my-2">Daily Play Count Per Library - Last {days} Days</h2>
 
       <div className="graph">
          <Chart libraries={libraries} stats={stats} />

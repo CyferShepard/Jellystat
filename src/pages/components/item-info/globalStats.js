@@ -14,9 +14,9 @@ function GlobalStats(props) {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const dayData = await axios.post(`/stats/getGlobalUserStats`, {
+        const dayData = await axios.post(`/stats/getGlobalItemStats`, {
           hours: (24*1),
-          userid: props.UserId,
+          itemid: props.ItemId,
         }, {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -25,9 +25,9 @@ function GlobalStats(props) {
         });
         setDayStats(dayData.data);
 
-        const weekData = await axios.post(`/stats/getGlobalUserStats`, {
+        const weekData = await axios.post(`/stats/getGlobalItemStats`, {
           hours: (24*7),
-          userid: props.UserId,
+          itemid: props.ItemId,
         }, {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -36,9 +36,9 @@ function GlobalStats(props) {
         });
         setWeekStats(weekData.data);
 
-        const monthData = await axios.post(`/stats/getGlobalUserStats`, {
+        const monthData = await axios.post(`/stats/getGlobalItemStats`, {
           hours: (24*30),
-          userid: props.UserId,
+          itemid: props.ItemId,
         }, {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -47,9 +47,9 @@ function GlobalStats(props) {
         });
         setMonthStats(monthData.data);
 
-        const allData = await axios.post(`/stats/getGlobalUserStats`, {
+        const allData = await axios.post(`/stats/getGlobalItemStats`, {
           hours: (24*999),
-          userid: props.UserId,
+          itemid: props.ItemId,
         }, {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -65,11 +65,13 @@ function GlobalStats(props) {
     fetchData();
     const intervalId = setInterval(fetchData, 60000 * 5);
     return () => clearInterval(intervalId);
-  }, [props.UserId,token]);
+  }, [props.ItemId,token]);
+
+  // console.log(dayStats);
 
   return (
     <div>
-      <h1 className="py-3">User Stats</h1>
+      <h1 className="py-3">Item Stats</h1>
       <div  className="global-stats-container">
         <WatchTimeStats data={dayStats} heading={"Last 24 Hours"} />
         <WatchTimeStats data={weekStats} heading={"Last 7 Days"} />

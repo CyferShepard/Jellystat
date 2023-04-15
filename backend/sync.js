@@ -12,6 +12,7 @@ const {jf_libraries_columns,jf_libraries_mapping,} = require("./models/jf_librar
 const {jf_library_items_columns,jf_library_items_mapping,} = require("./models/jf_library_items");
 const {jf_library_seasons_columns,jf_library_seasons_mapping,} = require("./models/jf_library_seasons");
 const {jf_library_episodes_columns,jf_library_episodes_mapping,} = require("./models/jf_library_episodes");
+const {jf_item_info_columns,jf_item_info_mapping,} = require("./models/jf_item_info");
 
 const {jf_users_columns,jf_users_mapping,} = require("./models/jf_users");
 
@@ -83,26 +84,46 @@ class sync {
       return [];
     }
   }
-  async getSeasonsAndEpisodes(showId,userid) {
-    const allSeasons = [];
-    const allEpisodes = [];
-    let seasonItems = await this.getItem(showId,userid);
-    const seasonWithParent = seasonItems.map((items) => ({
-      ...items,
-      ...{ ParentId: showId },
-    }));
-    allSeasons.push(...seasonWithParent);
-    for (let e = 0; e < seasonItems.length; e++) {
-      const season = seasonItems[e];
-      let episodeItems = await this.getItem(season.Id,userid);
-      const episodeWithParent = episodeItems.map((items) => ({
-        ...items,
-        ...{ ParentId: season.Id },
-      }));
-      allEpisodes.push(...episodeWithParent);
-    }
 
-    return { allSeasons: allSeasons, allEpisodes: allEpisodes };
+  async getSeasonsAndEpisodes(itemID, type) {
+    try {
+
+      let url = `${this.hostUrl}/shows/${itemID}/${type}`;
+      if (itemID !== undefined) {
+        url += `?ParentID=${itemID}`;
+      }
+      const response = await axios.get(url, {
+        headers: {
+          "X-MediaBrowser-Token": this.apiKey,
+        },
+      });
+
+      return response.data.Items;
+    } catch (error) {
+      console.log(error);
+      return [];
+    }
+  }
+
+  
+
+  async getItemInfo(itemID,userid) {
+    try {
+
+      let url = `${this.hostUrl}/Items/${itemID}/playbackinfo?userId=${userid}`;
+
+      const response = await axios.get(url, {
+        headers: {
+          "X-MediaBrowser-Token": this.apiKey,
+        },
+      });
+
+      const results = response.data.MediaSources;
+      return results;
+    } catch (error) {
+      console.log(error);
+      return [];
+    }
   }
 }
 ////////////////////////////////////////API Methods
@@ -222,7 +243,7 @@ async function syncLibraryItems()
   }
 
   const _sync = new sync(config[0].JF_HOST, config[0].JF_API_KEY);
-  sendMessageToClients({ color: "lawngreen", Message: "Syncing... 1/2" });
+  sendMessageToClients({ color: "lawngreen", Message: "Syncing... 1/3" });
 
   sendMessageToClients({color: "yellow",Message: "Beginning Library Item Sync",});
 
@@ -288,14 +309,14 @@ async function syncLibraryItems()
   sendMessageToClients({color: "orange",Message: deleteCounter + " Library Items Removed.",});
   sendMessageToClients({ color: "yellow", Message: "Item Sync Complete" });
 
-    const { rows: cleanup } = await db.query('DELETE FROM jf_playback_activity where "NowPlayingItemId" not in (select "Id" from jf_library_items)' );
-    sendMessageToClients({ color: "orange", Message: cleanup.length+" orphaned activity logs removed" });
+    // const { rows: cleanup } = await db.query('DELETE FROM jf_playback_activity where "NowPlayingItemId" not in (select "Id" from jf_library_items)' );
+    // sendMessageToClients({ color: "orange", Message: cleanup.length+" orphaned activity logs removed" });
 
 }
 
 async function syncShowItems()
 {
-  sendMessageToClients({ color: "lawngreen", Message: "Syncing... 2/2" });
+  sendMessageToClients({ color: "lawngreen", Message: "Syncing... 2/3" });
   sendMessageToClients({color: "yellow", Message: "Beginning Seasons and Episode sync",});
 
   const { rows: config } = await db.query('SELECT * FROM app_config where "ID"=1');
@@ -313,11 +334,12 @@ async function syncShowItems()
   let deleteSeasonsCount = 0;
   let deleteEpisodeCount = 0;
 
-  const admins = await _sync.getAdminUser();
-  const userid = admins[0].Id;
   //loop for each show
   for (const show of shows) {
-    const data = await _sync.getSeasonsAndEpisodes(show.Id,userid);
+    const allSeasons = await _sync.getSeasonsAndEpisodes(show.Id,'Seasons');
+    const allEpisodes =await _sync.getSeasonsAndEpisodes(show.Id,'Episodes');
+
+
 
     const existingIdsSeasons = await db.query(`SELECT *	FROM public.jf_library_seasons where "SeriesId" = '${show.Id}'`).then((res) => res.rows.map((row) => row.Id));
 
@@ -341,20 +363,20 @@ async function syncShowItems()
 
     if (existingIdsSeasons.length === 0) {
       // if there are no existing Ids in the table, map all items in the data array to the expected format
-      seasonsToInsert = await data.allSeasons.map(jf_library_seasons_mapping);
+      seasonsToInsert = await allSeasons.map(jf_library_seasons_mapping);
     } else {
       // otherwise, filter only new data to insert
-      seasonsToInsert = await data.allSeasons
+      seasonsToInsert = await allSeasons
         .filter((row) => !existingIdsSeasons.includes(row.Id))
         .map(jf_library_seasons_mapping);
     }
 
     if (existingIdsEpisodes.length === 0) {
       // if there are no existing Ids in the table, map all items in the data array to the expected format
-      episodesToInsert = await data.allEpisodes.map(jf_library_episodes_mapping);
+      episodesToInsert = await allEpisodes.map(jf_library_episodes_mapping);
     } else {
       // otherwise, filter only new data to insert
-      episodesToInsert = await data.allEpisodes.filter((row) => !existingIdsEpisodes.includes(row.Id + row.ParentId)).map(jf_library_episodes_mapping);
+      episodesToInsert = await allEpisodes.filter((row) => !existingIdsEpisodes.includes(row.Id + row.SeasonId)).map(jf_library_episodes_mapping);
     }
 
     ///insert delete seasons
@@ -370,7 +392,7 @@ async function syncShowItems()
         });
       }
     } 
-    const toDeleteIds = existingIdsSeasons.filter((id) =>!data.allSeasons.some((row) => row.Id === id ));
+    const toDeleteIds = existingIdsSeasons.filter((id) =>!allSeasons.some((row) => row.Id === id ));
     //Bulk delete from db thats no longer on api
     if (toDeleteIds.length > 0) {
       let result = await db.deleteBulk("jf_library_seasons",toDeleteIds);
@@ -395,7 +417,7 @@ async function syncShowItems()
       }
     } 
 
-    const toDeleteEpisodeIds = existingIdsEpisodes.filter((id) =>!data.allEpisodes.some((row) => (row.Id + row.ParentId) === id ));
+    const toDeleteEpisodeIds = existingIdsEpisodes.filter((id) =>!allEpisodes.some((row) => (row.Id + row.ParentId) === id ));
     //Bulk delete from db thats no longer on api
     if (toDeleteEpisodeIds.length > 0) {
       let result = await db.deleteBulk("jf_library_episodes",toDeleteEpisodeIds);
@@ -407,8 +429,6 @@ async function syncShowItems()
     
     } 
 
-
-    
     sendMessageToClients({ Message: "Sync complete for " + show.Name });
   }
 
@@ -416,6 +436,122 @@ async function syncShowItems()
   sendMessageToClients({color: "orange",Message: deleteSeasonsCount + " Seasons Removed.",});
   sendMessageToClients({color: "dodgerblue",Message: insertEpisodeCount + " Episodes inserted.",});
   sendMessageToClients({color: "orange",Message: deleteEpisodeCount + " Episodes Removed.",});
+  sendMessageToClients({ color: "yellow", Message: "Sync Complete" });
+}
+
+async function syncItemInfo()
+{
+  sendMessageToClients({ color: "lawngreen", Message: "Syncing... 3/3" });
+  sendMessageToClients({color: "yellow", Message: "Beginning File Info Sync",});
+
+  const { rows: config } = await db.query('SELECT * FROM app_config where "ID"=1');
+
+  if (config[0].JF_HOST === null || config[0].JF_API_KEY === null) {
+    res.send({ error: "Config Details Not Found" });
+    return;
+  }
+
+  const _sync = new sync(config[0].JF_HOST, config[0].JF_API_KEY);
+  const { rows: Items } = await db.query(`SELECT *	FROM public.jf_library_items where "Type" not in ('Series','Folder')`);
+  const { rows: Episodes } = await db.query(`SELECT *	FROM public.jf_library_episodes`);
+
+  let insertItemInfoCount = 0;
+  let insertEpisodeInfoCount = 0;
+  let deleteItemInfoCount  = 0;
+  let deleteEpisodeInfoCount = 0;
+
+  const admins = await _sync.getAdminUser();
+  const userid = admins[0].Id;
+  //loop for each Movie
+  for (const Item of Items) {
+    const data = await _sync.getItemInfo(Item.Id,userid);
+
+    const existingItemInfo = await db.query(`SELECT *	FROM public.jf_item_info where "Id" = '${Item.Id}'`).then((res) => res.rows.map((row) => row.Id));
+    
+    let ItemInfoToInsert = [];
+    //filter fix if jf_libraries is empty
+
+    if (existingItemInfo.length === 0) {
+      // if there are no existing Ids in the table, map all items in the data array to the expected format
+      ItemInfoToInsert = await data.map(item => jf_item_info_mapping(item, 'Item'));
+    } else {
+      ItemInfoToInsert = await data.filter((row) => !existingItemInfo.includes(row.Id))
+        .map(item => jf_item_info_mapping(item, 'Item'));
+    }
+
+    if (ItemInfoToInsert.length !== 0) {
+      let result = await db.insertBulk("jf_item_info",ItemInfoToInsert,jf_item_info_columns);
+      if (result.Result === "SUCCESS") {
+        insertItemInfoCount += ItemInfoToInsert.length;
+      } else {
+        sendMessageToClients({
+          color: "red",
+          Message: "Error performing bulk insert:" + result.message,
+        });
+      }
+    } 
+    const toDeleteItemInfoIds = existingItemInfo.filter((id) =>!data.some((row) => row.Id  === id ));
+    //Bulk delete from db thats no longer on api
+    if (toDeleteItemInfoIds.length > 0) {
+      let result = await db.deleteBulk("jf_item_info",toDeleteItemInfoIds);
+      if (result.Result === "SUCCESS") {
+        deleteItemInfoCount +=toDeleteItemInfoIds.length;
+      } else {
+        sendMessageToClients({color: "red",Message: result.message,});
+      }
+    
+    } 
+  }
+
+   //loop for each Episode
+   console.log("Episode") 
+   for (const Episode of Episodes) {
+    const data = await _sync.getItemInfo(Episode.EpisodeId,userid);
+
+
+    const existingEpisodeItemInfo = await db.query(`SELECT *	FROM public.jf_item_info where "Id" = '${Episode.EpisodeId}'`).then((res) => res.rows.map((row) => row.Id));
+
+
+    let EpisodeInfoToInsert = [];
+    //filter fix if jf_libraries is empty
+
+    if (existingEpisodeItemInfo.length === 0) {
+      // if there are no existing Ids in the table, map all items in the data array to the expected format
+      EpisodeInfoToInsert = await data.map(item => jf_item_info_mapping(item, 'Episode'));
+    } else {
+      EpisodeInfoToInsert = await data.filter((row) => !existingEpisodeItemInfo.includes(row.Id))
+        .map(item => jf_item_info_mapping(item, 'Episode'));
+    }
+
+    if (EpisodeInfoToInsert.length !== 0) {
+      let result = await db.insertBulk("jf_item_info",EpisodeInfoToInsert,jf_item_info_columns);
+      if (result.Result === "SUCCESS") {
+        insertEpisodeInfoCount += EpisodeInfoToInsert.length;
+      } else {
+        sendMessageToClients({
+          color: "red",
+          Message: "Error performing bulk insert:" + result.message,
+        });
+      }
+    } 
+    const toDeleteEpisodeInfoIds = existingEpisodeItemInfo.filter((id) =>!data.some((row) => row.Id  === id ));
+    //Bulk delete from db thats no longer on api
+    if (toDeleteEpisodeInfoIds.length > 0) {
+      let result = await db.deleteBulk("jf_item_info",toDeleteEpisodeInfoIds);
+      if (result.Result === "SUCCESS") {
+        deleteEpisodeInfoCount +=toDeleteEpisodeInfoIds.length;
+      } else {
+        sendMessageToClients({color: "red",Message: result.message,});
+      }
+    
+    }
+    console.log(Episode.Name) 
+  }
+
+  sendMessageToClients({color: "dodgerblue",Message: insertItemInfoCount + " Item Info inserted.",});
+  sendMessageToClients({color: "orange",Message: deleteItemInfoCount + " Item Info Removed.",});
+  sendMessageToClients({color: "dodgerblue",Message: insertEpisodeInfoCount + " Episodes inserted.",});
+  sendMessageToClients({color: "orange",Message: deleteEpisodeInfoCount + " Episodes Removed.",});
   sendMessageToClients({ color: "lawngreen", Message: "Sync Complete" });
 }
 
@@ -427,6 +563,7 @@ router.get("/beingSync", async (req, res) => {
   await syncLibraryFolders();
   await syncLibraryItems();
   await syncShowItems();
+  await syncItemInfo();
 
   res.send();
 
@@ -462,5 +599,15 @@ router.get("/writeSeasonsAndEpisodes", async (req, res) => {
 });
 
 //////////////////////////////////////
+
+//////////////////////////////////////////////////////writeMediaInfo
+router.get("/writeMediaInfo", async (req, res) => {
+  await syncItemInfo();
+  res.send();
+
+});
+
+//////////////////////////////////////
+
 
 module.exports = router;

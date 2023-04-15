@@ -9,7 +9,7 @@ div a
     background-color: rgba(0, 0, 0, 0.4);
 }
 
-.table-rows-content:hover a
+.table-rows-content div:hover a
 {
     color: #00A4DC;
 }

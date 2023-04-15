@@ -40,9 +40,7 @@ function Activity() {
           },
         })
         .then((data) => {
-          console.log("data");
           setData(data.data);
-          console.log(data);
         })
         .catch((error) => {
           console.log(error);

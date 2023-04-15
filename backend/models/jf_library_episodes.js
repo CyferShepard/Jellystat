@@ -22,7 +22,7 @@
       ];
       
     const jf_library_episodes_mapping = (item) => ({
-        Id: item.Id + item.ParentId,
+        Id: item.Id + item.SeasonId,
         EpisodeId: item.Id,
         Name: item.Name,
         ServerId: item.ServerId,
@@ -41,7 +41,7 @@
             ? item.ParentBackdropImageTags[0]
             : null,
         SeriesId: item.SeriesId,
-        SeasonId: item.ParentId,
+        SeasonId: item.SeasonId,
         SeasonName: item.SeasonName,
         SeriesName: item.SeriesName,
       });

@@ -13,6 +13,7 @@ import  Row  from "react-bootstrap/Row";
 
 function Libraries() {
   const [data, setData] = useState();
+  const [metadata, setMetaData] = useState();
   const [config, setConfig] = useState(null);
 
   useEffect(() => {
@@ -39,9 +40,23 @@ function Libraries() {
             },
           })
           .then((data) => {
-            console.log("data");
             setData(data.data);
-            console.log(data);
+          })
+          .catch((error) => {
+            console.log(error);
+          });
+
+          const metadataurl = `/stats/getLibraryMetadata`;
+
+          axios
+          .get(metadataurl, {
+            headers: {
+              Authorization: `Bearer ${config.token}`,
+              "Content-Type": "application/json",
+            },
+          })
+          .then((data) => {
+            setMetaData(data.data);
           })
           .catch((error) => {
             console.log(error);
@@ -54,15 +69,12 @@ function Libraries() {
       fetchConfig();
     }
 
-    if (!data) {
-      fetchLibraries();
-    }
-
+    fetchLibraries();
     const intervalId = setInterval(fetchLibraries, 60000 * 60);
     return () => clearInterval(intervalId);
-  }, [data, config]);
+  }, [ config]);
 
-  if (!data || !config) {
+  if (!data) {
     return <Loading />;
   }
 
@@ -74,7 +86,7 @@ function Libraries() {
       {data &&
           data.map((item) => (
     
-                <LibraryCard key={item.Id} data={item} base_url={config.hostUrl}/>
+                <LibraryCard key={item.Id} data={item} metadata={metadata.find(data => data.Id === item.Id)} base_url={config.hostUrl}/>
      
 
             ))}

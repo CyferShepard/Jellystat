@@ -91,7 +91,9 @@ function sessionCard(props) {
               <Row className="justify-content-between">
                 <Col>
                    <Card.Text>
-                   {props.data.session.NowPlayingItem.SeriesName ? (props.data.session.NowPlayingItem.SeriesName+" - "+ props.data.session.NowPlayingItem.Name) : (props.data.session.NowPlayingItem.Name)}
+                   <Link to={`/item/${props.data.session.NowPlayingItem.Id}`} target="_blank">
+                     {props.data.session.NowPlayingItem.SeriesName ? (props.data.session.NowPlayingItem.SeriesName+" - "+ props.data.session.NowPlayingItem.Name) : (props.data.session.NowPlayingItem.Name)}
+                   </Link> 
                    </Card.Text>
                 </Col>
 

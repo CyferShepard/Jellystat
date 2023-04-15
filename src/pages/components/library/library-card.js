@@ -8,6 +8,33 @@ import Col from 'react-bootstrap/Col';
 
 function LibraryCard(props) {
 
+  function formatFileSize(sizeInBytes) {
+    const sizeInKB = sizeInBytes / 1024; // 1 KB = 1024 bytes
+    if (sizeInKB < 1024) {
+      return `${sizeInKB.toFixed(2)} KB`;
+    } else {
+      const sizeInMB = sizeInKB / 1024; // 1 MB = 1024 KB
+      if (sizeInMB < 1024) {
+        return `${sizeInMB.toFixed(2)} MB`;
+      } else {
+        const sizeInGB = sizeInMB / 1024; // 1 GB = 1024 MB
+        if (sizeInGB < 1024) {
+          return `${sizeInGB.toFixed(2)} GB`;
+        } else {
+          const sizeInTB = sizeInGB / 1024; // 1 TB = 1024 GB
+          if (sizeInTB < 1024) {
+            return `${sizeInTB.toFixed(2)} TB`;
+          } else {
+            const sizeInPB = sizeInTB / 1024; // 1 PB = 1024 TB
+            return `${sizeInPB.toFixed(2)} PB`;
+          }
+        }
+      }
+    }
+  }
+  
+
+
   function formatTotalWatchTime(seconds) {
     const hours = Math.floor(seconds / 3600); // 1 hour = 3600 seconds
     const minutes = Math.floor((seconds % 3600) / 60); // 1 minute = 60 seconds
@@ -84,6 +111,16 @@ function LibraryCard(props) {
             </Row>
 
             <Row className="space-between-end card-row">
+              <Col className="card-label">Total Files</Col>
+              <Col className="text-end">{props.metadata.files}</Col>
+            </Row>
+
+            <Row className="space-between-end card-row">
+              <Col className="card-label">Library Size</Col>
+              <Col className="text-end">{formatFileSize(props.metadata.Size)}</Col>
+            </Row>
+
+            <Row className="space-between-end card-row">
               <Col className="card-label">Total Plays</Col>
               <Col className="text-end">{props.data.Plays}</Col>
             </Row>
@@ -117,6 +154,7 @@ function LibraryCard(props) {
               <Col className="card-label">Episodes</Col>
               <Col className="text-end">{props.data.CollectionType==='tvshows' ? props.data.Episode_Count : ''}</Col>
             </Row>
+            
           </Card.Body>
 
       </Card>

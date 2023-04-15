@@ -99,7 +99,6 @@ function Users() {
             },
           })
           .then((data) => {
-            console.log(data);
             setData(data.data);
           })
           .catch((error) => {
@@ -140,7 +139,7 @@ function Users() {
 
   return (
     <div className="Users">
-      <div className="Heading">
+      <div className="Heading py-2">
       <h1 >All Users</h1>
       <div className="pagination-range">
           <div className="header">Items</div>

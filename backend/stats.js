@@ -4,11 +4,6 @@ const db = require("./db");
 
 const router = express.Router();
 
-router.get("/test", async (req, res) => {
-  console.log(`ENDPOINT CALLED: /test`);
-  res.send("Backend Responded Succesfully");
-});
-
 router.get("/getLibraryOverview", async (req, res) => {
   try {
     const { rows } = await db.query("SELECT * FROM jf_library_count_view");
@@ -202,7 +197,6 @@ router.post("/getGlobalUserStats", async (req, res) => {
     if (hours === undefined) {
       _hours = 24;
     }
-    console.log(`select * from fs_user_stats(${_hours},'${userid}')`);
     const { rows } = await db.query(
       `select * from fs_user_stats(${_hours},'${userid}')`
     );
@@ -246,7 +240,6 @@ router.post("/getGlobalLibraryStats", async (req, res) => {
     if (hours === undefined) {
       _hours = 24;
     }
-    console.log(`select * from fs_library_stats(${_hours},'${libraryid}')`);
     const { rows } = await db.query(
       `select * from fs_library_stats(${_hours},'${libraryid}')`
     );
@@ -266,6 +259,16 @@ router.get("/getLibraryCardStats", async (req, res) => {
     res.send(error);
   }
 });
+
+router.get("/getLibraryMetadata", async (req, res) => {
+  try {
+    const { rows } = await db.query("select * from js_library_metadata");
+    res.send(rows);
+  } catch (error) {
+    res.send(error);
+  }
+});
+
 
 router.post("/getLibraryLastPlayed", async (req, res) => {
   try {
@@ -400,6 +403,28 @@ stats.forEach((item) => {
 });
 const finalData = {libraries:libraries,stats:Object.values(reorganizedData)};
     res.send(finalData);
+  } catch (error) {
+    console.log(error);
+    res.send(error);
+  }
+});
+
+router.post("/getGlobalItemStats", async (req, res) => {
+  try {
+    const { hours,itemid } = req.body;
+    let _hours = hours;
+    if (hours === undefined) {
+      _hours = 24;
+    }
+    const { rows } = await db.query(
+      `select count(*)"Plays",
+      sum("PlaybackDuration") total_playback_duration
+      from jf_playback_activity
+      where 
+      ("EpisodeId"='${itemid}' OR "SeasonId"='${itemid}' OR "NowPlayingItemId"='${itemid}')
+      AND jf_playback_activity."ActivityDateInserted" BETWEEN CURRENT_DATE - INTERVAL '1 hour' * ${_hours} AND NOW();`
+    );
+    res.send(rows[0]);
   } catch (error) {
     console.log(error);
     res.send(error);

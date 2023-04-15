@@ -1,7 +1,8 @@
 import React, {useState} from "react";
+import { Link } from "react-router-dom";
 import { Blurhash } from 'react-blurhash';
 
-import "../../../css/lastplayed.css";
+import "../../css/lastplayed.css";
 
 function formatTime(time) {
   
@@ -28,10 +29,11 @@ function formatTime(time) {
   }
   
 
-function LastPlayedItem(props) {
+function LastWatchedCard(props) {
   const [loaded, setLoaded] = useState(false);
   return (
     <div className="last-card">
+     <Link to={`/item/${props.data.Id}`}>
       <div className="last-card-banner">
         {loaded ? null : <Blurhash hash={props.data.PrimaryImageHash} width={'100%'}   height={'100%'}/>}
         <img
@@ -42,11 +44,12 @@ function LastPlayedItem(props) {
                 props.data.Id +
                 "/Images/Primary?fillHeight=320&fillWidth=213&quality=50"}`
           }
-          onLoad={() => setLoaded(true)}
           alt=""
+          onLoad={() => setLoaded(true)}
           style={loaded ? { backgroundImage: `url(path/to/image.jpg)` } : { display: 'none' }}
         />
       </div>
+    </Link>
 
       <div className="last-item-details">
         <div className="last-last-played">
@@ -64,4 +67,4 @@ function LastPlayedItem(props) {
   );
 }
 
-export default LastPlayedItem;
+export default LastWatchedCard;

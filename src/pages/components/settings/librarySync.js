@@ -44,7 +44,7 @@ export default function LibrarySync() {
       return (
         <div className="settings-form">
           <h1 className="my-2">Tasks</h1>
-          <Row className="mb-3" controlId="form_task_sync">
+          <Row className="mb-3">
 
             <Form.Label column sm="2">
               Syncronize with Jellyfin

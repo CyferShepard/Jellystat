@@ -26,7 +26,7 @@
             ? item.ParentBackdropImageTags[0]
             : null,
         SeriesName: item.SeriesName,
-        SeriesId: item.ParentId,
+        SeriesId: item.SeriesId,
         SeriesPrimaryImageTag: item.SeriesPrimaryImageTag,
       });
 

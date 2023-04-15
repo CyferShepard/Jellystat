@@ -122,7 +122,7 @@ export default function SettingsConfig() {
       <div className="general-settings-page">
         <h1>General Settings</h1>
         <Form onSubmit={handleFormSubmit} className="settings-form">
-          <Form.Group as={Row} className="mb-3" controlId="form_jellyfin_url">
+          <Form.Group as={Row} className="mb-3" >
             <Form.Label column className="fs-4">
               Jellyfin Url
             </Form.Label>
@@ -131,7 +131,7 @@ export default function SettingsConfig() {
             </Col>
           </Form.Group>
 
-          <Form.Group as={Row} className="mb-3" controlId="form_api_key">
+          <Form.Group as={Row} className="mb-3">
             <Form.Label column  className="fs-4">
               API Key
             </Form.Label>

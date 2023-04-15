@@ -6,7 +6,7 @@ import "../../css/stats.css";
 function PlayStatsByHour(props) {
   const [stats, setStats] = useState();
   const [libraries, setLibraries] = useState();
-  const [days, setDays] = useState(60);
+  const [days, setDays] = useState(20);
   const token = localStorage.getItem("token");
 
   useEffect(() => {
@@ -62,7 +62,7 @@ function PlayStatsByHour(props) {
 
   return (
     <div className="statistics-widget">
-      <h1>Play Count By Hour - Last {days} Days</h1>
+      <h2 className="text-start my-2">Play Count By Hour - Last {days} Days</h2>
       <div className="graph small">
       <Chart libraries={libraries} stats={stats} />
       </div>

@@ -20,13 +20,14 @@
 .small
 {
     height: 500px;
-    
+
 }
 
 .statistics-graphs
 {
-    display: flex;
-    justify-content: space-between;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    grid-gap: 20px;
     margin-bottom: 20px;
 
 
@@ -42,12 +43,6 @@
   margin-bottom: 10px !important;
 }
 
-.statistics-widget
-{
-    flex: 1;
-    max-width: 49.5%;
-    /* margin-right: 20px; */
-}
 
 .statistics-widget h1{
   margin-bottom: 10px !important;
@@ -57,13 +52,13 @@
     width: 100%;
     height: 400px;
   }
-  
+
   @media (min-width: 768px) {
     .chart-canvas {
       height: 500px;
     }
   }
-  
+
   @media (min-width: 992px) {
     .chart-canvas {
       height: 600px;

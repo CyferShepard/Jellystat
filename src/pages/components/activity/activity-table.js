@@ -86,7 +86,7 @@ function ActivityTable(props) {
                 <div className='table-rows' key={item.NowPlayingItemId+item.EpisodeId} onClick={() => handleCollapse(item.NowPlayingItemId+item.EpisodeId)}>
                     <div className='table-rows-content'>
                       <div><Link to={`/users/${item.UserId}`}>{item.UserName}</Link></div>
-                      <div>{!item.SeriesName ? item.NowPlayingItemName : item.SeriesName+' - '+ item.NowPlayingItemName}</div>
+                      <div><Link to={`/item/${item.EpisodeId || item.NowPlayingItemId}`}>{!item.SeriesName ? item.NowPlayingItemName : item.SeriesName+' - '+ item.NowPlayingItemName}</Link></div>
                       <div>{Intl.DateTimeFormat('en-UK', options).format(new Date(item.ActivityDateInserted))}</div>
                       <div>{item.results.length+1}</div>
                     </div>
@@ -95,7 +95,7 @@ function ActivityTable(props) {
 
                          <div className='table-rows-content  bg-grey sub-row' key={sub_item.EpisodeId+index}>
                             <div><Link to={`/users/${sub_item.UserId}`}>{sub_item.UserName}</Link></div>
-                            <div>{!sub_item.SeriesName ? sub_item.NowPlayingItemName : sub_item.SeriesName+' - '+ sub_item.NowPlayingItemName}</div>
+                            <div><Link to={`/item/${sub_item.EpisodeId || sub_item.Id}`}>{!sub_item.SeriesName ? sub_item.NowPlayingItemName : sub_item.SeriesName+' - '+ sub_item.NowPlayingItemName}</Link></div>
                             <div>{Intl.DateTimeFormat('en-UK', options).format(new Date(sub_item.ActivityDateInserted))}</div>
                             <div></div>
                         </div>

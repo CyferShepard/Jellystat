@@ -17,7 +17,7 @@ function ItemStatComponent(props) {
   const cardStyle = {
     backgroundImage: `url(${props.base_url}/Items/${props.data[0].Id}/Images/Backdrop/?fillWidth=300&quality=10), linear-gradient(to right, #00A4DC, #AA5CC3)`,
     height:'100%',
-    backgroundSize: 'cover',
+    backgroundSize: 'contain',
   };
 
   const cardBgStyle = {
@@ -33,9 +33,9 @@ function ItemStatComponent(props) {
 
 
   return (
-    <Card className="stat-card" style={cardStyle}>
-      <div style={cardBgStyle}>
-        <Row className="h-100">
+    <Card className="stat-card rounded-2" style={cardStyle}>
+      <div style={cardBgStyle} className="rounded-2">
+        <Row className="h-100 rounded-2">
           <Col className="d-none d-lg-block stat-card-banner">
           {props.icon ?
             <div className="stat-card-icon">
@@ -49,8 +49,7 @@ function ItemStatComponent(props) {
                   </div>
                 )}
                 <Card.Img
-                  variant="top"
-                  className="stat-card-image rounded-0"
+                  className="stat-card-image"
                   src={props.base_url + "/Items/" + props.data[0].Id + "/Images/Primary?fillWidth=400&quality=90"}
                   style={{ display: loaded ? 'block' : 'none' }}
                   onLoad={handleImageLoad}
@@ -81,7 +80,17 @@ function ItemStatComponent(props) {
                       <Card.Text>{item.Name}</Card.Text>
                     </Link>
                     :
-                    <Card.Text>{item.Name || item.Client}</Card.Text>
+                      !item.Client && !props.icon ? 
+                      <Link to={`/item/${item.Id}`}>
+                        <Card.Text>{item.Name}</Card.Text>
+                      </Link>
+                      :
+                        !item.Client && props.icon ? 
+                        <Link to={`/libraries/${item.Id}`}>
+                          <Card.Text>{item.Name}</Card.Text>
+                        </Link>
+                        :
+                        <Card.Text>{item.Client}</Card.Text>
                     }
                   </div>
                   

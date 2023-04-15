@@ -9,6 +9,7 @@ const authRouter= require('./auth');
 const apiRouter = require('./api');
 const syncRouter = require('./sync');
 const statsRouter = require('./stats');
+const backupRouter = require('./backup');
 const ActivityMonitor = require('./watchdog/ActivityMonitor');
 
 
@@ -50,6 +51,7 @@ app.use('/auth', authRouter); // mount the API router at /api, with JWT middlewa
 app.use('/api', verifyToken, apiRouter); // mount the API router at /api, with JWT middleware
 app.use('/sync', verifyToken, syncRouter); // mount the API router at /sync, with JWT middleware
 app.use('/stats', verifyToken, statsRouter); // mount the API router at /stats, with JWT middleware
+app.use('/data', backupRouter); // mount the API router at /stats, with JWT middleware
 
 try{
   createdb.createDatabase().then((result) => {
