@@ -74,7 +74,7 @@ function Libraries() {
     return () => clearInterval(intervalId);
   }, [ config]);
 
-  if (!data) {
+  if (!data || !metadata) {
     return <Loading />;
   }
 
