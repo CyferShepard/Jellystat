@@ -17,11 +17,11 @@ function ItemStatComponent(props) {
   const cardStyle = {
     backgroundImage: `url(${props.base_url}/Items/${props.data[0].Id}/Images/Backdrop/?fillWidth=300&quality=10), linear-gradient(to right, #00A4DC, #AA5CC3)`,
     height:'100%',
-    backgroundSize: 'contain',
+    backgroundSize: 'cover',
   };
 
   const cardBgStyle = {
-    backdropFilter: 'blur(10px)',
+    backdropFilter: 'blur(5px)',
     backgroundColor: 'rgb(0, 0, 0, 0.6)',
     height:'100%',
   };

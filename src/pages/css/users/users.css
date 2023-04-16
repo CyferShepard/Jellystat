@@ -124,7 +124,7 @@ td:first-child {
   color: white;
   display: flex;
   background-color: rgb(100, 100, 100,0.3);
-  border-radius: 4px;
+  border-radius: 8px;
   font-size: 1.2em;
   align-self: flex-end;
   justify-content: space-between;
@@ -136,7 +136,7 @@ td:first-child {
   height: 35px;
   outline: none;
   border: none;
-  border-radius: 4px;
+  border-radius: 8px;
   background-color: rgb(255, 255, 255, 0.1);
   color:white;
   font-size: 1em;

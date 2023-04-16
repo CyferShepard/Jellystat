@@ -4,7 +4,7 @@
   grid-template-columns: repeat(auto-fit, minmax(320px, 520px));
   grid-auto-rows: 200px;/* max-width+offset so 215 + 20*/
   /* margin-right: 20px; */
-  margin-top: 4px;
+  margin-top: 8px;
 }
 .stat-card{
   border: 0 !important;
@@ -12,7 +12,7 @@
   color: white;
   max-width: 500px;
   max-height: 180px;
-  border-radius: 4px !important;
+  border-radius: 8px !important;
 }
 
 .stat-card-banner
@@ -71,7 +71,7 @@
   color: white;
   display: flex;
   background-color: rgb(100, 100, 100,0.3);
-  border-radius: 4px;
+  border-radius: 8px;
   font-size: 1.2em;
   align-self: flex-end;
   justify-content: space-evenly;

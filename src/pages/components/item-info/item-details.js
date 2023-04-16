@@ -75,7 +75,6 @@ function ItemDetails(props) {
         </h1>
 
         <div className="my-3">
-            {props.data.CommunityRating ? <p style={{color:"lightgrey", fontSize:"0.8em", fontStyle:"italic"}}>Community Rating: {props.data.CommunityRating}</p> :<></>}
             {props.data.Type==="Episode"? <p><Link to={`/item/${props.data.SeasonId}`} className="fw-bold">{props.data.SeasonName}</Link> Episode {props.data.IndexNumber} - {props.data.Name}</p> : <></> }
             {props.data.Type==="Season"? <p>{props.data.Name}</p> : <></> }
             {props.data.FileName ?  <p style={{color:"lightgrey"}} className="fst-italic fs-6">File Name: {props.data.FileName}</p> :<></>}      

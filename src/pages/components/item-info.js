@@ -33,7 +33,6 @@ useEffect(() => {
     if(config){
       setRefresh(true);
     try {
-      console.log(Id);
       const itemData = await axios.post(`/api/getItemDetails`, {
         Id: Id
       }, {
@@ -64,7 +63,7 @@ useEffect(() => {
   return () => clearInterval(intervalId);
 }, [config, Id]);
 
-console.log(data);
+
 
 
 if(!data)

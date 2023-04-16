@@ -14,7 +14,7 @@ function LibraryStatComponent(props) {
   };
 
   const cardBgStyle = {
-    backdropFilter: 'blur(10px)',
+    backdropFilter: 'blur(5px)',
     backgroundColor: 'rgb(0, 0, 0, 0.6)',
     height:'100%',
   };
