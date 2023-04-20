@@ -68,7 +68,7 @@ async function ActivityMonitor(interval) {
 
       }
 
-      // console.log(WatchdogDataToUpdate);
+
   
       if (WatchdogDataToInsert.length !== 0) {
         db.insertBulk("jf_activity_watchdog",WatchdogDataToInsert,jf_activity_watchdog_columns);
@@ -94,13 +94,9 @@ async function ActivityMonitor(interval) {
             obj.PlaybackDuration =parseInt(obj.PlaybackDuration)+ diffInSeconds;
           }
 
-          // obj.ActivityDateInserted =endTime.format('YYYY-MM-DD HH:mm:ss.SSSZ');
-          obj.ActivityDateInserted = `'${endTime.format('YYYY-MM-DD HH:mm:ss.SSSZ')}'::timestamptz`;
+         obj.ActivityDateInserted = `'${endTime.format('YYYY-MM-DD HH:mm:ss.SSSZ')}'::timestamptz`;
           
           const {...rest } = obj;
-
-          console.log(startTime.format('YYYY-MM-DD HH:mm:ss.SSSZ')+" | "+ obj.ActivityDateInserted);
-          console.log(obj.PlaybackDuration);
 
           return { ...rest };
         });
@@ -149,10 +145,8 @@ async function ActivityMonitor(interval) {
         obj.Id=uuid;
          
         let startTime = moment(obj.ActivityDateInserted, 'YYYY-MM-DD HH:mm:ss.SSSZ');
-        console.log('startTime: '+startTime.format('YYYY-MM-DD HH:mm:ss.SSSZ'));
         let endTime = moment();
-        console.log('endTime: '+endTime.format('YYYY-MM-DD HH:mm:ss.SSSZ'));
-
+       
         let diffInSeconds = endTime.diff(startTime, 'seconds');
 
        
@@ -186,7 +180,7 @@ async function ActivityMonitor(interval) {
 
 
     } catch (error) {
-      console.log(error);
+      // console.log(error);
       return [];
     }
   }, interval);
