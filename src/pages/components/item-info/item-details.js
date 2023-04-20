@@ -3,6 +3,8 @@ import { Link } from "react-router-dom";
 import { Blurhash } from 'react-blurhash';
 import { Row, Col } from "react-bootstrap";
 
+import ExternalLinkFillIcon from "remixicon-react/ExternalLinkFillIcon";
+
 
 import "../../css/items/item-details.css";
 
@@ -65,14 +67,17 @@ function ItemDetails(props) {
 
         <Col >
         <div className="item-details">
-       <h1 className="">
-          {props.data.SeriesId?
-             <Link to={`/item/${props.data.SeriesId}`}>{props.data.SeriesName || props.data.Name}</Link>
-          :
-            props.data.SeriesName || props.data.Name
-          }
+          <div className="d-flex">
+          <h1 className="">
+            {props.data.SeriesId?
+               <Link to={`/item/${props.data.SeriesId}`}>{props.data.SeriesName || props.data.Name}</Link>
+            :
+              props.data.SeriesName || props.data.Name
+            }
 
-        </h1>
+          </h1>
+          <Link className="px-2" to={ props.hostUrl+"/web/index.html#!/details?id="+ (props.data.EpisodeId ||props.data.Id)}  title="Open in Jellyfin" target="_blank"><ExternalLinkFillIcon/></Link>
+        </div>
 
         <div className="my-3">
             {props.data.Type==="Episode"? <p><Link to={`/item/${props.data.SeasonId}`} className="fw-bold">{props.data.SeasonName}</Link> Episode {props.data.IndexNumber} - {props.data.Name}</p> : <></> }

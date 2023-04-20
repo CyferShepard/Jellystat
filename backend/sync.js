@@ -13,6 +13,7 @@ const {jf_library_items_columns,jf_library_items_mapping,} = require("./models/j
 const {jf_library_seasons_columns,jf_library_seasons_mapping,} = require("./models/jf_library_seasons");
 const {jf_library_episodes_columns,jf_library_episodes_mapping,} = require("./models/jf_library_episodes");
 const {jf_item_info_columns,jf_item_info_mapping,} = require("./models/jf_item_info");
+const {columnsPlaybackReporting,mappingPlaybackReporting}= require("./models/jf_playback_reporting_plugin_data");
 
 const {jf_users_columns,jf_users_mapping,} = require("./models/jf_users");
 
@@ -452,8 +453,8 @@ async function syncItemInfo()
   }
 
   const _sync = new sync(config[0].JF_HOST, config[0].JF_API_KEY);
-  const { rows: Items } = await db.query(`SELECT *	FROM public.jf_library_items where "Type" not in ('Series','Folder')`);
-  const { rows: Episodes } = await db.query(`SELECT *	FROM public.jf_library_episodes`);
+  const { rows: Items } = await db.query(`SELECT li.*	FROM public.jf_library_items li left join jf_item_info ii on ii."Id"=li."Id" where li."Type" not in ('Series','Folder') and ii."Id" is null`);
+  const { rows: Episodes } = await db.query(`SELECT le.*	FROM public.jf_library_episodes le left join jf_item_info ii on ii."Id"=le."EpisodeId" where ii."Id" is null`);
 
   let insertItemInfoCount = 0;
   let insertEpisodeInfoCount = 0;
@@ -550,10 +551,74 @@ async function syncItemInfo()
 
   sendMessageToClients({color: "dodgerblue",Message: insertItemInfoCount + " Item Info inserted.",});
   sendMessageToClients({color: "orange",Message: deleteItemInfoCount + " Item Info Removed.",});
-  sendMessageToClients({color: "dodgerblue",Message: insertEpisodeInfoCount + " Episodes inserted.",});
-  sendMessageToClients({color: "orange",Message: deleteEpisodeInfoCount + " Episodes Removed.",});
+  sendMessageToClients({color: "dodgerblue",Message: insertEpisodeInfoCount + " Episodes Info inserted.",});
+  sendMessageToClients({color: "orange",Message: deleteEpisodeInfoCount + " Episodes Info Removed.",});
   sendMessageToClients({ color: "lawngreen", Message: "Sync Complete" });
 }
+
+async function syncPlaybackPluginData()
+{
+  sendMessageToClients({ color: "lawngreen", Message: "Syncing... 3/3" });
+  sendMessageToClients({color: "yellow", Message: "Beginning File Info Sync",});
+
+  try {
+    const { rows: config } = await db.query(
+      'SELECT * FROM app_config where "ID"=1'
+    );
+  
+    
+    if(config.length===0)
+    {
+      return;
+    }
+    const base_url = config[0].JF_HOST;
+    const apiKey = config[0].JF_API_KEY;
+  
+    if (base_url === null || config[0].JF_API_KEY === null) {
+      return;
+    }
+
+    const { rows: pbData } = await db.query(
+      'SELECT * FROM jf_playback_reporting_plugin_data order by rowid desc limit 1'
+    );
+
+    let query=`SELECT rowid, * FROM PlaybackActivity`;
+
+    
+
+    if(pbData[0])
+    {
+      query+=' where rowid > '+pbData[0].rowid;
+    }
+    query+=' order by rowid';
+
+    const url = `${base_url}/user_usage_stats/submit_custom_query`;
+
+    const response = await axios.post(url, {
+      CustomQueryString: query,
+    }, {
+      headers: {
+        "X-MediaBrowser-Token": apiKey,
+      },
+    });
+
+    const PlaybackData=response.data.results;
+
+    let DataToInsert = await PlaybackData.map(mappingPlaybackReporting);
+
+
+    if (DataToInsert.length !== 0) {
+      let result=await db.insertBulk("jf_playback_reporting_plugin_data",DataToInsert,columnsPlaybackReporting);
+      console.log(result);
+    }    
+  
+     } catch (error) {
+      console.log(error);
+     return [];
+   }
+   
+}
+
 
 ////////////////////////////////////////API Calls
 
@@ -608,6 +673,16 @@ router.get("/writeMediaInfo", async (req, res) => {
 });
 
 //////////////////////////////////////
+
+//////////////////////////////////////////////////////syncPlaybackPluginData
+router.get("/syncPlaybackPluginData", async (req, res) => {
+  await syncPlaybackPluginData();
+  res.send();
+
+});
+
+//////////////////////////////////////
+
 
 
 module.exports = router;

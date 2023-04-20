@@ -1,21 +1,22 @@
 const db = require("../db");
 const pgp = require("pg-promise")();
 const axios = require("axios");
+const moment = require('moment');
 const { columnsPlayback, mappingPlayback } = require('../models/jf_playback_activity');
 const { jf_activity_watchdog_columns, jf_activity_watchdog_mapping } = require('../models/jf_activity_watchdog');
+const { randomUUID }  = require('crypto');
 
 async function ActivityMonitor(interval) {
   console.log("Activity Interval: " + interval);
 
-  
-  
+ 
 
   setInterval(async () => {
     try {
       const { rows: config } = await db.query(
         'SELECT * FROM app_config where "ID"=1'
       );
-    
+     
       
       if(config.length===0)
       {
@@ -81,16 +82,25 @@ async function ActivityMonitor(interval) {
 
         const WatchdogDataUpdated = WatchdogDataToUpdate.map(obj => {
          
-          const startTime = new Date(obj.ActivityDateInserted);
-          const endTime =new Date();
-          const diffInSeconds = Math.floor((endTime - startTime) / 1000);
+
+
+
+          let startTime = moment(obj.ActivityDateInserted, 'YYYY-MM-DD HH:mm:ss.SSSZ');
+          let endTime = moment();
+
+          let diffInSeconds = endTime.diff(startTime, 'seconds');
 
           if(obj.IsPaused) {
             obj.PlaybackDuration =parseInt(obj.PlaybackDuration)+ diffInSeconds;
           }
 
-          obj.ActivityDateInserted = `to_timestamp('${new Date().toISOString()}', 'YYYY-MM-DD"T"HH24:MI:SS.MS"Z"')`;
+          // obj.ActivityDateInserted =endTime.format('YYYY-MM-DD HH:mm:ss.SSSZ');
+          obj.ActivityDateInserted = `'${endTime.format('YYYY-MM-DD HH:mm:ss.SSSZ')}'::timestamptz`;
+          
           const {...rest } = obj;
+
+          console.log(startTime.format('YYYY-MM-DD HH:mm:ss.SSSZ')+" | "+ obj.ActivityDateInserted);
+          console.log(obj.PlaybackDuration);
 
           return { ...rest };
         });
@@ -134,15 +144,24 @@ async function ActivityMonitor(interval) {
 
       
       const playbackToInsert = playbackData.map(obj => {
+        const uuid = randomUUID()
+
+        obj.Id=uuid;
          
-        const startTime = new Date(obj.ActivityDateInserted);
-        const endTime =new Date();
-        const diffInSeconds = Math.floor((endTime - startTime) / 1000);
+        let startTime = moment(obj.ActivityDateInserted, 'YYYY-MM-DD HH:mm:ss.SSSZ');
+        console.log('startTime: '+startTime.format('YYYY-MM-DD HH:mm:ss.SSSZ'));
+        let endTime = moment();
+        console.log('endTime: '+endTime.format('YYYY-MM-DD HH:mm:ss.SSSZ'));
+
+        let diffInSeconds = endTime.diff(startTime, 'seconds');
+
+       
 
         if(!obj.IsPaused) {
-          obj.PlaybackDuration =parseInt(obj.PlaybackDuration)+ diffInSeconds;
+          obj.PlaybackDuration =parseInt(obj.PlaybackDuration)+ diffInSeconds; 
         }
-        obj.ActivityDateInserted = new Date().toISOString();
+
+        obj.ActivityDateInserted =endTime.format('YYYY-MM-DD HH:mm:ss.SSSZ');
         const {...rest } = obj;
 
         return { ...rest };
@@ -167,7 +186,7 @@ async function ActivityMonitor(interval) {
 
 
     } catch (error) {
-      // console.log(error);
+      console.log(error);
       return [];
     }
   }, interval);

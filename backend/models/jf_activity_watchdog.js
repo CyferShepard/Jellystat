@@ -1,3 +1,7 @@
+const moment = require('moment');
+
+
+
 const jf_activity_watchdog_columns = [
     "Id",
     "IsPaused",
@@ -34,7 +38,7 @@ const jf_activity_watchdog_columns = [
     SeriesName: item.NowPlayingItem.SeriesName || null,
     PlaybackDuration: item.PlaybackDuration !== undefined ? item.PlaybackDuration: 0,
     PlayMethod:item.PlayState.PlayMethod,
-    ActivityDateInserted: item.ActivityDateInserted !== undefined ?  item.ActivityDateInserted: new Date().toISOString(),
+    ActivityDateInserted: item.ActivityDateInserted !== undefined ?  item.ActivityDateInserted: moment().format('YYYY-MM-DD HH:mm:ss.SSSZ'),
   });
 
   module.exports = {
