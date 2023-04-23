@@ -12,7 +12,7 @@
     /* margin: 25px 0; */
     font-size: 0.9em;
     font-family: sans-serif;
-    min-width: 400px;
+    /* min-width: 400px; */
     /* box-shadow: 0 0 20px rgba(255, 255, 255, 0.15); */
     background-color: rgba(100,100, 100, 0.2);
     color: white;
@@ -20,13 +20,24 @@
 
 }
 
- th,
+
  td
   {
     padding: 15px 15px;
     border-bottom: 1px solid rgba(255, 255, 255, 0.05);
- 
 
+}
+
+
+
+@media screen and (max-width: 576px) {
+  td[data-cell]::before {
+    content: attr(data-cell)": ";
+    font-weight: bold;
+    text-transform: capitalize;
+    color: #a8a8a8;
+  
+  }
 }
 
 
@@ -43,16 +54,24 @@ td:hover a{
 
 
 th {
+    padding: 15px 15px;
     background-color: rgba(0, 0, 0, 0.8);
     border-right: 1px solid rgba(255, 255, 255, 0.05);
+    border-bottom: 1px solid transparent  !important;
     cursor: pointer;
 }
 
 th:hover {
-    border-bottom: 1px solid rgba(255, 255, 255, 0.5);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.5)  !important;
 }
 
+tr:nth-child(even) {
+  background-color: rgba(100, 100, 100, 0.1);
+}
 
+tr:nth-child(odd) {
+  background-color: rgba(0, 0, 0, 0.1);
+}
 
 /* tbody tr:last-of-type {
     border-bottom: 2px solid #009879;

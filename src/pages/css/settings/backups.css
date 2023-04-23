@@ -1,0 +1,22 @@
+tr{
+    color: white;
+}
+
+th:hover{
+    border-bottom: none !important;
+}
+
+th{
+    border-bottom: none !important;
+    cursor: default !important;
+    background-color: rgba(0, 0, 0, 0.8) !important;
+}
+
+.backup-file-download
+{
+    cursor: pointer;
+}
+
+td{
+    border-bottom: none !important;
+}

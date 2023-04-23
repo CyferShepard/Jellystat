@@ -1,10 +1,11 @@
 const WebSocket = require('ws');
 
-function createWebSocketServer(port) {
-  const wss = new WebSocket.Server({ port });
+function createWebSocketServer() {
+  var messages=[];
+  const port=process.env.WS_PORT || 3004 ;
+  const wss = new WebSocket.Server({port});
 
   // function to handle WebSocket connections
-
   function handleConnection(ws) {
     console.log('Client connected');
 
@@ -17,24 +18,30 @@ function createWebSocketServer(port) {
     ws.on('close', () => {
       console.log('Client disconnected');
     });
-  }
 
+    ws.send(JSON.stringify(messages));
+  }
 
   // call the handleConnection function for each new WebSocket connection
   wss.on('connection', handleConnection);
 
   // define a separate method that sends a message to all connected clients
   function sendMessageToClients(message) {
+    messages.push(message);
     wss.clients.forEach((client) => {
       if (client.readyState === WebSocket.OPEN) {
-        let parsedMessage = JSON.stringify(message);
-        console.log(parsedMessage);
-        client.send(parsedMessage);
+        client.send(JSON.stringify(messages));
       }
     });
   }
 
-  return sendMessageToClients;
+  function clearMessages() {
+    messages=[];
+  }
+
+  return {sendMessageToClients, clearMessages, wss};
 }
 
-module.exports = createWebSocketServer;
+const wsServer = createWebSocketServer();
+
+module.exports = wsServer;

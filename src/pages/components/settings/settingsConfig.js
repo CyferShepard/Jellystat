@@ -10,7 +10,7 @@ import Alert from 'react-bootstrap/Alert';
 
 
 
-import "../../css/settings.css";
+import "../../css/settings/settings.css";
 import { ButtonGroup } from "react-bootstrap";
 
 export default function SettingsConfig() {

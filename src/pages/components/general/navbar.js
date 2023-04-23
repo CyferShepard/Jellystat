@@ -15,7 +15,7 @@ export default function Navbar() {
   return (
     <BootstrapNavbar variant="dark" expand="md" className="navbar py-0">
       <Container fluid>
-      <BootstrapNavbar.Brand href="#home">Jellystat</BootstrapNavbar.Brand>
+      <BootstrapNavbar.Brand as={Link} to={"/"}>Jellystat</BootstrapNavbar.Brand>
       <BootstrapNavbar.Toggle aria-controls="responsive-navbar-nav" />
       <BootstrapNavbar.Collapse id="responsive-navbar-nav">
             <Nav className="ms-auto">

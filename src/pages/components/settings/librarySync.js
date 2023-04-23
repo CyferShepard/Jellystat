@@ -6,7 +6,7 @@ import Row from 'react-bootstrap/Row';
 import Col from 'react-bootstrap/Col';
 
 
-import "../../css/settings.css";
+import "../../css/settings/settings.css";
 
 export default function LibrarySync() {
   const [processing, setProcessing] = useState(false);
@@ -18,6 +18,30 @@ export default function LibrarySync() {
 
         await axios
         .get("/sync/beingSync", {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+        })
+        .then((response) => {
+          if (response.status === 200) {
+            // isValid = true;
+          }
+        })
+        .catch((error) => {
+           console.log(error);
+        });
+          setProcessing(false);
+        // return { isValid: isValid, errorMessage: errorMessage };
+      }
+
+      async function createBackup() {
+
+
+        setProcessing(true);
+
+        await axios
+        .get("/data/backup", {
           headers: {
             Authorization: `Bearer ${token}`,
             "Content-Type": "application/json",
@@ -51,7 +75,18 @@ export default function LibrarySync() {
             </Form.Label>
 
             <Col sm="10">
-            <Button variant={!processing ? "outline-primary" : "outline-light"} disabled={processing} onClick={handleClick}>Run Sync</Button>
+            <Button variant={!processing ? "outline-primary" : "outline-light"} disabled={processing} onClick={handleClick}>Start</Button>
+            </Col>
+          </Row>
+
+          <Row className="mb-3">
+
+            <Form.Label column sm="2">
+              Create Backup
+            </Form.Label>
+
+            <Col sm="10">
+            <Button variant={!processing ? "outline-primary" : "outline-light"} disabled={processing} onClick={createBackup}>Start</Button>
             </Col>
           </Row>
          

@@ -12,7 +12,7 @@ const TerminalComponent = () => {
     // handle incoming messages
     socket.addEventListener('message', (event) => {
         let message = JSON.parse(event.data);
-      setMessages(prevMessages => [...prevMessages, message]);
+      setMessages(message);
     });
 
     // cleanup function to close the WebSocket connection when the component unmounts

@@ -55,6 +55,13 @@ function LastWatchedCard(props) {
         <div className="last-last-played">
           {formatTime(props.data.LastPlayed)} 
         </div>
+
+        <div className="pb-2">
+          <Link to={`/users/${props.data.UserId}`}>
+            {props.data.UserName}
+          </Link>
+        </div>
+
         <div className="last-item-name"> {props.data.Name}</div>
         <div className="last-item-episode"> {props.data.EpisodeName}</div>
       </div>
