@@ -187,7 +187,7 @@ router.get("/getHistory", async (req, res) => {
    
 
     const { rows } = await db.query(
-      `SELECT * FROM jf_all_playback_activity order by "ActivityDateInserted" desc`
+      `SELECT * FROM jf_playback_activity order by "ActivityDateInserted" desc`
     );
 
     const groupedResults = {};

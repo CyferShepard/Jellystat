@@ -6,9 +6,6 @@ const moment = require('moment');
 
 const wss = require("./WebsocketHandler");
 
-var messages=[];
-
-
 const router = Router();
 
 // Database connection parameters
@@ -21,6 +18,7 @@ const postgresDatabase = process.env.POSTGRES_DATABASE || 'jfstat';
 // Tables to back up
 const tables = ['jf_libraries', 'jf_library_items', 'jf_library_seasons','jf_library_episodes','jf_users','jf_playback_activity','jf_playback_reporting_plugin_data','jf_item_info'];
 
+
 // Backup function
 async function backup() {
   const pool = new Pool({
@@ -32,10 +30,15 @@ async function backup() {
   });
 
   // Get data from each table and append it to the backup file
+ 
+ 
+  try{
+
   let now = moment();
   const backupPath = `./backup-data/backup_${now.format('yyyy-MM-DD HH-mm-ss')}.json`;
   const stream = fs.createWriteStream(backupPath, { flags: 'a' });
   const backup_data=[];
+  
   wss.clearMessages();
   wss.sendMessageToClients({ color: "yellow", Message: "Begin Backup "+backupPath });
   for (let table of tables) {
@@ -43,104 +46,110 @@ async function backup() {
 
     const { rows } = await pool.query(query);
     console.log(`Reading ${rows.length} rows for table ${table}`);
-  wss.sendMessageToClients({color: "dodgerblue",Message: `Saving ${rows.length} rows for table ${table}`});
+    wss.sendMessageToClients({color: "dodgerblue",Message: `Saving ${rows.length} rows for table ${table}`});
 
-   backup_data.push({[table]:rows});
-    // stream.write(JSON.stringify(backup_data));
+    backup_data.push({[table]:rows});
     
   }
 
-  wss.sendMessageToClients({ color: "lawngreen", Message: "Backup Complete" });
-  stream.write(JSON.stringify(backup_data));
-  stream.end();
+
+    await stream.write(JSON.stringify(backup_data));
+    stream.end();
+    wss.sendMessageToClients({ color: "lawngreen", Message: "Backup Complete" });
+
+  }catch(error)
+  {
+    console.log(error);
+    wss.sendMessageToClients({ color: "red", Message: "Backup Failed: "+error });
+  }
+ 
 
   await pool.end();
 }
 
 // Restore function
-async function restore() {
-    // const pool = new Pool({
-    //   user: 'postgres',
-    //   password: 'mypassword',
-    //   host: postgresIp,
-    //   port: 25432,
-    //   database: postgresDatabase
-    // });
 
-    let user='postgres';
-    let password='mypassword';
-    let host=postgresIp;
-    let port=25432;
-    let database= postgresDatabase;
 
-    const client = new Pool({
-      host,
-      port,
-      database,
-      user,
-      password
-    });
-    const backupPath = './backup-data/backup.json';
-
-    let jsonData;
-    await fs.readFile(backupPath, 'utf8', async (err, data) => {
+function readFile(path) {
+  return new Promise((resolve, reject) => {
+    fs.readFile(path, 'utf8', (err, data) => {
       if (err) {
-        console.error(err);
+        reject(err);
         return;
       }
-
-       jsonData = await JSON.parse(data);
+      const json = JSON.parse(data);
+      resolve(json);
     });
+  });
+}
 
-    console.log(jsonData);
+async function restore(file) {
+  wss.clearMessages();
+  wss.sendMessageToClients({ color: "yellow", Message: "Restoring from Backup: "+file });
+  const pool = new Pool({
+    user: postgresUser,
+    password: postgresPassword,
+    host: postgresIp,
+    port: postgresPort,
+    database: postgresDatabase
+  });
+
+    const backupPath = file;
+
+    let jsonData;
+
+    try {
+      // Use await to wait for the Promise to resolve
+      jsonData = await readFile(backupPath);
+
+    } catch (err) {
+      console.error(err);
+    }
+
+    // console.log(jsonData);
     if(!jsonData)
     {
+      console.log('No Data');
       return;
     }
 
-    jsonData.forEach((library) => {
+    for(let table of jsonData)
+    {
+      const data = Object.values(table)[0];
+      const tableName=Object.keys(table)[0];
 
-      console.log(library);
-    });
+      for(let index in data)
+      {
 
-    // await client.connect();
+        wss.sendMessageToClients({ color: "dodgerblue",key:tableName ,Message: `Restoring ${tableName} ${(((index)/(data.length-1))*100).toFixed(2)}%`});
 
-   
+        const keysWithQuotes = Object.keys(data[index]).map(key => `"${key}"`);
+        const keyString = keysWithQuotes.join(", ");
 
-    // let tableStarted = false;
-    // let tableColumns = '';
-    // let tableValues = '';
-    // let tableName = '';
-    
-    // for await (const line of rl) {
-    //   if (!tableStarted && line.startsWith('COPY ')) {
-    //     tableName = line.match(/COPY (.*) \(/)[1];
-    //     tableStarted = true;
-    //     tableColumns = '';
-    //     tableValues = '';
-    //   } else if (tableStarted && line.startsWith('\.')) {
-    //     const insertStatement = `INSERT INTO ${tableName} (${tableColumns}) VALUES ${tableValues};`;
-    //     await client.query(insertStatement);
-    //     tableStarted = false;
-    //   } else if (tableStarted && tableColumns === '') {
-    //     tableColumns = line.replace(/\(/g, '').replace(/\)/g, '').replace(/"/g, '').trim();
-    //     tableValues = '';
-    //   } else if (tableStarted) {
-    //     const values = line.replace(/\(/g, '').replace(/\)/g, '').split('\t').map(value => {
-    //       if (value === '') {
-    //         return null;
-    //       }
-    //       if (!isNaN(parseFloat(value))) {
-    //         return parseFloat(value);
-    //       }
-    //       return value.replace(/'/g, "''");
-    //     });
-    //     const rowValues = `(${values.join(',')})`;
-    //     tableValues = `${tableValues}${tableValues === '' ? '' : ','}${rowValues}`;
-    //   }
-    // }
-    
-    // await client.end();
+        const valuesWithQuotes = Object.values(data[index]).map(col => {
+          if (col === null) {
+            return 'NULL';
+          } else if (typeof col === 'string') {
+            return `'${col.replace(/'/g, "''")}'`;
+          }else if (typeof col === 'object') {
+            return `'${JSON.stringify(col).replace(/'/g, "''")}'`;
+          }  else {
+            return `'${col}'`;
+          }
+        });
+
+        const valueString = valuesWithQuotes.join(", ");
+       
+        
+        const query=`INSERT INTO ${tableName} (${keyString}) VALUES(${valueString})  ON CONFLICT DO NOTHING`;
+        const { rows } = await pool.query( query );
+
+      }
+  
+
+    }
+    await pool.end();
+
   }
 
 // Route handler for backup endpoint
@@ -154,13 +163,16 @@ router.get('/backup', async (req, res) => {
   }
 });
 
-router.get('/restore', async (req, res) => {
+router.get('/restore/:filename', async (req, res) => {
     try {
-      await restore();
-      res.send('Backup completed successfully');
+      const filePath = path.join(__dirname, backupfolder, req.params.filename);
+      await restore(filePath);
+      wss.sendMessageToClients({ color: "lawngreen", Message: `Restoring Complete` });
+      res.send('Restore completed successfully');
     } catch (error) {
       console.error(error);
-      res.status(500).send('Backup failed');
+      wss.sendMessageToClients({ color: "red", Message: error });
+      res.status(500).send('Restore failed');
     }
   });
 
@@ -174,7 +186,8 @@ router.get('/restore', async (req, res) => {
       if (err) {
         res.status(500).send('Unable to read directory');
       } else {
-        const fileData = files.map(file => {
+        const fileData = files.filter(file => file.endsWith('.json'))
+        .map(file => {
           const filePath = path.join(directoryPath, file);
           const stats = fs.statSync(filePath);
           return {

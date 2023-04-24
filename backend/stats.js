@@ -170,7 +170,7 @@ router.get("/getPlaybackActivity", async (req, res) => {
 
 router.get("/getAllUserActivity", async (req, res) => {
   try {
-    const { rows } = await db.query("SELECT * FROM jf_all_user_activity");
+    const { rows } = await db.query("SELECT * FROM jf_user_activity");
     res.send(rows);
   } catch (error) {
     res.send(error);

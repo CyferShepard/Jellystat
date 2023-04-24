@@ -21,16 +21,6 @@ const TerminalComponent = () => {
     }
   }, []);
 
-  // function to handle scrolling to the last message
-  const scrollToBottom = () => {
-    messagesEndRef.current.scrollIntoView({ behavior: 'smooth' });
-  }
-
-  // scroll to the last message whenever messages change
-  useEffect(() => {
-    scrollToBottom();
-  }, [messages]);
-
   return (
     <div className='my-4'>
       <div className="console-container">

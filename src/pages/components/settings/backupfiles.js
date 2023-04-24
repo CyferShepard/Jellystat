@@ -1,6 +1,6 @@
 import React, { useState,useEffect } from "react";
 import axios from "axios";
-import  Button  from "react-bootstrap/Button";
+import { DropdownButton, Dropdown, Button } from 'react-bootstrap';
 import  Alert  from "react-bootstrap/Alert";
 
 
@@ -57,6 +57,25 @@ export default function BackupFiles() {
             link.click();
             link.parentNode.removeChild(link);
           });
+      }
+
+      async function restoreBackup(filename) {
+        const url=`/data/restore/${filename}`;
+        axios
+        .get(url, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+        })
+        .then((response) => {
+            setshowAlert({visible:true,title:'Success',type:'success',message:response.data});
+        })
+        .catch((error) => {
+            setshowAlert({visible:true,title:'Error',type:'danger',message:error.response.data});
+        });
+
+
       }
 
       async function deleteBackup(filename) {
@@ -138,7 +157,6 @@ export default function BackupFiles() {
                     <th>Date Created</th>
                     <th>Size</th>
                     <th></th>
-                    <th></th>
                 </tr>
             </thead>
             <tbody>
@@ -148,8 +166,15 @@ export default function BackupFiles() {
                         <td>{file.name}</td>
                         <td>{Intl.DateTimeFormat('en-UK', options).format(new Date(file.datecreated))}</td>
                         <td>{formatFileSize(file.size)}</td>
-                        <td ><Button type="button" onClick={()=>downloadBackup(file.name)}  >Download</Button></td>
-                        <td ><Button type="button" className="btn-danger" onClick={()=>deleteBackup(file.name)}  >Delete</Button></td>
+                        <td>
+                            <DropdownButton title="Actions" variant="outline-primary">
+                                
+                              <Dropdown.Item as="button" variant="primary" onClick={()=>downloadBackup(file.name)}>Download</Dropdown.Item>
+                              <Dropdown.Item as="button" variant="warning" onClick={()=>restoreBackup(file.name)}>Restore</Dropdown.Item>
+                              <Dropdown.Divider ></Dropdown.Divider>
+                              <Dropdown.Item as="button" variant="danger" onClick={()=>deleteBackup(file.name)}>Delete</Dropdown.Item>
+                            </DropdownButton>
+                        </td>
                   </tr>
                 ))}
                 {files.length===0 ? <tr><td colSpan="5" style={{ textAlign: "center", fontStyle: "italic" ,color:"gray"}}>No Backups Found</td></tr> :''}
