@@ -1,9 +1,9 @@
 name: Docker CI Unstable
 on:
   push:
-    branches: [bootstrap]
+    branches: [unstable]
   pull_request:
-    branches: [bootstrap]
+    branches: [unstable]
 
 jobs:
   build:
