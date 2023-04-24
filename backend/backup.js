@@ -37,6 +37,11 @@ async function backup() {
   let now = moment();
   const backupPath = `./backup-data/backup_${now.format('yyyy-MM-DD HH-mm-ss')}.json`;
   const stream = fs.createWriteStream(backupPath, { flags: 'a' });
+  stream.on('error', (error) => {
+    console.error(error);
+    wss.sendMessageToClients({ color: "red", Message: "Backup Failed: "+error });
+    throw new Error(error);
+  });
   const backup_data=[];
   
   wss.clearMessages();
@@ -212,16 +217,23 @@ router.get('/restore/:filename', async (req, res) => {
   router.delete('/files/:filename', (req, res) => {
     const filePath = path.join(__dirname, backupfolder, req.params.filename);
   
-    fs.unlink(filePath, (err) => {
-      if (err) {
-        console.error(err);
-        res.status(500).send('An error occurred while deleting the file.');
-        return;
-      }
-  
-      console.log(`${filePath} has been deleted.`);
-      res.status(200).send(`${filePath} has been deleted.`);
-    });
+    try{
+      fs.unlink(filePath, (err) => {
+        if (err) {
+          console.error(err);
+          res.status(500).send('An error occurred while deleting the file.');
+          return;
+        }
+    
+        console.log(`${filePath} has been deleted.`);
+        res.status(200).send(`${filePath} has been deleted.`);
+      });
+
+    }catch(error)
+    {
+      res.status(500).send('An error occurred while deleting the file.');
+    }
+
   });
   
   
