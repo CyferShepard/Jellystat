@@ -419,7 +419,7 @@ router.post("/getGlobalItemStats", async (req, res) => {
     const { rows } = await db.query(
       `select count(*)"Plays",
       sum("PlaybackDuration") total_playback_duration
-      from jf_all_playback_activity jf_playback_activity
+      from jf_playback_activity jf_playback_activity
       where 
       ("EpisodeId"='${itemid}' OR "SeasonId"='${itemid}' OR "NowPlayingItemId"='${itemid}')
       AND jf_playback_activity."ActivityDateInserted" BETWEEN CURRENT_DATE - INTERVAL '1 hour' * ${_hours} AND NOW();`
