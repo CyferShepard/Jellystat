@@ -173,7 +173,7 @@ router.get("/getAllUserActivity", async (req, res) => {
     const { rows } = await db.query("SELECT * FROM jf_all_user_activity");
     res.send(rows);
   } catch (error) {
-    res.send(error);
+    res.send([]);
   }
 });
 
