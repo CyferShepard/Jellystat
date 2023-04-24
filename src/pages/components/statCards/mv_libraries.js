@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 
-import StatComponent from "./statsComponent";
+
+import ItemStatComponent from "./ItemStatComponent";
 
 import TvLineIcon from "remixicon-react/TvLineIcon";
 import FilmLineIcon from "remixicon-react/FilmLineIcon";
@@ -52,24 +53,7 @@ function MVLibraries(props) {
 
 
   return (
-    <div className="stats-card"
-    >
-    
-    <div className="popular-image">
-        <div  className="library-icons">
-          {data[0].CollectionType==="tvshows" ?
-          
-          <TvLineIcon size={'80%'}/>
-          :
-          <FilmLineIcon size={'80%'}/>
-        }
-
-        </div>
-    </div>
-    <StatComponent data={data} heading={"MOST VIEWED LIBRARIES"} units={"Plays"}/>
-    
-
-    </div>
+    <ItemStatComponent icon={data[0].CollectionType==="tvshows"? <TvLineIcon color="white" size={'100%'}/> :  <FilmLineIcon color="white" size={'100%'}/> } data={data} heading={"MOST VIEWED LIBRARIES"} units={"Plays"}/>
   );
 }
 

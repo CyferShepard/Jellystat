@@ -72,7 +72,7 @@ function RecentlyPlayed(props) {
 
   return (
     <div className="last-played">
-        <h1>Recently Added</h1>
+        <h1 className="my-3">Recently Added</h1>
         <div className="last-played-container">
         {data.filter((item) => ["Series", "Movie","Audio"].includes(item.Type)).map((item) => (
                     <RecentlyAddedCard data={item} base_url={config.hostUrl} key={item.Id}/>

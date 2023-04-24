@@ -1,14 +1,10 @@
-.sessions {
-    margin-bottom: 10px;
 
-    
-}
 
 .sessions-container {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(520px, 520px));
+    grid-template-columns: repeat(auto-fit, minmax(320px, 520px));
     grid-auto-rows: 200px;/* max-width+offset so 215 + 20*/
-    margin-right: 20px;
+    /* margin-right: 20px; */
 
 }
 
@@ -26,7 +22,7 @@
     /* margin-bottom: 10px; */
 
     background-size: cover;
-    border-radius: 4px 4px 0px 4px;
+    border-radius: 8px 8px 0px 8px;
 
     display: grid;
     grid-template-columns: auto 1fr;
@@ -36,18 +32,20 @@
 
 .progress-bar {
 
-    grid-row: 2 / 3;
-    grid-column: 1/3;
+    /* grid-row: 2 / 3;
+    grid-column: 1/3; */
     height: 5px;
-    background-color: #101010;
-    border-radius: 0px 0px 4px 4px;
+    background-color: #101010 !important;
+    border-radius: 0px 0px 8px 8px;
+
+
 }
 
-.progress {
+.progress-custom {
     height: 100%;
     background-color: #00A4DC;
     transition: width 0.2s ease-in-out;
-    border-radius: 0px 0px 0px 4px;
+    border-radius: 0px 0px 0px 8px;
 }
 
 .card-banner {
@@ -68,12 +66,12 @@
     grid-column: 2 / 3;
     backdrop-filter: blur(1px);
     background-color: rgb(0, 0, 0, 0.6);
-    border-radius: 0px 4px 0px 0px;
+    border-radius: 0px 8px 0px 0px;
 }
 
 
 .card-banner-image {
-    border-radius: 4px 0px 0px 0px;
+    border-radius: 8px 0px 0px 0px;
     max-height: inherit;
     /* box-shadow: 0 0 20px 5px rgba(0, 0, 0, 0.8); */
 }
@@ -137,9 +135,10 @@
 }
 
 .card-device-image {
-    width: 35px;
-    margin-right: 5px;
-    grid-row: 1 / span 2;
+    max-width: 35px;
+    width: 100%;
+    /* margin-right: 5px; */
+    /* grid-row: 1 / span 2; */
 }
 
 .card-client {
@@ -162,14 +161,13 @@
 
 .card-playback-position {
     bottom: 5px;
-    right: 5px;
-    text-align: right;
-    position: absolute;
+    /* right: 5px; */
+    /* text-align: right; */
+    /* position: absolute; */
 }
 
-.card-play-state {
-    bottom: 1px;
-    position: absolute;
+.device-info {
+margin-bottom: 100%;
 }
 
 .card-ip {

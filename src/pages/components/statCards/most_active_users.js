@@ -1,8 +1,7 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import Config from "../../../lib/config";
-import StatComponent from "./statsComponent";
-
+import ItemStatComponent from "./ItemStatComponent";
 
 
 import AccountCircleFillIcon from "remixicon-react/AccountCircleFillIcon";
@@ -10,8 +9,6 @@ import AccountCircleFillIcon from "remixicon-react/AccountCircleFillIcon";
 function MostActiveUsers(props) {
   const [data, setData] = useState();
   const [days, setDays] = useState(30); 
-  const [imgError, setImgError] = useState(false);
-
   const [config, setConfig] = useState(null);
 
 
@@ -68,9 +65,9 @@ function MostActiveUsers(props) {
 
 
 
-  const handleImageError = () => {
-    setImgError(true);
-  };
+  // const handleImageError = () => {
+  //   setImgError(true);
+  // };
 
 
   if (!data || data.length === 0) {
@@ -79,31 +76,7 @@ function MostActiveUsers(props) {
 
 
   return (
-    <div className="stats-card"
-    >
-    
-    <div className="popular-image popular-user-image-container">
-    {imgError ?
-
-      <AccountCircleFillIcon size={'80%'}/>
-      :
-
-    <img
-          className="popular-user-image"
-          src={
-            config.hostUrl +
-              "/Users/" +
-              (data[0].UserId) +
-              "/Images/Primary?quality=50"
-          }
-          onError={handleImageError}
-          alt=""
-        ></img>
-        }
-    </div>
-    <StatComponent data={data} heading={"MOST ACTIVE USERS"} units={"Plays"}/>
-
-    </div>
+    <ItemStatComponent base_url={config.hostUrl} icon={<AccountCircleFillIcon color="white" size={"100%"}/>} data={data} heading={"MOST ACTIVE USERS"} units={"Plays"}/>
   );
 }
 

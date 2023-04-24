@@ -13,7 +13,7 @@ export default function LibraryOverView() {
   const token = localStorage.getItem('token');
   const SeriesIcon=<TvLineIcon size={"80%"} /> ;
   const MovieIcon=<FilmLineIcon size={"80%"} /> ;
-  const [data, setData] = useState([]);
+  const [data, setData] = useState();
 
 
   useEffect(() => {
@@ -35,13 +35,13 @@ export default function LibraryOverView() {
     }
   }, [data,token]);
 
-  if (data.length === 0) {
+  if (!data) {
     return <Loading />;
   }
 
   return (
     <div>
-      <h1>Library Statistics</h1>
+      <h1 className="my-3">Library Statistics</h1>
       <div className="overview-container">
 
         <LibraryStatComponent data={data.filter((stat) => stat.CollectionType === "movies")} heading={"MOVIE LIBRARIES"} units={"MOVIES"} icon={MovieIcon}/>

@@ -1,11 +1,16 @@
 import React from "react";
 import { Link } from 'react-router-dom';
+import Card from 'react-bootstrap/Card';
+import Row from 'react-bootstrap/Row';
+import Col from 'react-bootstrap/Col';
+import Container from 'react-bootstrap/Container';
 
 import AccountCircleFillIcon from "remixicon-react/AccountCircleFillIcon";
 import PlayFillIcon from "remixicon-react/PlayFillIcon";
 import PauseFillIcon from "remixicon-react/PauseFillIcon";
 
 import { clientData } from "../../../lib/devices";
+
 
 function ticksToTimeString(ticks) {
   // Convert ticks to seconds
@@ -27,173 +32,130 @@ function ticksToTimeString(ticks) {
 function sessionCard(props) {
   // Access data passed in as a prop using `props.data`
 
-  if (props.data.session.NowPlayingItem === undefined) {
-    return (
-      <div key={props.data.session.Id} className="session-card">
-        <div className="card-banner"></div>
+  const cardStyle = {
+    backgroundImage: `url(${props.data.base_url}/Items/${(props.data.session.NowPlayingItem.SeriesId ? props.data.session.NowPlayingItem.SeriesId : props.data.session.NowPlayingItem.Id)}/Images/Backdrop?fillHeight=320&fillWidth=213&quality=80), linear-gradient(to right, #00A4DC, #AA5CC3)`,
+    height:'100%',
+    backgroundSize: 'cover',
+  };
 
-        <div className="card-details">
-          <div className="card-device">
-            <img
-              className="card-device-image"
-              src={
-                props.data.base_url +
-                "/web/assets/img/devices/" +
-                +
-                (props.data.session.Client.toLowerCase().includes("web") ? 
-                ( clientData.find(item => props.data.session.DeviceName.toLowerCase().includes(item)) || "other")
-                :
-                ( clientData.find(item => props.data.session.Client.toLowerCase().includes(item)) || "other")
-                )
-                +
-                ".svg"
-              }
-              alt=""
-            ></img>
-            <div className="card-device-name">
-              {props.data.session.DeviceName}
-            </div>
-            <div className="card-client">
-              {props.data.session.Client +
-                " " +
-                props.data.session.ApplicationVersion}
-            </div>
-          </div>
+  const cardBgStyle = {
+    backdropFilter: 'blur(5px)',
+    backgroundColor: 'rgb(0, 0, 0, 0.6)',
+    height:'100%',
+  };
 
-          <div className="card-user">
-            {props.data.session.UserPrimaryImageTag !== undefined ? (
-              <img
-                className="card-user-image"
-                src={
-                  props.data.base_url +
-                  "/Users/" +
-                  props.data.session.UserId +
-                  "/Images/Primary?tag=" +
-                  props.data.session.UserPrimaryImageTag +
-                  "&quality=50"
-                }
-                alt=""
-              />
-            ) : (
-              <AccountCircleFillIcon />
-            )}
-            <div className="card-username"> {props.data.session.UserName}</div>
-          </div>
-
-          <div className="card-play-state"></div>
-          <div className="card-item-name"> </div>
-
-          <div className="card-playback-position"> </div>
-        </div>
-
-        <div className="progress-bar">
-          <div className="progress" style={{ width: `0%` }}></div>
-        </div>
-      </div>
-    );
-  }
-
+  
   return (
-    <div
+    <Card className="stat-card" style={cardStyle}>
+    <div style={cardBgStyle}>
+      <Row className="h-100">
+        <Col className="stat-card-banner">
+              <Card.Img
+                variant="top"
+                className="stat-card-image rounded-0"
+                src={props.data.base_url + "/Items/" + (props.data.session.NowPlayingItem.SeriesId ? props.data.session.NowPlayingItem.SeriesId : props.data.session.NowPlayingItem.Id) + "/Images/Primary?fillHeight=320&fillWidth=213&quality=50"}
+              />
 
-      className="session-card"
-      style={{
-        backgroundImage: `url(${
-          props.data.base_url +
-          "/Items/" +
-          (props.data.session.NowPlayingItem.SeriesId
-            ? props.data.session.NowPlayingItem.SeriesId
-            : props.data.session.NowPlayingItem.Id) +
-          "/Images/Backdrop?fillHeight=320&fillWidth=213&quality=80"
-        })`,
-      }}
-    >
-      <div className="card-banner">
-        <img
-          className="card-banner-image"
-          src={
-            props.data.base_url +
-              "/Items/" +
-              (props.data.session.NowPlayingItem.SeriesId
-                ? props.data.session.NowPlayingItem.SeriesId
-                : props.data.session.NowPlayingItem.Id) +
-                "/Images/Primary?fillHeight=320&fillWidth=213&quality=50"
-          }
-          alt=""
-        ></img>
-      </div>
 
-      <div className="card-details">
-        <div className="card-device">
-          <img
-            className="card-device-image"
-            src={
-              props.data.base_url +
-              "/web/assets/img/devices/" 
-              +
-              (props.data.session.Client.toLowerCase().includes("web") ? 
-              ( clientData.find(item => props.data.session.DeviceName.toLowerCase().includes(item)) || "other")
-              :
-              ( clientData.find(item => props.data.session.Client.toLowerCase().includes(item)) || "other")
-              )
-              +
-              ".svg"
-            }
-            alt=""
-          ></img>
-          <div className="card-device-name">
-            {" "}
-            {props.data.session.DeviceName}
-          </div>
-          <div className="card-client">
-            {props.data.session.Client +
-              " " +
-              props.data.session.ApplicationVersion}
-          </div>
-        </div>
+        </Col>
+        <Col  className="stat-card-info w-100 mt-auto ">
 
-        <div className="card-user">
-          {props.data.session.UserPrimaryImageTag !== undefined ? (
-            <img
-              className="card-user-image"
-              src={
-                props.data.base_url +
-                "/Users/" +
-                props.data.session.UserId +
-                "/Images/Primary?tag=" +
-                props.data.session.UserPrimaryImageTag +
-                "&quality=50"
-              }
-              alt=""
-            />
-          ) : (
-            <AccountCircleFillIcon />
-          )}
-          <div className="card-username"><Link to={`/users/${props.data.session.UserId}`}>{props.data.session.UserName}</Link> </div>
-        </div>
+          <Card.Body  className="w-100" >
+            <Container className="p-0">
+              <Row className="position-absolute top-0">
+                  <Col className="col-auto d-flex justify-content-center">
+                  <img
+                   className="card-device-image"
+                   src={
+                  props.data.base_url +
+                  "/web/assets/img/devices/" 
+                  +
+                  (props.data.session.Client.toLowerCase().includes("web") ? 
+                  ( clientData.find(item => props.data.session.DeviceName.toLowerCase().includes(item)) || "other")
+                  :
+                  ( clientData.find(item => props.data.session.Client.toLowerCase().includes(item)) || "other")
+                  )
+                  +
+                  ".svg"
+                   }
+                  alt=""
+                   />
+                  </Col>
+                 
+                  <Col>
+                    <Row> {props.data.session.DeviceName}</Row>
+                    <Row>    {props.data.session.Client + " " + props.data.session.ApplicationVersion}</Row>
+                  </Col>
+              </Row>
 
-        <div className="card-play-state">
-          {props.data.session.PlayState.IsPaused ? (
-            <PauseFillIcon />
-          ) : (
-            <PlayFillIcon />
-          )}
-        </div>
-        <div className="card-item-name">
-          {" "}
-          {props.data.session.NowPlayingItem.Name}
-        </div>
+              <Row className="justify-content-between">
+                <Col>
+                   <Card.Text>
+                   <Link to={`/item/${props.data.session.NowPlayingItem.Id}`} target="_blank">
+                     {props.data.session.NowPlayingItem.SeriesName ? (props.data.session.NowPlayingItem.SeriesName+" - "+ props.data.session.NowPlayingItem.Name) : (props.data.session.NowPlayingItem.Name)}
+                   </Link> 
+                   </Card.Text>
+                </Col>
 
-        <div className="card-playback-position">
-          {" "}
-          {ticksToTimeString(props.data.session.PlayState.PositionTicks)} /{" "}
-          {ticksToTimeString(props.data.session.NowPlayingItem.RunTimeTicks)}
-        </div>
-      </div>
 
+                <Col className="col-auto">
+                   <Row className="d-flex">
+                      <Col className="col-auto px-0">
+                        {props.data.session.UserPrimaryImageTag !== undefined ? (
+                          <img
+                            className="card-user-image"
+                            src={
+                              props.data.base_url +
+                              "/Users/" +
+                              props.data.session.UserId +
+                              "/Images/Primary?tag=" +
+                              props.data.session.UserPrimaryImageTag +
+                              "&quality=50"
+                            }
+                            alt=""
+                          />
+                        ) : (
+                          <AccountCircleFillIcon />
+                        )}
+                      </Col>
+
+                      <Col className="col-auto">
+                       <Card.Text className="text-end">
+                           <Link to={`/users/${props.data.session.UserId}`}>{props.data.session.UserName}</Link> 
+                       </Card.Text>
+                      </Col>
+           
+                      </Row>
+                </Col>
+              </Row>
+
+              <Row className="d-flex">
+                <Col className="col-auto">
+
+                  {props.data.session.PlayState.IsPaused ?
+                     <PauseFillIcon /> 
+                      : 
+                     <PlayFillIcon />
+                    }
+
+                </Col>
+
+                <Col>
+                <Card.Text className="text-end">
+                    {ticksToTimeString(props.data.session.PlayState.PositionTicks)} /
+                    {ticksToTimeString(props.data.session.NowPlayingItem.RunTimeTicks)}
+                   </Card.Text>
+                </Col>
+              </Row>
+              </Container>
+          </Card.Body>
+        </Col>
+      </Row>
+      <Row>
+      <Col>
       <div className="progress-bar">
         <div
-          className="progress"
+          className="progress-custom"
           style={{
             width: `${
               (props.data.session.PlayState.PositionTicks /
@@ -203,7 +165,10 @@ function sessionCard(props) {
           }}
         ></div>
       </div>
-    </div>
+      </Col>
+      </Row>
+  </div>
+</Card>
   );
 }
 

@@ -40,9 +40,7 @@ function Activity() {
           },
         })
         .then((data) => {
-          console.log("data");
           setData(data.data);
-          console.log(data);
         })
         .catch((error) => {
           console.log(error);
@@ -83,7 +81,7 @@ function Activity() {
   }
 
   return (
-    <div>
+    <div className="Activity">
       <div className="Heading">
       <h1>Activity</h1>
       <div className="pagination-range">

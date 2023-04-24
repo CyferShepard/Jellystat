@@ -99,7 +99,6 @@ function Users() {
             },
           })
           .then((data) => {
-            console.log(data);
             setData(data.data);
           })
           .catch((error) => {
@@ -140,8 +139,8 @@ function Users() {
 
   return (
     <div className="Users">
-      <div className="Heading">
-      <h1>All Users</h1>
+      <div className="Heading py-2">
+      <h1 >All Users</h1>
       <div className="pagination-range">
           <div className="header">Items</div>
           <select value={itemCount} onChange={(event) => {setItemCount(event.target.value); setCurrentPage(1);}}>
@@ -156,19 +155,19 @@ function Users() {
       <table className="user-activity-table">
         <thead>
           <tr>
-            <th></th>
-            <th onClick={() => handleSort("UserName")}>User</th>
-            <th onClick={() => handleSort("LastWatched")}>Last Watched</th>
-            <th onClick={() => handleSort("LastClient")}>Last Client</th>
-            <th onClick={() => handleSort("TotalPlays")}>Total Plays</th>
-            <th onClick={() => handleSort("TotalWatchTime")}>Total Watch Time</th>
-            <th onClick={() => handleSort("LastSeen")}>Last Seen</th>
+            <th className="d-none d-md-table-cell" ></th>
+            <th className="d-none d-md-table-cell" onClick={() => handleSort("UserName")}>User</th>
+            <th className="d-none d-md-table-cell" onClick={() => handleSort("LastWatched")}>Last Watched</th>
+            <th className="d-none d-md-table-cell" onClick={() => handleSort("LastClient")}>Last Client</th>
+            <th className="d-none d-md-table-cell" onClick={() => handleSort("TotalPlays")}>Total Plays</th>
+            <th className="d-none d-md-table-cell" onClick={() => handleSort("TotalWatchTime")}>Total Watch Time</th>
+            <th className="d-none d-md-table-cell" onClick={() => handleSort("LastSeen")}>Last Seen</th>
           </tr>
         </thead>
         <tbody>
           {currentUsers.map((item) => (
-            <tr key={item.UserId}>
-              <td>
+            <tr key={item.UserId} >
+              <td  className="d-block d-md-table-cell">
                 {item.PrimaryImageTag ? (
                   <img
                     className="card-user-image"
@@ -184,12 +183,12 @@ function Users() {
                   <AccountCircleFillIcon color="#fff" size={30} />
                 )}
               </td>
-             <td> <Link to={`/users/${item.UserId}`}>{item.UserName}</Link></td>
-              <td>{item.LastWatched || 'never'}</td>
-              <td>{item.LastClient || 'n/a'}</td>
-              <td>{item.TotalPlays}</td>
-              <td>{formatTotalWatchTime(item.TotalWatchTime) || 0}</td>
-              <td>{item.LastSeen ? formatLastSeenTime(item.LastSeen) : 'never'}</td>
+              <td className="d-block d-md-table-cell py-2" data-cell={"User"}> <Link to={`/users/${item.UserId}`}>{item.UserName}</Link></td>
+              <td className="d-block d-md-table-cell py-2" data-cell={"Last Watched"}>{item.LastWatched || 'never'}</td>
+              <td className="d-block d-md-table-cell py-2" data-cell={"Last Client"}>{item.LastClient || 'n/a'}</td>
+              <td className="d-block d-md-table-cell py-2" data-cell={"Total Plays"}>{item.TotalPlays}</td>
+              <td className="d-block d-md-table-cell py-2" data-cell={"Total Watch Time"}>{formatTotalWatchTime(item.TotalWatchTime) || 0}</td>
+              <td className="d-block d-md-table-cell py-2" data-cell={"Last Seen"}>{item.LastSeen ? formatLastSeenTime(item.LastSeen) : 'never'}</td>
             </tr>
           ))}
         </tbody>

@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
-
-import StatComponent from "./statsComponent";
+import ItemStatComponent from "./ItemStatComponent";
 
 
 
@@ -53,17 +52,7 @@ function MostUsedClient(props) {
 
 
   return (
-    <div className="stats-card"
-    >
-    
-    <div className="popular-image">
-        <div  className="library-icons">
-        <ComputerLineIcon size={'80%'}/>
-        </div>
-    </div>
-    <StatComponent data={data} heading={"MOST USED CLIENTS"} units={"Plays"}/>
-
-    </div>
+        <ItemStatComponent icon={  <ComputerLineIcon color="white" size={'100%'}/>} data={data} heading={"MOST USED CLIENTS"} units={"Plays"}/>
   );
 }
 

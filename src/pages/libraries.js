@@ -7,11 +7,13 @@ import "./css/library/libraries.css";
 
 import Loading from "./components/general/loading";
 import LibraryCard from "./components/library/library-card";
+import  Row  from "react-bootstrap/Row";
 
 
 
 function Libraries() {
   const [data, setData] = useState();
+  const [metadata, setMetaData] = useState();
   const [config, setConfig] = useState(null);
 
   useEffect(() => {
@@ -38,9 +40,23 @@ function Libraries() {
             },
           })
           .then((data) => {
-            console.log("data");
             setData(data.data);
-            console.log(data);
+          })
+          .catch((error) => {
+            console.log(error);
+          });
+
+          const metadataurl = `/stats/getLibraryMetadata`;
+
+          axios
+          .get(metadataurl, {
+            headers: {
+              Authorization: `Bearer ${config.token}`,
+              "Content-Type": "application/json",
+            },
+          })
+          .then((data) => {
+            setMetaData(data.data);
           })
           .catch((error) => {
             console.log(error);
@@ -53,29 +69,28 @@ function Libraries() {
       fetchConfig();
     }
 
-    if (!data) {
-      fetchLibraries();
-    }
-
+    fetchLibraries();
     const intervalId = setInterval(fetchLibraries, 60000 * 60);
     return () => clearInterval(intervalId);
-  }, [data, config]);
+  }, [ config]);
 
-  if (!data || !config) {
+  if (!data || !metadata) {
     return <Loading />;
   }
 
   return (
     <div className="libraries">
-      <h1>Libraries</h1>
-      <div className="libraries-container">
+      <h1 className="py-4">Libraries</h1>
+
+      <Row xs={1} md={2} lg={4} className="g-4">
       {data &&
           data.map((item) => (
-
-              <LibraryCard key={item.Id} data={item} base_url={config.hostUrl}/>
+    
+                <LibraryCard key={item.Id} data={item} metadata={metadata.find(data => data.Id === item.Id)} base_url={config.hostUrl}/>
+     
 
             ))}
-      </div>
+      </Row>
       
     </div>
   );

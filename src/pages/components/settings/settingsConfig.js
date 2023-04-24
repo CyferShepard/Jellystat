@@ -2,10 +2,16 @@ import React, { useState, useEffect } from "react";
 import axios from "axios";
 import Config from "../../../lib/config";
 import Loading from "../general/loading";
+import Form from 'react-bootstrap/Form';
+import Row from 'react-bootstrap/Row';
+import Col from 'react-bootstrap/Col';
+import Button from 'react-bootstrap/Button';
+import Alert from 'react-bootstrap/Alert';
 
 
 
-import "../../css/settings.css";
+import "../../css/settings/settings.css";
+import { ButtonGroup } from "react-bootstrap";
 
 export default function SettingsConfig() {
   const [config, setConfig] = useState(null);
@@ -79,8 +85,6 @@ export default function SettingsConfig() {
     }
 
     setisSubmitted("");
-
-    // Send a POST request to /api/setconfig/ with the updated configuration
     axios
       .post("/api/setconfig/", formValues, {
         headers: {
@@ -91,7 +95,7 @@ export default function SettingsConfig() {
       .then((response) => {
         console.log("Config updated successfully:", response.data);
         setisSubmitted("Success");
-        setsubmissionMessage("Success Updated Configuration");
+        setsubmissionMessage("Successfully updated configuration");
       })
       .catch((error) => {
         console.log("Error updating config:", error);
@@ -117,43 +121,45 @@ export default function SettingsConfig() {
     return (
       <div className="general-settings-page">
         <h1>General Settings</h1>
-        <form onSubmit={handleFormSubmit} className="settings-form">
-          <div className="form-row">
-            <label htmlFor="JF_HOST">Jellyfin URL</label>
-            <input
-              type="text"
-              id="JF_HOST"
-              name="JF_HOST"
-              value={formValues.JF_HOST || ""}
-              onChange={handleFormChange}
-            />
-          </div>
-          <div className="form-row">
-            <label htmlFor="JF_API_KEY">API Key</label>
-            <input
-              type={showKey ? "text" : "password"}
-              id="JF_API_KEY"
-              name="JF_API_KEY"
-              value={formValues.JF_API_KEY || ""}
-              onChange={handleFormChange}
-            />
-            <button className="show-key" type="button" onClick={() => setKeyState(!showKey)}>Show Key</button>
-          </div>
-    
+        <Form onSubmit={handleFormSubmit} className="settings-form">
+          <Form.Group as={Row} className="mb-3" >
+            <Form.Label column className="fs-4">
+              Jellyfin Url
+            </Form.Label>
+            <Col sm="10">
+              <Form.Control  id="JF_HOST" name="JF_HOST" value={formValues.JF_HOST || ""} onChange={handleFormChange}  placeholder="http://127.0.0.1:8096 or http://example.jellyfin.server" />
+            </Col>
+          </Form.Group>
+
+          <Form.Group as={Row} className="mb-3">
+            <Form.Label column  className="fs-4">
+              API Key
+            </Form.Label>
+            <Col sm="10">
+              <Form.Control id="JF_API_KEY" name="JF_API_KEY"  value={formValues.JF_API_KEY || ""} onChange={handleFormChange} type={showKey ? "text" : "password"} />
+            </Col>
+          </Form.Group>
           {isSubmitted !== "" ? (
-            <div
-              className={
-                isSubmitted === "Failed" ? "submit error" : "submit success"
-              }
-            >
-              {submissionMessage}
-            </div>
+
+                  isSubmitted === "Failed" ?
+                        <Alert variant="danger">
+                             {submissionMessage}
+                        </Alert>
+                  :
+                        <Alert variant="success" >
+                             {submissionMessage}
+                        </Alert>
           ) : (
             <></>
           )}
-    
-          <button className="settings-submit-button" type="submit">Save</button>
-        </form>
+          <div className="d-flex flex-column flex-sm-row justify-content-end align-items-sm-center">
+            <ButtonGroup >
+              <Button variant="outline-success" type="submit"> Save </Button>
+              <Button variant="outline-secondary" type="button" onClick={() => setKeyState(!showKey)}>Show Key</Button>
+            </ButtonGroup>
+          </div>
+        </Form>
+
       </div>
       );
 

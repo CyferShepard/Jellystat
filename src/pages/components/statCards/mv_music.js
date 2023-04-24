@@ -1,10 +1,7 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import Config from "../../../lib/config";
-import ItemImage from "./ItemImageComponent";
-
-import StatComponent from "./statsComponent";
-
+import ItemStatComponent from "./ItemStatComponent";
 
 function MVMovies(props) {
   const [data, setData] = useState();
@@ -71,21 +68,7 @@ function MVMovies(props) {
 
 
   return (
-    <div className="stats-card"
-    style={{
-        backgroundImage: `url(${
-         config.hostUrl +
-          "/Items/" +
-          (data[0].Id) +
-          "/Images/Backdrop/?fillWidth=300&quality=10"
-        })`}}
-    >
-    
-    <ItemImage data={data[0]} base_url={config.hostUrl}/>
-    <StatComponent data={data} heading={"MOST PLAYED MUSIC"} units={"Plays"}/>
-    
-
-    </div>
+    <ItemStatComponent base_url={config.hostUrl} data={data} heading={"MOST LISTENED MUSIC"} units={"Plays"}/>
   );
 }
 

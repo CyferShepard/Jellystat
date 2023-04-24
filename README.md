@@ -4,11 +4,12 @@
 
 ## Current Features
 
-- Session Monitoring anf logging
+- Session Monitoring and logging
 - Statistics for all Libraries and Users
 - Watch History
 - User Overview and activity
 - Watch statisitcs
+- Backup and restore Data
 
 ## Required Development
 - Responsive UI
@@ -16,7 +17,7 @@
 - Security Testing
 - More Validations and Error Handling
 - Auto sync library items
-- Stats for Library Items (Eg Movies etc)
+- Jellyfin Statistics Plugin Integration
 - More to come
 
 ## Getting Started

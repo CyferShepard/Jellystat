@@ -86,6 +86,102 @@ router.post("/getLibraryItems", async (req, res) => {
   console.log(`ENDPOINT CALLED: /getLibraryItems: `);
 });
 
+router.post("/getSeasons", async (req, res) => {
+  try{
+    const { Id } = req.body;
+
+    const { rows } = await db.query(
+      `SELECT * FROM jf_library_seasons where "SeriesId"='${Id}'`
+    );
+    console.log({ Id: Id });
+    res.send(rows);
+  
+
+  }catch(error)
+  {
+    console.log(error);
+  }
+
+  console.log(`ENDPOINT CALLED: /getSeasons: `);
+});
+
+router.post("/getEpisodes", async (req, res) => {
+  try{
+    const { Id } = req.body;
+    const { rows } = await db.query(
+      `SELECT * FROM jf_library_episodes where "SeasonId"='${Id}'`
+    );
+    console.log({ Id: Id });
+    res.send(rows);
+  
+
+  }catch(error)
+  {
+    console.log(error);
+  }
+
+  console.log(`ENDPOINT CALLED: /getEpisodes: `);
+});
+
+
+
+router.post("/getItemDetails", async (req, res) => {
+  try{
+
+    const { Id } = req.body;
+
+
+    //
+
+    let query= `SELECT im."Name" "FileName",im.*,i.* FROM jf_library_items i left join jf_item_info im on i."Id" = im."Id" where i."Id"='${Id}'`;
+  
+
+
+    const { rows:items } = await db.query(
+      query
+    );
+
+    if(items.length===0)
+    {
+      query=`SELECT im."Name" "FileName",im.*,s.*  FROM jf_library_seasons s left join jf_item_info im on s."Id" = im."Id" where s."Id"='${Id}'`;
+      const { rows:seasons } = await db.query(
+        query
+      );
+
+      if(seasons.length===0)
+      {
+        query=`SELECT im."Name" "FileName",im.*,e.*  FROM jf_library_episodes e join jf_item_info im on e."EpisodeId" = im."Id" where e."EpisodeId"='${Id}'`;
+        const { rows:episodes } = await db.query(
+          query
+        );
+  
+        res.send(episodes);
+  
+      }else{
+  
+        res.send(seasons);
+  
+      }
+  
+    }else{
+
+      res.send(items);
+
+    }
+
+
+
+  
+
+  }catch(error)
+  {
+    console.log(error);
+  }
+
+  console.log(`ENDPOINT CALLED: /getLibraryItems: `);
+});
+
+
 router.get("/getHistory", async (req, res) => {
   try{
    

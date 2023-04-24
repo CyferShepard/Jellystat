@@ -69,7 +69,7 @@ function GlobalStats(props) {
 
   return (
     <div>
-      <h1>User Stats</h1>
+      <h1 className="py-3">User Stats</h1>
       <div  className="global-stats-container">
         <WatchTimeStats data={dayStats} heading={"Last 24 Hours"} />
         <WatchTimeStats data={weekStats} heading={"Last 7 Days"} />

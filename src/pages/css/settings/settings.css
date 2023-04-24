@@ -8,7 +8,8 @@
 .settings-form {
 
     color: white;
-    width: 100%;
+    /* width: 100%; */
+    margin-top: 20px;
 
   }
 
@@ -56,9 +57,9 @@
     margin-bottom: 10px;
   } */
 
-  .settings-form button:hover {
+  /* .settings-form button:hover {
     background-color: #0d8bf2;
-  }
+  } */
 
   .submit
   {

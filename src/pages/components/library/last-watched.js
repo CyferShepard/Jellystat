@@ -1,12 +1,15 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 
-import ItemCardInfo from "./LastWatched/last-watched-card";
+// import ItemCardInfo from "./LastWatched/last-watched-card";
+
+import LastWatchedCard from "../general/last-watched-card";
+
 
 import Config from "../../../lib/config";
 import "../../css/users/user-details.css";
 
-function LibraryLastPlayed(props) {
+function LibraryLastWatched(props) {
   const [data, setData] = useState();
   const [config, setConfig] = useState();
 
@@ -58,10 +61,10 @@ function LibraryLastPlayed(props) {
 
   return (
     <div className="last-played">
-        <h1>Last Watched</h1>
+        <h1 className="my-3">Last Watched</h1>
         <div className="last-played-container">
         {data.map((item) => (
-                    <ItemCardInfo data={item} base_url={config.hostUrl} key={item.Id+item.SeasonNumber+item.EpisodeNumber}/>
+                    <LastWatchedCard data={item} base_url={config.hostUrl} key={item.Id+item.SeasonNumber+item.EpisodeNumber}/>
           ))}
 
         </div>
@@ -70,4 +73,4 @@ function LibraryLastPlayed(props) {
   );
 }
 
-export default LibraryLastPlayed;
+export default LibraryLastWatched;

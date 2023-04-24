@@ -12,7 +12,7 @@ const TerminalComponent = () => {
     // handle incoming messages
     socket.addEventListener('message', (event) => {
         let message = JSON.parse(event.data);
-      setMessages(prevMessages => [...prevMessages, message]);
+      setMessages(message);
     });
 
     // cleanup function to close the WebSocket connection when the component unmounts
@@ -21,19 +21,8 @@ const TerminalComponent = () => {
     }
   }, []);
 
-  // function to handle scrolling to the last message
-  const scrollToBottom = () => {
-    messagesEndRef.current.scrollIntoView({ behavior: 'smooth' });
-  }
-
-  // scroll to the last message whenever messages change
-  useEffect(() => {
-    scrollToBottom();
-  }, [messages]);
-
   return (
-    <div>
-      <h1>Terminal</h1>
+    <div className='my-4'>
       <div className="console-container">
         {messages.map((message, index) => (
           <div key={index} className="console-message">

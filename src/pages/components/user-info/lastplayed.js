@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 
-import LastPlayedItem from "./lastplayed/last-played-item";
+import LastWatchedCard from "../general/last-watched-card";
 
 import Config from "../../../lib/config";
 import "../../css/users/user-details.css";
@@ -23,6 +23,8 @@ function LastPlayed(props) {
       };
 
     const fetchData = async () => {
+      if(config)
+      {
       try {
         const itemData = await axios.post(`/stats/getUserLastPlayed`, {
           userid: props.UserId,
@@ -35,7 +37,8 @@ function LastPlayed(props) {
         setData(itemData.data);
       } catch (error) {
         console.log(error);
-      }
+      }        
+    }
     };
 
     if (!data) {
@@ -57,10 +60,10 @@ function LastPlayed(props) {
 
   return (
     <div className="last-played">
-        <h1>Last Watched</h1>
+        <h1 className="my-3">Last Watched</h1>
         <div className="last-played-container">
         {data.map((item) => (
-                    <LastPlayedItem data={item} base_url={config.hostUrl} key={item.Id+item.EpisodeNumber}/>
+                    <LastWatchedCard data={item} base_url={config.hostUrl} key={item.Id+item.EpisodeNumber}/>
           ))}
 
         </div>

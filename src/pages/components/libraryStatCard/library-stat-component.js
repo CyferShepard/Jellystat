@@ -1,4 +1,5 @@
 import React from "react";
+import { Row, Col, Card } from "react-bootstrap";
 
 function LibraryStatComponent(props) {
 
@@ -6,34 +7,61 @@ function LibraryStatComponent(props) {
     return <></>;
   }
 
+  const cardStyle = {
+    backgroundImage: `url(${props.base_url}/Items/${props.data[0].Id}/Images/Backdrop/?fillWidth=300&quality=10), linear-gradient(to right, #00A4DC, #AA5CC3)`,
+    height:'100%',
+    backgroundSize: 'cover',
+  };
+
+  const cardBgStyle = {
+    backdropFilter: 'blur(5px)',
+    backgroundColor: 'rgb(0, 0, 0, 0.6)',
+    height:'100%',
+  };
+
+
   return (
-    <div className="library-stat-card">
+    <Card className="stat-card" style={cardStyle}>
+    <div style={cardBgStyle}>
+      <Row className="h-100">
+        <Col className="d-none d-lg-block stat-card-banner">
 
-    <div className="library-image">
-      <div className="library-icons">
-        {props.icon}
-      </div>
-    </div>
+          <div className="stat-card-icon">
+              {props.icon} 
+          </div>
 
-    <div className="library">
-      <div className="library-header">
-        <div>{props.heading}</div>
-        <div className="library-header-count">{props.units}</div>
-      </div>
 
-      <div className="stats-list">
-        {props.data
-            .map((item, index) => (
-              <div className="library-item" key={item.Id}>
-                <p className="library-item-index">{index + 1}</p>
-                <p className="library-item-name">{item.Name}</p>
-                <p className="library-item-count">{item.CollectionType ==='tvshows'? (item.Library_Count+' / '+item.Season_Count+' / '+item.Episode_Count): item.Library_Count}</p>
+        </Col>
+        <Col  className="stat-card-info w-100">
+          <Card.Body  className="w-100" >
+          <Card.Header className="d-flex justify-content-between border-0 p-0 bg-transparent stat-header">
+              <div>
+                <Card.Subtitle className="stat-items">{props.heading}</Card.Subtitle>
+              </div>
+              <div>
+                <Card.Subtitle className="stat-items fw-lighter text-end">{props.units}</Card.Subtitle>
+              </div>
+            </Card.Header>
+            {props.data &&
+            props.data.map((item, index) => (
+              <div className="d-flex justify-content-between  stat-items" key={item.Id || index}>
+              
+                <div className="d-flex justify-content-between">
+                  <Card.Text className="stat-item-index m-0">{index + 1}</Card.Text>
+                  <Card.Text>{item.Name}</Card.Text>
+                </div>
+                
+                <Card.Text className="stat-item-count">
+                {item.CollectionType ==='tvshows'? (item.Library_Count+' / '+item.Season_Count+' / '+item.Episode_Count): item.Library_Count}
+                </Card.Text>
+                
               </div>
             ))}
-      </div>
-    </div>
-
+          </Card.Body>
+        </Col>
+      </Row>
   </div>
+</Card>
   );
 }
 

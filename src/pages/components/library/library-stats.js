@@ -69,7 +69,7 @@ function LibraryGlobalStats(props) {
 
   return (
     <div>
-      <h1>Library Stats</h1>
+      <h1 className="my-3">Library Stats</h1>
       <div  className="global-stats-container">
         <WatchTimeStats data={dayStats} heading={"Last 24 Hours"} />
         <WatchTimeStats data={weekStats} heading={"Last 7 Days"} />
