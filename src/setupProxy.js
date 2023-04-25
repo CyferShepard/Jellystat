@@ -2,42 +2,42 @@ const { createProxyMiddleware } = require('http-proxy-middleware');
 
 module.exports = function(app) {
   app.use(
-    '/api',
+    `/api`,
     createProxyMiddleware({
-      target: 'http://127.0.0.1:3003',
+      target: `http://127.0.0.1:${process.env.PORT || 3003}`,
       changeOrigin: true,
     })
   );
   app.use(
-    '/stats',
+    `/stats`,
     createProxyMiddleware({
-      target: 'http://127.0.0.1:3003',
+      target: `http://127.0.0.1:${process.env.PORT || 3003}`,
       changeOrigin: true,
     })
   );
   app.use(
-    '/sync',
+    `/sync`,
     createProxyMiddleware({
-      target: 'http://127.0.0.1:3003',
+      target: `http://127.0.0.1:${process.env.PORT || 3003}`,
       changeOrigin: true,
     })
   );
   app.use(
-    '/auth',
+    `/auth`,
     createProxyMiddleware({
-      target: 'http://127.0.0.1:3003',
+      target: `http://127.0.0.1:${process.env.PORT || 3003}`,
       changeOrigin: true,
     })
   );
   app.use(
-    '/data',
+    `/data`,
     createProxyMiddleware({
-      target: 'http://127.0.0.1:3003',
+      target: `http://127.0.0.1:${process.env.PORT || 3003}`,
       changeOrigin: true,
     })
   );
   app.use(
-    '/ws',
+    `/ws`,
     createProxyMiddleware({
       target: `ws://127.0.0.1:${process.env.WS_PORT || 3004}`,
       changeOrigin: true,
@@ -45,5 +45,5 @@ module.exports = function(app) {
     })
   );
   
-  console.log('Proxy middleware applied');
+  console.log(`Proxy middleware applied`);
 };
