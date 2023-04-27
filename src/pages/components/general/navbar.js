@@ -20,7 +20,7 @@ export default function Navbar() {
       <BootstrapNavbar.Collapse id="responsive-navbar-nav">
             <Nav className="ms-auto">
               {navData.map((item) => {
-                const isActive = ('/'+item.link).toLocaleLowerCase() === location.pathname.toLocaleLowerCase(); // check if the link is the current path
+                const isActive = location.pathname.toLocaleLowerCase().includes(('/'+item.link).toLocaleLowerCase()); // check if the link is the current path
                 return (
                   <Nav.Link
                     as={Link}

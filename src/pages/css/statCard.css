@@ -113,3 +113,12 @@ input[type=number] {
   padding-inline: 10px;
   align-self: center;
 }
+
+.stat-items div a{
+  text-decoration: none !important;
+  color: white !important;
+}
+
+.stat-items div a:hover{
+  color: #00A4DC !important;
+}

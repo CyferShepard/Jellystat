@@ -5,7 +5,8 @@
   "dependencies": {
     "@emotion/react": "^11.10.6",
     "@emotion/styled": "^11.10.6",
-    "@mui/material": "^5.11.10",
+    "@mui/material": "^5.12.2",
+    "@mui/x-data-grid": "^6.2.1",
     "@nivo/api": "^0.74.1",
     "@nivo/bar": "^0.80.0",
     "@nivo/core": "^0.80.0",

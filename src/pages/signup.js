@@ -4,6 +4,7 @@ import axios from "axios";
 import Config from "../lib/config";
 import CryptoJS from 'crypto-js';
 import "./css/setup.css";
+import Loading from "./components/general/loading";
 // import LibrarySync from "./components/settings/librarySync";
 
 // import Loading from './components/loading';
@@ -75,6 +76,11 @@ function Signup() {
       fetchConfig();
     }
   }, [config]);
+
+  if(!config)
+  {
+    return <Loading/>;
+  }
 
   return (
     <section>

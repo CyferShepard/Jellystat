@@ -3,39 +3,23 @@ import axios from "axios";
 import Config from "../lib/config";
 import { Link } from 'react-router-dom';
 import AccountCircleFillIcon from "remixicon-react/AccountCircleFillIcon";
+import { DropdownButton, Dropdown,ButtonGroup, Button } from 'react-bootstrap';
+
+import Table from '@mui/material/Table';
+import TableBody from '@mui/material/TableBody';
+import TableCell from '@mui/material/TableCell';
+import TableContainer from '@mui/material/TableContainer';
+import TableHead from '@mui/material/TableHead';
+import TableRow from '@mui/material/TableRow';
 
 import "./css/users/users.css";
 
 import Loading from "./components/general/loading";
 
-function Users() {
-  const [data, setData] = useState();
-  const [config, setConfig] = useState(null);
-  const [sortConfig, setSortConfig] = useState({ key: null, direction: null });
-  const [currentPage, setCurrentPage] = useState(1);
-  const [itemCount,setItemCount] = useState(10);
+const token = localStorage.getItem('token');
 
-  function handleSort(key) {
-    const direction =
-      sortConfig.key === key && sortConfig.direction === "ascending"
-        ? "descending"
-        : "ascending";
-    setSortConfig({ key, direction });
-  }
-
-  function sortData(data, { key, direction }) {
-    if (!key) return data;
-
-    const sortedData = [...data];
-
-    sortedData.sort((a, b) => {
-      if (a[key] < b[key]) return direction === "ascending" ? -1 : 1;
-      if (a[key] > b[key]) return direction === "ascending" ? 1 : -1;
-      return 0;
-    });
-
-    return sortedData;
-  }
+function Row(row) {
+  const { data } = row;
 
   function formatTotalWatchTime(seconds) {
     const hours = Math.floor(seconds / 3600); // 1 hour = 3600 seconds
@@ -75,6 +59,61 @@ function Users() {
 
 
 
+  const options = {
+    day: "numeric",
+    month: "numeric",
+    year: "numeric",
+    hour: "numeric",
+    minute: "numeric",
+    second: "numeric",
+    hour12: false,
+  };
+
+
+  return (
+    <React.Fragment>
+      <TableRow sx={{ '& > *': { borderBottom: 'unset' } }}>
+        <TableCell>
+        {data.PrimaryImageTag ? (
+                  <img
+                    className="card-user-image"
+                    src={
+                      row.hostUrl +
+                      "/Users/" +
+                      data.UserId +
+                      "/Images/Primary?quality=10"
+                    }
+                    alt=""
+                  />
+                ) : (
+                  <AccountCircleFillIcon color="#fff" size={30} />
+                )}
+        </TableCell>
+        <TableCell><Link to={`/users/${data.UserId}`} className="text-decoration-none">{data.UserName}</Link></TableCell>
+        <TableCell>{data.LastWatched || 'never'}</TableCell>
+        <TableCell>{data.LastClient || 'n/a'}</TableCell>
+        <TableCell>{data.TotalPlays}</TableCell>
+        <TableCell>{formatTotalWatchTime(data.TotalWatchTime) || 0}</TableCell>
+        <TableCell>{data.LastSeen ? formatLastSeenTime(data.LastSeen) : 'never'}</TableCell>
+
+      </TableRow>
+    </React.Fragment>
+  );
+}
+
+function Users() {
+  const [data, setData] = useState();
+  const [config, setConfig] = useState(null);
+  const [rowsPerPage, setRowsPerPage] = React.useState(10);
+  const [page, setPage] = React.useState(0);
+
+
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemCount,setItemCount] = useState(10);
+
+
+
+
   useEffect(() => {
     const fetchConfig = async () => {
       try {
@@ -94,7 +133,7 @@ function Users() {
         axios
           .get(url, {
             headers: {
-              Authorization: `Bearer ${config.token}`,
+              Authorization: `Bearer ${token}`,
               "Content-Type": "application/json",
             },
           })
@@ -109,9 +148,7 @@ function Users() {
 
 
 
-    if (!data && config) {
-      fetchData();
-    }
+    fetchData();
 
     if (!config) {
       fetchConfig();
@@ -119,22 +156,21 @@ function Users() {
 
     const intervalId = setInterval(fetchData, 60000);
     return () => clearInterval(intervalId);
-  }, [data, config]);
+  }, [config]);
 
   if (!data || data.length === 0) {
     return <Loading />;
   }
 
-  const sortedData = sortData(data, sortConfig);
- 
-  const indexOfLastUser = currentPage * itemCount;
-  const indexOfFirstUser = indexOfLastUser - itemCount;
-  const currentUsers = sortedData.slice(indexOfFirstUser, indexOfLastUser);
+  const handleNextPageClick = () => {
+    setPage((prevPage) => prevPage + 1);
+  };
 
-  const pageNumbers = [];
-  for (let i = 1; i <= Math.ceil(sortedData.length / itemCount); i++) {
-    pageNumbers.push(i);
-  }
+  const handlePreviousPageClick = () => {
+    setPage((prevPage) => prevPage - 1);
+  };
+
+
 
 
   return (
@@ -143,7 +179,7 @@ function Users() {
       <h1 >All Users</h1>
       <div className="pagination-range">
           <div className="header">Items</div>
-          <select value={itemCount} onChange={(event) => {setItemCount(event.target.value); setCurrentPage(1);}}>
+          <select value={itemCount} onChange={(event) => {setRowsPerPage(event.target.value); setPage(0); setItemCount(event.target.value);}}>
                 <option value="10">10</option>
                 <option value="25">25</option>
                 <option value="50">50</option>
@@ -152,62 +188,54 @@ function Users() {
         </div>
       </div>
 
-      <table className="user-activity-table">
-        <thead>
-          <tr>
-            <th className="d-none d-md-table-cell" ></th>
-            <th className="d-none d-md-table-cell" onClick={() => handleSort("UserName")}>User</th>
-            <th className="d-none d-md-table-cell" onClick={() => handleSort("LastWatched")}>Last Watched</th>
-            <th className="d-none d-md-table-cell" onClick={() => handleSort("LastClient")}>Last Client</th>
-            <th className="d-none d-md-table-cell" onClick={() => handleSort("TotalPlays")}>Total Plays</th>
-            <th className="d-none d-md-table-cell" onClick={() => handleSort("TotalWatchTime")}>Total Watch Time</th>
-            <th className="d-none d-md-table-cell" onClick={() => handleSort("LastSeen")}>Last Seen</th>
-          </tr>
-        </thead>
-        <tbody>
-          {currentUsers.map((item) => (
-            <tr key={item.UserId} >
-              <td  className="d-block d-md-table-cell">
-                {item.PrimaryImageTag ? (
-                  <img
-                    className="card-user-image"
-                    src={
-                      config.hostUrl +
-                      "/Users/" +
-                      item.UserId +
-                      "/Images/Primary?quality=10"
-                    }
-                    alt=""
-                  />
-                ) : (
-                  <AccountCircleFillIcon color="#fff" size={30} />
-                )}
-              </td>
-              <td className="d-block d-md-table-cell py-2" data-cell={"User"}> <Link to={`/users/${item.UserId}`}>{item.UserName}</Link></td>
-              <td className="d-block d-md-table-cell py-2" data-cell={"Last Watched"}>{item.LastWatched || 'never'}</td>
-              <td className="d-block d-md-table-cell py-2" data-cell={"Last Client"}>{item.LastClient || 'n/a'}</td>
-              <td className="d-block d-md-table-cell py-2" data-cell={"Total Plays"}>{item.TotalPlays}</td>
-              <td className="d-block d-md-table-cell py-2" data-cell={"Total Watch Time"}>{formatTotalWatchTime(item.TotalWatchTime) || 0}</td>
-              <td className="d-block d-md-table-cell py-2" data-cell={"Last Seen"}>{item.LastSeen ? formatLastSeenTime(item.LastSeen) : 'never'}</td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
-      <div className="pagination">
-      <button className="page-btn" onClick={() => setCurrentPage(1)} disabled={currentPage === 1}>
-        First
-      </button>
-      <button className="page-btn" onClick={() => setCurrentPage(currentPage - 1)} disabled={currentPage === 1}>
-        Previous
-      </button>
-      <div className="page-number">{`Page ${currentPage} of ${pageNumbers.length}`}</div>
-      <button className="page-btn" onClick={() => setCurrentPage(currentPage + 1)} disabled={currentPage === pageNumbers.length}>
-        Next
-      </button>
-      <button className="page-btn" onClick={() => setCurrentPage(pageNumbers.length)} disabled={currentPage === pageNumbers.length}>
-        Last
-      </button>
-    </div>
+      <TableContainer className='rounded-2'>
+                    <Table aria-label="collapsible table" >
+                      <TableHead>
+                        <TableRow>
+                          <TableCell></TableCell>
+                          <TableCell>User</TableCell>
+                          <TableCell>Last Watched</TableCell>
+                          <TableCell>Last Client</TableCell>
+                          <TableCell>Plays</TableCell>
+                          <TableCell>Watch Time</TableCell>
+                          <TableCell>Last Seen</TableCell>
+                        </TableRow>
+                      </TableHead>
+                      <TableBody>
+                        {data && data.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
+                          .map((row) => (
+                            <Row key={row.id} data={row} hostUrl={config.hostUrl}/>
+                          ))}
+                          {data.length===0 ? <tr><td colSpan="5" style={{ textAlign: "center", fontStyle: "italic" ,color:"grey"}}>No Backups Found</td></tr> :''}
+            
+                      </TableBody>
+                    </Table>
+            </TableContainer>
+
+            <div className='d-flex justify-content-end my-2'>
+                <ButtonGroup className="pagination-buttons">
+                    <Button className="page-btn" onClick={()=>setPage(0)} disabled={page === 0}>
+                      First
+                    </Button>
+
+                    <Button className="page-btn" onClick={handlePreviousPageClick}  disabled={page === 0}>
+                      Previous
+                    </Button>
+
+                    <div className="page-number d-flex align-items-center justify-content-center">{`${page *rowsPerPage + 1}-${Math.min((page * rowsPerPage+ 1 ) +  (rowsPerPage - 1),data.length)} of ${data.length}`}</div>
+
+                    <Button className="page-btn" onClick={handleNextPageClick}  disabled={page >= Math.ceil(data.length / rowsPerPage) - 1}>
+                      Next
+                    </Button>
+
+                    <Button className="page-btn" onClick={()=>setPage(Math.ceil(data.length / rowsPerPage) - 1)} disabled={page >= Math.ceil(data.length / rowsPerPage) - 1}>
+                      Last
+                    </Button>
+                </ButtonGroup>
+            </div>
+
+
+
     </div>
   );
 }

@@ -3,17 +3,18 @@ import axios from "axios";
 import TvLineIcon from "remixicon-react/TvLineIcon";
 import FilmLineIcon from "remixicon-react/FilmLineIcon";
 
-// import "../../css/users/user-details.css";
+import ActivityTable from "../activity/activity-table";
 
-function LibraryDetails(props) {
+function LibraryActivity(props) {
   const [data, setData] = useState();
   const token = localStorage.getItem('token');
+  const [itemCount,setItemCount] = useState(10);
 
   useEffect(() => {
 
     const fetchData = async () => {
       try {
-        const libraryrData = await axios.post(`/stats/getLibraryDetails`, {
+        const libraryrData = await axios.post(`/api/getLibraryHistory`, {
           libraryid: props.LibraryId,
         }, {
           headers: {
@@ -41,18 +42,26 @@ function LibraryDetails(props) {
   }
 
   return (
-    <div className="user-detail-container">
-      <div className="user-image-container">
-      {data.CollectionType==="tvshows" ?
-          
-          <TvLineIcon size={'100%'}/>
-          :
-          <FilmLineIcon size={'100%'}/>
-        }
+    <div className="Activity">
+    <div className="Heading">
+    <h1>Library Activity</h1>
+    <div className="pagination-range">
+        <div className="header">Items</div>
+        <select value={itemCount} onChange={(event) => {setItemCount(event.target.value);}}>
+              <option value="10">10</option>
+              <option value="25">25</option>
+              <option value="50">50</option>
+              <option value="100">100</option>
+            </select>
       </div>
-      <p className="user-name">{data.Name}</p>
     </div>
+    <div className="Activity">
+      <ActivityTable data={data} itemCount={itemCount}/>
+
+
+  </div>
+  </div>
   );
 }
 
-export default LibraryDetails;
+export default LibraryActivity;

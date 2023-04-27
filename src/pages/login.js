@@ -5,7 +5,7 @@ import CryptoJS from 'crypto-js';
 import "./css/setup.css";
 // import LibrarySync from "./components/settings/librarySync";
 
-// import Loading from './components/loading';
+import Loading from './components/general/loading';
 
 function Login() {
   const [config, setConfig] = useState(null);
@@ -75,6 +75,11 @@ function Login() {
       fetchConfig();
     }
   }, [config]);
+
+  if(!config || config.token)
+  {
+    return <Loading/>;
+  }
 
   return (
     <section>

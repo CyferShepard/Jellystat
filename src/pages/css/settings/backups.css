@@ -9,7 +9,7 @@ th:hover{
 th{
     border-bottom: none !important;
     cursor: default !important;
-    background-color: rgba(0, 0, 0, 0.8) !important;
+    /* background-color: rgba(0, 0, 0, 0.8) !important; */
 }
 
 .backup-file-download

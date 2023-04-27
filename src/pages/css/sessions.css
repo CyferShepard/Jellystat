@@ -174,3 +174,13 @@ margin-bottom: 100%;
     grid-row: 2 / 3;
     grid-column: 2 / 3;
 }
+
+.card-text >a{
+    text-decoration: none !important;
+    color: white !important;
+  }
+  
+  .card-text a:hover{
+    color: #00A4DC !important;
+  }
+  

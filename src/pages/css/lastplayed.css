@@ -45,6 +45,7 @@
 
 }
 
+
 .episode{
   width: 220px !important;
   height: 128px !important;
@@ -75,19 +76,22 @@
 }
 
 .last-item-details {
-
-
     width: 90%;
-    /* height: 30%; */
     position: relative;
-    /* padding-top: 10px; */
     margin: 10px;
-
-    /* background-color: #f71b1b;  */
 }
 
+.last-item-details a{
+  text-decoration: none !important;
+  color: white !important;
+}
+
+.last-item-details a:hover{
+  color: #00A4DC !important;
+}
+
+
 .last-item-name {
-    /* width: 185px; */
     overflow: hidden;
     text-overflow: ellipsis;
 

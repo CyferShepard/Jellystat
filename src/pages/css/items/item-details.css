@@ -20,3 +20,12 @@
     object-fit: cover;
 }
 
+.item-details div a{
+    text-decoration: none !important;
+    color: white !important;
+  }
+  
+  .item-details div a:hover{
+    color: #00A4DC !important;
+  }
+  

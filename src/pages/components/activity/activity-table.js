@@ -1,156 +1,187 @@
-import React ,{useState} from 'react';
+import React from 'react';
 import { Link } from "react-router-dom";
-// import { useParams } from 'react-router-dom';
+import { Button, ButtonGroup } from "react-bootstrap";
+
+
+import Table from '@mui/material/Table';
+import TableBody from '@mui/material/TableBody';
+import TableCell from '@mui/material/TableCell';
+import TableContainer from '@mui/material/TableContainer';
+import TableHead from '@mui/material/TableHead';
+import TableRow from '@mui/material/TableRow';
+import Collapse from '@mui/material/Collapse';
+import IconButton from '@mui/material/IconButton';
+import Box from '@mui/material/Box';
+
+import AddCircleFillIcon from 'remixicon-react/AddCircleFillIcon';
+import IndeterminateCircleFillIcon from 'remixicon-react/IndeterminateCircleFillIcon';
 
 import '../../css/activity/activity-table.css';
 
 
+function formatTotalWatchTime(seconds) {
+  const hours = Math.floor(seconds / 3600); // 1 hour = 3600 seconds
+  const minutes = Math.floor((seconds % 3600) / 60); // 1 minute = 60 seconds
+  let formattedTime='';
+  if(hours)
+  {
+    formattedTime+=`${hours} hours`;
+  }
+  if(minutes)
+  {
+    formattedTime+=` ${minutes} minutes`;
+  }
 
-function ActivityTable(props) {
+  return formattedTime ;
+}
 
-    const [sortConfig, setSortConfig] = useState({ key: null, direction: null });
-    const [currentPage, setCurrentPage] = useState(1);
+function Row(data) {
+  const { row } = data;
+  const [open, setOpen] = React.useState(false);
+  // const classes = useRowStyles();
 
-    const [data, setData] = useState(props.data);
-  
-    function handleSort(key) {
-        const direction =
-          sortConfig.key === key && sortConfig.direction === "ascending"
-            ? "descending"
-            : "ascending";
-        setSortConfig({ key, direction });
-      }  
-    
-    function sortData(data, { key, direction }) {
-      if (!key) return data;
-
-      const sortedData = [...data];
-
-      sortedData.sort((a, b) => {
-        if (a[key] < b[key]) return direction === "ascending" ? -1 : 1;
-        if (a[key] > b[key]) return direction === "ascending" ? 1 : -1;
-        return 0;
-      });
-
-      return sortedData;
-    }
-
-    const options = {
-        day: "numeric",
-        month: "numeric",
-        year: "numeric",
-        hour: "numeric",
-        minute: "numeric",
-        second: "numeric",
-        hour12: false,
-      };
+  const options = {
+    day: "numeric",
+    month: "numeric",
+    year: "numeric",
+    hour: "numeric",
+    minute: "numeric",
+    second: "numeric",
+    hour12: false,
+  };
 
 
-    const sortedData = sortData(data, sortConfig);
- 
-    const indexOfLastUser = currentPage * props.itemCount;
-    const indexOfFirstUser = indexOfLastUser - props.itemCount;
-    const currentData = sortedData.slice(indexOfFirstUser, indexOfLastUser);
 
-    const pageNumbers = [];
-    for (let i = 1; i <= Math.ceil(sortedData.length / props.itemCount); i++) {
-      pageNumbers.push(i);
-    }
-
-    const handleCollapse = (itemId) => {
-      setData(data.map(item => {
-        if ((item.NowPlayingItemId+item.EpisodeId) === itemId) {
-          return { ...item, isCollapsed: !item.isCollapsed };
-        } else {
-          return item;
-        }
-      }));
-    }
-    function formatTotalWatchTime(seconds) {
-      const hours = Math.floor(seconds / 3600); // 1 hour = 3600 seconds
-      const minutes = Math.floor((seconds % 3600) / 60); // 1 minute = 60 seconds
-      let formattedTime='';
-      if(hours)
-      {
-        formattedTime+=`${hours} hours`;
-      }
-      if(minutes)
-      {
-        formattedTime+=` ${minutes} minutes`;
-      }
-    
-      return formattedTime ;
-    }
-    
-  
-   
   return (
-    <div>
-     
-    <div className='activity-table'>
-        <div className='table-headers'>
-            <div onClick={() => handleSort("UserName")}>User</div>
-            <div onClick={() => handleSort("NowPlayingItemName")}>Title </div>
-            <div onClick={() => handleSort("ActivityDateInserted")}>Date</div>
-            <div onClick={() => handleSort("PlaybackDuration")}>Playback Duration</div>
-            <div onClick={() => handleSort("results")}>Total Plays</div>
-        </div>
+    <React.Fragment>
+      <TableRow sx={{ '& > *': { borderBottom: 'unset' } }}>
+        <TableCell>
+          <IconButton
+            aria-label="expand row"
+            size="small"
+            onClick={() => {if(row.results.length>1){setOpen(!open);}}}
+            >
+              {!open ? <AddCircleFillIcon /> : <IndeterminateCircleFillIcon />}
+          </IconButton>
+        </TableCell>
+        <TableCell><Link to={`/users/${row.UserId}`} className='text-decoration-none'>{row.UserName}</Link></TableCell>
+        <TableCell><Link to={`/libraries/item/${row.EpisodeId || row.NowPlayingItemId}`} className='text-decoration-none'>{!row.SeriesName ? row.NowPlayingItemName : row.SeriesName+' - '+ row.NowPlayingItemName}</Link></TableCell>
+        <TableCell>{row.Client}</TableCell>
+        <TableCell>{Intl.DateTimeFormat('en-UK', options).format(new Date(row.ActivityDateInserted))}</TableCell>
+        <TableCell>{formatTotalWatchTime(row.PlaybackDuration) || '0 minutes'}</TableCell>
+        <TableCell>{row.results.length}</TableCell>
+      </TableRow>
+      <TableRow>
+        <TableCell style={{ paddingBottom: 0, paddingTop: 0 }} colSpan={7}>
+          <Collapse in={open} timeout="auto" unmountOnExit>
+            <Box sx={{ margin: 1 }}>
 
-    {currentData.map((item) => (
-
-                <div className='table-rows' key={item.NowPlayingItemId+item.EpisodeId} onClick={() => handleCollapse(item.NowPlayingItemId+item.EpisodeId)}>
-                    <div className='table-rows-content'>
-                      <div><Link to={`/users/${item.UserId}`}>{item.UserName}</Link></div>
-                      <div><Link to={`/item/${item.EpisodeId || item.NowPlayingItemId}`}>{!item.SeriesName ? item.NowPlayingItemName : item.SeriesName+' - '+ item.NowPlayingItemName}</Link></div>
-                      <div>{Intl.DateTimeFormat('en-UK', options).format(new Date(item.ActivityDateInserted))}</div>
-                      <div>{formatTotalWatchTime(item.PlaybackDuration) || '0 sec'}</div>
-                      <div>{item.results.length+1}</div>
-                    </div>
-                    <div className={`sub-table ${item.isCollapsed ? 'collapsed' : ''}`}>
-                    {item.results.map((sub_item,index) => (
-
-                         <div className='table-rows-content  bg-grey sub-row' key={sub_item.EpisodeId+index}>
-                            <div><Link to={`/users/${sub_item.UserId}`}>{sub_item.UserName}</Link></div>
-                            <div><Link to={`/item/${sub_item.EpisodeId || sub_item.NowPlayingItemId}`}>{!sub_item.SeriesName ? sub_item.NowPlayingItemName : sub_item.SeriesName+' - '+ sub_item.NowPlayingItemName}</Link></div>
-                            <div>{Intl.DateTimeFormat('en-UK', options).format(new Date(sub_item.ActivityDateInserted))}</div>
-                            <div></div>
-                            <div>1</div>
-                        </div>
-                                  ))}
-                    </div>
-                </div>
-          ))}
-    </div>
-
-
-
-      
-      
-      {props.itemCount>0  ?
-
-                <div className="pagination">
-                    <button className="page-btn" onClick={() => setCurrentPage(1)} disabled={currentPage === 1}>
-                      First
-                    </button>
-
-                    <button className="page-btn" onClick={() => setCurrentPage(currentPage - 1)} disabled={currentPage === 1}>
-                      Previous
-                    </button>
-
-                    <div className="page-number">{`Page ${currentPage} of ${pageNumbers.length}`}</div>
-
-                    <button className="page-btn" onClick={() => setCurrentPage(currentPage + 1)} disabled={currentPage === pageNumbers.length}>
-                      Next
-                    </button>
-
-                    <button className="page-btn" onClick={() => setCurrentPage(pageNumbers.length)} disabled={currentPage === pageNumbers.length}>
-                      Last
-                    </button>
-                </div>
-            :<></>
-
-        }
-    </div>
+              <Table aria-label="sub-activity" className='rounded-2'>
+                <TableHead>
+                  <TableRow>
+                    <TableCell>Username</TableCell>
+                    <TableCell>Title</TableCell>
+                    <TableCell>Client</TableCell>
+                    <TableCell>Date</TableCell>
+                    <TableCell>Playback Duration</TableCell>
+                    <TableCell>Plays</TableCell>
+                  </TableRow>
+                </TableHead>
+                <TableBody>
+                  {row.results.map((resultRow) => (
+                    <TableRow key={resultRow.Id}>
+ 
+                        <TableCell><Link to={`/users/${resultRow.UserId}`} className='text-decoration-none'>{resultRow.UserName}</Link></TableCell>
+                        <TableCell><Link to={`/libraries/item/${resultRow.EpisodeId || resultRow.NowPlayingItemId}`} className='text-decoration-none'>{!resultRow.SeriesName ? resultRow.NowPlayingItemName : resultRow.SeriesName+' - '+ resultRow.NowPlayingItemName}</Link></TableCell>
+                        <TableCell>{resultRow.Client}</TableCell>
+                        <TableCell>{Intl.DateTimeFormat('en-UK', options).format(new Date(resultRow.ActivityDateInserted))}</TableCell>
+                        <TableCell>{formatTotalWatchTime(resultRow.PlaybackDuration) || '0 minutes'}</TableCell>
+                        <TableCell>1</TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </Box>
+          </Collapse>
+        </TableCell>
+      </TableRow>
+    </React.Fragment>
   );
 }
-export default ActivityTable;
+
+export default function ActivityTable(props) {
+  const [page, setPage] = React.useState(0);
+  const [rowsPerPage, setRowsPerPage] = React.useState(10);
+
+  const handleChangePage = (event, newPage) => {
+    setPage(newPage);
+  };
+
+
+  if(rowsPerPage!==props.itemCount)
+  {
+    setRowsPerPage(props.itemCount);
+    setPage(0);
+  }
+
+
+  const handleNextPageClick = () => {
+    setPage((prevPage) => prevPage + 1);
+  };
+
+  const handlePreviousPageClick = () => {
+    setPage((prevPage) => prevPage - 1);
+  };
+
+  return (
+    <>
+      <TableContainer className='rounded-2'>
+        <Table aria-label="collapsible table" >
+          <TableHead>
+            <TableRow>
+              <TableCell />
+              <TableCell>Username</TableCell>
+              <TableCell>Title</TableCell>
+              <TableCell>Client</TableCell>
+              <TableCell>Date</TableCell>
+              <TableCell>Playback Duration</TableCell>
+              <TableCell>Plays</TableCell>
+            </TableRow>
+          </TableHead>
+          <TableBody>
+            {props.data
+              .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
+              .map((row) => (
+                <Row key={row.Id} row={row} />
+              ))}
+              {props.data.length===0 ? <tr><td colSpan="7" style={{ textAlign: "center", fontStyle: "italic" ,color:"grey"}} className='py-2'>No Activity Found</td></tr> :''}
+            
+          </TableBody>
+        </Table>
+      </TableContainer>
+
+            <div className='d-flex justify-content-end my-2'>
+                <ButtonGroup className="pagination-buttons">
+                    <Button className="page-btn" onClick={()=>setPage(0)} disabled={page === 0}>
+                      First
+                    </Button>
+
+                    <Button className="page-btn" onClick={handlePreviousPageClick}  disabled={page === 0}>
+                      Previous
+                    </Button>
+
+                    <div className="page-number d-flex align-items-center justify-content-center">{`${page *rowsPerPage + 1}-${Math.min((page * rowsPerPage+ 1 ) +  (rowsPerPage - 1),props.data.length)} of ${props.data.length}`}</div>
+
+                    <Button className="page-btn" onClick={handleNextPageClick}  disabled={page >= Math.ceil(props.data.length / rowsPerPage) - 1}>
+                      Next
+                    </Button>
+
+                    <Button className="page-btn" onClick={()=>setPage(Math.ceil(props.data.length / rowsPerPage) - 1)} disabled={page >= Math.ceil(props.data.length / rowsPerPage) - 1}>
+                      Last
+                    </Button>
+                </ButtonGroup>
+            </div>
+    
+    </>
+  );
+}

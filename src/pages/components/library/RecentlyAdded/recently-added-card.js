@@ -10,7 +10,7 @@ function RecentlyAddedCard(props) {
   const [loaded, setLoaded] = useState(false);
   return (
     <div className="last-card">
-     <Link to={`/item/${props.data.Id}`}>
+     <Link to={`/libraries/item/${props.data.Id}`}>
       <div className="last-card-banner">
         {loaded ? null : <Blurhash hash={props.data.ImageBlurHashes.Primary[props.data.ImageTags.Primary]} width={'100%'}   height={'100%'}/>}
         <img
