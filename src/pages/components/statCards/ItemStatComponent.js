@@ -81,7 +81,7 @@ function ItemStatComponent(props) {
                     </Link>
                     :
                       !item.Client && !props.icon ? 
-                      <Link to={`/item/${item.Id}`}>
+                      <Link to={`/libraries/item/${item.Id}`}>
                         <Card.Text>{item.Name}</Card.Text>
                       </Link>
                       :
