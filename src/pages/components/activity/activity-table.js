@@ -61,7 +61,7 @@ function Row(data) {
             size="small"
             onClick={() => {if(row.results.length>1){setOpen(!open);}}}
             >
-              {!open ? <AddCircleFillIcon /> : <IndeterminateCircleFillIcon />}
+              {!open ? <AddCircleFillIcon opacity={row.results.length>1 ?1 : 0} cursor={row.results.length>1 ? "pointer":"default"}/> : <IndeterminateCircleFillIcon />}
           </IconButton>
         </TableCell>
         <TableCell><Link to={`/users/${row.UserId}`} className='text-decoration-none'>{row.UserName}</Link></TableCell>

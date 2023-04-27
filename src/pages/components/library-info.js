@@ -11,6 +11,7 @@ import LibraryGlobalStats from './library/library-stats';
 import LibraryLastWatched from './library/last-watched';
 import RecentlyPlayed from './library/recently-added';
 import LibraryActivity from './library/library-activity';
+import LibraryItems from './library/library-items';
 
 import { Tabs, Tab, Button, ButtonGroup } from 'react-bootstrap';
 
@@ -90,7 +91,7 @@ function LibraryInfo() {
             <LibraryActivity LibraryId={LibraryId}/>
           </Tab>
           <Tab eventKey="tabItems" className='bg-transparent'>
-            <LibraryActivity LibraryId={LibraryId}/>
+            <LibraryItems LibraryId={LibraryId}/>
           </Tab>
         </Tabs>
     </div>

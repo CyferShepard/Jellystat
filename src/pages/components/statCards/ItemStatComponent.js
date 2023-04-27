@@ -21,7 +21,7 @@ function ItemStatComponent(props) {
   };
 
   const cardBgStyle = {
-    backdropFilter: 'blur(5px)',
+    backdropFilter: props.base_url ? 'blur(5px)' : 'blur(0px)',
     backgroundColor: 'rgb(0, 0, 0, 0.6)',
     height:'100%',
   };

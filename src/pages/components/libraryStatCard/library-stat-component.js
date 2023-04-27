@@ -14,15 +14,15 @@ function LibraryStatComponent(props) {
   };
 
   const cardBgStyle = {
-    backdropFilter: 'blur(5px)',
+    // backdropFilter: 'blur(5px)',
     backgroundColor: 'rgb(0, 0, 0, 0.6)',
     height:'100%',
   };
 
 
   return (
-    <Card className="stat-card" style={cardStyle}>
-    <div style={cardBgStyle}>
+    <Card className="stat-card rounded-3" style={cardStyle}>
+    <div style={cardBgStyle} className="rounded-3">
       <Row className="h-100">
         <Col className="d-none d-lg-block stat-card-banner">
 

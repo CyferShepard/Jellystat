@@ -69,12 +69,11 @@ router.get("/getLibraries", async (req, res) => {
 
 router.post("/getLibraryItems", async (req, res) => {
   try{
-    const  Id  = req.headers['id'];
-
+    const  {libraryid}  = req.body;
+    console.log(`ENDPOINT CALLED: /getLibraryItems: `+libraryid);
     const { rows } = await db.query(
-      `SELECT * FROM jf_library_items where "ParentId"='${Id}'`
+      `SELECT * FROM jf_library_items where "ParentId"='${libraryid}'`
     );
-    console.log({ Id: Id });
     res.send(rows);
   
 
@@ -83,7 +82,7 @@ router.post("/getLibraryItems", async (req, res) => {
     console.log(error);
   }
 
-  console.log(`ENDPOINT CALLED: /getLibraryItems: `);
+ 
 });
 
 router.post("/getSeasons", async (req, res) => {

@@ -12,13 +12,14 @@ function MoreItemCards(props) {
   const [loaded, setLoaded] = useState(false);
   const [fallback, setFallback] = useState(false);
   return (
-    <div className={props.data.Type==="Episode" ? "last-card episode" : "last-card"}>
+    <div className={props.data.Type==="Episode" ? "last-card episode-card" : "last-card"}>
      <Link to={`/libraries/item/${ (props.data.Type==="Episode" ? props.data.EpisodeId :  props.data.Id) }`}>
       <div className={props.data.Type==="Episode" ? "last-card-banner episode" : "last-card-banner"}>
         {props.data.ImageBlurHashes && !loaded ? <Blurhash hash={props.data.ImageBlurHashes.Primary[props.data.ImageTags.Primary]} width={'100%'}   height={'100%'}/> : null}
 
         {fallback ? 
         <img
+        className="episode"
           src={
             `${
               props.base_url +

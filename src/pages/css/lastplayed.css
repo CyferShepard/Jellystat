@@ -8,10 +8,8 @@
     color: white;
     margin-bottom: 20px;
     min-height: 300px;
-
-
-
 }
+
 .last-played-container::-webkit-scrollbar {
     width: 5px; /* set scrollbar width */
   }
@@ -42,6 +40,7 @@
 
     width: 150px;
     border-radius: 8px;
+       background-color: #1e1c22;
 
 }
 
@@ -49,13 +48,19 @@
 .episode{
   width: 220px !important;
   height: 128px !important;
+
 }
 
+.episode-card{
+  width: 220px !important;
+
+
+}
 
 
 .last-card-banner {
   width: 150px;
-  height: 224px;
+  height: 220px;
   transition: opacity 0.2s ease-in-out;
 }
 
