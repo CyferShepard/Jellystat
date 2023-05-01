@@ -32,6 +32,12 @@ function formatTotalWatchTime(seconds) {
     formattedTime+=` ${minutes} minutes`;
   }
 
+  if(!hours && !minutes)
+  {
+    // const seconds = Math.floor(((seconds % 3600) / 60) / 60); // 1 minute = 60 seconds
+    formattedTime+=` ${seconds} seconds`;
+  }
+
   return formattedTime ;
 }
 
@@ -112,10 +118,6 @@ function Row(data) {
 export default function ActivityTable(props) {
   const [page, setPage] = React.useState(0);
   const [rowsPerPage, setRowsPerPage] = React.useState(10);
-
-  const handleChangePage = (event, newPage) => {
-    setPage(newPage);
-  };
 
 
   if(rowsPerPage!==props.itemCount)

@@ -1,6 +1,6 @@
 import React, { useState,useEffect } from "react";
 import axios from "axios";
-import { DropdownButton, Dropdown,ButtonGroup, Button } from 'react-bootstrap';
+import {Form, DropdownButton, Dropdown,ButtonGroup, Button } from 'react-bootstrap';
 
 import Table from '@mui/material/Table';
 import TableBody from '@mui/material/TableBody';
@@ -22,10 +22,6 @@ const token = localStorage.getItem('token');
 
 function Row(file) {
   const { data } = file;
-
-  console.log(data);
-  const [open, setOpen] = React.useState(false);
-
 
   async function downloadBackup(filename) {
     const url=`/data/files/${filename}`;
@@ -114,6 +110,7 @@ function Row(file) {
 
 
 
+
   const options = {
     day: "numeric",
     month: "numeric",
@@ -151,43 +148,72 @@ function Row(file) {
 export default function BackupFiles() {
     const [files, setFiles] = useState([]);
     const [showAlert, setshowAlert] = useState({visible:false,type:'danger',title:'Error',message:''});
-    const [rowsPerPage, setRowsPerPage] = React.useState(10);
+    const [rowsPerPage] = React.useState(10);
     const [page, setPage] = React.useState(0);
+    const [progress, setProgress] = useState(0);
+
+
 
     
 function handleCloseAlert() {
   setshowAlert({visible:false});
 }
 
-    useEffect(() => {
+const uploadFile = (file, onUploadProgress) => {
+  const formData = new FormData();
+  formData.append("file", file);
 
-        const fetchData = async () => {
-          try {
-            const backupFiles = await axios.get(`/data/files`, {
-              headers: {
-                Authorization: `Bearer ${token}`,
-                "Content-Type": "application/json",
-              },
-            });
-            setFiles(backupFiles.data);
-          } catch (error) {
-            console.log(error);
-          }
-        };
-    
-        fetchData();
-    
-        const intervalId = setInterval(fetchData, 60000 * 5);
-        return () => clearInterval(intervalId);
-      }, [files,token]);
+  return axios.post("/data/upload", formData, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+      "Content-Type": "multipart/form-data",
+    },
+    onUploadProgress,
+  });
+};
 
-      const handleNextPageClick = () => {
-        setPage((prevPage) => prevPage + 1);
-      };
-    
-      const handlePreviousPageClick = () => {
-        setPage((prevPage) => prevPage - 1);
-      };
+
+const handleFileSelect = (event) => {
+  setProgress(0);
+  if (event.target.files[0]) {
+    uploadFile(event.target.files[0], (progressEvent) => {
+      setProgress(Math.round((progressEvent.loaded / progressEvent.total) * 100));
+    });
+  }
+};
+
+
+
+
+useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const backupFiles = await axios.get(`/data/files`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+        });
+        setFiles(backupFiles.data);
+      } catch (error) {
+        console.log(error);
+      }
+    };
+
+    fetchData();
+
+    const intervalId = setInterval(fetchData, 60000 * 5);
+    return () => clearInterval(intervalId);
+  }, [files]);
+
+
+const handleNextPageClick = () => {
+  setPage((prevPage) => prevPage + 1);
+};
+
+const handlePreviousPageClick = () => {
+  setPage((prevPage) => prevPage - 1);
+};
       
 
     
@@ -219,12 +245,23 @@ function handleCloseAlert() {
                             <Row key={index} data={file} />
                           ))}
                           {files.length===0 ? <tr><td colSpan="5" style={{ textAlign: "center", fontStyle: "italic" ,color:"grey"}}  className='py-2'>No Backups Found</td></tr> :''}
-            
+                            <TableRow>
+                              <TableCell colSpan="5">
+                                <Form.Group controlId="formFile"  onChange={handleFileSelect} className="mx-2">
+                                  <Form.Control type="file" accept=".json" className="upload-file" style={{ backgroundColor:"rgb(90 45 165)", borderColor: "rgb(90 45 165)"}}/>
+                                  <progress className="w-100" value={progress} max="100" />
+                                </Form.Group>
+                              </TableCell>
+                            </TableRow>
+                            
                       </TableBody>
                     </Table>
             </TableContainer>
 
             <div className='d-flex justify-content-end my-2'>
+              
+
+
                 <ButtonGroup className="pagination-buttons">
                     <Button className="page-btn" onClick={()=>setPage(0)} disabled={page === 0}>
                       First
@@ -244,9 +281,7 @@ function handleCloseAlert() {
                       Last
                     </Button>
                 </ButtonGroup>
-            </div>
-
-         
+            </div>       
         </div>
       );
 

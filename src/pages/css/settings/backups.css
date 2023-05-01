@@ -20,3 +20,15 @@ th{
 td{
     border-bottom: none !important;
 }
+
+.upload-file
+{
+    background-color: rgb(100, 100, 100,0.2) !important;
+    border-color: rgb(100, 100, 100,0.2) !important;
+    color: white !important;
+}
+
+.upload-file:focus
+{
+    box-shadow: none !important;
+}

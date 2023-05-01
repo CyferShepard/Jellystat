@@ -2,6 +2,7 @@ import { Nav, Navbar as BootstrapNavbar, Container } from "react-bootstrap";
 import { Link, useLocation } from "react-router-dom";
 import { navData } from "../../../lib/navdata";
 import LogoutBoxLineIcon from "remixicon-react/LogoutBoxLineIcon";
+import logo_dark from '../../images/icon-b-512.png';
 import "../../css/navbar.css";
 
 export default function Navbar() {
@@ -15,7 +16,7 @@ export default function Navbar() {
   return (
     <BootstrapNavbar variant="dark" expand="md" className="navbar py-0">
       <Container fluid>
-      <BootstrapNavbar.Brand as={Link} to={"/"}>Jellystat</BootstrapNavbar.Brand>
+      <BootstrapNavbar.Brand as={Link} to={"/"}><img src={logo_dark} style={{height:"32px"}} className="px-2"/>Jellystat</BootstrapNavbar.Brand>
       <BootstrapNavbar.Toggle aria-controls="responsive-navbar-nav" />
       <BootstrapNavbar.Collapse id="responsive-navbar-nav">
             <Nav className="ms-auto">

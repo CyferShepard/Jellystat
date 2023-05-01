@@ -3,7 +3,7 @@ import axios from "axios";
 import Config from "../lib/config";
 import { Link } from 'react-router-dom';
 import AccountCircleFillIcon from "remixicon-react/AccountCircleFillIcon";
-import { DropdownButton, Dropdown,ButtonGroup, Button } from 'react-bootstrap';
+import {ButtonGroup, Button } from 'react-bootstrap';
 
 import Table from '@mui/material/Table';
 import TableBody from '@mui/material/TableBody';
@@ -58,18 +58,6 @@ function Row(row) {
   }
 
 
-
-  const options = {
-    day: "numeric",
-    month: "numeric",
-    year: "numeric",
-    hour: "numeric",
-    minute: "numeric",
-    second: "numeric",
-    hour12: false,
-  };
-
-
   return (
     <React.Fragment>
       <TableRow sx={{ '& > *': { borderBottom: 'unset' } }}>
@@ -106,9 +94,6 @@ function Users() {
   const [config, setConfig] = useState(null);
   const [rowsPerPage, setRowsPerPage] = React.useState(10);
   const [page, setPage] = React.useState(0);
-
-
-  const [currentPage, setCurrentPage] = useState(1);
   const [itemCount,setItemCount] = useState(10);
 
 

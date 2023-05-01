@@ -3,6 +3,7 @@ const { Pool } = require('pg');
 const fs = require('fs');
 const path = require('path');
 const moment = require('moment');
+const multer = require('multer');
 
 const wss = require("./WebsocketHandler");
 
@@ -234,6 +235,27 @@ router.get('/restore/:filename', async (req, res) => {
       res.status(500).send('An error occurred while deleting the file.');
     }
 
+  });
+
+  
+  const storage = multer.diskStorage({
+    destination: function (req, file, cb) {
+      cb(null, path.join(__dirname, backupfolder)); // Set the destination folder for uploaded files
+    },
+    filename: function (req, file, cb) {
+      cb(null, file.originalname); // Set the file name
+    },
+  });
+  
+  const upload = multer({ storage: storage });
+  
+  
+  router.post("/upload", upload.single("file"), (req, res) => {
+    // Handle the uploaded file here
+    res.json({
+      fileName: req.file.originalname,
+      filePath: req.file.path,
+    });
   });
   
   

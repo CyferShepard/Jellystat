@@ -1,8 +1,5 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
-import TvLineIcon from "remixicon-react/TvLineIcon";
-import FilmLineIcon from "remixicon-react/FilmLineIcon";
-
 import ActivityTable from "../activity/activity-table";
 
 function UserActivity(props) {
@@ -32,7 +29,7 @@ function UserActivity(props) {
 
     const intervalId = setInterval(fetchData, 60000 * 5);
     return () => clearInterval(intervalId);
-  }, [ props.LibraryId,token]);
+  }, [ props.UserId,token]);
 
 
   if (!data) {

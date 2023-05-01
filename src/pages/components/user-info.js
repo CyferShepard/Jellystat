@@ -3,7 +3,7 @@ import React, { useState, useEffect } from "react";
 import axios from "axios";
 import AccountCircleFillIcon from "remixicon-react/AccountCircleFillIcon";
 import Config from "../../lib/config";
-import {Row, Col, Tabs, Tab, Button, ButtonGroup } from 'react-bootstrap';
+import {Tabs, Tab, Button, ButtonGroup } from 'react-bootstrap';
 
 import GlobalStats from './user-info/globalStats';
 import LastPlayed from './user-info/lastplayed';
