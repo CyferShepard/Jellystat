@@ -71,7 +71,7 @@ export default function LibrarySync() {
           <Row className="mb-3">
 
             <Form.Label column sm="2">
-              Syncronize with Jellyfin
+              Synchronize with Jellyfin
             </Form.Label>
 
             <Col sm="10">
