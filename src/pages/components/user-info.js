@@ -80,10 +80,9 @@ function UserInfo() {
           <img
             className="user-image"
             src={
-              config.hostUrl +
-              "/Users/" +
-              data.Id +
-              "/Images/Primary?fillHeight=100&fillWidth=100&quality=90"
+              "/Proxy/Users/Images/Primary?id=" +
+              UserId+
+              "&quality=100"
             }
             onError={handleImageError}
             alt=""

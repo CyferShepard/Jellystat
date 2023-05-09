@@ -91,6 +91,7 @@ function Login() {
               type="text"
               id="username"
               name="username"
+              autocomplete="on"
               value={formValues.username || ""}
               onChange={handleFormChange}
               required
@@ -102,6 +103,7 @@ function Login() {
               type="text"
               id="password"
               name="password"
+              autocomplete="on"
               value={formValues.password || ""}
               onChange={handleFormChange}
               required

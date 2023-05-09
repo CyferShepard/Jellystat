@@ -39,10 +39,9 @@ function LastWatchedCard(props) {
         <img
           src={
             `${
-              props.base_url +
-                "/Items/" +
+                "/Proxy/Items/Images/Primary?id=" +
                 props.data.Id +
-                "/Images/Primary?fillHeight=320&fillWidth=213&quality=50"}`
+                "&fillHeight=320&fillWidth=213&quality=50"}`
           }
           alt=""
           onLoad={() => setLoaded(true)}

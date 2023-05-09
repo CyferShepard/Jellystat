@@ -187,24 +187,32 @@ router.get('/restore/:filename', async (req, res) => {
 
   
   router.get('/files', (req, res) => {
-    const directoryPath = path.join(__dirname, backupfolder);
-    fs.readdir(directoryPath, (err, files) => {
-      if (err) {
-        res.status(500).send('Unable to read directory');
-      } else {
-        const fileData = files.filter(file => file.endsWith('.json'))
-        .map(file => {
-          const filePath = path.join(directoryPath, file);
-          const stats = fs.statSync(filePath);
-          return {
-            name: file,
-            size: stats.size,
-            datecreated: stats.birthtime
-          };
-        });
-        res.json(fileData);
-      }
-    });
+    try
+    {  
+      const directoryPath = path.join(__dirname, backupfolder);
+      fs.readdir(directoryPath, (err, files) => {
+        if (err) {
+          res.status(500).send('Unable to read directory');
+        } else {
+          const fileData = files.filter(file => file.endsWith('.json'))
+          .map(file => {
+            const filePath = path.join(directoryPath, file);
+            const stats = fs.statSync(filePath);
+            return {
+              name: file,
+              size: stats.size,
+              datecreated: stats.birthtime
+            };
+          });
+          res.json(fileData);
+        }
+      });
+
+    }catch(error)
+    {
+        console.log(error);
+    }
+  
   });
 
 
@@ -216,9 +224,10 @@ router.get('/restore/:filename', async (req, res) => {
 
   //delete backup
   router.delete('/files/:filename', (req, res) => {
-    const filePath = path.join(__dirname, backupfolder, req.params.filename);
-  
+
     try{
+      const filePath = path.join(__dirname, backupfolder, req.params.filename);
+  
       fs.unlink(filePath, (err) => {
         if (err) {
           console.error(err);

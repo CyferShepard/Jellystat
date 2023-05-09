@@ -1,11 +1,9 @@
-
+@import './variables.module.css';
 
 .sessions-container {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(320px, 520px));
     grid-auto-rows: 200px;/* max-width+offset so 215 + 20*/
-    /* margin-right: 20px; */
-
 }
 
 .session-card {
@@ -13,13 +11,10 @@
     color: white;
 
     background-color: grey;
-    /* box-shadow: 0 0 20px 5px rgba(0, 0, 0, 0.8); */
 
     max-height: 180px;
     max-width: 500px;
 
-    /* margin-left: 20px; */
-    /* margin-bottom: 10px; */
 
     background-size: cover;
     border-radius: 8px 8px 0px 8px;
@@ -32,8 +27,6 @@
 
 .progress-bar {
 
-    /* grid-row: 2 / 3;
-    grid-column: 1/3; */
     height: 5px;
     background-color: #101010 !important;
     border-radius: 0px 0px 8px 8px;
@@ -43,7 +36,7 @@
 
 .progress-custom {
     height: 100%;
-    background-color: #00A4DC;
+    background-color:  var(--secondary-color);
     transition: width 0.2s ease-in-out;
     border-radius: 0px 0px 0px 8px;
 }
@@ -73,7 +66,6 @@
 .card-banner-image {
     border-radius: 8px 0px 0px 0px;
     max-height: inherit;
-    /* box-shadow: 0 0 20px 5px rgba(0, 0, 0, 0.8); */
 }
 
 .card-user {
@@ -98,7 +90,6 @@
 
 .card-user-image-default
 {
-    /* width: 50px !important; */
     font-size: large;
 }
 
@@ -125,7 +116,6 @@
     display: grid;
     grid-template-columns: auto 1fr;
     grid-template-rows: auto auto;
-    /* grid-column-gap: 10px; */
 }
 
 .card-device-name {
@@ -137,8 +127,6 @@
 .card-device-image {
     max-width: 35px;
     width: 100%;
-    /* margin-right: 5px; */
-    /* grid-row: 1 / span 2; */
 }
 
 .card-client {
@@ -161,9 +149,6 @@
 
 .card-playback-position {
     bottom: 5px;
-    /* right: 5px; */
-    /* text-align: right; */
-    /* position: absolute; */
 }
 
 .device-info {
@@ -181,6 +166,6 @@ margin-bottom: 100%;
   }
   
   .card-text a:hover{
-    color: #00A4DC !important;
+    color:  var(--secondary-color) !important;
   }
   

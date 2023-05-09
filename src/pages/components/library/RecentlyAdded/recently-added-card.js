@@ -15,11 +15,9 @@ function RecentlyAddedCard(props) {
         {loaded ? null : <Blurhash hash={props.data.ImageBlurHashes.Primary[props.data.ImageTags.Primary]} width={'100%'}   height={'100%'}/>}
         <img
           src={
-            `${
-              props.base_url +
-                "/Items/" +
+            `${"/Proxy/Items/Images/Primary?id=" +
                 props.data.Id +
-                "/Images/Primary?fillHeight=320&fillWidth=213&quality=50"}`
+                "&fillHeight=320&fillWidth=213&quality=50"}`
           }
           alt=""
           onLoad={() => setLoaded(true)}

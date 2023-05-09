@@ -1,7 +1,8 @@
+@import '../variables.module.css';
 .item-detail-container
 {
     color:white;
-    background-color: rgb(100, 100, 100,0.2);
+    background-color:  var(--secondary-background-color);
     padding: 20px;
     margin: 20px 0;
     border-radius: 8px;    
@@ -26,6 +27,6 @@
   }
   
   .item-details div a:hover{
-    color: #00A4DC !important;
+    color: var(--secondary-color) !important;
   }
   

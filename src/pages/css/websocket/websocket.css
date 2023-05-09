@@ -15,12 +15,11 @@
 .console-text {
   margin: 0;
   font-family: monospace;
+  text-overflow: ellipsis;
+  overflow-x: hidden;
 }
 
 
-.console-container {
-  overflow: auto; /* show scrollbar when needed */
-}
 
 .console-container::-webkit-scrollbar {
   width: 10px; /* set scrollbar width */

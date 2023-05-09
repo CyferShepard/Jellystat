@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
-// import axios from 'axios';
+import axios from 'axios';
 import Config from "../../../lib/config";
-import API from "../../../classes/jellyfin-api";
+// import API from "../../../classes/jellyfin-api";
 
 import "../../css/sessions.css";
 // import "../../App.css"
@@ -12,27 +12,45 @@ import Loading from "../general/loading";
 
 function Sessions() {
   const [data, setData] = useState();
-  const [base_url, setURL] = useState("");
+
+  const [config, setConfig] = useState();
   // const [errorHandler, seterrorHandler] = useState({ error_count: 0, error_message: '' })
 
   useEffect(() => {
-    const _api = new API();
-    const fetchData = () => {
-      _api.getSessions().then((SessionData) => {
-        let results=SessionData.filter((session) => session.NowPlayingItem);
-        setData(results);
 
-      });
+    const fetchConfig = async () => {
+      try {
+        const newConfig = await Config();
+        setConfig(newConfig);
+      } catch (error) {
+          console.log(error);
+      }
     };
 
-    if (base_url === "") {
-      Config()
-        .then((config) => {
-          setURL(config.hostUrl);
+    const fetchData = () => {
+
+      if (config) {
+        const url = `/api/getSessions`;
+
+        axios
+        .get(url, {
+          headers: {
+            Authorization: `Bearer ${config.token}`,
+            "Content-Type": "application/json",
+          },
         })
-        .catch((error) => {
-          console.log(error);
-        });
+          .then((data) => {
+            setData(data.data);
+          })
+          .catch((error) => {
+            console.log(error);
+          });
+      }
+    };
+ 
+
+    if (!config) {
+      fetchConfig();
     }
     if(!data)
     {
@@ -41,7 +59,7 @@ function Sessions() {
 
     const intervalId = setInterval(fetchData, 1000);
     return () => clearInterval(intervalId);
-  }, [data,base_url]);
+  }, [data,config]);
 
   if (!data) {
     return <Loading />;
@@ -63,11 +81,12 @@ function Sessions() {
       <div className="sessions-container">
         {data &&
           data
+          .filter(row => row.NowPlayingItem !== undefined)
             .sort((a, b) =>
               a.Id.padStart(12, "0").localeCompare(b.Id.padStart(12, "0"))
             )
             .map((session) => (
-              <SessionCard key={session.Id} data={{ session: session, base_url: base_url }} />
+              <SessionCard key={session.Id} data={{ session: session, base_url: config.base_url }} />
             ))}
       </div>
     </div>

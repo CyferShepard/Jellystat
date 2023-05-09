@@ -1,13 +1,15 @@
 .error
 {
-    position: fixed;
-    top: 0;
-    bottom: 0;
-    left: 0;
-    right: 0;
+    margin: 0px;
+    height:  calc(100vh - 100px);
+ 
     display: flex;
     justify-content: center;
     align-items: center;
+    /* z-index: 9999; */
+    background-color: #1e1c22;
+    transition: opacity 800ms ease-in;
+    opacity: 1;
 }
 
 .error .message

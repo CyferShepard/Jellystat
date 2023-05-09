@@ -9,6 +9,13 @@ module.exports = function(app) {
     })
   );
   app.use(
+    `/proxy`,
+    createProxyMiddleware({
+      target: `http://127.0.0.1:${process.env.PORT || 3003}`,
+      changeOrigin: true,
+    })
+  );
+  app.use(
     `/stats`,
     createProxyMiddleware({
       target: `http://127.0.0.1:${process.env.PORT || 3003}`,
@@ -40,8 +47,9 @@ module.exports = function(app) {
     `/ws`,
     createProxyMiddleware({
       target: `ws://127.0.0.1:${process.env.WS_PORT || 3004}`,
-      changeOrigin: true,
       ws: true,
+      changeOrigin: true,
+      secure: false,
     })
   );
   

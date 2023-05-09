@@ -33,7 +33,7 @@ function sessionCard(props) {
   // Access data passed in as a prop using `props.data`
 
   const cardStyle = {
-    backgroundImage: `url(${props.data.base_url}/Items/${(props.data.session.NowPlayingItem.SeriesId ? props.data.session.NowPlayingItem.SeriesId : props.data.session.NowPlayingItem.Id)}/Images/Backdrop?fillHeight=320&fillWidth=213&quality=80), linear-gradient(to right, #00A4DC, #AA5CC3)`,
+    backgroundImage: `url(Proxy/Items/Images/Backdrop?id=${(props.data.session.NowPlayingItem.SeriesId ? props.data.session.NowPlayingItem.SeriesId : props.data.session.NowPlayingItem.Id)}&fillHeight=320&fillWidth=213&quality=80), linear-gradient(to right, #00A4DC, #AA5CC3)`,
     height:'100%',
     backgroundSize: 'cover',
   };
@@ -53,7 +53,7 @@ function sessionCard(props) {
               <Card.Img
                 variant="top"
                 className="stat-card-image rounded-0"
-                src={props.data.base_url + "/Items/" + (props.data.session.NowPlayingItem.SeriesId ? props.data.session.NowPlayingItem.SeriesId : props.data.session.NowPlayingItem.Id) + "/Images/Primary?fillHeight=320&fillWidth=213&quality=50"}
+                src={"/Proxy/Items/Images/Primary?id=" + (props.data.session.NowPlayingItem.SeriesId ? props.data.session.NowPlayingItem.SeriesId : props.data.session.NowPlayingItem.Id) + "&fillHeight=320&fillWidth=213&quality=50"}
               />
 
 
@@ -105,11 +105,8 @@ function sessionCard(props) {
                           <img
                             className="card-user-image"
                             src={
-                              props.data.base_url +
-                              "/Users/" +
+                              "/Proxy/Users/Images/Primary?id=" +
                               props.data.session.UserId +
-                              "/Images/Primary?tag=" +
-                              props.data.session.UserPrimaryImageTag +
                               "&quality=50"
                             }
                             alt=""

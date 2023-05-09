@@ -3,6 +3,17 @@ const express = require("express");
 const axios = require("axios");
 const ActivityMonitor=require('./watchdog/ActivityMonitor');
 const db = require("./db");
+const https = require('https');
+
+const agent = new https.Agent({
+  rejectUnauthorized: (process.env.REJECT_SELF_SIGNED_CERTIFICATES || 'true').toLowerCase() ==='true'
+});
+
+
+
+const axios_instance = axios.create({
+  httpsAgent: agent
+});
 
 const router = express.Router();
 
@@ -154,7 +165,14 @@ router.post("/getItemDetails", async (req, res) => {
           query
         );
   
-        res.send(episodes);
+          if(episodes.length!==0)
+          {
+            res.send(episodes);
+          }else
+          {
+            res.status(404).send('Item not found');
+          }
+
   
       }else{
   
@@ -250,20 +268,16 @@ router.post("/getItemHistory", async (req, res) => {
       ("EpisodeId"='${itemid}' OR "SeasonId"='${itemid}' OR "NowPlayingItemId"='${itemid}');`
     );
     
-    const groupedResults = {};
-    rows.forEach(row => {
-      if (groupedResults[row.NowPlayingItemId+row.EpisodeId]) {
-        groupedResults[row.NowPlayingItemId+row.EpisodeId].results.push(row);
-      } else {
-        groupedResults[row.NowPlayingItemId+row.EpisodeId] = {
-          ...row,
-          results: []
-        };
-        groupedResults[row.NowPlayingItemId+row.EpisodeId].results.push(row);
-      }
-    });
+  
+
+    const groupedResults = rows.map(item => ({
+      ...item,
+      results: []
+    }));
     
-    res.send(Object.values(groupedResults));
+
+    
+    res.send(groupedResults);
   } catch (error) {
     console.log(error);
     res.send(error);
@@ -307,7 +321,7 @@ router.get("/getAdminUsers", async (req, res) => {
   try {
     const { rows:config } = await db.query('SELECT * FROM app_config where "ID"=1');
     const url = `${config[0].JF_HOST}/Users`;
-    const response = await axios.get(url, {
+    const response = await axios_instance.get(url, {
       headers: {
         "X-MediaBrowser-Token": config[0].JF_API_KEY,
       },
@@ -338,6 +352,87 @@ router.get("/runWatchdog", async (req, res) => {
     res.send(message);
   }
 });
+
+router.get("/getSessions", async (req, res) => {
+  try {
+
+   
+    const { rows: config } = await db.query('SELECT * FROM app_config where "ID"=1');
+
+    if (config[0].JF_HOST === null || config[0].JF_API_KEY === null) {
+      res.send({ error: "Config Details Not Found" });
+      return;
+    }
+
+   
+
+    let url=`${config[0].JF_HOST}/sessions`;
+    
+    const response_data = await axios_instance.get(url, {
+      headers: {
+        "X-MediaBrowser-Token":  config[0].JF_API_KEY ,
+      },
+    });
+    res.send(response_data.data);
+  } catch (error) {
+    console.log(error);
+    res.send(error);
+  }
+});
+
+router.post("/validateSettings", async (req, res) => {
+    const { url,apikey } = req.body;
+  
+    let isValid = false;
+    let errorMessage = "";
+    try
+    {
+      await axios_instance
+      .get(url + "/system/configuration", {
+        headers: {
+          "X-MediaBrowser-Token": apikey,
+        },
+      })
+      .then((response) => {
+        if (response.status === 200) {
+          isValid = true;
+        }
+      })
+      .catch((error) => {
+        if (error.code === "ERR_NETWORK") {
+          isValid = false;
+          errorMessage = `Error : Unable to connect to Jellyfin Server`;
+        } else if (error.code === "ECONNREFUSED") {
+          isValid = false;
+          errorMessage = `Error : Unable to connect to Jellyfin Server`;
+        }
+        else if (error.response && error.response.status === 401) {
+          isValid = false;
+          errorMessage = `Error: ${error.response.status} Not Authorized. Please check API key`;
+        } else if (error.response && error.response.status === 404) {
+          isValid = false;
+          errorMessage = `Error ${error.response.status}: The requested URL was not found.`;
+        } else {
+          isValid = false;
+          errorMessage =  `${error}`;
+        }
+      });
+
+    }catch(error)
+    {
+      isValid = false;
+      errorMessage = `Error: ${error}`;
+    }
+   
+
+    res.send({isValid:isValid,errorMessage:errorMessage });
+
+
+});
+
+
+
+
 
 
 

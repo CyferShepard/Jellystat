@@ -2,6 +2,17 @@ const express = require("express");
 const pgp = require("pg-promise")();
 const db = require("./db");
 const axios = require("axios");
+const https = require('https');
+
+const agent = new https.Agent({
+  rejectUnauthorized: (process.env.REJECT_SELF_SIGNED_CERTIFICATES || 'true').toLowerCase() ==='true'
+});
+
+
+
+const axios_instance = axios.create({
+  httpsAgent: agent
+});
 
 const wss = require("./WebsocketHandler");
 const socket=wss;
@@ -29,7 +40,7 @@ class sync {
     try {
       const url = `${this.hostUrl}/Users`;
       console.log("getAdminUser: ", url);
-      const response = await axios.get(url, {
+      const response = await axios_instance.get(url, {
         headers: {
           "X-MediaBrowser-Token": this.apiKey,
         },
@@ -45,7 +56,7 @@ class sync {
     try {
       const url = `${this.hostUrl}/Users`;
       console.log("getAdminUser: ", url);
-      const response = await axios.get(url, {
+      const response = await axios_instance.get(url, {
         headers: {
           "X-MediaBrowser-Token": this.apiKey,
         },
@@ -67,7 +78,7 @@ class sync {
       if (itemID !== undefined) {
         url += `?ParentID=${itemID}`;
       }
-      const response = await axios.get(url, {
+      const response = await axios_instance.get(url, {
         headers: {
           "X-MediaBrowser-Token": this.apiKey,
         },
@@ -94,7 +105,7 @@ class sync {
       if (itemID !== undefined) {
         url += `?ParentID=${itemID}`;
       }
-      const response = await axios.get(url, {
+      const response = await axios_instance.get(url, {
         headers: {
           "X-MediaBrowser-Token": this.apiKey,
         },
@@ -114,7 +125,7 @@ class sync {
 
       let url = `${this.hostUrl}/Items/${itemID}/playbackinfo?userId=${userid}`;
 
-      const response = await axios.get(url, {
+      const response = await axios_instance.get(url, {
         headers: {
           "X-MediaBrowser-Token": this.apiKey,
         },
@@ -337,10 +348,12 @@ async function syncShowItems()
   let deleteEpisodeCount = 0;
 
   //loop for each show
+  let show_counter=0;
   for (const show of shows) {
     const allSeasons = await _sync.getSeasonsAndEpisodes(show.Id,'Seasons');
     const allEpisodes =await _sync.getSeasonsAndEpisodes(show.Id,'Episodes');
-
+    show_counter++;
+    socket.sendMessageToClients({ Message: "Syncing shows " + (show_counter/shows.length*100).toFixed(2) +"%" ,key:'show_sync'});
 
 
     const existingIdsSeasons = await db.query(`SELECT *	FROM public.jf_library_seasons where "SeriesId" = '${show.Id}'`).then((res) => res.rows.map((row) => row.Id));
@@ -431,7 +444,7 @@ async function syncShowItems()
     
     } 
 
-    socket.sendMessageToClients({ Message: "Sync complete for " + show.Name });
+ 
   }
 
   socket.sendMessageToClients({color: "dodgerblue",Message: insertSeasonsCount + " Seasons inserted.",});
@@ -595,7 +608,7 @@ async function syncPlaybackPluginData()
 
     const url = `${base_url}/user_usage_stats/submit_custom_query`;
 
-    const response = await axios.post(url, {
+    const response = await axios_instance.post(url, {
       CustomQueryString: query,
     }, {
       headers: {

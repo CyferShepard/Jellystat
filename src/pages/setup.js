@@ -3,6 +3,7 @@ import axios from "axios";
 import Config from "../lib/config";
 
 import "./css/setup.css";
+const token = localStorage.getItem('token');
 // import LibrarySync from "./components/settings/librarySync";
 
 // import Loading from './components/loading';
@@ -39,38 +40,23 @@ function Setup() {
   }
 
   async function validateSettings(_url, _apikey) {
-    // Send a GET request to /system/configuration to test copnnection
-    let isValid = false;
-    let errorMessage = "";
-    await axios
-      .get(_url + "/system/configuration", {
-        headers: {
-          "X-MediaBrowser-Token": _apikey,
-        },
-      })
-      .then((response) => {
-        if (response.status === 200) {
-          isValid = true;
-        }
-      })
-      .catch((error) => {
-        // console.log(error.code);
-        if (error.code === "ERR_NETWORK") {
-          isValid = false;
-          errorMessage = `Unable to connect to Jellyfin Server`;
-        } else if (error.response.status === 401) {
-          isValid = false;
-          errorMessage = `Error ${error.response.status} Unauthorized`;
-        } else if (error.response.status === 404) {
-          isValid = false;
-          errorMessage = `Error ${error.response.status}: The requested URL was not found.`;
-        } else {
-          isValid = false;
-          errorMessage = `Error : ${error.response.status}`;
-        }
-      });
+    const result = await axios
+    .post("/api/validateSettings", {
+      url:_url,
+      apikey: _apikey
 
-    return { isValid: isValid, errorMessage: errorMessage };
+    }, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
+      },
+    })
+    .catch((error) => {
+      let errorMessage= `Error : ${error}`;
+    });
+
+    let data=result.data;
+    return { isValid:data.isValid, errorMessage:data.errorMessage} ;
   }
 
   async function handleFormSubmit(event) {

@@ -1,10 +1,22 @@
 const db = require("../db");
 const pgp = require("pg-promise")();
 const axios = require("axios");
+
 const moment = require('moment');
 const { columnsPlayback, mappingPlayback } = require('../models/jf_playback_activity');
 const { jf_activity_watchdog_columns, jf_activity_watchdog_mapping } = require('../models/jf_activity_watchdog');
 const { randomUUID }  = require('crypto');
+const https = require('https');
+
+const agent = new https.Agent({
+  rejectUnauthorized: (process.env.REJECT_SELF_SIGNED_CERTIFICATES || 'true').toLowerCase() ==='true'
+});
+
+
+
+const axios_instance = axios.create({
+  httpsAgent: agent
+});
 
 async function ActivityMonitor(interval) {
   console.log("Activity Interval: " + interval);
@@ -30,7 +42,7 @@ async function ActivityMonitor(interval) {
       }
 
       const url = `${base_url}/Sessions`;
-      const response = await axios.get(url, {
+      const response = await axios_instance.get(url, {
         headers: {
           "X-MediaBrowser-Token": apiKey,
         },

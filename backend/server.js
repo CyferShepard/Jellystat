@@ -7,10 +7,14 @@ const knexConfig = require('./migrations');
 
 const authRouter= require('./auth');
 const apiRouter = require('./api');
+const proxyRouter = require('./proxy');
 const syncRouter = require('./sync');
 const statsRouter = require('./stats');
 const backupRouter = require('./backup');
 const ActivityMonitor = require('./watchdog/ActivityMonitor');
+
+const { checkForUpdates } = require('./version-control');
+
 
 
 const app = express();
@@ -49,6 +53,7 @@ function verifyToken(req, res, next) {
 
 app.use('/auth', authRouter); // mount the API router at /api, with JWT middleware
 app.use('/api', verifyToken, apiRouter); // mount the API router at /api, with JWT middleware
+app.use('/proxy', proxyRouter); // mount the API router at /api, with JWT middleware
 app.use('/sync', verifyToken, syncRouter); // mount the API router at /sync, with JWT middleware
 app.use('/stats', verifyToken, statsRouter); // mount the API router at /stats, with JWT middleware
 app.use('/data', verifyToken, backupRouter); // mount the API router at /stats, with JWT middleware
@@ -62,6 +67,7 @@ try{
     db.migrate.latest().then(() => {
       app.listen(PORT, async () => {
         console.log(`Server listening on http://${LISTEN_IP}:${PORT}`);
+        checkForUpdates();
         ActivityMonitor.ActivityMonitor(1000);
       });
     });

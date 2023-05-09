@@ -1,8 +1,9 @@
+@import './variables.module.css';
 .last-played-container {
 
     display: flex;
     overflow-x: auto;
-    background-color: rgb(100, 100, 100,0.2);
+    background-color:  var(--secondary-background-color);
     padding: 20px;
     border-radius: 8px;
     color: white;
@@ -40,7 +41,7 @@
 
     width: 150px;
     border-radius: 8px;
-       background-color: #1e1c22;
+       background-color:  var(--background-color);
 
 }
 
@@ -92,7 +93,7 @@
 }
 
 .last-item-details a:hover{
-  color: #00A4DC !important;
+  color:  var(--secondary-color) !important;
 }
 
 
@@ -120,6 +121,6 @@
 .last-last-played{
     font-size: 0.8em;
     margin-bottom: 5px;
-    color: #00a4dc;
+    color: var(--secondary-color);
 }
 

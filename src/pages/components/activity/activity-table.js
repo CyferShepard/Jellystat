@@ -17,9 +17,11 @@ import AddCircleFillIcon from 'remixicon-react/AddCircleFillIcon';
 import IndeterminateCircleFillIcon from 'remixicon-react/IndeterminateCircleFillIcon';
 
 import '../../css/activity/activity-table.css';
-
+// localStorage.setItem('hour12',true);
+let hour_format = Boolean(localStorage.getItem('hour12'));
 
 function formatTotalWatchTime(seconds) {
+
   const hours = Math.floor(seconds / 3600); // 1 hour = 3600 seconds
   const minutes = Math.floor((seconds % 3600) / 60); // 1 minute = 60 seconds
   let formattedTime='';
@@ -53,7 +55,7 @@ function Row(data) {
     hour: "numeric",
     minute: "numeric",
     second: "numeric",
-    hour12: false,
+    hour12: hour_format,
   };
 
 
@@ -75,7 +77,7 @@ function Row(data) {
         <TableCell>{row.Client}</TableCell>
         <TableCell>{Intl.DateTimeFormat('en-UK', options).format(new Date(row.ActivityDateInserted))}</TableCell>
         <TableCell>{formatTotalWatchTime(row.PlaybackDuration) || '0 minutes'}</TableCell>
-        <TableCell>{row.results.length}</TableCell>
+        <TableCell>{row.results.length !==0 ? row.results.length : 1}</TableCell>
       </TableRow>
       <TableRow>
         <TableCell style={{ paddingBottom: 0, paddingTop: 0 }} colSpan={7}>
@@ -154,7 +156,7 @@ export default function ActivityTable(props) {
             {props.data
               .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
               .map((row) => (
-                <Row key={row.Id} row={row} />
+                <Row key={row.Id+row.NowPlayingItemId+row.EpisodeId} row={row} />
               ))}
               {props.data.length===0 ? <tr><td colSpan="7" style={{ textAlign: "center", fontStyle: "italic" ,color:"grey"}} className='py-2'>No Activity Found</td></tr> :''}
             

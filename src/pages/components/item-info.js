@@ -12,6 +12,7 @@ import "../css/items/item-details.css";
 
 import MoreItems from "./item-info/more-items";
 import ItemActivity from "./item-info/item-activity";
+import ErrorPage from "./general/error";
 
 
 import Config from "../../lib/config";
@@ -79,10 +80,12 @@ useEffect(() => {
 
 
       setData(itemData.data[0]);
-      setRefresh(false);
+
     } catch (error) {
+      setData({notfound:true, message:error.response.data});
       console.log(error);
     }
+    setRefresh(false);
   }
 
   };
@@ -101,18 +104,19 @@ useEffect(() => {
 
 
 
-if(!data)
-{
-  return <></>;
-}
 
 
-if(refresh)
+
+if(!data || refresh)
 {
   return <Loading/>;
 }
-  
-   
+
+if(data && data.notfound)
+{
+  return <ErrorPage message={data.message}/>;
+}
+
   return (
     <div>
        
@@ -123,10 +127,9 @@ if(refresh)
         <img
             className="item-image"
             src={
-              config.hostUrl +
-              "/Items/" +
+              "/Proxy/Items/Images/Primary?id=" +
              (data.Type==="Episode"? data.SeriesId : data.Id) +
-              "/Images/Primary?fillWidth=200&quality=90"
+              "&fillWidth=200&quality=90"
             }
             alt=""
             style={{

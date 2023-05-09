@@ -1,7 +1,8 @@
+@import '../variables.module.css';
 
 .activity-table
 {
-    background-color: rgba(100,100, 100, 0.2);
+    background-color: var(--secondary-background-color);
     color: white !important;
     
 }
@@ -9,7 +10,7 @@
 td,th, td>button
 {
   color: white !important;
-  background-color: rgba(100,100, 100, 0.2);
+  background-color: var(--secondary-background-color);
 
 }
 
@@ -38,7 +39,7 @@ td:hover > a
 }
 
 select option {
-  background-color: #4a4a4a;
+  background-color: var(--secondary-color);
   outline: unset;
   width: 100%;
   border: none;
@@ -63,7 +64,7 @@ width: 130px;
 height: 35px;
 color: white;
 display: flex;
-background-color: rgb(100, 100, 100,0.3);
+background-color:  var(--secondary-background-color);
 border-radius: 8px;
 font-size: 1.2em;
 align-self: flex-end;
@@ -86,6 +87,6 @@ font-size: 1em;
 
 .page-btn
 {
-  background-color: rgb(90 45 165) !important;
-  border-color:  rgb(90 45 165) !important;
+  background-color:  var(--primary-color) !important;
+  border-color:  var(--primary-color)!important;
 }

@@ -128,14 +128,15 @@ function Row(file) {
         <TableCell>{data.name}</TableCell>
         <TableCell>{Intl.DateTimeFormat('en-UK', options).format(new Date(data.datecreated))}</TableCell>
         <TableCell>{formatFileSize(data.size)}</TableCell>
-        <TableCell className="d-flex justify-content-center">
-        <DropdownButton title="Actions" variant="outline-primary">
-                                
-                              <Dropdown.Item as="button" variant="primary" onClick={()=>downloadBackup(data.name)}>Download</Dropdown.Item>
-                                <Dropdown.Item as="button" variant="warning" onClick={()=>restoreBackup(data.name)}>Restore</Dropdown.Item>
-                                <Dropdown.Divider ></Dropdown.Divider>
-                                <Dropdown.Item as="button" variant="danger" onClick={()=>deleteBackup(data.name)}>Delete</Dropdown.Item>
-                              </DropdownButton>
+        <TableCell className="">
+          <div className="d-flex justify-content-center">
+            <DropdownButton title="Actions" variant="outline-primary"> 
+              <Dropdown.Item as="button" variant="primary" onClick={()=>downloadBackup(data.name)}>Download</Dropdown.Item>
+              <Dropdown.Item as="button" variant="warning" onClick={()=>restoreBackup(data.name)}>Restore</Dropdown.Item>
+              <Dropdown.Divider ></Dropdown.Divider>
+              <Dropdown.Item as="button" variant="danger" onClick={()=>deleteBackup(data.name)}>Delete</Dropdown.Item>
+            </DropdownButton>
+        </div>
 
         </TableCell>
 
@@ -229,7 +230,7 @@ const handlePreviousPageClick = () => {
                 </Alert>
             )}
 
-            <TableContainer className='rounded-2 overflow-visible'>
+            <TableContainer className='rounded-2'>
                     <Table aria-label="collapsible table" >
                       <TableHead>
                         <TableRow>

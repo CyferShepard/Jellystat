@@ -66,10 +66,9 @@ function Row(row) {
                   <img
                     className="card-user-image"
                     src={
-                      row.hostUrl +
-                      "/Users/" +
+                      "Proxy/Users/Images/Primary?id=" +
                       data.UserId +
-                      "/Images/Primary?quality=10"
+                      "&quality=10"
                     }
                     alt=""
                   />
@@ -78,7 +77,7 @@ function Row(row) {
                 )}
         </TableCell>
         <TableCell><Link to={`/users/${data.UserId}`} className="text-decoration-none">{data.UserName}</Link></TableCell>
-        <TableCell>{data.LastWatched || 'never'}</TableCell>
+        <TableCell><Link to={`/libraries/item/${data.NowPlayingItemId}`} className="text-decoration-none">{data.LastWatched || 'never'}</Link></TableCell>
         <TableCell>{data.LastClient || 'n/a'}</TableCell>
         <TableCell>{data.TotalPlays}</TableCell>
         <TableCell>{formatTotalWatchTime(data.TotalWatchTime) || 0}</TableCell>
@@ -189,9 +188,9 @@ function Users() {
                       <TableBody>
                         {data && data.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
                           .map((row) => (
-                            <Row key={row.id} data={row} hostUrl={config.hostUrl}/>
+                            <Row key={row.UserId} data={row} hostUrl={config.hostUrl}/>
                           ))}
-                          {data.length===0 ? <tr><td colSpan="5" style={{ textAlign: "center", fontStyle: "italic" ,color:"grey"}}>No Backups Found</td></tr> :''}
+                          {data.length===0 ? <tr><td colSpan="5" style={{ textAlign: "center", fontStyle: "italic" ,color:"grey"}}>No Users Found</td></tr> :''}
             
                       </TableBody>
                     </Table>

@@ -22,29 +22,30 @@ function RecentlyPlayed(props) {
         }
       };
       
-    const fetchAdmin = async () => {
-      try {
-        let url=`/api/getAdminUsers`;
-        const adminData = await axios.get(url, {
-          headers: {
-            Authorization: `Bearer ${config.token}`,
-            "Content-Type": "application/json",
-          },
-        });
-         return adminData.data[0].Id;
-        // setData(itemData.data);
-      } catch (error) {
-        console.log(error);
-      }
-    };
+    // const fetchAdmin = async () => {
+    //   try {
+    //     let url=`/api/getAdminUsers`;
+    //     const adminData = await axios.get(url, {
+    //       headers: {
+    //         Authorization: `Bearer ${config.token}`,
+    //         "Content-Type": "application/json",
+    //       },
+    //     });
+    //      return adminData.data[0].Id;
+    //     // setData(itemData.data);
+    //   } catch (error) {
+    //     console.log(error);
+    //   }
+    // };
 
     const fetchData = async () => {
       try {
-        let adminId=await fetchAdmin();
-        let url=`${config.hostUrl}/users/${adminId}/Items/latest?parentId=${props.LibraryId}`;
+        // let adminId=await fetchAdmin();
+        let url=`/stats/getRecentlyAdded?libraryid=${props.LibraryId}`;
         const itemData = await axios.get(url, {
           headers: {
-            "X-MediaBrowser-Token": config.apiKey,
+            Authorization: `Bearer ${config.token}`,
+            "Content-Type": "application/json",
           },
         });
         setData(itemData.data);

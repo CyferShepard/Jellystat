@@ -1,3 +1,5 @@
+@import '../variables.module.css';
+
 .lib-card{
     color: white;
     max-width: 400px;
@@ -6,7 +8,7 @@
 
 .card-label
 {
-    color: #00A4DC;
+    color: var(--secondary-color);
 }
 
 .card-row .col
@@ -39,7 +41,7 @@
 
 .library-card-details
 {
-    background-color: rgb(100, 100, 100,0.2) !important;
+    background-color: var(--secondary-background-color) !important;
 }
 
 

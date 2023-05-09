@@ -1,3 +1,4 @@
+@import '../variables.module.css';
 tr{
     color: white;
 }
@@ -9,7 +10,6 @@ th:hover{
 th{
     border-bottom: none !important;
     cursor: default !important;
-    /* background-color: rgba(0, 0, 0, 0.8) !important; */
 }
 
 .backup-file-download
@@ -23,8 +23,8 @@ td{
 
 .upload-file
 {
-    background-color: rgb(100, 100, 100,0.2) !important;
-    border-color: rgb(100, 100, 100,0.2) !important;
+    background-color:  var(--secondary-background-color) !important;
+    border-color:  var(--secondary-background-color) !important;
     color: white !important;
 }
 

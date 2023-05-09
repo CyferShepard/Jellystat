@@ -12,10 +12,10 @@ function ItemStatComponent(props) {
     setLoaded(true);
   }
 
-
+  const backgroundImage=`/proxy/Items/Images/Backdrop?id=${props.data[0].Id}&fillWidth=300&quality=10`;
 
   const cardStyle = {
-    backgroundImage: `url(${props.base_url}/Items/${props.data[0].Id}/Images/Backdrop/?fillWidth=300&quality=10), linear-gradient(to right, #00A4DC, #AA5CC3)`,
+    backgroundImage: `url(${backgroundImage}), linear-gradient(to right, #00A4DC, #AA5CC3)`,
     height:'100%',
     backgroundSize: 'cover',
   };
@@ -50,7 +50,7 @@ function ItemStatComponent(props) {
                 )}
                 <Card.Img
                   className="stat-card-image"
-                  src={props.base_url + "/Items/" + props.data[0].Id + "/Images/Primary?fillWidth=400&quality=90"}
+                  src={"Proxy/Items/Images/Primary?id=" + props.data[0].Id + "& fillWidth=400&quality=90"}
                   style={{ display: loaded ? 'block' : 'none' }}
                   onLoad={handleImageLoad}
                   onError={() => setLoaded(false)}

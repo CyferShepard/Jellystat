@@ -20,6 +20,7 @@ export default function SettingsConfig() {
   const [isSubmitted, setisSubmitted] = useState("");
   const [loadSate, setloadSate] = useState("Loading");
   const [submissionMessage, setsubmissionMessage] = useState("");
+  const token = localStorage.getItem('token');
 
   useEffect(() => {
     Config()
@@ -38,37 +39,23 @@ export default function SettingsConfig() {
   }, []);
 
   async function validateSettings(_url, _apikey) {
-    let isValid = false;
-    let errorMessage = "";
-    await axios
-      .get(_url + "/system/configuration", {
-        headers: {
-          "X-MediaBrowser-Token": _apikey,
-        },
-      })
-      .then((response) => {
-        if (response.status === 200) {
-          isValid = true;
-        }
-      })
-      .catch((error) => {
-        // console.log(error.code);
-        if (error.code === "ERR_NETWORK") {
-          isValid = false;
-          errorMessage = `Error : Unable to connect to Jellyfin Server`;
-        } else if (error.response.status === 401) {
-          isValid = false;
-          errorMessage = `Error: ${error.response.status} Not Authorized. Please check API key`;
-        } else if (error.response.status === 404) {
-          isValid = false;
-          errorMessage = `Error ${error.response.status}: The requested URL was not found.`;
-        } else {
-          isValid = false;
-          errorMessage = `Error : ${error.response.status}`;
-        }
-      });
+    const result = await axios
+    .post("/api/validateSettings", {
+      url:_url,
+      apikey: _apikey
 
-    return { isValid: isValid, errorMessage: errorMessage };
+    }, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
+      },
+    })
+    .catch((error) => {
+      let errorMessage= `Error : ${error}`;
+    });
+
+    let data=result.data;
+    return { isValid:data.isValid, errorMessage:data.errorMessage} ;
   }
 
   async function handleFormSubmit(event) {
@@ -77,7 +64,7 @@ export default function SettingsConfig() {
       formValues.JF_HOST,
       formValues.JF_API_KEY
     );
-    console.log(validation);
+    
     if (!validation.isValid) {
       setisSubmitted("Failed");
       setsubmissionMessage(validation.errorMessage);
@@ -119,7 +106,7 @@ export default function SettingsConfig() {
 
 
     return (
-      <div className="general-settings-page">
+      <div>
         <h1>General Settings</h1>
         <Form onSubmit={handleFormSubmit} className="settings-form">
           <Form.Group as={Row} className="mb-3" >

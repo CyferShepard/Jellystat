@@ -1,10 +1,8 @@
 // import logo from './logo.svg';
 import './App.css';
 import React, { useState, useEffect } from 'react';
-import {
-  Routes,
-  Route,
-} from "react-router-dom";
+import { Routes, Route } from "react-router-dom";
+import { Helmet } from 'react-helmet';
 import axios from 'axios';
 
 import Config from './lib/config';
@@ -67,7 +65,7 @@ function App() {
       axios
       .get("/auth/isConfigured")
       .then(async (response) => {
-        console.log(response);
+        // console.log(response);
         if(response.status===200)
         {
           setisConfigured(true);
@@ -119,6 +117,9 @@ if (config  && config.apiKey ===null) {
 if (config  && isConfigured && token!==null){
   return (
     <div className="App">
+       <Helmet>
+        <meta http-equiv="Content-Security-Policy" content="upgrade-insecure-requests" />
+      </Helmet>
       <Navbar />
       <div>
       <main>

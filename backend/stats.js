@@ -1,6 +1,7 @@
 // api.js
 const express = require("express");
 const db = require("./db");
+const axios=require("axios");
 
 const router = express.Router();
 
@@ -277,6 +278,44 @@ router.post("/getLibraryLastPlayed", async (req, res) => {
       `select * from fs_last_library_activity('${libraryid}') limit 15`
     );
     res.send(rows);
+  } catch (error) {
+    console.log(error);
+    res.send(error);
+  }
+});
+
+router.get("/getRecentlyAdded", async (req, res) => {
+  try {
+
+    const { libraryid } = req.query;
+    const { rows: config } = await db.query('SELECT * FROM app_config where "ID"=1');
+
+    if (config[0].JF_HOST === null || config[0].JF_API_KEY === null) {
+      res.send({ error: "Config Details Not Found" });
+      return;
+    }
+
+    const adminurl = `${config[0].JF_HOST}/Users`;
+
+    const response = await axios.get(adminurl, {
+      headers: {
+        "X-MediaBrowser-Token":  config[0].JF_API_KEY ,
+      },
+    });
+
+    const adminUser = response.data.filter(
+      (user) => user.Policy.IsAdministrator === true
+    );
+   
+
+    let url=`${config[0].JF_HOST}/users/${adminUser[0].Id}/Items/latest?parentId=${libraryid}`;
+    
+    const response_data = await axios.get(url, {
+      headers: {
+        "X-MediaBrowser-Token":  config[0].JF_API_KEY ,
+      },
+    });
+    res.send(response_data.data);
   } catch (error) {
     console.log(error);
     res.send(error);
