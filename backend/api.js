@@ -1,9 +1,10 @@
 // api.js
 const express = require("express");
 const axios = require("axios");
-const ActivityMonitor=require('./watchdog/ActivityMonitor');
+const ActivityMonitor=require('./tasks/ActivityMonitor');
 const db = require("./db");
 const https = require('https');
+const { checkForUpdates } = require('./version-control');
 
 const agent = new https.Agent({
   rejectUnauthorized: (process.env.REJECT_SELF_SIGNED_CERTIFICATES || 'true').toLowerCase() ==='true'
@@ -59,6 +60,19 @@ router.post("/setconfig", async (req, res) => {
   
 
   console.log(`ENDPOINT CALLED: /setconfig: `);
+});
+
+router.get("/CheckForUpdates", async (req, res) => {
+  try{
+
+    let result=await checkForUpdates();
+    res.send(result);
+
+  }catch(error)
+  {
+    console.log(error);
+  }
+
 });
 
 
@@ -219,6 +233,14 @@ router.get("/getHistory", async (req, res) => {
         groupedResults[row.NowPlayingItemId+row.EpisodeId].results.push(row);
       }
     });
+
+        // Update GroupedResults with playbackDurationSum
+        Object.values(groupedResults).forEach(row => {
+          if (row.results && row.results.length > 0) {
+            row.PlaybackDuration = row.results.reduce((acc, item) => acc + parseInt(item.PlaybackDuration), 0);
+          }
+        });
+        
     
     res.send(Object.values(groupedResults));
     

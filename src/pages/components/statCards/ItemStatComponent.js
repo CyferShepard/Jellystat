@@ -45,12 +45,12 @@ function ItemStatComponent(props) {
               <>
                 {!loaded && (
                   <div className="position-absolute w-100 h-100">
-                    <Blurhash hash={props.data[0].PrimaryImageHash} width="100%" height="100%" />
+                    <Blurhash hash={props.data[0].PrimaryImageHash}  height={'100%'} className="rounded-3 overflow-hidden"/>
                   </div>
                 )}
                 <Card.Img
                   className="stat-card-image"
-                  src={"Proxy/Items/Images/Primary?id=" + props.data[0].Id + "& fillWidth=400&quality=90"}
+                  src={"Proxy/Items/Images/Primary?id=" + props.data[0].Id + "&fillWidth=400&quality=90"}
                   style={{ display: loaded ? 'block' : 'none' }}
                   onLoad={handleImageLoad}
                   onError={() => setLoaded(false)}

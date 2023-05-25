@@ -11,8 +11,8 @@ import FilmLineIcon from "remixicon-react/FilmLineIcon";
 
 export default function LibraryOverView() {
   const token = localStorage.getItem('token');
-  const SeriesIcon=<TvLineIcon size={"80%"} /> ;
-  const MovieIcon=<FilmLineIcon size={"80%"} /> ;
+  const SeriesIcon=<TvLineIcon size={"100%"} /> ;
+  const MovieIcon=<FilmLineIcon size={"100%"} /> ;
   const [data, setData] = useState();
 
 
@@ -41,7 +41,7 @@ export default function LibraryOverView() {
 
   return (
     <div>
-      <h1 className="my-3">Library Statistics</h1>
+      <h1 className="my-3">Library Overview</h1>
       <div className="overview-container">
 
         <LibraryStatComponent data={data.filter((stat) => stat.CollectionType === "movies")} heading={"MOVIE LIBRARIES"} units={"MOVIES"} icon={MovieIcon}/>

@@ -7,6 +7,8 @@ import Row from 'react-bootstrap/Row';
 import Col from 'react-bootstrap/Col';
 import Button from 'react-bootstrap/Button';
 import Alert from 'react-bootstrap/Alert';
+import ToggleButton from 'react-bootstrap/ToggleButton';
+import ToggleButtonGroup from 'react-bootstrap/ToggleButtonGroup';
 
 
 
@@ -21,6 +23,17 @@ export default function SettingsConfig() {
   const [loadSate, setloadSate] = useState("Loading");
   const [submissionMessage, setsubmissionMessage] = useState("");
   const token = localStorage.getItem('token');
+  const [twelve_hr, set12hr] = useState(localStorage.getItem('12hr') === 'true');
+
+  const storage_12hr = localStorage.getItem('12hr');
+
+  if(storage_12hr===null)
+  {
+    localStorage.setItem('12hr',false);
+    set12hr(false);
+  }else if(twelve_hr===null){
+    set12hr(Boolean(storage_12hr));
+  }
 
   useEffect(() => {
     Config()
@@ -51,7 +64,7 @@ export default function SettingsConfig() {
       },
     })
     .catch((error) => {
-      let errorMessage= `Error : ${error}`;
+      // let errorMessage= `Error : ${error}`;
     });
 
     let data=result.data;
@@ -102,28 +115,34 @@ export default function SettingsConfig() {
     return <div className="submit critical">{submissionMessage}</div>;
   }
 
+    
+  function toggle12Hr(is_12_hr){
+    set12hr(is_12_hr);
+    localStorage.setItem('12hr',is_12_hr);
+  };
+
 
 
 
     return (
       <div>
-        <h1>General Settings</h1>
+        <h1>Settings</h1>
         <Form onSubmit={handleFormSubmit} className="settings-form">
           <Form.Group as={Row} className="mb-3" >
-            <Form.Label column className="fs-4">
+            <Form.Label column className="">
               Jellyfin Url
             </Form.Label>
             <Col sm="10">
-              <Form.Control  id="JF_HOST" name="JF_HOST" value={formValues.JF_HOST || ""} onChange={handleFormChange}  placeholder="http://127.0.0.1:8096 or http://example.jellyfin.server" />
+              <Form.Control  id="JF_HOST"  name="JF_HOST" value={formValues.JF_HOST || ""} onChange={handleFormChange}  placeholder="http://127.0.0.1:8096 or http://example.jellyfin.server" />
             </Col>
           </Form.Group>
 
           <Form.Group as={Row} className="mb-3">
-            <Form.Label column  className="fs-4">
+            <Form.Label column  className="">
               API Key
             </Form.Label>
             <Col sm="10">
-              <Form.Control id="JF_API_KEY" name="JF_API_KEY"  value={formValues.JF_API_KEY || ""} onChange={handleFormChange} type={showKey ? "text" : "password"} />
+              <Form.Control id="JF_API_KEY"  name="JF_API_KEY"  value={formValues.JF_API_KEY || ""} onChange={handleFormChange} type={showKey ? "text" : "password"} />
             </Col>
           </Form.Group>
           {isSubmitted !== "" ? (
@@ -139,13 +158,30 @@ export default function SettingsConfig() {
           ) : (
             <></>
           )}
-          <div className="d-flex flex-column flex-sm-row justify-content-end align-items-sm-center">
+          <div className="d-flex flex-column flex-md-row justify-content-end align-items-md-center">
             <ButtonGroup >
               <Button variant="outline-success" type="submit"> Save </Button>
               <Button variant="outline-secondary" type="button" onClick={() => setKeyState(!showKey)}>Show Key</Button>
             </ButtonGroup>
           </div>
+
         </Form>
+
+        <Form className="settings-form">
+         <Form.Group as={Row} className="mb-3">
+           <Form.Label column  className="">Hour Format</Form.Label>
+           <Col >
+              <ToggleButtonGroup type="checkbox" className="d-flex" >
+                  <ToggleButton variant="outline-primary" active={twelve_hr}  onClick={()=> {toggle12Hr(true);}}>12 Hours</ToggleButton>
+                  <ToggleButton variant="outline-primary" active={!twelve_hr}  onClick={()=>{toggle12Hr(false);}}>24 Hours</ToggleButton>
+               </ToggleButtonGroup>
+            </Col>  
+          </Form.Group>
+
+        </Form>
+
+
+
 
       </div>
       );

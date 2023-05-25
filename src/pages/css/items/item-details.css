@@ -3,9 +3,12 @@
 {
     color:white;
     background-color:  var(--secondary-background-color);
-    padding: 20px;
     margin: 20px 0;
-    border-radius: 8px;    
+}
+
+.item-banner-image
+{
+    margin-right: 20px;
 }
 
 .item-name

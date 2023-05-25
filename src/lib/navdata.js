@@ -7,6 +7,7 @@ import HistoryFillIcon from 'remixicon-react/HistoryFillIcon';
 import SettingsFillIcon from 'remixicon-react/SettingsFillIcon';
 import GalleryFillIcon from 'remixicon-react/GalleryFillIcon';
 import UserFillIcon from 'remixicon-react/UserFillIcon';
+import InformationFillIcon from 'remixicon-react/InformationFillIcon';
 
 
 // import ReactjsFillIcon from 'remixicon-react/ReactjsFillIcon';
@@ -16,7 +17,7 @@ export const navData = [
         id: 0,
         icon: <HomeFillIcon/>,
         text: "Home",
-        link: "/"
+        link: ""
     },
     {
         id: 1,
@@ -49,13 +50,14 @@ export const navData = [
         text: "Settings",
         link: "settings"
     }
+    ,
+
+    {
+        id: 7,
+        icon: <InformationFillIcon />,
+        text: "About",
+        link: "about"
+    }
 
 ]
 
-// {
-//     id: 5,
-//     icon: <ReactjsFillIcon />,
-//     text: "Component Testing Playground",
-//     link: "testing"
-// }
-// ,

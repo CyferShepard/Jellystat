@@ -67,17 +67,13 @@ function sessionCard(props) {
                   <img
                    className="card-device-image"
                    src={
-                  props.data.base_url +
-                  "/web/assets/img/devices/" 
+                  "/proxy/web/assets/img/devices/?devicename=" 
                   +
                   (props.data.session.Client.toLowerCase().includes("web") ? 
                   ( clientData.find(item => props.data.session.DeviceName.toLowerCase().includes(item)) || "other")
                   :
                   ( clientData.find(item => props.data.session.Client.toLowerCase().includes(item)) || "other")
-                  )
-                  +
-                  ".svg"
-                   }
+                  )}
                   alt=""
                    />
                   </Col>
@@ -125,6 +121,22 @@ function sessionCard(props) {
                       </Row>
                 </Col>
               </Row>
+
+              {props.data.session.NowPlayingItem.ParentIndexNumber ? 
+                
+                <Row>
+
+                <Col className="col-auto">
+                         <Card.Text className="text-end">
+                            {'S'+props.data.session.NowPlayingItem.ParentIndexNumber +' - E'+ props.data.session.NowPlayingItem.IndexNumber}
+                         </Card.Text>
+                        </Col>
+                </Row>
+                :
+                <></>
+              
+              }
+
 
               <Row className="d-flex">
                 <Col className="col-auto">

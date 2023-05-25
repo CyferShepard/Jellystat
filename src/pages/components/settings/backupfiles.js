@@ -111,6 +111,8 @@ function Row(file) {
 
 
 
+  const twelve_hr = JSON.parse(localStorage.getItem('12hr'));
+
   const options = {
     day: "numeric",
     month: "numeric",
@@ -118,8 +120,9 @@ function Row(file) {
     hour: "numeric",
     minute: "numeric",
     second: "numeric",
-    hour12: false,
+    hour12: twelve_hr,
   };
+
 
 
   return (

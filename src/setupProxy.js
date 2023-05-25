@@ -44,6 +44,13 @@ module.exports = function(app) {
     })
   );
   app.use(
+    `/logs`,
+    createProxyMiddleware({
+      target: `http://127.0.0.1:${process.env.PORT || 3003}`,
+      changeOrigin: true,
+    })
+  );
+  app.use(
     `/ws`,
     createProxyMiddleware({
       target: `ws://127.0.0.1:${process.env.WS_PORT || 3004}`,

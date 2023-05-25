@@ -74,7 +74,7 @@ function LibraryCard(props) {
     return `${formattedTime}ago`;
   }
   return (
-      <Card className="bg-transparent lib-card border-0">
+      <Card className="bg-transparent lib-card rounded-3">
           <Link to={`/libraries/${props.data.Id}`}>
             <div className="library-card-image">
               <Card.Img

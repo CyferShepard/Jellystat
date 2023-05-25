@@ -9,6 +9,7 @@ import MoreItemCards from "../item-info/more-items/more-items-card";
 
 import Config from "../../../lib/config";
 import "../../css/library/media-items.css";
+import "../../css/width_breakpoint_css.css";
 
 function LibraryItems(props) {
   const [data, setData] = useState();
@@ -70,10 +71,10 @@ function LibraryItems(props) {
   }
 
   return (
-    <div className="last-played">
+    <div className="library-items">
       <div className="d-md-flex justify-content-between">
         <h1 className="my-3">Media</h1>
-        <FormControl type="text" placeholder="Search" value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} className="my-3 w-25" />
+        <FormControl type="text" placeholder="Search" value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} className="my-3 w-sm-100 w-md-75 w-lg-25" />
       </div>
         
         <div className="media-items-container">

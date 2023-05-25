@@ -81,7 +81,7 @@ async function insertBulk(table_name, data,columns) {
 
       await client.query("COMMIT");
 
-      message=(data.length + " Rows Inserted.");
+      message=((data.length||1) + " Rows Inserted.");
 
   } catch (error) {
     await client.query('ROLLBACK');

@@ -7,7 +7,7 @@ import "./css/library/libraries.css";
 
 import Loading from "./components/general/loading";
 import LibraryCard from "./components/library/library-card";
-import  Row  from "react-bootstrap/Row";
+import  Container  from "react-bootstrap/Container";
 
 
 
@@ -82,7 +82,7 @@ function Libraries() {
     <div className="libraries">
       <h1 className="py-4">Libraries</h1>
 
-      <Row xs={1} md={2} lg={4} className="g-4">
+      <div xs={1} md={2} lg={4} className="g-0 libraries-container">
       {data &&
           data.map((item) => (
     
@@ -90,7 +90,7 @@ function Libraries() {
      
 
             ))}
-      </Row>
+      </div>
       
     </div>
   );

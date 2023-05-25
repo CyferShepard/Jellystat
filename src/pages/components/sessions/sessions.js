@@ -40,7 +40,7 @@ function Sessions() {
           },
         })
           .then((data) => {
-            setData(data.data);
+            setData(data.data.filter(row => row.NowPlayingItem !== undefined));
           })
           .catch((error) => {
             console.log(error);
@@ -79,9 +79,8 @@ function Sessions() {
     <div>
       <h1  className="my-3">Sessions</h1>
       <div className="sessions-container">
-        {data &&
+        {data && data.length>0 &&
           data
-          .filter(row => row.NowPlayingItem !== undefined)
             .sort((a, b) =>
               a.Id.padStart(12, "0").localeCompare(b.Id.padStart(12, "0"))
             )

@@ -308,7 +308,11 @@ router.get("/getRecentlyAdded", async (req, res) => {
     );
    
 
-    let url=`${config[0].JF_HOST}/users/${adminUser[0].Id}/Items/latest?parentId=${libraryid}`;
+    let url=`${config[0].JF_HOST}/users/${adminUser[0].Id}/Items/latest`;
+    if(libraryid)
+    {
+      url+=`?parentId=${libraryid}`;
+    }
     
     const response_data = await axios.get(url, {
       headers: {

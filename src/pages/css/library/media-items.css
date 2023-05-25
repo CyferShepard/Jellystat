@@ -33,7 +33,7 @@
     background-color: #88888883; /* set thumb color */
   }
 
-  .form-control
+  .library-items > div> .form-control
   {
     color: white !important;
     background-color: var(--secondary-background-color) !important;
@@ -41,7 +41,7 @@
   }
 
   
-  .form-control:focus
+  .library-items > div> .form-control:focus
   {
     box-shadow: none !important;
     border-color: var(--primary-color) !important;

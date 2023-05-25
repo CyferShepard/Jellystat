@@ -12,7 +12,7 @@ function RecentlyAddedCard(props) {
     <div className="last-card">
      <Link to={`/libraries/item/${props.data.Id}`}>
       <div className="last-card-banner">
-        {loaded ? null : <Blurhash hash={props.data.ImageBlurHashes.Primary[props.data.ImageTags.Primary]} width={'100%'}   height={'100%'}/>}
+        {loaded ? null : <Blurhash hash={props.data.ImageBlurHashes.Primary[props.data.ImageTags.Primary]} width={'100%'}   height={'100%'} className="rounded-3 overflow-hidden"/>}
         <img
           src={
             `${"/Proxy/Items/Images/Primary?id=" +

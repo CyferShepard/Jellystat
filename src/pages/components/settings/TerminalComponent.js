@@ -1,30 +1,9 @@
-import React, { useEffect, useState } from 'react';
+import React, {  useState } from 'react';
 import '../../css/websocket/websocket.css';
 
-const TerminalComponent = () => {
-  const [messages, setMessages] = useState([]);
+function TerminalComponent(props){
+  const [messages] = useState(props.data);
 
-  useEffect(() => {
-    try{
-
-    const socket = new WebSocket(`ws://127.0.0.1:${process.env.WS_PORT || 3004}`);
-
-    // handle incoming messages
-    socket.addEventListener('message', (event) => {
-        let message = JSON.parse(event.data);
-        setMessages(message);
-    });
-
-    return () => {
-      socket.close();
-    }
-
-    }catch(error)
-    {
-      // console.log(error);
-    }
-
-  }, []);
 
   return (
     <div className='my-4'>

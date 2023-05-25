@@ -1,3 +1,4 @@
+@import './variables.module.css';
 .loading {
 
     margin: 0px;
@@ -6,8 +7,7 @@
     display: flex;
     justify-content: center;
     align-items: center;
-    /* z-index: 9999; */
-    background-color: #1e1c22;
+    background-color: var(--background-color);
     transition: opacity 800ms ease-in;
     opacity: 1;
   }

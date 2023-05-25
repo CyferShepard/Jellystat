@@ -9,7 +9,7 @@ import FilmLineIcon from "remixicon-react/FilmLineIcon";
 import Loading from './general/loading';
 import LibraryGlobalStats from './library/library-stats';
 import LibraryLastWatched from './library/last-watched';
-import RecentlyPlayed from './library/recently-added';
+import RecentlyAdded from './library/recently-added';
 import LibraryActivity from './library/library-activity';
 import LibraryItems from './library/library-items';
 
@@ -84,7 +84,7 @@ function LibraryInfo() {
           <Tabs defaultActiveKey="tabOverview" activeKey={activeTab} variant='pills'>
           <Tab eventKey="tabOverview" className='bg-transparent'>
             <LibraryGlobalStats LibraryId={LibraryId}/>
-            <RecentlyPlayed LibraryId={LibraryId}/>
+            <RecentlyAdded LibraryId={LibraryId}/>
             <LibraryLastWatched LibraryId={LibraryId}/>
           </Tab>
           <Tab eventKey="tabActivity" className='bg-transparent'>

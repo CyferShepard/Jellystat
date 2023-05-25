@@ -51,8 +51,8 @@ h2{
     pointer-events: none;
     transition: .2s;
 }
-input:focus ~ label,
-input:valid ~ label{
+.form-box> form> .inputbox> input:focus ~ label,
+.form-box> form> .inputbox> input:valid ~ label{
 top: -15px;
 }
 .inputbox input {

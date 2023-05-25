@@ -8,12 +8,13 @@ const knexConfig = require('./migrations');
 const authRouter= require('./auth');
 const apiRouter = require('./api');
 const proxyRouter = require('./proxy');
-const syncRouter = require('./sync');
+const {router: syncRouter} = require('./sync');
 const statsRouter = require('./stats');
-const backupRouter = require('./backup');
-const ActivityMonitor = require('./watchdog/ActivityMonitor');
-
-const { checkForUpdates } = require('./version-control');
+const {router: backupRouter}  = require('./backup');
+const ActivityMonitor = require('./tasks/ActivityMonitor');
+const SyncTask = require('./tasks/SyncTask');
+const BackupTask = require('./tasks/BackupTask');
+const {router: logRouter} = require('./logging');
 
 
 
@@ -57,6 +58,7 @@ app.use('/proxy', proxyRouter); // mount the API router at /api, with JWT middle
 app.use('/sync', verifyToken, syncRouter); // mount the API router at /sync, with JWT middleware
 app.use('/stats', verifyToken, statsRouter); // mount the API router at /stats, with JWT middleware
 app.use('/data', verifyToken, backupRouter); // mount the API router at /stats, with JWT middleware
+app.use('/logs', verifyToken, logRouter); // mount the API router at /stats, with JWT middleware
 
 try{
   createdb.createDatabase().then((result) => {
@@ -67,8 +69,10 @@ try{
     db.migrate.latest().then(() => {
       app.listen(PORT, async () => {
         console.log(`Server listening on http://${LISTEN_IP}:${PORT}`);
-        checkForUpdates();
+
         ActivityMonitor.ActivityMonitor(1000);
+        SyncTask.SyncTask(60000*10);
+        BackupTask.BackupTask(60000*60*24);
       });
     });
   });

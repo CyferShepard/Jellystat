@@ -11,12 +11,95 @@ import TableCell from '@mui/material/TableCell';
 import TableContainer from '@mui/material/TableContainer';
 import TableHead from '@mui/material/TableHead';
 import TableRow from '@mui/material/TableRow';
+import TableSortLabel from '@mui/material/TableSortLabel';
+import Box from '@mui/material/Box';
+import { visuallyHidden } from '@mui/utils';
+
 
 import "./css/users/users.css";
 
 import Loading from "./components/general/loading";
 
 const token = localStorage.getItem('token');
+
+
+function EnhancedTableHead(props) {
+  const {  order, orderBy, onRequestSort } =
+    props;
+  const createSortHandler = (property) => (event) => {
+    onRequestSort(event, property);
+  };
+
+  const headCells = [
+    {
+      id: 'UserName',
+      numeric: false,
+      disablePadding: true,
+      label: 'User',
+    },
+    {
+      id: 'LastWatched',
+      numeric: false,
+      disablePadding: false,
+      label: 'Last Watched',
+    },
+    {
+      id: 'LastClient',
+      numeric: false,
+      disablePadding: false,
+      label: 'Last Client',
+    },
+    {
+      id: 'TotalPlays',
+      numeric: false,
+      disablePadding: false,
+      label: 'Plays',
+    },
+    {
+      id: 'TotalWatchTime',
+      numeric: false,
+      disablePadding: false,
+      label: 'Watch Time',
+    },    
+    {
+      id: 'LastSeen',
+      numeric: false,
+      disablePadding: false,
+      label: 'Last Seen',
+    },
+  ];
+
+
+  return (
+    <TableHead>
+      <TableRow>
+        <TableCell/>
+        {headCells.map((headCell) => (
+          <TableCell
+            key={headCell.id}
+            align={headCell.numeric ? 'right' : 'left'}
+            padding={headCell.disablePadding ? 'none' : 'normal'}
+            sortDirection={orderBy === headCell.id ? order : false}
+          >
+            <TableSortLabel
+              active={orderBy === headCell.id}
+              direction={orderBy === headCell.id ? order : 'asc'}
+              onClick={createSortHandler(headCell.id)}
+            >
+              {headCell.label}
+              {orderBy === headCell.id ? (
+                <Box component="span" sx={visuallyHidden}>
+                  {order === 'desc' ? 'sorted descending' : 'sorted ascending'}
+                </Box>
+              ) : null}
+            </TableSortLabel>
+          </TableCell>
+        ))}
+      </TableRow>
+    </TableHead>
+  );
+}
+
 
 function Row(row) {
   const { data } = row;
@@ -80,7 +163,7 @@ function Row(row) {
         <TableCell><Link to={`/libraries/item/${data.NowPlayingItemId}`} className="text-decoration-none">{data.LastWatched || 'never'}</Link></TableCell>
         <TableCell>{data.LastClient || 'n/a'}</TableCell>
         <TableCell>{data.TotalPlays}</TableCell>
-        <TableCell>{formatTotalWatchTime(data.TotalWatchTime) || 0}</TableCell>
+        <TableCell>{formatTotalWatchTime(data.TotalWatchTime) || '0 minutes'}</TableCell>
         <TableCell>{data.LastSeen ? formatLastSeenTime(data.LastSeen) : 'never'}</TableCell>
 
       </TableRow>
@@ -94,6 +177,11 @@ function Users() {
   const [rowsPerPage, setRowsPerPage] = React.useState(10);
   const [page, setPage] = React.useState(0);
   const [itemCount,setItemCount] = useState(10);
+
+  const [order, setOrder] = React.useState('asc');
+  const [orderBy, setOrderBy] = React.useState('LastSeen');
+
+  
 
 
 
@@ -154,6 +242,101 @@ function Users() {
     setPage((prevPage) => prevPage - 1);
   };
 
+    function formatLastSeenTime(time) {
+      if(!time)
+      {
+        return ' never';
+      }
+    const units = {
+      days: ['Day', 'Days'],
+      hours: ['Hour', 'Hours'],
+      minutes: ['Minute', 'Minutes'],
+      seconds: ['Second', 'Seconds']
+    };
+  
+    let formattedTime = '';
+  
+    for (const unit in units) {
+      if (time[unit]) {
+        const unitName = units[unit][time[unit] > 1 ? 1 : 0];
+        formattedTime += `${time[unit]} ${unitName} `;
+      }
+    }
+  
+    return `${formattedTime}ago`;
+  }
+
+
+  
+  function descendingComparator(a, b, orderBy) {
+    if (orderBy==='LastSeen') {
+      let order_a=formatLastSeenTime(a[orderBy]);
+      let order_b=formatLastSeenTime(b[orderBy]);
+      if (order_b > order_a) {
+        return -1;
+      }
+      if (order_a< order_b) {
+        return 1;
+      }
+      return 0;
+    }
+
+    if (orderBy === 'TotalPlays') {
+      let order_a = parseInt(a[orderBy]);
+      let order_b = parseInt(b[orderBy]);
+    
+      if (order_a < order_b) {
+        return -1;
+      }
+      if (order_a > order_b) {
+        return 1;
+      }
+      return 0;
+    }
+    
+    if (b[orderBy] < a[orderBy]) {
+      return -1;
+    }
+    if (b[orderBy] > a[orderBy]) {
+      return 1;
+    }
+    return 0;
+  }
+  
+  function getComparator(order, orderBy) {
+    return order === 'desc'
+      ? (a, b) => descendingComparator(a, b, orderBy)
+      : (a, b) => -descendingComparator(a, b, orderBy);
+  }
+  
+
+  function stableSort(array, comparator) {
+    const stabilizedThis = array.map((el, index) => [el, index]);
+
+    stabilizedThis.sort((a, b) => {
+
+      const order = comparator(a[0], b[0]);
+      if (order !== 0) {
+        return order;
+      }
+      return a[1] - b[1];
+      
+    });
+
+    return stabilizedThis.map((el) => el[0]);
+  }
+
+  const visibleRows = stableSort(data, getComparator(order, orderBy)).slice(
+    page * rowsPerPage,
+    page * rowsPerPage + rowsPerPage,
+  );
+
+  const handleRequestSort = (event, property) => {
+    const isAsc = orderBy === property && order === 'asc';
+    setOrder(isAsc ? 'desc' : 'asc');
+    setOrderBy(property);
+  };
+
 
 
 
@@ -174,20 +357,14 @@ function Users() {
 
       <TableContainer className='rounded-2'>
                     <Table aria-label="collapsible table" >
-                      <TableHead>
-                        <TableRow>
-                          <TableCell></TableCell>
-                          <TableCell>User</TableCell>
-                          <TableCell>Last Watched</TableCell>
-                          <TableCell>Last Client</TableCell>
-                          <TableCell>Plays</TableCell>
-                          <TableCell>Watch Time</TableCell>
-                          <TableCell>Last Seen</TableCell>
-                        </TableRow>
-                      </TableHead>
+                    <EnhancedTableHead
+                      order={order}
+                      orderBy={orderBy}
+                      onRequestSort={handleRequestSort}
+                      rowCount={rowsPerPage}
+                     />
                       <TableBody>
-                        {data && data.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
-                          .map((row) => (
+                        {visibleRows.map((row) => (
                             <Row key={row.UserId} data={row} hostUrl={config.hostUrl}/>
                           ))}
                           {data.length===0 ? <tr><td colSpan="5" style={{ textAlign: "center", fontStyle: "italic" ,color:"grey"}}>No Users Found</td></tr> :''}

@@ -5,6 +5,9 @@
   grid-template-columns: repeat(auto-fit, minmax(320px, 520px));
   grid-auto-rows: 200px;/* max-width+offset so 215 + 20*/
   margin-top: 8px;
+  background-color: var(--secondary-background-color);
+  border-radius: 8px;
+  padding: 20px;
 }
 .stat-card{
   border: 0 !important;
@@ -21,6 +24,8 @@
 
 
 
+
+
 .stat-card-image {
   width: 120px !important;
   height: 180px;
@@ -29,7 +34,12 @@
 .stat-card-icon
 {
   width: 120px !important;
-  height: 180px;
+
+
+  position: relative;
+  top: 50%;
+  left: 65%;
+  transform: translate(-50%, -50%);
 }
 
 

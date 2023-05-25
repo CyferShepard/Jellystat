@@ -117,18 +117,30 @@ if(data && data.notfound)
   return <ErrorPage message={data.message}/>;
 }
 
+const cardStyle = {
+  backgroundImage: `url(/Proxy/Items/Images/Backdrop?id=${(["Episode","Season"].includes(data.Type)? data.SeriesId : data.Id)}&fillWidth=800&quality=90)`,
+  height:'100%',
+  backgroundSize: 'cover',
+};
+
+const cardBgStyle = {
+  backgroundColor: 'rgb(0, 0, 0, 0.8)',
+ 
+};
+
+
   return (
     <div>
        
-       <div className="item-detail-container">
-      <Row className="justify-content-center justify-content-md-start">
-        <Col className="col-auto my-4 my-md-0">
-        {data.PrimaryImageHash && !loaded ? <Blurhash hash={data.PrimaryImageHash} width={'200px'}   height={'300px'}/> : null}
+       <div className="item-detail-container rounded-3" style={cardStyle}>
+      <Row className="justify-content-center justify-content-md-start rounded-3 g-0 p-4" style={cardBgStyle}>
+        <Col className="col-auto my-4 my-md-0 item-banner-image" >
+        {data.PrimaryImageHash && !loaded ? <Blurhash hash={data.PrimaryImageHash} width={'200px'}   height={'300px'} className="rounded-3 overflow-hidden" style={{display:'block'}}/> : null}
         <img
             className="item-image"
             src={
               "/Proxy/Items/Images/Primary?id=" +
-             (data.Type==="Episode"? data.SeriesId : data.Id) +
+             (["Episode","Season"].includes(data.Type)? data.SeriesId : data.Id) +
               "&fillWidth=200&quality=90"
             }
             alt=""

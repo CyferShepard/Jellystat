@@ -14,7 +14,7 @@
 .tasks {
 
   color: white;
-  margin-inline: 10px;
+  /* margin-inline: 10px; */
 
 }
 
@@ -56,4 +56,19 @@
     margin-bottom: 5px;
   }
 
+
+
+
+  .settings-form > div> div> .form-control
+  {
+    color: white !important;
+    background-color: var(--background-color) !important;
+    border-color: var(--background-color) !important;
+  }
+
   
+  .settings-form > div> div> .form-control:focus
+  {
+    box-shadow: none !important;
+    border-color: var(--primary-color) !important;
+  }

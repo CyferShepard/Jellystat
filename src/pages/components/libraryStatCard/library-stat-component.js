@@ -1,4 +1,5 @@
 import React from "react";
+import { Link } from "react-router-dom";
 import { Row, Col, Card } from "react-bootstrap";
 
 function LibraryStatComponent(props) {
@@ -48,7 +49,7 @@ function LibraryStatComponent(props) {
               
                 <div className="d-flex justify-content-between">
                   <Card.Text className="stat-item-index m-0">{index + 1}</Card.Text>
-                  <Card.Text>{item.Name}</Card.Text>
+                  <Link to={`/libraries/${item.Id}`}><Card.Text>{item.Name}</Card.Text></Link>
                 </div>
                 
                 <Card.Text className="stat-item-count">

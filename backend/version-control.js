@@ -1,33 +1,43 @@
 const GitHub = require('github-api');
 const packageJson = require('../package.json');
+const {compareVersions} =require('compare-versions');
 
 async function checkForUpdates() {
   const currentVersion = packageJson.version;
   const repoOwner = 'cyfershepard';
-  const repoName = 'jellystat';
+  const repoName = 'Jellystat';
   const gh = new GitHub();
-  const repo = gh.getRepo(repoOwner, repoName);
+
+  let result={current_version: packageJson.version, latest_version:'', message:'', update_available:false};
+
   let latestVersion;
 
   try {
-    const releases = await repo.listReleases();
+    const path = 'package.json';
 
-    if (releases.data.length > 0) {
-      latestVersion = releases.data[0].tag_name;
-      console.log(releases.data);
+    const response = await gh.getRepo(repoOwner, repoName).getContents('main', path);
+    const content = response.data.content;
+    const decodedContent = Buffer.from(content, 'base64').toString();
+    latestVersion = JSON.parse(decodedContent).version;
+
+    if (compareVersions(latestVersion,currentVersion) > 0) {
+      // console.log(`A new version V.${latestVersion} of ${repoName} is available.`);
+      result = { current_version: packageJson.version, latest_version: latestVersion, message: `${repoName} has an update ${latestVersion}`, update_available:true };
+    } else if (compareVersions(latestVersion,currentVersion) < 0) {
+      // console.log(`${repoName} is using a beta version.`);
+      result = { current_version: packageJson.version, latest_version: latestVersion, message: `${repoName} is using a beta version`, update_available:false };
+    } else {
+      // console.log(`${repoName} is up to date.`);
+      result = { current_version: packageJson.version, latest_version: latestVersion, message: `${repoName} is up to date`, update_available:false };
     }
   } catch (error) {
     console.error(`Failed to fetch releases for ${repoName}: ${error.message}`);
+    result = { current_version: packageJson.version, latest_version: 'N/A', message: `Failed to fetch releases for ${repoName}: ${error.message}`, update_available:false };
   }
 
-  if (latestVersion && latestVersion !== currentVersion) {
-    console.log(`A new version (${latestVersion}) of ${repoName} is available.`);
-  } else if (latestVersion) {
-    console.log(`${repoName} is up to date.`);
-  }
-  else {
-    console.log(`Unable to retrieve latest version`);
-  }
+  return result;
 }
+
+
 
 module.exports = { checkForUpdates };

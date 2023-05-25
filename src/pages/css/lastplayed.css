@@ -2,13 +2,14 @@
 .last-played-container {
 
     display: flex;
-    overflow-x: auto;
+    overflow-x: scroll;
     background-color:  var(--secondary-background-color);
     padding: 20px;
     border-radius: 8px;
     color: white;
     margin-bottom: 20px;
     min-height: 300px;
+ 
 }
 
 .last-played-container::-webkit-scrollbar {

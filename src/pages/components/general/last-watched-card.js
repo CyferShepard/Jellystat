@@ -35,7 +35,7 @@ function LastWatchedCard(props) {
     <div className="last-card">
      <Link to={`/libraries/item/${props.data.EpisodeId||props.data.Id}`}>
       <div className="last-card-banner">
-        {loaded ? null : <Blurhash hash={props.data.PrimaryImageHash} width={'100%'}   height={'100%'}/>}
+        {loaded ? null : <Blurhash hash={props.data.PrimaryImageHash} width={'100%'}   height={'100%'} className="rounded-3 overflow-hidden"/>}
         <img
           src={
             `${

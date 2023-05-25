@@ -6,7 +6,7 @@ import RecentlyAddedCard from "./RecentlyAdded/recently-added-card";
 import Config from "../../../lib/config";
 import "../../css/users/user-details.css";
 
-function RecentlyPlayed(props) {
+function RecentlyAdded(props) {
   const [data, setData] = useState();
   const [config, setConfig] = useState();
 
@@ -22,33 +22,23 @@ function RecentlyPlayed(props) {
         }
       };
       
-    // const fetchAdmin = async () => {
-    //   try {
-    //     let url=`/api/getAdminUsers`;
-    //     const adminData = await axios.get(url, {
-    //       headers: {
-    //         Authorization: `Bearer ${config.token}`,
-    //         "Content-Type": "application/json",
-    //       },
-    //     });
-    //      return adminData.data[0].Id;
-    //     // setData(itemData.data);
-    //   } catch (error) {
-    //     console.log(error);
-    //   }
-    // };
+
 
     const fetchData = async () => {
       try {
-        // let adminId=await fetchAdmin();
-        let url=`/stats/getRecentlyAdded?libraryid=${props.LibraryId}`;
+        let url=`/stats/getRecentlyAdded`;
+        if(props.LibraryId)
+        {
+            url+=`?libraryid=${props.LibraryId}`;
+        }
+     
         const itemData = await axios.get(url, {
           headers: {
             Authorization: `Bearer ${config.token}`,
             "Content-Type": "application/json",
           },
         });
-        setData(itemData.data);
+        setData(itemData.data.filter((item) => ["Series", "Movie","Audio"].includes(item.Type)));
       } catch (error) {
         console.log(error);
       }
@@ -75,7 +65,7 @@ function RecentlyPlayed(props) {
     <div className="last-played">
         <h1 className="my-3">Recently Added</h1>
         <div className="last-played-container">
-        {data.filter((item) => ["Series", "Movie","Audio"].includes(item.Type)).map((item) => (
+        {data && data.map((item) => (
                     <RecentlyAddedCard data={item} base_url={config.hostUrl} key={item.Id}/>
           ))}
 
@@ -85,4 +75,4 @@ function RecentlyPlayed(props) {
   );
 }
 
-export default RecentlyPlayed;
+export default RecentlyAdded;

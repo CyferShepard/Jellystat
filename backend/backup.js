@@ -3,9 +3,11 @@ const { Pool } = require('pg');
 const fs = require('fs');
 const path = require('path');
 const moment = require('moment');
+const { randomUUID }  = require('crypto');
 const multer = require('multer');
 
-const wss = require("./WebsocketHandler");
+// const wss = require("./WebsocketHandler");
+const Logging =require('./logging');
 
 const router = Router();
 
@@ -21,7 +23,8 @@ const tables = ['jf_libraries', 'jf_library_items', 'jf_library_seasons','jf_lib
 
 
 // Backup function
-async function backup() {
+async function backup(logData,result) {
+  logData.push({ color: "lawngreen", Message: "Starting Backup" });
   const pool = new Pool({
     user: postgresUser,
     password: postgresPassword,
@@ -39,20 +42,19 @@ async function backup() {
   const backupPath = `./backup-data/backup_${now.format('yyyy-MM-DD HH-mm-ss')}.json`;
   const stream = fs.createWriteStream(backupPath, { flags: 'a' });
   stream.on('error', (error) => {
-    console.error(error);
-    wss.sendMessageToClients({ color: "red", Message: "Backup Failed: "+error });
+    logData.push({ color: "red", Message: "Backup Failed: "+error });
+    result='Failed';
     throw new Error(error);
   });
   const backup_data=[];
   
-  wss.clearMessages();
-  wss.sendMessageToClients({ color: "yellow", Message: "Begin Backup "+backupPath });
+  logData.push({ color: "yellow", Message: "Begin Backup "+backupPath });
   for (let table of tables) {
     const query = `SELECT * FROM ${table}`;
 
     const { rows } = await pool.query(query);
     console.log(`Reading ${rows.length} rows for table ${table}`);
-    wss.sendMessageToClients({color: "dodgerblue",Message: `Saving ${rows.length} rows for table ${table}`});
+    logData.push({color: "dodgerblue",Message: `Saving ${rows.length} rows for table ${table}`});
 
     backup_data.push({[table]:rows});
     
@@ -61,12 +63,13 @@ async function backup() {
 
     await stream.write(JSON.stringify(backup_data));
     stream.end();
-    wss.sendMessageToClients({ color: "lawngreen", Message: "Backup Complete" });
+    logData.push({ color: "lawngreen", Message: "Backup Complete" });
 
   }catch(error)
   {
     console.log(error);
-    wss.sendMessageToClients({ color: "red", Message: "Backup Failed: "+error });
+    logData.push({ color: "red", Message: "Backup Failed: "+error });
+    result='Failed';
   }
  
 
@@ -161,7 +164,28 @@ async function restore(file) {
 // Route handler for backup endpoint
 router.get('/backup', async (req, res) => {
   try {
-    await backup();
+    let startTime = moment();
+    let logData=[];
+    let result='Success';
+    await backup(logData,result);
+
+    let endTime = moment();
+    let diffInSeconds = endTime.diff(startTime, 'seconds');
+    const uuid = randomUUID();
+    const log=
+    {
+      "Id":uuid,
+      "Name":"Backup",
+      "Type":"Task",
+      "ExecutionType":"Manual",
+      "Duration":diffInSeconds,
+      "TimeRun":startTime,
+      "Log":JSON.stringify(logData),
+      "Result": result
+  
+    };
+  
+    Logging.insertLog(log);
     res.send('Backup completed successfully');
   } catch (error) {
     console.error(error);
@@ -272,4 +296,8 @@ router.get('/restore/:filename', async (req, res) => {
 
 
 
-module.exports = router;
+module.exports = 
+{
+  router,
+  backup
+};

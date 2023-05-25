@@ -14,8 +14,43 @@ const axios_instance = axios.create({
 
 const router = express.Router();
 
+router.get('/web/assets/img/devices/', async(req, res) => {
+  const { devicename } = req.query; // Get the image URL from the query string
+  const { rows: config } = await db.query('SELECT * FROM app_config where "ID"=1');
+
+  if (config[0].JF_HOST === null || config[0].JF_API_KEY === null || devicename===undefined) {
+    res.send({ error: "Config Details Not Found" });
+    return;
+  }
+
+  let url=`${config[0].JF_HOST}/web/assets/img/devices/${devicename}.svg`;
+
+  axios_instance.get(url, {
+    responseType: 'arraybuffer'
+  })
+  .then((response) => {
+    res.set('Content-Type', 'image/svg+xml');
+    res.status(200);
+  
+    if (response.headers['content-type'].startsWith('image/')) {
+      res.send(response.data);
+    } else {
+      res.send(response.data.toString());
+    }
+  
+    return; // Add this line
+  })
+  .catch((error) => {
+    console.error(error);
+    res.status(500).send('Error fetching image');
+  });
+  
+});
+
+
+
 router.get('/Items/Images/Backdrop/', async(req, res) => {
-    const { id,fillWidth,quality } = req.query; // Get the image URL from the query string
+    const { id,fillWidth,quality,blur } = req.query; // Get the image URL from the query string
     const { rows: config } = await db.query('SELECT * FROM app_config where "ID"=1');
 
     if (config[0].JF_HOST === null || config[0].JF_API_KEY === null) {
@@ -24,7 +59,7 @@ router.get('/Items/Images/Backdrop/', async(req, res) => {
     }
   
 
-    let url=`${config[0].JF_HOST}/Items/${id}/Images/Backdrop?fillWidth=${fillWidth || 100}&quality=${quality || 100}`;
+    let url=`${config[0].JF_HOST}/Items/${id}/Images/Backdrop?fillWidth=${fillWidth || 800}&quality=${quality || 100}&blur=${blur || 0}`;
 
 
     axios_instance.get(url, {
@@ -56,7 +91,7 @@ router.get('/Items/Images/Backdrop/', async(req, res) => {
     }
   
 
-    let url=`${config[0].JF_HOST}/Items/${id}/Images/Primary?fillWidth=${fillWidth || 100}&quality=${quality || 100}`;
+    let url=`${config[0].JF_HOST}/Items/${id}/Images/Primary?fillWidth=${fillWidth || 400}&quality=${quality || 100}`;
 
     axios_instance.get(url, {
       responseType: 'arraybuffer'

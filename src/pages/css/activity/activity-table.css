@@ -10,7 +10,7 @@
 td,th, td>button
 {
   color: white !important;
-  background-color: var(--secondary-background-color);
+  background-color: var(--tertiary-background-color);
 
 }
 
@@ -89,4 +89,14 @@ font-size: 1em;
 {
   background-color:  var(--primary-color) !important;
   border-color:  var(--primary-color)!important;
+}
+
+.MuiTableCell-head >  .Mui-active, .MuiTableSortLabel-icon
+{
+  color: var(--secondary-color) !important;
+}
+
+.MuiTableCell-head :hover
+{
+  color: var(--secondary-color) !important;
 }
