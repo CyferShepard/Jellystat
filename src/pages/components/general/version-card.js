@@ -57,7 +57,7 @@ export default function VersionCard() {
 
             {data.update_available?
               <Row>
-                   <Col ><a href="https://github.com/CyferShepard/Jellystat" target="_blank" style={{color:'#00A4DC'}}>New version available: {data.latest_version}</a></Col>
+                   <Col ><a href="https://github.com/CyferShepard/Jellystat" target="_blank"  rel="noreferrer"  style={{color:'#00A4DC'}}>New version available: {data.latest_version}</a></Col>
                </Row>
                :
                <></>

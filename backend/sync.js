@@ -146,118 +146,137 @@ class sync {
 
 async function syncUserData(loggedData,result)
 {
-  const { rows } = await db.query('SELECT * FROM app_config where "ID"=1');
-  if (rows[0].JF_HOST === null || rows[0].JF_API_KEY === null) {
-    res.send({ error: "Config Details Not Found" });
-    loggedData.push({ Message: "Error: Config details not found!" });
-    result='Failed';
-    return;
-  }
-
-  const _sync = new sync(rows[0].JF_HOST, rows[0].JF_API_KEY);
-
-  const data = await _sync.getUsers();
-
-  const existingIds = await db
-    .query('SELECT "Id" FROM jf_users')
-    .then((res) => res.rows.map((row) => row.Id)); // get existing library Ids from the db
-
-  let dataToInsert = [];
-  //filter fix if jf_libraries is empty
-
-  if (existingIds.length === 0) {
-    dataToInsert = await data.map(jf_users_mapping);
-  } else {
-    dataToInsert = await data
-      .filter((row) => !existingIds.includes(row.Id))
-      .map(jf_users_mapping);
-  }
-
-  if (dataToInsert.length !== 0) {
-    let result = await db.insertBulk("jf_users",dataToInsert,jf_users_columns);
-    if (result.Result === "SUCCESS") {
-      loggedData.push(dataToInsert.length + " Rows Inserted.");
-    } else {
-      loggedData.push({
-        color: "red",
-        Message: "Error performing bulk insert:" + result.message,
-      });
+  try
+  {
+    const { rows } = await db.query('SELECT * FROM app_config where "ID"=1');
+    if (rows[0].JF_HOST === null || rows[0].JF_API_KEY === null) {
+      res.send({ error: "Config Details Not Found" });
+      loggedData.push({ Message: "Error: Config details not found!" });
       result='Failed';
-    }
-  }
-  
-  const toDeleteIds = existingIds.filter((id) =>!data.some((row) => row.Id === id ));
-  if (toDeleteIds.length > 0) {
-    let result = await db.deleteBulk("jf_users",toDeleteIds);
-    if (result.Result === "SUCCESS") {
-      loggedData.push(toDeleteIds.length + " Rows Removed.");
-    } else {
-      loggedData.push({color: "red",Message: result.message,});
-      result='Failed';
+      return;
     }
   
+    const _sync = new sync(rows[0].JF_HOST, rows[0].JF_API_KEY);
+  
+    const data = await _sync.getUsers();
+  
+    const existingIds = await db
+      .query('SELECT "Id" FROM jf_users')
+      .then((res) => res.rows.map((row) => row.Id)); // get existing library Ids from the db
+  
+    let dataToInsert = [];
+    //filter fix if jf_libraries is empty
+  
+    if (existingIds.length === 0) {
+      dataToInsert = await data.map(jf_users_mapping);
+    } else {
+      dataToInsert = await data
+        .filter((row) => !existingIds.includes(row.Id))
+        .map(jf_users_mapping);
+    }
+  
+    if (dataToInsert.length !== 0) {
+      let result = await db.insertBulk("jf_users",dataToInsert,jf_users_columns);
+      if (result.Result === "SUCCESS") {
+        loggedData.push(dataToInsert.length + " Rows Inserted.");
+      } else {
+        loggedData.push({
+          color: "red",
+          Message: "Error performing bulk insert:" + result.message,
+        });
+        result='Failed';
+      }
+    }
+    
+    const toDeleteIds = existingIds.filter((id) =>!data.some((row) => row.Id === id ));
+    if (toDeleteIds.length > 0) {
+      let result = await db.deleteBulk("jf_users",toDeleteIds);
+      if (result.Result === "SUCCESS") {
+        loggedData.push(toDeleteIds.length + " Rows Removed.");
+      } else {
+        loggedData.push({color: "red",Message: result.message,});
+        result='Failed';
+      }
+    
+    }
+
+  }catch(error)
+  {
+  loggedData.push({color: "red",Message: error,});
+  result='Failed';
   }
+ 
 
 }
 
 async function syncLibraryFolders(loggedData,result)
 {
+  try
+  {
+
+    const { rows } = await db.query('SELECT * FROM app_config where "ID"=1');
+    if (rows[0].JF_HOST === null || rows[0].JF_API_KEY === null) {
+      res.send({ error: "Config Details Not Found" });
+      loggedData.push({ Message: "Error: Config details not found!" });
+      result='Failed';
+      return;
+    }
   
-  const { rows } = await db.query('SELECT * FROM app_config where "ID"=1');
-  if (rows[0].JF_HOST === null || rows[0].JF_API_KEY === null) {
-    res.send({ error: "Config Details Not Found" });
-    loggedData.push({ Message: "Error: Config details not found!" });
+    const _sync = new sync(rows[0].JF_HOST, rows[0].JF_API_KEY);
+    const admins = await _sync.getAdminUser();
+    const userid = admins[0].Id;
+    const data = await _sync.getItem(undefined,userid); //getting all root folders aka libraries
+  
+    const existingIds = await db
+      .query('SELECT "Id" FROM jf_libraries')
+      .then((res) => res.rows.map((row) => row.Id));
+  
+  
+    let dataToInsert = [];
+    //filter fix if jf_libraries is empty
+  
+    if (existingIds.length === 0) {
+      dataToInsert = await data.map(jf_libraries_mapping);
+    } else {
+      dataToInsert = await data.filter((row) => !existingIds.includes(row.Id)).map(jf_libraries_mapping);
+    }
+  
+    if (dataToInsert.length !== 0) {
+      let result = await db.insertBulk("jf_libraries",dataToInsert,jf_libraries_columns);
+      if (result.Result === "SUCCESS") {
+        loggedData.push(dataToInsert.length + " Rows Inserted.");
+      } else {
+        loggedData.push({
+          color: "red",
+          Message: "Error performing bulk insert:" + result.message,
+        });
+        result='Failed';
+      }
+    }
+  
+    const toDeleteIds = existingIds.filter((id) =>!data.some((row) => row.Id === id ));
+    if (toDeleteIds.length > 0) {
+      let result = await db.deleteBulk("jf_libraries",toDeleteIds);
+      if (result.Result === "SUCCESS") {
+        loggedData.push(toDeleteIds.length + " Rows Removed.");
+      } else {
+        loggedData.push({color: "red",Message: result.message,});
+        result='Failed';
+      }
+    
+    } 
+  }
+  catch(error)
+  {
+    loggedData.push({color: "red",Message: error,});
     result='Failed';
-    return;
   }
-
-  const _sync = new sync(rows[0].JF_HOST, rows[0].JF_API_KEY);
-  const admins = await _sync.getAdminUser();
-  const userid = admins[0].Id;
-  const data = await _sync.getItem(undefined,userid); //getting all root folders aka libraries
-
-  const existingIds = await db
-    .query('SELECT "Id" FROM jf_libraries')
-    .then((res) => res.rows.map((row) => row.Id));
-
-
-  let dataToInsert = [];
-  //filter fix if jf_libraries is empty
-
-  if (existingIds.length === 0) {
-    dataToInsert = await data.map(jf_libraries_mapping);
-  } else {
-    dataToInsert = await data.filter((row) => !existingIds.includes(row.Id)).map(jf_libraries_mapping);
-  }
-
-  if (dataToInsert.length !== 0) {
-    let result = await db.insertBulk("jf_libraries",dataToInsert,jf_libraries_columns);
-    if (result.Result === "SUCCESS") {
-      loggedData.push(dataToInsert.length + " Rows Inserted.");
-    } else {
-      loggedData.push({
-        color: "red",
-        Message: "Error performing bulk insert:" + result.message,
-      });
-      result='Failed';
-    }
-  }
-
-  const toDeleteIds = existingIds.filter((id) =>!data.some((row) => row.Id === id ));
-  if (toDeleteIds.length > 0) {
-    let result = await db.deleteBulk("jf_libraries",toDeleteIds);
-    if (result.Result === "SUCCESS") {
-      loggedData.push(toDeleteIds.length + " Rows Removed.");
-    } else {
-      loggedData.push({color: "red",Message: result.message,});
-      result='Failed';
-    }
   
-  } 
 }
 async function syncLibraryItems(loggedData,result)
 {
-  const { rows: config } = await db.query('SELECT * FROM app_config where "ID"=1' );
+  try{
+    const { rows: config } = await db.query('SELECT * FROM app_config where "ID"=1' );
 
 
   if (config[0].JF_HOST === null || config[0].JF_API_KEY === null) {
@@ -334,11 +353,19 @@ async function syncLibraryItems(loggedData,result)
   loggedData.push({color: "orange",Message: deleteCounter + " Library Items Removed.",});
   loggedData.push({ color: "yellow", Message: "Item Sync Complete" });
 
+  }catch(error)
+  {
+    loggedData.push({color: "red",Message: error,});
+    result='Failed';
+  }
+  
+
 
 }
 
 async function syncShowItems(loggedData,result)
 {
+ try{
   loggedData.push({ color: "lawngreen", Message: "Syncing... 2/3" });
   loggedData.push({color: "yellow", Message: "Beginning Seasons and Episode sync",});
 
@@ -466,10 +493,16 @@ async function syncShowItems(loggedData,result)
   loggedData.push({color: "dodgerblue",Message: insertEpisodeCount + " Episodes inserted.",});
   loggedData.push({color: "orange",Message: deleteEpisodeCount + " Episodes Removed.",});
   loggedData.push({ color: "yellow", Message: "Sync Complete" });
+ }catch(error)
+ {
+  loggedData.push({color: "red",Message: error,});
+  result='Failed';
+ }
 }
 
 async function syncItemInfo(loggedData,result)
 {
+ try{
   loggedData.push({ color: "lawngreen", Message: "Syncing... 3/3" });
   loggedData.push({color: "yellow", Message: "Beginning File Info Sync",});
 
@@ -586,6 +619,11 @@ async function syncItemInfo(loggedData,result)
   loggedData.push({color: "dodgerblue",Message: insertEpisodeInfoCount + " Episodes Info inserted.",});
   loggedData.push({color: "orange",Message: deleteEpisodeInfoCount + " Episodes Info Removed.",});
   loggedData.push({ color: "lawngreen", Message: "Sync Complete" });
+ }catch(error)
+ {
+  loggedData.push({color: "red",Message: error,});
+  result='Failed';
+ }
 }
 
 async function syncPlaybackPluginData()
