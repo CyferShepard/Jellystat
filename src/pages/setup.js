@@ -52,7 +52,7 @@ function Setup() {
       },
     })
     .catch((error) => {
-      let errorMessage= `Error : ${error}`;
+     
     });
 
     let data=result.data;

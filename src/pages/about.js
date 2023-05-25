@@ -43,7 +43,7 @@ export default function SettingsAbout() {
 
     const intervalId = setInterval(fetchVersion, 60000 * 5);
     return () => clearInterval(intervalId);
-  }, [token]);
+  }, [data,token]);
     
 
   if(!data)
@@ -79,7 +79,7 @@ export default function SettingsAbout() {
                   Github:
                  </Col>
                  <Col>
-                 <a href="https://github.com/CyferShepard/Jellystat" target="_blank" > https://github.com/CyferShepard/Jellystat</a>
+                 <a href="https://github.com/CyferShepard/Jellystat" target="_blank" rel="noreferrer" > https://github.com/CyferShepard/Jellystat</a>
                  </Col>
              </Row>
        </Card.Body>

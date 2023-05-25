@@ -230,7 +230,8 @@ export default function ActivityTable(props) {
       }
       return 0;
     }
-    
+   
+    // eslint-disable-next-line 
     function getComparator(order, orderBy) {
       return order === 'desc'
         ? (a, b) => descendingComparator(a, b, orderBy)
