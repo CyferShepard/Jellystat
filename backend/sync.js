@@ -64,7 +64,13 @@ class sync {
           "X-MediaBrowser-Token": this.apiKey,
         },
       });
-      console.l
+      if(!response || typeof response.data !== 'object' || !Array.isArray(response.data))
+      {
+        res.status(503);
+        res.send({ error: "Invalid Response from Users API Call.", user_response:response });
+        return;
+      }
+  
       const adminUser = response.data.filter(
         (user) => user.Policy.IsAdministrator === true
       );
