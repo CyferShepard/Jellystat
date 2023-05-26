@@ -703,7 +703,7 @@ async function removeOrphanedData(loggedData,result)
   loggedData.push({ color: "lawngreen", Message: "Sync Complete" });
  }catch(error)
  {
-  loggedData.push({color: "red",Message: error,});
+  loggedData.push({color: "red",Message: 'Error:'+error,});
   loggedData.push({ color: "red", Message: "Cleanup Failed with errors" });
   result='Failed';
  }
