@@ -92,9 +92,10 @@ function readFile(path) {
   });
 }
 
-async function restore(file) {
-  wss.clearMessages();
-  wss.sendMessageToClients({ color: "yellow", Message: "Restoring from Backup: "+file });
+async function restore(file,logData,result) {
+
+  logData.push({ color: "lawngreen", Message: "Starting Restore" });
+  logData.push({ color: "yellow", Message: "Restoring from Backup: "+file });
   const pool = new Pool({
     user: postgresUser,
     password: postgresPassword,
@@ -112,6 +113,9 @@ async function restore(file) {
       jsonData = await readFile(backupPath);
 
     } catch (err) {
+      logData.push({ color: "red",key:tableName ,Message: `Failed to read backup file`});
+        
+      result='Failed';
       console.error(err);
     }
 
@@ -130,8 +134,7 @@ async function restore(file) {
       for(let index in data)
       {
 
-        wss.sendMessageToClients({ color: "dodgerblue",key:tableName ,Message: `Restoring ${tableName} ${(((index)/(data.length-1))*100).toFixed(2)}%`});
-
+        logData.push({ color: "dodgerblue",key:tableName ,Message: `Restoring ${tableName} ${(((index)/(data.length-1))*100).toFixed(2)}%`});
         const keysWithQuotes = Object.keys(data[index]).map(key => `"${key}"`);
         const keyString = keysWithQuotes.join(", ");
 
@@ -153,11 +156,13 @@ async function restore(file) {
         const query=`INSERT INTO ${tableName} (${keyString}) VALUES(${valueString})  ON CONFLICT DO NOTHING`;
         const { rows } = await pool.query( query );
 
+
       }
   
 
     }
     await pool.end();
+    logData.push({ color: "lawngreen", Message: "Restore Complete" });
 
   }
 
@@ -194,16 +199,39 @@ router.get('/backup', async (req, res) => {
 });
 
 router.get('/restore/:filename', async (req, res) => {
+  let startTime = moment();
+  let logData=[];
+  let result='Success';
     try {
       const filePath = path.join(__dirname, backupfolder, req.params.filename);
-      await restore(filePath);
-      wss.sendMessageToClients({ color: "lawngreen", Message: `Restoring Complete` });
+   
+      await restore(filePath,logData,result);
+
       res.send('Restore completed successfully');
     } catch (error) {
       console.error(error);
-      wss.sendMessageToClients({ color: "red", Message: error });
       res.status(500).send('Restore failed');
     }
+
+    let endTime = moment();
+      let diffInSeconds = endTime.diff(startTime, 'seconds');
+      const uuid = randomUUID();
+
+      const log=
+      {
+        "Id":uuid,
+        "Name":"Restore",
+        "Type":"Task",
+        "ExecutionType":"Manual",
+        "Duration":diffInSeconds,
+        "TimeRun":startTime,
+        "Log":JSON.stringify(logData),
+        "Result": result
+    
+      };
+    
+      
+      Logging.insertLog(log);
   });
 
   //list backup files

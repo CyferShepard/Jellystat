@@ -25,8 +25,6 @@ function Login() {
 
     let hashedPassword= CryptoJS.SHA3(formValues.password).toString();
 
-    console.log(hashedPassword);
-
     axios
       .post("/auth/login", {
         username:formValues.username,

@@ -128,7 +128,7 @@ async function ActivityMonitor(interval) {
             const updateQuery = pgp.helpers.update(WatchdogDataUpdated, cs,'jf_activity_watchdog' ) + ' WHERE v."Id" = t."Id"';
             await db.query(updateQuery)
               .then(result => {
-                console.log('Update successful', result.rowCount, 'rows updated');
+                // console.log('Update successful', result.rowCount, 'rows updated');
               })
               .catch(error => {
                 console.error('Error updating rows', error);
@@ -178,12 +178,12 @@ async function ActivityMonitor(interval) {
       if(toDeleteIds.length>0)
       {
         let result=await db.deleteBulk('jf_activity_watchdog',toDeleteIds)
-        console.log(result);
+        // console.log(result);
       }
       if(playbackToInsert.length>0)
       {
         let result=await db.insertBulk('jf_playback_activity',playbackToInsert,columnsPlayback);
-        console.log(result);
+        // console.log(result);
       }
 
 

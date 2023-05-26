@@ -64,6 +64,7 @@ class sync {
           "X-MediaBrowser-Token": this.apiKey,
         },
       });
+      console.l
       const adminUser = response.data.filter(
         (user) => user.Policy.IsAdministrator === true
       );
@@ -194,7 +195,7 @@ async function syncUserData(loggedData,result)
       if (result.Result === "SUCCESS") {
         loggedData.push(toDeleteIds.length + " Rows Removed.");
       } else {
-        loggedData.push({color: "red",Message: result.message,});
+        loggedData.push({color: "red",Message: "Error: "+result.message,});
         result='Failed';
       }
     
@@ -202,7 +203,7 @@ async function syncUserData(loggedData,result)
 
   }catch(error)
   {
-  loggedData.push({color: "red",Message: error,});
+  loggedData.push({color: "red",Message:  "Error: "+error,});
   result='Failed';
   }
  
@@ -260,7 +261,7 @@ async function syncLibraryFolders(loggedData,result)
       if (result.Result === "SUCCESS") {
         loggedData.push(toDeleteIds.length + " Rows Removed.");
       } else {
-        loggedData.push({color: "red",Message: result.message,});
+        loggedData.push({color: "red",Message:  "Error: "+result.message,});
         result='Failed';
       }
     
@@ -268,7 +269,7 @@ async function syncLibraryFolders(loggedData,result)
   }
   catch(error)
   {
-    loggedData.push({color: "red",Message: error,});
+    loggedData.push({color: "red",Message: "Error: "+error,});
     result='Failed';
   }
   
@@ -344,7 +345,7 @@ async function syncLibraryItems(loggedData,result)
     if (result.Result === "SUCCESS") {
       deleteCounter +=toDeleteIds.length;
     } else {
-      loggedData.push({color: "red",Message: result.message,});
+      loggedData.push({color: "red",Message:  "Error: "+result.message,});
       result='Failed';
     }
   } 
@@ -355,7 +356,7 @@ async function syncLibraryItems(loggedData,result)
 
   }catch(error)
   {
-    loggedData.push({color: "red",Message: error,});
+    loggedData.push({color: "red",Message:  "Error: "+error,});
     result='Failed';
   }
   
@@ -452,7 +453,7 @@ async function syncShowItems(loggedData,result)
       if (result.Result === "SUCCESS") {
         deleteSeasonsCount +=toDeleteIds.length;
       } else {
-        loggedData.push({color: "red",Message: result.message,});
+        loggedData.push({color: "red",Message:  "Error: "+result.message,});
         result='Failed';
       }
     
@@ -479,7 +480,7 @@ async function syncShowItems(loggedData,result)
       if (result.Result === "SUCCESS") {
         deleteEpisodeCount +=toDeleteEpisodeIds.length;
       } else {
-        loggedData.push({color: "red",Message: result.message,});
+        loggedData.push({color: "red",Message:  "Error: "+result.message,});
         result='Failed';
       }
     
@@ -495,7 +496,7 @@ async function syncShowItems(loggedData,result)
   loggedData.push({ color: "yellow", Message: "Sync Complete" });
  }catch(error)
  {
-  loggedData.push({color: "red",Message: error,});
+  loggedData.push({color: "red",Message:  "Error: "+error,});
   result='Failed';
  }
 }
@@ -503,7 +504,7 @@ async function syncShowItems(loggedData,result)
 async function syncItemInfo(loggedData,result)
 {
  try{
-  loggedData.push({ color: "lawngreen", Message: "Syncing... 3/3" });
+  loggedData.push({ color: "lawngreen", Message: "Syncing... 3/4" });
   loggedData.push({color: "yellow", Message: "Beginning File Info Sync",});
 
   const { rows: config } = await db.query('SELECT * FROM app_config where "ID"=1');
@@ -561,7 +562,7 @@ async function syncItemInfo(loggedData,result)
       if (result.Result === "SUCCESS") {
         deleteItemInfoCount +=toDeleteItemInfoIds.length;
       } else {
-        loggedData.push({color: "red",Message: result.message,});
+        loggedData.push({color: "red",Message:  "Error: "+result.message,});
         result='Failed';
       }
     
@@ -606,7 +607,7 @@ async function syncItemInfo(loggedData,result)
       if (result.Result === "SUCCESS") {
         deleteEpisodeInfoCount +=toDeleteEpisodeInfoIds.length;
       } else {
-        loggedData.push({color: "red",Message: result.message,});
+        loggedData.push({color: "red",Message:  "Error: "+result.message,});
         result='Failed';
       }
     
@@ -618,10 +619,10 @@ async function syncItemInfo(loggedData,result)
   loggedData.push({color: "orange",Message: deleteItemInfoCount + " Item Info Removed.",});
   loggedData.push({color: "dodgerblue",Message: insertEpisodeInfoCount + " Episodes Info inserted.",});
   loggedData.push({color: "orange",Message: deleteEpisodeInfoCount + " Episodes Info Removed.",});
-  loggedData.push({ color: "lawngreen", Message: "Sync Complete" });
+  loggedData.push({ color: "lawngreen", Message: "Info Sync Complete" });
  }catch(error)
  {
-  loggedData.push({color: "red",Message: error,});
+  loggedData.push({color: "red",Message:  "Error: "+error,});
   result='Failed';
  }
 }
@@ -689,6 +690,26 @@ async function syncPlaybackPluginData()
    
 }
 
+async function removeOrphanedData(loggedData,result)
+{
+ try{
+  loggedData.push({ color: "lawngreen", Message: "Syncing... 4/4" });
+  loggedData.push({color: "yellow", Message: "Removing Orphaned FileInfo/Episode/Season Records",});
+
+  await db.query('CALL jd_remove_orphaned_data()');
+
+  loggedData.push({color: "dodgerblue",Message: "Orphaned FileInfo/Episode/Season Removed.",});
+
+  loggedData.push({ color: "lawngreen", Message: "Sync Complete" });
+ }catch(error)
+ {
+  loggedData.push({color: "red",Message: error,});
+  loggedData.push({ color: "red", Message: "Cleanup Failed with errors" });
+  result='Failed';
+ }
+
+}
+
 async function fullSync()
 {
   let startTime = moment();
@@ -699,6 +720,7 @@ async function fullSync()
   await syncLibraryItems(loggedData,result);
   await syncShowItems(loggedData,result);
   await syncItemInfo(loggedData,result);
+  await removeOrphanedData(loggedData,result);
   const uuid = randomUUID();
 
   let endTime = moment();
@@ -737,6 +759,7 @@ router.get("/beingSync", async (req, res) => {
   await syncLibraryItems(loggedData,result);
   await syncShowItems(loggedData,result);
   await syncItemInfo(loggedData,result);
+  await removeOrphanedData(loggedData,result);
   const uuid = randomUUID();
 
   let endTime = moment();

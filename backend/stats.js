@@ -4,6 +4,18 @@ const db = require("./db");
 const axios=require("axios");
 
 const router = express.Router();
+const https = require('https');
+
+
+
+const agent = new https.Agent({
+  rejectUnauthorized: (process.env.REJECT_SELF_SIGNED_CERTIFICATES || 'true').toLowerCase() ==='true'
+});
+const axios_instance = axios.create({
+  httpsAgent: agent
+});
+
+
 
 router.get("/getLibraryOverview", async (req, res) => {
   try {
@@ -297,7 +309,7 @@ router.get("/getRecentlyAdded", async (req, res) => {
 
     const adminurl = `${config[0].JF_HOST}/Users`;
 
-    const response = await axios.get(adminurl, {
+    const response = await axios_instance.get(adminurl, {
       headers: {
         "X-MediaBrowser-Token":  config[0].JF_API_KEY ,
       },
@@ -314,7 +326,7 @@ router.get("/getRecentlyAdded", async (req, res) => {
       url+=`?parentId=${libraryid}`;
     }
     
-    const response_data = await axios.get(url, {
+    const response_data = await axios_instance.get(url, {
       headers: {
         "X-MediaBrowser-Token":  config[0].JF_API_KEY ,
       },

@@ -36,23 +36,29 @@ function LibraryCard(props) {
 
 
   function formatTotalWatchTime(seconds) {
-    const hours = Math.floor(seconds / 3600); // 1 hour = 3600 seconds
-    const minutes = Math.floor((seconds % 3600) / 60); // 1 minute = 60 seconds
-    let formattedTime='';
-    if(hours)
-    {
-      formattedTime+=`${hours} hours`;
+    const days = Math.floor(seconds / 86400); // 1 day = 86400 seconds
+    const hours = Math.floor((seconds % 86400) / 3600); // 1 hour = 3600 seconds
+    const minutes = Math.floor(((seconds % 86400) % 3600) / 60); // 1 minute = 60 seconds
+    
+    let formattedTime = '';
+    if (days) {
+      formattedTime += `${days} day${days > 1 ? 's' : ''}`;
     }
-    if(minutes)
-    {
-      formattedTime+=` ${minutes} minutes`;
+    
+    if (hours) {
+      formattedTime += ` ${hours} hour${hours > 1 ? 's' : ''}`;
     }
-    if(!hours && !minutes)
-    {
-      formattedTime=`0 minutes`;
+    
+    if (minutes) {
+      formattedTime += ` ${minutes} minute${minutes > 1 ? 's' : ''}`;
     }
-  
-    return formattedTime ;
+    
+    if (!days && !hours && !minutes) {
+      formattedTime = '0 minutes';
+    }
+    
+    return formattedTime;
+    
   }
 
   function formatLastActivityTime(time) {
