@@ -38,7 +38,11 @@ function RecentlyAdded(props) {
             "Content-Type": "application/json",
           },
         });
-        setData(itemData.data.filter((item) => ["Series", "Movie","Audio"].includes(item.Type)));
+        
+        if(itemData && typeof itemData.data === 'object' && Array.isArray(itemData.data))
+        {
+          setData(itemData.data.filter((item) => ["Series", "Movie","Audio"].includes(item.Type)));
+        }
       } catch (error) {
         console.log(error);
       }
@@ -57,7 +61,11 @@ function RecentlyAdded(props) {
   }, [data,config, props.LibraryId]);
 
 
-  if (!data || !config) {
+  if (!data && !config) {
+    return <></>;
+  }
+
+  if (!data && config) {
     return <></>;
   }
 

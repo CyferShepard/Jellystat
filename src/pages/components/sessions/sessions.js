@@ -40,7 +40,11 @@ function Sessions() {
           },
         })
           .then((data) => {
-            setData(data.data.filter(row => row.NowPlayingItem !== undefined));
+            if(data && typeof data.data === 'object' && Array.isArray(data.data))
+            {
+              setData(data.data.filter(row => row.NowPlayingItem !== undefined));
+            }
+
           })
           .catch((error) => {
             console.log(error);
@@ -51,7 +55,7 @@ function Sessions() {
 
     if (!config) {
       fetchConfig();
-    }
+    }else
     if(!data)
     {
       fetchData();
@@ -61,11 +65,12 @@ function Sessions() {
     return () => clearInterval(intervalId);
   }, [data,config]);
 
-  if (!data) {
+  if (!data && !config) {
     return <Loading />;
   }
 
-  if (data.length === 0) {
+
+  if ((!data && config) || data.length === 0) {
     return(
     <div>
       <h1  className="my-3">Sessions</h1>

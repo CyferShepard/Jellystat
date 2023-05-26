@@ -302,7 +302,8 @@ router.get("/getRecentlyAdded", async (req, res) => {
     const { libraryid } = req.query;
     const { rows: config } = await db.query('SELECT * FROM app_config where "ID"=1');
 
-    if (config[0].JF_HOST === null || config[0].JF_API_KEY === null) {
+    if (config.length===0 || config[0].JF_HOST === null || config[0].JF_API_KEY === null) {
+      res.status(503);
       res.send({ error: "Config Details Not Found" });
       return;
     }
