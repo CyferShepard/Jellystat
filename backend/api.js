@@ -274,6 +274,7 @@ router.post("/getLibraryHistory", async (req, res) => {
     res.send(Object.values(groupedResults));
   } catch (error) {
     console.log(error);
+    res.status(503);
     res.send(error);
   }
 });
@@ -302,6 +303,7 @@ router.post("/getItemHistory", async (req, res) => {
     res.send(groupedResults);
   } catch (error) {
     console.log(error);
+    res.status(503);
     res.send(error);
   }
 });
@@ -332,6 +334,7 @@ router.post("/getUserHistory", async (req, res) => {
     res.send(Object.values(groupedResults));
   } catch (error) {
     console.log(error);
+    res.status(503);
     res.send(error);
   }
 });
@@ -354,6 +357,7 @@ router.get("/getAdminUsers", async (req, res) => {
     res.send(adminUser);
   } catch (error) {
     console.log( error);
+    res.status(503);
     res.send(error);
     
   }
@@ -398,7 +402,7 @@ router.get("/getSessions", async (req, res) => {
     });
     res.send(response_data.data);
   } catch (error) {
-    console.log(error);
+    res.status(503);
     res.send(error);
   }
 });

@@ -22,6 +22,7 @@ router.get("/getLibraryOverview", async (req, res) => {
     const { rows } = await db.query("SELECT * FROM jf_library_count_view");
     res.send(rows);
   } catch (error) {
+    res.status(503);
     res.send(error);
   }
 });
@@ -38,6 +39,7 @@ router.post("/getMostViewedSeries", async (req, res) => {
     );
     res.send(rows);
   } catch (error) {
+    res.status(503);
     res.send(error);
   }
 });
@@ -56,6 +58,7 @@ router.post("/getMostViewedMovies", async (req, res) => {
   } catch (error) {
     console.log('/getMostViewedMovies');
     console.log(error);
+    res.status(503);
     res.send(error);
   }
 });
@@ -72,6 +75,7 @@ router.post("/getMostViewedMusic", async (req, res) => {
     );
     res.send(rows);
   } catch (error) {
+    res.status(503);
     res.send(error);
   }
 });
@@ -88,6 +92,7 @@ router.post("/getMostViewedLibraries", async (req, res) => {
     );
     res.send(rows);
   } catch (error) {
+    res.status(503);
     res.send(error);
   }
 });
@@ -104,6 +109,7 @@ router.post("/getMostUsedClient", async (req, res) => {
     );
     res.send(rows);
   } catch (error) {
+    res.status(503);
     res.send(error);
   }
 });
@@ -120,6 +126,7 @@ router.post("/getMostActiveUsers", async (req, res) => {
     );
     res.send(rows);
   } catch (error) {
+    res.status(503);
     res.send(error);
   }
 });
@@ -136,6 +143,7 @@ router.post("/getMostPopularMovies", async (req, res) => {
     );
     res.send(rows);
   } catch (error) {
+    res.status(503);
     res.send(error);
   }
 });
@@ -152,6 +160,7 @@ router.post("/getMostPopularSeries", async (req, res) => {
     );
     res.send(rows);
   } catch (error) {
+    res.status(503);
     res.send(error);
   }
 });
@@ -168,6 +177,7 @@ router.post("/getMostPopularMusic", async (req, res) => {
     );
     res.send(rows);
   } catch (error) {
+    res.status(503);
     res.send(error);
   }
 });
@@ -177,6 +187,7 @@ router.get("/getPlaybackActivity", async (req, res) => {
     const { rows } = await db.query("SELECT * FROM jf_playback_activity");
     res.send(rows);
   } catch (error) {
+    res.status(503);
     res.send(error);
   }
 });
@@ -199,6 +210,7 @@ router.post("/getUserDetails", async (req, res) => {
     res.send(rows[0]);
   } catch (error) {
     console.log(error);
+    res.status(503);
     res.send(error);
   }
 });
@@ -216,6 +228,7 @@ router.post("/getGlobalUserStats", async (req, res) => {
     res.send(rows[0]);
   } catch (error) {
     console.log(error);
+    res.status(503);
     res.send(error);
   }
 });
@@ -229,6 +242,7 @@ router.post("/getUserLastPlayed", async (req, res) => {
     res.send(rows);
   } catch (error) {
     console.log(error);
+    res.status(503);
     res.send(error);
   }
 });
@@ -242,6 +256,7 @@ router.post("/getLibraryDetails", async (req, res) => {
     res.send(rows[0]);
   } catch (error) {
     console.log(error);
+    res.status(503);
     res.send(error);
   }
 });
@@ -259,6 +274,7 @@ router.post("/getGlobalLibraryStats", async (req, res) => {
     res.send(rows[0]);
   } catch (error) {
     console.log(error);
+    res.status(503);
     res.send(error);
   }
 });
@@ -269,6 +285,7 @@ router.get("/getLibraryCardStats", async (req, res) => {
     const { rows } = await db.query("select * from js_library_stats_overview");
     res.send(rows);
   } catch (error) {
+    res.status(503);
     res.send(error);
   }
 });
@@ -278,6 +295,7 @@ router.get("/getLibraryMetadata", async (req, res) => {
     const { rows } = await db.query("select * from js_library_metadata");
     res.send(rows);
   } catch (error) {
+    res.status(503);
     res.send(error);
   }
 });
@@ -292,6 +310,7 @@ router.post("/getLibraryLastPlayed", async (req, res) => {
     res.send(rows);
   } catch (error) {
     console.log(error);
+    res.status(503);
     res.send(error);
   }
 });
@@ -334,7 +353,7 @@ router.get("/getRecentlyAdded", async (req, res) => {
     });
     res.send(response_data.data);
   } catch (error) {
-    console.log(error);
+    res.status(503);
     res.send(error);
   }
 });
@@ -382,6 +401,7 @@ const finalData = {libraries:libraries,stats:Object.values(reorganizedData)};
     res.send(finalData);
   } catch (error) {
     console.log(error);
+    res.status(503);
     res.send(error);
   }
 });
@@ -422,6 +442,7 @@ const finalData = {libraries:libraries,stats:Object.values(reorganizedData)};
     res.send(finalData);
   } catch (error) {
     console.log(error);
+    res.status(503);
     res.send(error);
   }
 });
@@ -463,6 +484,7 @@ const finalData = {libraries:libraries,stats:Object.values(reorganizedData)};
     res.send(finalData);
   } catch (error) {
     console.log(error);
+    res.status(503);
     res.send(error);
   }
 });
@@ -485,6 +507,7 @@ router.post("/getGlobalItemStats", async (req, res) => {
     res.send(rows[0]);
   } catch (error) {
     console.log(error);
+    res.status(503);
     res.send(error);
   }
 });
