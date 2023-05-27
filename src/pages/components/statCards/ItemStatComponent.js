@@ -59,7 +59,7 @@ function ItemStatComponent(props) {
             }
 
           </Col>
-          <Col  className="stat-card-info w-100">
+          <Col  className="w-100">
             <Card.Body  className="w-100" >
             <Card.Header className="d-flex justify-content-between border-0 p-0 bg-transparent stat-header">
                 <div>

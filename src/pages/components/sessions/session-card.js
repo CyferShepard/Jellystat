@@ -28,6 +28,20 @@ function ticksToTimeString(ticks) {
 
   return timeString;
 }
+function convertBitrate(bitrate) {
+  if(!bitrate)
+  {
+    return 'N/A';
+  }
+  const kbps = (bitrate / 1000).toFixed(1);
+  const mbps = (bitrate / 1000000).toFixed(1);
+
+  if (kbps >= 1000) {
+    return  mbps+' Mbps';
+  } else {
+    return  kbps+' Kbps';
+  }
+}
 
 function sessionCard(props) {
   // Access data passed in as a prop using `props.data`
@@ -58,9 +72,9 @@ function sessionCard(props) {
 
 
         </Col>
-        <Col  className="stat-card-info w-100 mt-auto ">
+        <Col  className="w-100 mt-auto ">
 
-          <Card.Body  className="w-100" >
+          <Card.Body  className="w-100 pb-2" >
             <Container className="p-0">
               <Row className="position-absolute top-0">
                   <Col className="col-auto d-flex justify-content-center">
@@ -81,6 +95,8 @@ function sessionCard(props) {
                   <Col>
                     <Row> {props.data.session.DeviceName}</Row>
                     <Row>    {props.data.session.Client + " " + props.data.session.ApplicationVersion}</Row>
+                    <Row>    {props.data.session.PlayState.PlayMethod+' '+ (props.data.session.NowPlayingItem.MediaStreams ? '( '+props.data.session.NowPlayingItem.MediaStreams.find(stream => stream.Level>0)?.Codec.toUpperCase()+(props.data.session.TranscodingInfo? ' - '+props.data.session.TranscodingInfo.VideoCodec.toUpperCase() : '')+' - '+convertBitrate(props.data.session.TranscodingInfo ? props.data.session.TranscodingInfo.Bitrate :props.data.session.NowPlayingItem.MediaStreams.find(stream => stream.Level>0)?.BitRate)+' )':'')}</Row>
+                    
                   </Col>
               </Row>
 
@@ -122,7 +138,7 @@ function sessionCard(props) {
                 </Col>
               </Row>
 
-              {props.data.session.NowPlayingItem.ParentIndexNumber ? 
+              {props.data.session.NowPlayingItem.Type==='Episode' ? 
                 
                 <Row>
 
@@ -136,7 +152,6 @@ function sessionCard(props) {
                 <></>
               
               }
-
 
               <Row className="d-flex">
                 <Col className="col-auto">

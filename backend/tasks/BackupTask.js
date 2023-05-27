@@ -25,10 +25,9 @@ async function BackupTask(interval) {
  
 
       let startTime = moment();
-      let logData=[];
-      let result='Success';
-  
-      await  backup.backup(logData,result);
+      let refLog={logData:[],result:'Success'};
+
+      await  backup.backup(refLog);
   
       let endTime = moment();
       let diffInSeconds = endTime.diff(startTime, 'seconds');
@@ -41,8 +40,8 @@ async function BackupTask(interval) {
         "ExecutionType":"Automatic",
         "Duration":diffInSeconds,
         "TimeRun":startTime,
-        "Log":JSON.stringify(logData),
-        "Result":result
+        "Log":JSON.stringify(refLog.logData),
+        "Result":refLog.result
     
       };
       Logging.insertLog(log);
