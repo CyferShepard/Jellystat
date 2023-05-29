@@ -11,10 +11,10 @@ async function Config() {
 
     if(response.data.length>0)
     {
-      const { JF_HOST, JF_API_KEY, APP_USER } = response.data[0];
-      return { hostUrl: JF_HOST, apiKey: JF_API_KEY, username: APP_USER, token:token };
+      const { JF_HOST, JF_API_KEY, APP_USER,REQUIRE_LOGIN } = response.data[0];
+      return { hostUrl: JF_HOST, apiKey: JF_API_KEY, username: APP_USER, token:token, requireLogin:REQUIRE_LOGIN };
     }
-    return { hostUrl: null, apiKey: null, username: null, token:token };
+    return { hostUrl: null, apiKey: null, username: null, token:token,requireLogin:true };
 
   } catch (error) {
     // console.log(error);

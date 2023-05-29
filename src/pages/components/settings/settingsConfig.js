@@ -10,10 +10,13 @@ import Alert from 'react-bootstrap/Alert';
 import ToggleButton from 'react-bootstrap/ToggleButton';
 import ToggleButtonGroup from 'react-bootstrap/ToggleButtonGroup';
 
+import EyeFillIcon from 'remixicon-react/EyeFillIcon';
+import EyeOffFillIcon from 'remixicon-react/EyeOffFillIcon';
+
 
 
 import "../../css/settings/settings.css";
-import { ButtonGroup } from "react-bootstrap";
+import {  InputGroup } from "react-bootstrap";
 
 export default function SettingsConfig() {
   const [config, setConfig] = useState(null);
@@ -142,7 +145,10 @@ export default function SettingsConfig() {
               API Key
             </Form.Label>
             <Col sm="10">
+            <InputGroup>
               <Form.Control id="JF_API_KEY"  name="JF_API_KEY"  value={formValues.JF_API_KEY || ""} onChange={handleFormChange} type={showKey ? "text" : "password"} />
+              <Button variant="outline-primary" type="button" onClick={() => setKeyState(!showKey)}>{showKey?<EyeFillIcon/>:<EyeOffFillIcon/>}</Button>
+            </InputGroup> 
             </Col>
           </Form.Group>
           {isSubmitted !== "" ? (
@@ -159,10 +165,7 @@ export default function SettingsConfig() {
             <></>
           )}
           <div className="d-flex flex-column flex-md-row justify-content-end align-items-md-center">
-            <ButtonGroup >
-              <Button variant="outline-success" type="submit"> Save </Button>
-              <Button variant="outline-secondary" type="button" onClick={() => setKeyState(!showKey)}>Show Key</Button>
-            </ButtonGroup>
+          <Button variant="outline-success" type="submit"> Save </Button>
           </div>
 
         </Form>

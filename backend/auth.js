@@ -13,7 +13,7 @@ router.post('/login', async (req, res) => {
     try{
       const { username, password } = req.body;
         
-      const { rows : login } = await db.query(`SELECT * FROM app_config where "APP_USER"='${username}' and "APP_PASSWORD"='${password}'`);
+      const { rows : login } = await db.query(`SELECT * FROM app_config where ("APP_USER"='${username}' and "APP_PASSWORD"='${password}') OR "REQUIRE_LOGIN"=false`);
   
       if(login.length>0)
       {

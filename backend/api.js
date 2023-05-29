@@ -25,7 +25,7 @@ router.get("/test", async (req, res) => {
 
 router.get("/getconfig", async (req, res) => {
   try{
-    const { rows } = await db.query('SELECT "JF_HOST","JF_API_KEY","APP_USER" FROM app_config where "ID"=1');
+    const { rows } = await db.query('SELECT "JF_HOST","JF_API_KEY","APP_USER","REQUIRE_LOGIN" FROM app_config where "ID"=1');
     res.send(rows);
 
   }catch(error)
@@ -60,6 +60,33 @@ router.post("/setconfig", async (req, res) => {
   
 
   console.log(`ENDPOINT CALLED: /setconfig: `);
+});
+
+router.post("/setRequireLogin", async (req, res) => {
+  try{
+    const { REQUIRE_LOGIN } = req.body;
+
+    if(REQUIRE_LOGIN===undefined)
+    {
+      res.status(503);
+      res.send(rows);
+    }
+  
+    let query='UPDATE app_config SET "REQUIRE_LOGIN"=$1 where "ID"=1';
+
+    console.log(`ENDPOINT CALLED: /setRequireLogin: `+REQUIRE_LOGIN);
+  
+    const { rows } = await db.query(
+      query,
+      [REQUIRE_LOGIN]
+    );
+    res.send(rows);
+  }catch(error)
+  {
+    console.log(error);
+  }
+  
+
 });
 
 router.get("/CheckForUpdates", async (req, res) => {
@@ -457,6 +484,45 @@ router.post("/validateSettings", async (req, res) => {
 
 });
 
+router.post("/updatePassword", async (req, res) => {
+  const { current_password,new_password } = req.body;
+
+  let result={isValid:true,errorMessage:""};
+
+
+  try{
+    const { rows } = await db.query(`SELECT "JF_HOST","JF_API_KEY","APP_USER" FROM app_config where "ID"=1 AND "APP_PASSWORD"='${current_password}' `);
+    
+    if(rows && rows.length>0)
+    {
+      if(current_password===new_password)
+      {
+        result.isValid=false;
+        result.errorMessage = "New Password cannot be the same as Old Password";
+      }else{
+  
+        await db.query(`UPDATE app_config SET "APP_PASSWORD"='${new_password}' where "ID"=1 AND "APP_PASSWORD"='${current_password}' `);
+       
+    
+      }
+
+    }else{
+      result.isValid=false;
+      result.errorMessage = "Old Password is Invalid";
+    }
+
+  }catch(error)
+  {
+    console.log(error);
+    result.errorMessage = error;
+  }
+  
+ 
+
+  res.send(result);
+
+
+});
 
 
 

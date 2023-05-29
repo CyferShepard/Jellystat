@@ -35,14 +35,14 @@ router.get('/web/assets/img/devices/', async(req, res) => {
     if (response.headers['content-type'].startsWith('image/')) {
       res.send(response.data);
     } else {
-      res.send(response.data.toString());
+      res.status(500).send('Error fetching image');
     }
   
     return; // Add this line
   })
   .catch((error) => {
     console.error(error);
-    res.status(500).send('Error fetching image');
+    res.status(500).send('Error fetching image: '+error);
   });
   
 });
@@ -72,12 +72,12 @@ router.get('/Items/Images/Backdrop/', async(req, res) => {
       if (response.headers['content-type'].startsWith('image/')) {
         res.send(response.data);
       } else {
-        res.send(response.data.toString());
+        res.status(500).send('Error fetching image');
       }
     })
     .catch((error) => {
       // console.error(error);
-      res.status(500).send('Error fetching image');
+      res.status(500).send('Error fetching image: '+error);
     });
   });
 
@@ -103,12 +103,12 @@ router.get('/Items/Images/Backdrop/', async(req, res) => {
       if (response.headers['content-type'].startsWith('image/')) {
         res.send(response.data);
       } else {
-        res.send(response.data.toString());
+        res.status(500).send('Error fetching image');
       }
     })
     .catch((error) => {
       // console.error(error);
-      res.status(500).send('Error fetching image');
+      res.status(500).send('Error fetching image: '+error);
     });
   });
 
@@ -135,12 +135,12 @@ router.get('/Items/Images/Backdrop/', async(req, res) => {
       if (response.headers['content-type'].startsWith('image/')) {
         res.send(response.data);
       } else {
-        res.send(response.data.toString());
+        res.status(500).send('Error fetching image');
       }
     })
     .catch((error) => {
       // console.error(error);
-      res.status(500).send('Error fetching image');
+      res.status(500).send('Error fetching image: '+error);
     });
   });
   

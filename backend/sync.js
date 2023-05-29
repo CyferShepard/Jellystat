@@ -300,7 +300,7 @@ async function syncLibraryItems(refLog)
   const userid = admins[0].Id;
   const libraries = await _sync.getItem(undefined,userid);
   const data = [];
-  let insertCounter = 0;
+  let insertMessage='';
   let deleteCounter = 0;
   //for each item in library run get item using that id as the ParentId (This gets the children of the parent id)
   for (let i = 0; i < libraries.length; i++) {
@@ -321,21 +321,21 @@ async function syncLibraryItems(refLog)
   let dataToInsert = [];
   //filter fix if jf_libraries is empty
 
-
-  if (existingIds.length === 0) {
-    dataToInsert = await data.map(jf_library_items_mapping);
-  } else {
-    dataToInsert = await data
-      .filter((row) => !existingIds.includes(row.Id))
-      .map(jf_library_items_mapping);
-  }
+  dataToInsert = await data.map(jf_library_items_mapping);
+  // if (existingIds.length === 0) {
+  //   dataToInsert = await data.map(jf_library_items_mapping);
+  // } else {
+  //   dataToInsert = await data
+  //     .filter((row) => !existingIds.includes(row.Id))
+  //     .map(jf_library_items_mapping);
+  // }
 
 
   if (dataToInsert.length !== 0) {
     
     let result = await db.insertBulk("jf_library_items",dataToInsert,jf_library_items_columns);
     if (result.Result === "SUCCESS") {
-      insertCounter += dataToInsert.length;
+      insertMessage = `${dataToInsert.length-existingIds.length} Rows Inserted. ${existingIds.length} Rows Updated.`;
     } else {
       refLog.loggedData.push({
         color: "red",
@@ -356,7 +356,7 @@ async function syncLibraryItems(refLog)
     }
   } 
   
-  refLog.loggedData.push({color: "dodgerblue",Message: insertCounter + " Library Items Inserted.",});
+  refLog.loggedData.push({color: "dodgerblue",Message: insertMessage,});
   refLog.loggedData.push({color: "orange",Message: deleteCounter + " Library Items Removed.",});
   refLog.loggedData.push({ color: "yellow", Message: "Item Sync Complete" });
 
@@ -389,16 +389,17 @@ async function syncShowItems(refLog)
 
   let insertSeasonsCount = 0;
   let insertEpisodeCount = 0;
+  let updateSeasonsCount = 0;
+  let updateEpisodeCount = 0;
+
+
   let deleteSeasonsCount = 0;
   let deleteEpisodeCount = 0;
 
   //loop for each show
-  let show_counter=0;
   for (const show of shows) {
     const allSeasons = await _sync.getSeasonsAndEpisodes(show.Id,'Seasons');
     const allEpisodes =await _sync.getSeasonsAndEpisodes(show.Id,'Episodes');
-    show_counter++;
-    refLog.loggedData.push({ Message: "Syncing shows " + (show_counter/shows.length*100).toFixed(2) +"%" ,key:'show_sync'});
 
     const existingIdsSeasons = await db.query(`SELECT *	FROM public.jf_library_seasons where "SeriesId" = '${show.Id}'`).then((res) => res.rows.map((row) => row.Id));
 
@@ -414,37 +415,21 @@ async function syncShowItems(refLog)
         .then((res) => res.rows.map((row) => row.EpisodeId));
     }
 
-    //
+
 
     let seasonsToInsert = [];
     let episodesToInsert = [];
-    //filter fix if jf_libraries is empty
 
-    if (existingIdsSeasons.length === 0) {
-      // if there are no existing Ids in the table, map all items in the data array to the expected format
-      seasonsToInsert = await allSeasons.map(jf_library_seasons_mapping);
-    } else {
-      // otherwise, filter only new data to insert
-      seasonsToInsert = await allSeasons
-        .filter((row) => !existingIdsSeasons.includes(row.Id))
-        .map(jf_library_seasons_mapping);
-    }
+    seasonsToInsert = await allSeasons.map(jf_library_seasons_mapping);
+    episodesToInsert = await allEpisodes.map(jf_library_episodes_mapping);
 
-    if (existingIdsEpisodes.length === 0) {
-      // if there are no existing Ids in the table, map all items in the data array to the expected format
-      episodesToInsert = await allEpisodes.map(jf_library_episodes_mapping);
-    } else {
-      // otherwise, filter only new data to insert
-      episodesToInsert = await allEpisodes.filter((row) => !existingIdsEpisodes.includes(row.Id)).map(jf_library_episodes_mapping);
-    }
-
-    ///insert delete seasons
     //Bulkinsert new data not on db
     if (seasonsToInsert.length !== 0) {
       let result = await db.insertBulk("jf_library_seasons",seasonsToInsert,jf_library_seasons_columns);
       if (result.Result === "SUCCESS") {
-        insertSeasonsCount += seasonsToInsert.length;
-      } else {
+        insertSeasonsCount+=seasonsToInsert.length-existingIdsSeasons.length;
+        updateSeasonsCount+=existingIdsSeasons.length;
+        } else {
         refLog.loggedData.push({
           color: "red",
           Message: "Error performing bulk insert:" + result.message,
@@ -469,7 +454,8 @@ async function syncShowItems(refLog)
     if (episodesToInsert.length !== 0) {
       let result = await db.insertBulk("jf_library_episodes",episodesToInsert,jf_library_episodes_columns);
       if (result.Result === "SUCCESS") {
-        insertEpisodeCount += episodesToInsert.length;
+        insertEpisodeCount+=episodesToInsert.length-existingIdsEpisodes.length;
+        updateEpisodeCount+=existingIdsEpisodes.length;
       } else {
         refLog.loggedData.push({
           color: "red",
@@ -495,9 +481,9 @@ async function syncShowItems(refLog)
  
   }
 
-  refLog.loggedData.push({color: "dodgerblue",Message: insertSeasonsCount + " Seasons inserted.",});
+  refLog.loggedData.push({color: "dodgerblue",Message: `Seasons: ${insertSeasonsCount} Rows Inserted. ${updateSeasonsCount} Rows Updated.`});
   refLog.loggedData.push({color: "orange",Message: deleteSeasonsCount + " Seasons Removed.",});
-  refLog.loggedData.push({color: "dodgerblue",Message: insertEpisodeCount + " Episodes inserted.",});
+  refLog.loggedData.push({color: "dodgerblue",Message: `Episodes: ${insertEpisodeCount} Rows Inserted. ${updateEpisodeCount} Rows Updated.`});
   refLog.loggedData.push({color: "orange",Message: deleteEpisodeCount + " Episodes Removed.",});
   refLog.loggedData.push({ color: "yellow", Message: "Sync Complete" });
  }catch(error)

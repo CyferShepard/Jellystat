@@ -59,15 +59,22 @@
 
 
 
-  .settings-form > div> div> .form-control
+  .settings-form > div> div> .form-control,
+  .settings-form > div> div> .input-group> .form-control
   {
     color: white !important;
     background-color: var(--background-color) !important;
     border-color: var(--background-color) !important;
   }
 
+  .settings-form > div> div> .input-group> .btn
+  {
+    border: none !important;
+  }
+
   
-  .settings-form > div> div> .form-control:focus
+  .settings-form > div> div> .form-control:focus,
+  .settings-form > div> div> .input-group> .form-control:focus
   {
     box-shadow: none !important;
     border-color: var(--primary-color) !important;

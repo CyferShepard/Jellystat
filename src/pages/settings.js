@@ -4,6 +4,7 @@ import {Tabs, Tab } from 'react-bootstrap';
 import SettingsConfig from "./components/settings/settingsConfig";
 import Tasks from "./components/settings/Tasks";
 import BackupFiles from "./components/settings/backupfiles";
+import SecuritySettings from "./components/settings/security";
 
 import Logs from "./components/settings/logs";
 
@@ -22,8 +23,10 @@ export default function Settings() {
 
           <Tab eventKey="tabGeneral" className='bg-transparent my-2' title='Settings'  style={{minHeight:'500px'}}>
            <SettingsConfig/>
+           <SecuritySettings/>
 
            <Tasks/>
+  
   
           </Tab>
 

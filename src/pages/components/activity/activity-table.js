@@ -48,7 +48,6 @@ function formatTotalWatchTime(seconds) {
 function Row(data) {
   const { row } = data;
   const [open, setOpen] = React.useState(false);
-  // const classes = useRowStyles();
   const twelve_hr = JSON.parse(localStorage.getItem('12hr'));
 
   const options = {
