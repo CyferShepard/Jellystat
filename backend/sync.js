@@ -322,13 +322,6 @@ async function syncLibraryItems(refLog)
   //filter fix if jf_libraries is empty
 
   dataToInsert = await data.map(jf_library_items_mapping);
-  // if (existingIds.length === 0) {
-  //   dataToInsert = await data.map(jf_library_items_mapping);
-  // } else {
-  //   dataToInsert = await data
-  //     .filter((row) => !existingIds.includes(row.Id))
-  //     .map(jf_library_items_mapping);
-  // }
 
 
   if (dataToInsert.length !== 0) {

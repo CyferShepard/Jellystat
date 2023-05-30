@@ -25,7 +25,6 @@ export default function SettingsConfig() {
   const [showCurrentPassword, setShowCurrentPassword] = useState(false);
   const [formValues, setFormValues] = useState({});
   const [isSubmitted, setisSubmitted] = useState("");
-  const [config, setConfig] = useState(null);
 
   const [submissionMessage, setsubmissionMessage] = useState("");
   const token = localStorage.getItem('token');
@@ -36,7 +35,6 @@ export default function SettingsConfig() {
     const fetchConfig = async () => {
         try {
           const newConfig = await Config();
-          setConfig(newConfig);
           setuse_password(newConfig.requireLogin);
         } catch (error) {
             console.log(error);

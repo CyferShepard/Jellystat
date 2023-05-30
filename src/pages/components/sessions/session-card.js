@@ -84,9 +84,9 @@ function sessionCard(props) {
                   "/proxy/web/assets/img/devices/?devicename=" 
                   +
                   (props.data.session.Client.toLowerCase().includes("web") ? 
-                  ( clientData.find(item => props.data.session.DeviceName.toLowerCase().includes(item)).replace('ios','apple') || "other")
+                  ( clientData.find(item => props.data.session.DeviceName.toLowerCase().includes(item)) || "other")
                   :
-                  ( clientData.find(item => props.data.session.Client.toLowerCase().includes(item)).replace('ios','apple') || "other")
+                  ( clientData.find(item => props.data.session.Client.toLowerCase().includes(item)) || "other")
                   )}
                   alt=""
                    />
