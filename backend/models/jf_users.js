@@ -14,7 +14,7 @@
         PrimaryImageTag: item.PrimaryImageTag,
         LastLoginDate: item.LastLoginDate,
         LastActivityDate: item.LastActivityDate,
-        IsAdministrator: item.Policy.IsAdministrator,
+        IsAdministrator: item.Policy && item.Policy.IsAdministrator ? item.Policy.IsAdministrator : false,
       });
 
   module.exports = {
