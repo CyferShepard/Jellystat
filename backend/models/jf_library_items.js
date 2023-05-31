@@ -42,7 +42,7 @@
           item.ImageTags && item.ImageTags.Thumb ? item.ImageTags.Thumb : null,
         BackdropImageTags: item.BackdropImageTags[0],
         ParentId: item.ParentId,
-        PrimaryImageHash:  item.ImageTags && item.ImageTags.Primary? item.ImageBlurHashes.Primary[item.ImageTags["Primary"]] : null,
+        PrimaryImageHash:  item.ImageTags && item.ImageTags.Primary && item.ImageBlurHashes && item.ImageBlurHashes.Primary && item.ImageBlurHashes.Primary[item.ImageTags["Primary"]] ? item.ImageBlurHashes.Primary[item.ImageTags["Primary"]] : null,
       });
 
   module.exports = {
