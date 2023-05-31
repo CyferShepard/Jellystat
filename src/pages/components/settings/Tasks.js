@@ -67,7 +67,6 @@ export default function Tasks() {
     const handleClick = () => {
 
          beginSync();
-        console.log('Button clicked!');
       }
     
       return (

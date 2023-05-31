@@ -4,17 +4,14 @@ import Config from "../../../lib/config";
 // import API from "../../../classes/jellyfin-api";
 
 import "../../css/sessions.css";
-// import "../../App.css"
-
+import ErrorBoundary from "../general/ErrorBoundary";
 import SessionCard from "./session-card";
 
 import Loading from "../general/loading";
 
 function Sessions() {
   const [data, setData] = useState();
-
   const [config, setConfig] = useState();
-  // const [errorHandler, seterrorHandler] = useState({ error_count: 0, error_message: '' })
 
   useEffect(() => {
 
@@ -90,7 +87,9 @@ function Sessions() {
               a.Id.padStart(12, "0").localeCompare(b.Id.padStart(12, "0"))
             )
             .map((session) => (
-              <SessionCard key={session.Id} data={{ session: session, base_url: config.base_url }} />
+              <ErrorBoundary>
+                <SessionCard key={session.Id} data={{ session: session, base_url: config.base_url }} />
+              </ErrorBoundary>
             ))}
       </div>
     </div>

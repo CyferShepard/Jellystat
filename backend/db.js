@@ -63,7 +63,7 @@ async function deleteBulk(table_name, data) {
   } finally {
     client.release();
   }
-  return ({Result:result,message:message});
+  return ({Result:result,message:'Bulk delete error:'+message});
 }
 
 async function insertBulk(table_name, data,columns) {
@@ -85,7 +85,7 @@ async function insertBulk(table_name, data,columns) {
   } finally {
     client.release();
   }
-  return ({Result:result,message:message});
+  return ({Result:result,message:'Bulk insert error: '+message});
 }
 
 async function query(text, params)  {

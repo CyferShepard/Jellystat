@@ -9,6 +9,13 @@
     padding: 20px;
 }
 
+.truncate-text {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 10ch;
+  }
+
 .session-card {
     display: flex;
     color: white;

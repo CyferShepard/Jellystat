@@ -5,6 +5,7 @@ import RecentlyAddedCard from "./RecentlyAdded/recently-added-card";
 
 import Config from "../../../lib/config";
 import "../../css/users/user-details.css";
+import ErrorBoundary from "../general/ErrorBoundary";
 
 function RecentlyAdded(props) {
   const [data, setData] = useState();
@@ -74,7 +75,9 @@ function RecentlyAdded(props) {
         <h1 className="my-3">Recently Added</h1>
         <div className="last-played-container">
         {data && data.map((item) => (
-                    <RecentlyAddedCard data={item} base_url={config.hostUrl} key={item.Id}/>
+                <ErrorBoundary key={item.Id}>
+                    <RecentlyAddedCard data={item} base_url={config.hostUrl} />
+                </ErrorBoundary>
           ))}
 
         </div>

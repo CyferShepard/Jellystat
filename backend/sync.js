@@ -35,6 +35,21 @@ const {columnsPlaybackReporting,mappingPlaybackReporting}= require("./models/jf_
 const {jf_users_columns,jf_users_mapping,} = require("./models/jf_users");
 
 /////////////////////////////////////////Functions
+
+function getErrorLineNumber(error) {
+  // console.log(error);
+  const stackTrace = error.stack.split('\n');
+  // The stack trace will contain the file path and line number
+  // of each function call leading up to the error.
+  // We can extract the line number of the error from the stack trace.
+  const errorLine = stackTrace[1].trim();
+  const lineNumber = errorLine.substring(
+    errorLine.lastIndexOf('\\') + 1,
+    errorLine.lastIndexOf(')')
+  );
+  return lineNumber;
+}
+
 class sync {
   constructor(hostUrl, apiKey) {
     this.hostUrl = hostUrl;
@@ -56,7 +71,7 @@ class sync {
     }
   }
 
-  async getAdminUser() {
+  async getAdminUser(refLog) {
     try {
       const url = `${this.hostUrl}/Users`;
       const response = await axios_instance.get(url, {
@@ -77,6 +92,8 @@ class sync {
       return adminUser || null;
     } catch (error) {
       console.log(error);
+      refLog.loggedData.push({ Message: "Error Getting AdminId: "+error});
+      refLog.result='Failed';
       return [];
     }
   }
@@ -209,7 +226,7 @@ async function syncUserData(refLog)
 
   }catch(error)
   {
-  refLog.loggedData.push({color: "red",Message:  "Error: "+error,});
+  refLog.loggedData.push({color: "red",Message: getErrorLineNumber(error)+ ": Error: "+error,});
   refLog.result='Failed';
   }
  
@@ -230,7 +247,7 @@ async function syncLibraryFolders(refLog)
     }
   
     const _sync = new sync(rows[0].JF_HOST, rows[0].JF_API_KEY);
-    const admins = await _sync.getAdminUser();
+    const admins = await _sync.getAdminUser(refLog);
     const userid = admins[0].Id;
     const data = await _sync.getItem(undefined,userid); //getting all root folders aka libraries
   
@@ -275,7 +292,7 @@ async function syncLibraryFolders(refLog)
   }
   catch(error)
   {
-    refLog.loggedData.push({color: "red",Message: "Error: "+error,});
+    refLog.loggedData.push({color: "red",Message: getErrorLineNumber(error)+ ": Error: "+error,});
     refLog.result='Failed';
   }
   
@@ -296,7 +313,7 @@ async function syncLibraryItems(refLog)
   refLog.loggedData.push({ color: "lawngreen", Message: "Syncing... 1/3" });
   refLog.loggedData.push({color: "yellow",Message: "Beginning Library Item Sync",});
 
-  const admins = await _sync.getAdminUser();
+  const admins = await _sync.getAdminUser(refLog);
   const userid = admins[0].Id;
   const libraries = await _sync.getItem(undefined,userid);
   const data = [];
@@ -322,10 +339,9 @@ async function syncLibraryItems(refLog)
   //filter fix if jf_libraries is empty
 
   dataToInsert = await data.map(jf_library_items_mapping);
-
+  dataToInsert=dataToInsert.filter((item)=>item.Id !== undefined);
 
   if (dataToInsert.length !== 0) {
-    
     let result = await db.insertBulk("jf_library_items",dataToInsert,jf_library_items_columns);
     if (result.Result === "SUCCESS") {
       insertMessage = `${dataToInsert.length-existingIds.length} Rows Inserted. ${existingIds.length} Rows Updated.`;
@@ -355,7 +371,7 @@ async function syncLibraryItems(refLog)
 
   }catch(error)
   {
-    refLog.loggedData.push({color: "red",Message:  "Error: "+error,});
+    refLog.loggedData.push({color: "red",Message:  getErrorLineNumber(error)+ ": Error: "+error,});
     refLog.result='Failed';
   }
   
@@ -395,7 +411,6 @@ async function syncShowItems(refLog)
     const allEpisodes =await _sync.getSeasonsAndEpisodes(show.Id,'Episodes');
 
     const existingIdsSeasons = await db.query(`SELECT *	FROM public.jf_library_seasons where "SeriesId" = '${show.Id}'`).then((res) => res.rows.map((row) => row.Id));
-
     let existingIdsEpisodes = [];
     if (existingIdsSeasons.length > 0) {
       existingIdsEpisodes = await db
@@ -416,6 +431,8 @@ async function syncShowItems(refLog)
     seasonsToInsert = await allSeasons.map(jf_library_seasons_mapping);
     episodesToInsert = await allEpisodes.map(jf_library_episodes_mapping);
 
+    seasonsToInsert=seasonsToInsert.filter((item)=>item.Id !== undefined);
+    episodesToInsert=episodesToInsert.filter((item)=>item.Id !== undefined);
     //Bulkinsert new data not on db
     if (seasonsToInsert.length !== 0) {
       let result = await db.insertBulk("jf_library_seasons",seasonsToInsert,jf_library_seasons_columns);
@@ -481,7 +498,7 @@ async function syncShowItems(refLog)
   refLog.loggedData.push({ color: "yellow", Message: "Sync Complete" });
  }catch(error)
  {
-  refLog.loggedData.push({color: "red",Message:  "Error: "+error,});
+  refLog.loggedData.push({color: "red",Message:  getErrorLineNumber(error)+ ": Error: "+error,});
   refLog.result='Failed';
  }
 }
@@ -509,7 +526,7 @@ async function syncItemInfo(refLog)
   let deleteItemInfoCount  = 0;
   let deleteEpisodeInfoCount = 0;
 
-  const admins = await _sync.getAdminUser();
+  const admins = await _sync.getAdminUser(refLog);
   const userid = admins[0].Id;
   //loop for each Movie
   for (const Item of Items) {
@@ -607,7 +624,7 @@ async function syncItemInfo(refLog)
   refLog.loggedData.push({ color: "lawngreen", Message: "Info Sync Complete" });
  }catch(error)
  {
-  refLog.loggedData.push({color: "red",Message:  "Error: "+error,});
+  refLog.loggedData.push({color: "red",Message:  getErrorLineNumber(error)+ ": Error: "+error,});
   refLog.result='Failed';
  }
 }
@@ -669,7 +686,7 @@ async function syncPlaybackPluginData()
     }    
   
      } catch (error) {
-      console.log(error);
+      console.log(getErrorLineNumber(error)+ ": "+error);
      return [];
    }
    
@@ -688,8 +705,8 @@ async function removeOrphanedData(refLog)
   refLog.loggedData.push({ color: "lawngreen", Message: "Sync Complete" });
  }catch(error)
  {
-  refLog.loggedData.push({color: "red",Message: 'Error:'+error,});
-  refLog.loggedData.push({ color: "red", Message: "Cleanup Failed with errors" });
+  refLog.loggedData.push({color: "red",Message: getErrorLineNumber(error)+ ': Error:'+error,});
+  refLog.loggedData.push({ color: "red", Message: getErrorLineNumber(error)+ ": Cleanup Failed with errors" });
   refLog.result='Failed';
  }
 

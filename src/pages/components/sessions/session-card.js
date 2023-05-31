@@ -10,6 +10,7 @@ import PlayFillIcon from "remixicon-react/PlayFillIcon";
 import PauseFillIcon from "remixicon-react/PauseFillIcon";
 
 import { clientData } from "../../../lib/devices";
+import  Tooltip  from "@mui/material/Tooltip";
 
 
 function ticksToTimeString(ticks) {
@@ -130,7 +131,9 @@ function sessionCard(props) {
 
                       <Col className="col-auto">
                        <Card.Text className="text-end">
-                           <Link to={`/users/${props.data.session.UserId}`}>{props.data.session.UserName}</Link> 
+                          <Tooltip title={props.data.session.UserName} >
+                             <Link to={`/users/${props.data.session.UserId}`}>{props.data.session.UserName}</Link> 
+                          </Tooltip>
                        </Card.Text>
                       </Col>
            
