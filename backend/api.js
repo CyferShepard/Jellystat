@@ -25,7 +25,7 @@ router.get("/test", async (req, res) => {
 
 router.get("/getconfig", async (req, res) => {
   try{
-    const { rows } = await db.query('SELECT "JF_HOST","JF_API_KEY","APP_USER","REQUIRE_LOGIN" FROM app_config where "ID"=1');
+    const { rows } = await db.query('SELECT "JF_HOST","APP_USER","REQUIRE_LOGIN" FROM app_config where "ID"=1');
     res.send(rows);
 
   }catch(error)

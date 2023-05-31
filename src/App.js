@@ -31,7 +31,7 @@ import Statistics from './pages/statistics';
 
 function App() {
 
-  const [isConfigured, setisConfigured] = useState(false);
+  const [setupState, setSetupState] = useState(0);
   const [config, setConfig] = useState(null);
   const [loading, setLoading] = useState(true);
   const [errorFlag, seterrorFlag] = useState(false);
@@ -59,16 +59,15 @@ function App() {
         }
     };
 
-    if(!isConfigured)
+    if(setupState===0)
     {
       setLoading(false);
       axios
       .get("/auth/isConfigured")
       .then(async (response) => {
-        // console.log(response);
         if(response.status===200)
         {
-          setisConfigured(true);
+          setSetupState(response.data.state);
          
         }
    
@@ -82,11 +81,11 @@ function App() {
        
     }
 
-    if (!config && isConfigured) {
+    if (!config && setupState>=1) {
         fetchConfig();
     }
 
-}, [config,isConfigured]);
+}, [config,setupState]);
 
 if (loading) {
   return <Loading />;
@@ -96,25 +95,28 @@ if (errorFlag) {
   return <ErrorPage message={"Error: Unable to connect to Jellystat Backend"} />;
 }
 
-if(isConfigured)
+if(!config && setupState===2)
   {
     if ((token===undefined || token===null) || !config) {
       return <Login />;
     }
   }
-  else{
+
+  if (setupState===0) {
     return <Signup />;
   }
+  if(setupState===1)
+    {
+      return <Setup />;
+ 
+    }
 
 
 
 
 
-if (config  && config.apiKey ===null) {
-  return <Setup />;
-}
 
-if (config  && isConfigured && token!==null){
+if (config  && setupState===2 && token!==null){
   return (
     <div className="App">
  

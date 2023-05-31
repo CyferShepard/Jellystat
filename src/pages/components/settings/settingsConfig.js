@@ -41,7 +41,7 @@ export default function SettingsConfig() {
   useEffect(() => {
     Config()
       .then((config) => {
-        setFormValues({ JF_HOST: config.hostUrl, JF_API_KEY: config.apiKey });
+        setFormValues({ JF_HOST: config.hostUrl });
         setConfig(config);
         setloadSate("Loaded");
       })

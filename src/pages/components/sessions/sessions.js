@@ -87,8 +87,8 @@ function Sessions() {
               a.Id.padStart(12, "0").localeCompare(b.Id.padStart(12, "0"))
             )
             .map((session) => (
-              <ErrorBoundary>
-                <SessionCard key={session.Id} data={{ session: session, base_url: config.base_url }} />
+              <ErrorBoundary key={session.Id} >
+                <SessionCard data={{ session: session, base_url: config.base_url }} />
               </ErrorBoundary>
             ))}
       </div>

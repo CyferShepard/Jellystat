@@ -44,9 +44,25 @@ router.post('/login', async (req, res) => {
   
       if(Configured.length>0)
       {
-        res.sendStatus(200);
+      if(Configured[0].JF_API_KEY && Configured[0].APP_USER && Configured[0].JF_API_KEY!==null  && Configured[0].APP_USER!==null)
+      {
+        
+        res.status(200);
+        res.send({state:2});
+      }else
+      if(Configured[0].APP_USER && Configured[0].APP_USER!==null)
+      {
+        
+        res.status(200);
+        res.send({state:1});
+      }else
+      {
+        res.status(200);
+        res.send({state:0});
+      }
       }else{
-        res.sendStatus(204);
+        res.status(200);
+        res.send({state:0});
       }
    
     }catch(error)
