@@ -43,7 +43,7 @@ function ItemStatComponent(props) {
             </div>
               :
               <>
-                {!loaded && (
+                {props.data && props.data[0] && props.data[0].PrimaryImageHash && props.data[0].PrimaryImageHash!=null && !loaded && (
                   <div className="position-absolute w-100 h-100">
                     <Blurhash hash={props.data[0].PrimaryImageHash}  height={'100%'} className="rounded-3 overflow-hidden"/>
                   </div>

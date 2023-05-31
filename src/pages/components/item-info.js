@@ -135,7 +135,7 @@ const cardBgStyle = {
        <div className="item-detail-container rounded-3" style={cardStyle}>
       <Row className="justify-content-center justify-content-md-start rounded-3 g-0 p-4" style={cardBgStyle}>
         <Col className="col-auto my-4 my-md-0 item-banner-image" >
-        {data.PrimaryImageHash && !loaded ? <Blurhash hash={data.PrimaryImageHash} width={'200px'}   height={'300px'} className="rounded-3 overflow-hidden" style={{display:'block'}}/> : null}
+        {data.PrimaryImageHash && data.PrimaryImageHash!=null && !loaded ? <Blurhash hash={data.PrimaryImageHash} width={'200px'}   height={'300px'} className="rounded-3 overflow-hidden" style={{display:'block'}}/> : null}
         <img
             className="item-image"
             src={

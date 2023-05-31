@@ -16,7 +16,7 @@ function MoreItemCards(props) {
     <div className={props.data.Type==="Episode" ? "last-card episode-card" : "last-card"}>
      <Link to={`/libraries/item/${ (props.data.Type==="Episode" ? props.data.EpisodeId :  props.data.Id) }`}>
       <div className={props.data.Type==="Episode" ? "last-card-banner episode" : "last-card-banner"}>
-        {(props.data.ImageBlurHashes || props.data.PrimaryImageHash )&& !loaded ? <Blurhash hash={props.data.PrimaryImageHash || props.data.ImageBlurHashes.Primary[props.data.ImageTags.Primary] } width={'100%'}   height={'100%'} className="rounded-3 overflow-hidden"/> : null}
+        {((props.data.ImageBlurHashes && props.data.ImageBlurHashes!=null) || (props.data.PrimaryImageHash && props.data.PrimaryImageHash!=null) ) && !loaded ? <Blurhash hash={props.data.PrimaryImageHash || props.data.ImageBlurHashes.Primary[props.data.ImageTags.Primary] } width={'100%'}   height={'100%'} className="rounded-3 overflow-hidden"/> : null}
 
         {fallback ? 
         <img
