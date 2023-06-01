@@ -3,7 +3,11 @@ const db = require("./db");
 const jwt = require('jsonwebtoken');
 
 
-const JWT_SECRET = process.env.JWT_SECRET ||'my-secret-jwt-key';
+const JWT_SECRET = process.env.JWT_SECRET;
+if (JWT_SECRET === undefined) {
+  console.log('JWT Secret cannot be undefined');
+  process.exit(1); // end the program with error status code
+}
 
 const router = express.Router();
 
@@ -13,8 +17,9 @@ router.post('/login', async (req, res) => {
     try{
       const { username, password } = req.body;
         
-      const { rows : login } = await db.query(`SELECT * FROM app_config where ("APP_USER"='${username}' and "APP_PASSWORD"='${password}') OR "REQUIRE_LOGIN"=false`);
-  
+      const query = 'SELECT * FROM app_config WHERE ("APP_USER" = $1 AND "APP_PASSWORD" = $2) OR "REQUIRE_LOGIN" = false';
+      const values = [username, password];
+      const { rows: login } = await db.query(query, values);
       if(login.length>0)
       {
         const user = { id: 1, username: username };
