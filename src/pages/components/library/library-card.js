@@ -105,12 +105,12 @@ function LibraryCard(props) {
 
             <Row className="space-between-end card-row">
               <Col className="card-label">Total Files</Col>
-              <Col className="text-end">{props.metadata.files}</Col>
+              <Col className="text-end">{props.metadata && props.metadata.files  ? props.metadata.files :0}</Col>
             </Row>
 
             <Row className="space-between-end card-row">
               <Col className="card-label">Library Size</Col>
-              <Col className="text-end">{formatFileSize(props.metadata.Size)}</Col>
+              <Col className="text-end">{formatFileSize(props.metadata && props.metadata.Size ? props.metadata.Size:0)}</Col>
             </Row>
 
             <Row className="space-between-end card-row">

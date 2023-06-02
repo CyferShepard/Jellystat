@@ -5,7 +5,7 @@ import Config from "../lib/config";
 import "./css/library/libraries.css";
 import Loading from "./components/general/loading";
 import LibraryCard from "./components/library/library-card";
-
+import ErrorBoundary from "./components/general/ErrorBoundary";
 
 
 function Libraries() {
@@ -82,9 +82,9 @@ function Libraries() {
       <div xs={1} md={2} lg={4} className="g-0 libraries-container">
       {data &&
           data.map((item) => (
-    
-                <LibraryCard key={item.Id} data={item} metadata={metadata.find(data => data.Id === item.Id)} base_url={config.hostUrl}/>
-     
+                <ErrorBoundary key={item.Id} >
+                  <LibraryCard data={item} metadata={metadata.find(data => data.Id === item.Id)} base_url={config.hostUrl}/>
+                </ErrorBoundary>
 
             ))}
       </div>
