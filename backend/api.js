@@ -524,6 +524,144 @@ router.post("/updatePassword", async (req, res) => {
 
 });
 
+router.post("/getLibraries", async (req, res) => {
+  try {
+    const { itemid } = req.body;
+    const { rows:config } = await db.query('SELECT * FROM app_config where "ID"=1');
+
+    let payload=
+              {
+                existing_library_count:0,
+                existing_item_count:0,
+                existing_season_count:0,
+                existing_episode_count:0,
+                api_library_count:0,
+                api_item_count:0,
+                api_season_count:0,
+                api_episode_count:0,
+                missing_api_library_data:{},
+                missing_api_item_data:{},
+                missing_api_season_data:{},
+                missing_api_episode_data:{},
+              };
+
+    /////////////////////////Get Admin
+
+    const adminurl = `${config[0].JF_HOST}/Users`;
+    const response = await axios_instance.get(adminurl, {
+      headers: {
+        "X-MediaBrowser-Token": config[0].JF_API_KEY,
+      },
+    });
+    const adminUser = await response.data.filter(
+      (user) => user.Policy.IsAdministrator === true
+    );
+
+    ////////////////////////
+    const db_libraries=await db.query('SELECT "Id" FROM jf_libraries').then((res) => res.rows.map((row) => row.Id))
+    const db_items=await db.query('SELECT "Id" FROM jf_library_items').then((res) => res.rows.map((row) => row.Id))
+    const db_seasons=await db.query('SELECT "Id" FROM jf_library_seasons').then((res) => res.rows.map((row) => row.Id))
+    const db_episodes=await db.query('SELECT "EpisodeId" FROM jf_library_episodes').then((res) => res.rows.map((row) => row.EpisodeId))
+
+
+//get libraries
+    let url=`${config[0].JF_HOST}/Users/${adminUser[0].Id}/Items`;
+    if(itemid)
+    {
+      url+=`/${itemid}`;
+    }
+    
+    const response_data = await axios_instance.get(url, {
+      headers: {
+        "X-MediaBrowser-Token":  config[0].JF_API_KEY ,
+      },
+    });
+
+
+    let libraries=response_data.data.Items;
+
+    //get items
+    const item_data = [];
+    for (let i = 0; i < libraries.length; i++) {
+      const library = libraries[i];
+
+      let item_url=`${config[0].JF_HOST}/Users/${adminUser[0].Id}/Items?ParentID=${library.Id}`;
+      const response_data_item = await axios_instance.get(item_url, {
+        headers: {
+          "X-MediaBrowser-Token":  config[0].JF_API_KEY ,
+        },
+      });
+
+      const libraryItemsWithParent = response_data_item.data.Items.map((items) => ({
+        ...items,
+        ...{ ParentId: library.Id },
+      }));
+      item_data.push(...libraryItemsWithParent);
+    }
+
+     payload.existing_library_count=db_libraries.length;
+     payload.api_library_count=libraries.length;
+
+     payload.existing_item_count=db_items.length;
+     payload.api_item_count=item_data.length;
+
+
+
+     //SHows
+     let allSeasons = [];
+     let allEpisodes =[];
+
+     const { rows: shows } = await db.query(`SELECT "Id"	FROM public.jf_library_items where "Type"='Series'`);
+       //loop for each show
+       
+  for (const show of shows) {
+
+    let season_url = `${config[0].JF_HOST}/shows/${show.Id}/Seasons`;
+    let episodes_url = `${config[0].JF_HOST}/shows/${show.Id}/Episodes`;
+
+    const response_data_seasons = await axios_instance.get(season_url, {
+      headers: {
+        "X-MediaBrowser-Token":  config[0].JF_API_KEY ,
+      },
+    });
+
+    const response_data_episodes = await axios_instance.get(episodes_url, {
+      headers: {
+        "X-MediaBrowser-Token":  config[0].JF_API_KEY ,
+      },
+    });
+
+     allSeasons.push(...response_data_seasons.data.Items);
+     allEpisodes.push(...response_data_episodes.data.Items);
+  }
+
+    payload.existing_season_count=db_seasons.length;
+    payload.api_season_count=allSeasons.length;
+
+    payload.existing_episode_count=db_episodes.length;
+    payload.api_episode_count=allEpisodes.length;
+
+    //missing data section
+    let missing_libraries=libraries.filter(library => !db_libraries.includes(library.Id));
+    let missing_items=item_data.filter(item => !db_items.includes(item.Id));
+    let missing_seasons=allSeasons.filter(season => !db_seasons.includes(season.Id));
+    let missing_episodes=allEpisodes.filter(episode => !db_episodes.includes(episode.Id));
+
+    payload.missing_api_library_data=missing_libraries;
+    payload.missing_api_item_data=missing_items;
+    payload.missing_api_season_data=missing_seasons;
+    payload.missing_api_episode_data=missing_episodes;
+   
+
+    res.send(payload);
+  } catch (error) {
+    console.log(error);
+    res.status(503);
+    res.send(error);
+  }
+});
+
+
 
 
 

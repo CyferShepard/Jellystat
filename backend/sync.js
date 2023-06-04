@@ -127,9 +127,9 @@ class sync {
     try {
 
       let url = `${this.hostUrl}/shows/${itemID}/${type}`;
-      if (itemID !== undefined) {
-        url += `?ParentID=${itemID}`;
-      }
+      // if (itemID !== undefined) {
+      //   url += `?ParentID=${itemID}`;
+      // }
       const response = await axios_instance.get(url, {
         headers: {
           "X-MediaBrowser-Token": this.apiKey,

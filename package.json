@@ -1,6 +1,6 @@
 {
   "name": "jfstat",
-  "version": "1.0.4.6",
+  "version": "1.0.4.7",
   "private": true,
   "dependencies": {
     "@emotion/react": "^11.10.6",
@@ -21,6 +21,7 @@
     "concurrently": "^7.6.0",
     "cors": "^2.8.5",
     "crypto-js": "^4.1.1",
+    "file-saver": "^2.0.5",
     "github-api": "^3.4.0",
     "http-proxy-middleware": "^2.0.6",
     "knex": "^2.4.2",

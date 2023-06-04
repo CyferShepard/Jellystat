@@ -28,6 +28,7 @@ import About from './pages/about';
 import Testing from './pages/testing';
 import Activity from './pages/activity';
 import Statistics from './pages/statistics';
+import Datadebugger from './pages/data-debugger';
 
 function App() {
 
@@ -135,6 +136,7 @@ if (config  && setupState===2 && token!==null){
           <Route path="/activity" element={<Activity />} />
           <Route path="/testing" element={<Testing />} />
           <Route path="/about" element={<About />} />
+          <Route path="/debugger/data" element={<Datadebugger />} />
         </Routes>
       </main>
       </div>
