@@ -100,7 +100,7 @@ function LibraryCard(props) {
 
             <Row className="space-between-end card-row">
               <Col className="card-label">Type</Col>
-              <Col className="text-end">{props.data.CollectionType==='tvshows' ? 'Series' : "Movies"}</Col>
+              <Col className="text-end">{props.data.CollectionType==='tvshows' ? 'Series' : props.data.CollectionType==='movies'? "Movies" : props.data.CollectionType==='music'? "Music" : 'Mixed'}</Col>
             </Row>
 
             <Row className="space-between-end card-row">

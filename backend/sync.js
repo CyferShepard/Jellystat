@@ -113,7 +113,7 @@ class sync {
 
       const results = response.data.Items;
       if (itemID === undefined) {
-        return results.filter((type) => !["boxsets"].includes(type.CollectionType));
+        return results.filter((type) => !["boxsets","playlists"].includes(type.CollectionType));
       } else {
         return results.filter((item) => item.ImageTags.Primary);
       }
