@@ -169,11 +169,11 @@ function Datadebugger() {
                               Download Raw Item Data
                               </Button>
 
-                              <Button  onClick={()=>handleDownload(data.raw_season_data,'RawItemData')}>
+                              <Button  onClick={()=>handleDownload(data.raw_season_data,'RawSeasonData')}>
                               Download Raw Season Data
                               </Button>
 
-                              <Button  onClick={()=>handleDownload(data.raw_episode_data,'RawItemData')}>
+                              <Button  onClick={()=>handleDownload(data.raw_episode_data,'RawEpisodeData')}>
                               Download Raw Episode Data
                               </Button>
             </ButtonGroup>
