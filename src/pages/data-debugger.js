@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import axios from 'axios';
 
-import {Button } from 'react-bootstrap';
+import {Button, ButtonGroup } from 'react-bootstrap';
 
 import Table from '@mui/material/Table';
 import TableBody from '@mui/material/TableBody';
@@ -83,7 +83,7 @@ function Datadebugger() {
                             <TableCell>{data ? data.existing_library_count:''}</TableCell>
                             <TableCell>{data ? data.api_library_count:''}</TableCell>
                             <TableCell>{data ? data.api_library_count-data.existing_library_count:''}</TableCell>
-                            <TableCell>{data  &&  data.api_library_count!==data.existing_library_count ?       
+                            <TableCell>{data  &&  data.api_library_count>data.existing_library_count ?       
                               <Button onClick={()=>handleDownload(data.missing_api_library_data,'MissingLibraryData')}>
                                Download
                               </Button>:
@@ -92,12 +92,38 @@ function Datadebugger() {
                           </TableRow>
 
                           <TableRow>
-                            <TableCell>Library Items</TableCell>
-                            <TableCell>{data ? data.existing_item_count:''}</TableCell>
-                            <TableCell>{data ? data.api_item_count:''}</TableCell>
-                            <TableCell>{data ? data.api_item_count-data.existing_item_count:''}</TableCell>
-                            <TableCell>{data  &&  data.api_item_count!==data.existing_item_count ?       
-                              <Button onClick={()=>handleDownload(data.missing_api_item_data,'MissingItemData')}>
+                            <TableCell>Movies</TableCell>
+                            <TableCell>{data ? data.existing_movie_count:''}</TableCell>
+                            <TableCell>{data ? data.api_movie_count:''}</TableCell>
+                            <TableCell>{data ? data.api_movie_count-data.existing_movie_count:''}</TableCell>
+                            <TableCell>{data  &&  data.api_movie_count>data.existing_movie_count ?       
+                              <Button onClick={()=>handleDownload(data.missing_api_movies_data,'MissingMovieData')}>
+                               Download
+                              </Button>:
+                              ''}
+                            </TableCell>
+                          </TableRow>
+
+                          <TableRow>
+                            <TableCell>Shows</TableCell>
+                            <TableCell>{data ? data.existing_show_count:''}</TableCell>
+                            <TableCell>{data ? data.api_show_count:''}</TableCell>
+                            <TableCell>{data ? data.api_show_count-data.existing_show_count:''}</TableCell>
+                            <TableCell>{data  &&  data.api_show_count>data.existing_show_count ?       
+                              <Button onClick={()=>handleDownload(data.missing_api_shows_data,'MissingShowData')}>
+                               Download
+                              </Button>:
+                              ''}
+                            </TableCell>
+                          </TableRow>
+
+                          <TableRow>
+                            <TableCell>Music</TableCell>
+                            <TableCell>{data ? data.existing_music_count:''}</TableCell>
+                            <TableCell>{data ? data.api_music_count:''}</TableCell>
+                            <TableCell>{data ? data.api_music_count-data.existing_music_count:''}</TableCell>
+                            <TableCell>{data  &&  data.api_music_count>data.existing_music_count ?       
+                              <Button onClick={()=>handleDownload(data.missing_api_music_data,'MissingMusicData')}>
                                Download
                               </Button>:
                               ''}
@@ -109,7 +135,7 @@ function Datadebugger() {
                             <TableCell>{data ? data.existing_season_count:''}</TableCell>
                             <TableCell>{data ? data.api_season_count:''}</TableCell>
                             <TableCell>{data ? data.api_season_count-data.existing_season_count:''}</TableCell>
-                            <TableCell>{data  &&  data.api_season_count!==data.existing_season_count ?       
+                            <TableCell>{data  &&  data.api_season_count>data.existing_season_count ?       
                               <Button onClick={()=>handleDownload(data.missing_api_season_data,'MissingSeasonData')}>
                                Download
                               </Button>:
@@ -122,7 +148,7 @@ function Datadebugger() {
                             <TableCell>{data ? data.existing_episode_count:''}</TableCell>
                             <TableCell>{data ? data.api_episode_count:''}</TableCell>
                             <TableCell>{data ? data.api_episode_count-data.existing_episode_count:''}</TableCell>
-                            <TableCell>{data  &&  data.api_episode_count!==data.existing_episode_count ?       
+                            <TableCell>{data  &&  data.api_episode_count>data.existing_episode_count ?       
                               <Button onClick={()=>handleDownload(data.missing_api_episode_data,'MissingEpisodeData')}>
                                Download
                               </Button>:
@@ -133,6 +159,24 @@ function Datadebugger() {
                       </TableBody>
                     </Table>
             </TableContainer>
+
+            <ButtonGroup className="pt-3 w-100">
+                              <Button onClick={()=>handleDownload(data.raw_library_data,'RawLibData')}>
+                               Download Raw Library Data
+                              </Button>
+
+                              <Button  onClick={()=>handleDownload(data.raw_item_data,'RawItemData')}>
+                              Download Raw Item Data
+                              </Button>
+
+                              <Button  onClick={()=>handleDownload(data.raw_season_data,'RawItemData')}>
+                              Download Raw Season Data
+                              </Button>
+
+                              <Button  onClick={()=>handleDownload(data.raw_episode_data,'RawItemData')}>
+                              Download Raw Episode Data
+                              </Button>
+            </ButtonGroup>
 
     </div>
 

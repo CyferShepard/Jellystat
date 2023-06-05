@@ -532,17 +532,27 @@ router.post("/getLibraries", async (req, res) => {
     let payload=
               {
                 existing_library_count:0,
-                existing_item_count:0,
+                existing_movie_count:0,
+                existing_music_count:0,
+                existing_show_count:0,
                 existing_season_count:0,
                 existing_episode_count:0,
                 api_library_count:0,
-                api_item_count:0,
+                api_movie_count:0,
+                api_music_count:0,
+                api_show_count:0,
                 api_season_count:0,
                 api_episode_count:0,
                 missing_api_library_data:{},
-                missing_api_item_data:{},
+                missing_api_music_data:{},
+                missing_api_movies_data:{},
+                missing_api_shows_data:{},
                 missing_api_season_data:{},
                 missing_api_episode_data:{},
+                raw_library_data:{},
+                raw_item_data:{},
+                raw_season_data:{},
+                raw_episode_data:{},
               };
 
     /////////////////////////Get Admin
@@ -558,18 +568,16 @@ router.post("/getLibraries", async (req, res) => {
     );
 
     ////////////////////////
-    const db_libraries=await db.query('SELECT "Id" FROM jf_libraries').then((res) => res.rows.map((row) => row.Id))
-    const db_items=await db.query('SELECT "Id" FROM jf_library_items').then((res) => res.rows.map((row) => row.Id))
-    const db_seasons=await db.query('SELECT "Id" FROM jf_library_seasons').then((res) => res.rows.map((row) => row.Id))
-    const db_episodes=await db.query('SELECT "EpisodeId" FROM jf_library_episodes').then((res) => res.rows.map((row) => row.EpisodeId))
+    const db_libraries=await db.query('SELECT "Id" FROM jf_libraries').then((res) => res.rows.map((row) => row.Id));
+    const db_music=await db.query(`SELECT "Id" FROM jf_library_items where "Type"='Audio'`).then((res) => res.rows.map((row) => row.Id));
+    const db_movies=await db.query(`SELECT "Id" FROM jf_library_items where "Type"='Movie'`).then((res) => res.rows.map((row) => row.Id));
+    const db_shows=await db.query(`SELECT "Id" FROM jf_library_items where "Type"='Series'`).then((res) => res.rows.map((row) => row.Id));
+    const db_seasons=await db.query('SELECT "Id" FROM jf_library_seasons').then((res) => res.rows.map((row) => row.Id));
+    const db_episodes=await db.query('SELECT "EpisodeId" FROM jf_library_episodes').then((res) => res.rows.map((row) => row.EpisodeId));
 
 
 //get libraries
     let url=`${config[0].JF_HOST}/Users/${adminUser[0].Id}/Items`;
-    if(itemid)
-    {
-      url+=`/${itemid}`;
-    }
     
     const response_data = await axios_instance.get(url, {
       headers: {
@@ -579,9 +587,15 @@ router.post("/getLibraries", async (req, res) => {
 
 
     let libraries=response_data.data.Items;
+    let raw_library_data=response_data.data;
+
+    payload.raw_library_data=raw_library_data;
 
     //get items
-    const item_data = [];
+    const show_data = [];
+    const movie_data = [];
+    const music_data = [];
+    const raw_item_data=[];
     for (let i = 0; i < libraries.length; i++) {
       const library = libraries[i];
 
@@ -596,20 +610,34 @@ router.post("/getLibraries", async (req, res) => {
         ...items,
         ...{ ParentId: library.Id },
       }));
-      item_data.push(...libraryItemsWithParent);
+      movie_data.push(...libraryItemsWithParent.filter((item) => item.Type==='Movie'));
+      show_data.push(...libraryItemsWithParent.filter((item) => item.Type==='Series'));
+      music_data.push(...libraryItemsWithParent.filter((item) => item.Type==='Audio'));
+      raw_item_data.push(response_data_item.data);
     }
 
      payload.existing_library_count=db_libraries.length;
      payload.api_library_count=libraries.length;
 
-     payload.existing_item_count=db_items.length;
-     payload.api_item_count=item_data.length;
+     payload.existing_movie_count=db_movies.length;
+     payload.api_movie_count=movie_data.length;
+
+     payload.existing_music_count=db_music.length;
+     payload.api_music_count=music_data.length;
+
+     payload.existing_show_count=db_shows.length;
+     payload.api_show_count=show_data.length;
+
+     payload.raw_item_data=raw_item_data;
 
 
 
      //SHows
      let allSeasons = [];
      let allEpisodes =[];
+
+     let raw_allSeasons = [];
+     let raw_allEpisodes =[];
 
      const { rows: shows } = await db.query(`SELECT "Id"	FROM public.jf_library_items where "Type"='Series'`);
        //loop for each show
@@ -633,6 +661,9 @@ router.post("/getLibraries", async (req, res) => {
 
      allSeasons.push(...response_data_seasons.data.Items);
      allEpisodes.push(...response_data_episodes.data.Items);
+
+     raw_allSeasons.push(response_data_seasons.data);
+     raw_allEpisodes.push(response_data_episodes.data);
   }
 
     payload.existing_season_count=db_seasons.length;
@@ -641,14 +672,25 @@ router.post("/getLibraries", async (req, res) => {
     payload.existing_episode_count=db_episodes.length;
     payload.api_episode_count=allEpisodes.length;
 
+    payload.raw_season_data=raw_allSeasons;
+    payload.raw_episode_data=raw_allEpisodes;
+
     //missing data section
     let missing_libraries=libraries.filter(library => !db_libraries.includes(library.Id));
-    let missing_items=item_data.filter(item => !db_items.includes(item.Id));
+
+    let missing_movies=movie_data.filter(item => !db_movies.includes(item.Id) && item.Type==='Movie');
+    let missing_shows=show_data.filter(item => !db_shows.includes(item.Id) && item.Type==='Series');
+    let missing_music=music_data.filter(item => !db_music.includes(item.Id) && item.Type==='Audio');
+
     let missing_seasons=allSeasons.filter(season => !db_seasons.includes(season.Id));
     let missing_episodes=allEpisodes.filter(episode => !db_episodes.includes(episode.Id));
 
     payload.missing_api_library_data=missing_libraries;
-    payload.missing_api_item_data=missing_items;
+
+    payload.missing_api_movies_data=missing_movies;
+    payload.missing_api_music_data=missing_music;
+    payload.missing_api_shows_data=missing_shows;
+
     payload.missing_api_season_data=missing_seasons;
     payload.missing_api_episode_data=missing_episodes;
    
