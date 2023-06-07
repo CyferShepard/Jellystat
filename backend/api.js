@@ -553,6 +553,7 @@ router.post("/getLibraries", async (req, res) => {
                 raw_item_data:{},
                 raw_season_data:{},
                 raw_episode_data:{},
+                count_from_api:{},
               };
 
     /////////////////////////Get Admin
@@ -575,7 +576,15 @@ router.post("/getLibraries", async (req, res) => {
     const db_seasons=await db.query('SELECT "Id" FROM jf_library_seasons').then((res) => res.rows.map((row) => row.Id));
     const db_episodes=await db.query('SELECT "EpisodeId" FROM jf_library_episodes').then((res) => res.rows.map((row) => row.EpisodeId));
 
+    let count_url=`${config[0].JF_HOST}/items/counts`;
+    
+    const response_api_count = await axios_instance.get(count_url, {
+      headers: {
+        "X-MediaBrowser-Token":  config[0].JF_API_KEY ,
+      },
+    });
 
+    payload.count_from_api=response_api_count.data;
 //get libraries
     let url=`${config[0].JF_HOST}/Users/${adminUser[0].Id}/Items`;
     

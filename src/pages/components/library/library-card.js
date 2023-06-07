@@ -134,7 +134,7 @@ function LibraryCard(props) {
             </Row>
 
             <Row className="space-between-end card-row">
-              <Col className="card-label">{props.data.CollectionType==='tvshows' ? 'Series' : "Movies"}</Col>
+              <Col className="card-label">{props.data.CollectionType==='tvshows' ? 'Series' : props.data.CollectionType==='movies'? "Movies" : props.data.CollectionType==='music'? "Songs" : 'Files'}</Col>
               <Col className="text-end">{props.data.Library_Count}</Col>
             </Row>
 

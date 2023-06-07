@@ -37,11 +37,7 @@ const {jf_users_columns,jf_users_mapping,} = require("./models/jf_users");
 /////////////////////////////////////////Functions
 
 function getErrorLineNumber(error) {
-  // console.log(error);
   const stackTrace = error.stack.split('\n');
-  // The stack trace will contain the file path and line number
-  // of each function call leading up to the error.
-  // We can extract the line number of the error from the stack trace.
   const errorLine = stackTrace[1].trim();
   const lineNumber = errorLine.substring(
     errorLine.lastIndexOf('\\') + 1,
@@ -79,6 +75,7 @@ class sync {
           "X-MediaBrowser-Token": this.apiKey,
         },
       });
+
       if(!response || typeof response.data !== 'object' || !Array.isArray(response.data))
       {
         res.status(503);
@@ -98,24 +95,44 @@ class sync {
     }
   }
 
-  async getItem(itemID,userid) {
+  async getItem(key,id,params) {
     try {
 
-      let url = `${this.hostUrl}/users/${userid}/Items`;
-      if (itemID !== undefined) {
-        url += `?ParentID=${itemID}`;
-      }
-      const response = await axios_instance.get(url, {
-        headers: {
-          "X-MediaBrowser-Token": this.apiKey,
-        },
-      });
 
-      const results = response.data.Items;
-      if (itemID === undefined) {
-        return results.filter((type) => !["boxsets","playlists"].includes(type.CollectionType));
+      let url = `${this.hostUrl}/Items?${key}=${id}`;
+      let startIndex=params && params.startIndex ? params.startIndex :0;
+      let increment=params && params.increment ? params.startIndex :200;
+      let recursive=params && params.recursive!==undefined  ? params.recursive :true;
+      let total=200;
+
+      let final_response=[];
+      while(startIndex<total && total !== undefined)
+      {
+        const response = await axios_instance.get(url, {
+          headers: {
+            "X-MediaBrowser-Token": this.apiKey,
+          },        
+          params:{
+            startIndex:startIndex,
+            recursive:recursive,
+            limit:increment
+          },
+        });
+
+        total=response.data.TotalRecordCount;
+        startIndex+=increment;
+
+         final_response=[...final_response, ...response.data.Items];
+
+      }
+
+
+      // const results = response.data.Items;
+      if (key === 'userid') {
+        return final_response.filter((type) => !["boxsets","playlists"].includes(type.CollectionType));
       } else {
-        return results.filter((item) => item.ImageTags.Primary);
+        // return final_response.filter((item) => item.ImageTags.Primary);
+        return final_response;
       }
     } catch (error) {
       console.log(error);
@@ -123,27 +140,6 @@ class sync {
     }
   }
 
-  async getSeasonsAndEpisodes(itemID, type) {
-    try {
-
-      let url = `${this.hostUrl}/shows/${itemID}/${type}`;
-      // if (itemID !== undefined) {
-      //   url += `?ParentID=${itemID}`;
-      // }
-      const response = await axios_instance.get(url, {
-        headers: {
-          "X-MediaBrowser-Token": this.apiKey,
-        },
-      });
-
-      return response.data.Items;
-    } catch (error) {
-      console.log(error);
-      return [];
-    }
-  }
-
-  
 
   async getItemInfo(itemID,userid) {
     try {
@@ -231,24 +227,11 @@ async function syncUserData(refLog)
 
 }
 
-async function syncLibraryFolders(refLog)
+async function syncLibraryFolders(refLog,data)
 {
   try
   {
-
-    const { rows } = await db.query('SELECT * FROM app_config where "ID"=1');
-    if (rows[0].JF_HOST === null || rows[0].JF_API_KEY === null) {
-      res.send({ error: "Config Details Not Found" });
-      refLog.loggedData.push({ Message: "Error: Config details not found!" });
-      refLog.result='Failed';
-      return;
-    }
-  
-    const _sync = new sync(rows[0].JF_HOST, rows[0].JF_API_KEY);
-    const admins = await _sync.getAdminUser(refLog);
-    const userid = admins[0].Id;
-    const data = await _sync.getItem(undefined,userid); //getting all root folders aka libraries
-  
+ 
     const existingIds = await db
       .query('SELECT "Id" FROM jf_libraries')
       .then((res) => res.rows.map((row) => row.Id));
@@ -295,38 +278,16 @@ async function syncLibraryFolders(refLog)
   }
   
 }
-async function syncLibraryItems(refLog)
+async function syncLibraryItems(refLog,data)
 {
   try{
-    const { rows: config } = await db.query('SELECT * FROM app_config where "ID"=1' );
 
-
-  if (config[0].JF_HOST === null || config[0].JF_API_KEY === null) {
-    res.send({ error: "Config Details Not Found" });
-    refLog.result='Failed';
-    return;
-  }
-
-  const _sync = new sync(config[0].JF_HOST, config[0].JF_API_KEY);
   refLog.loggedData.push({ color: "lawngreen", Message: "Syncing... 1/3" });
   refLog.loggedData.push({color: "yellow",Message: "Beginning Library Item Sync",});
 
-  const admins = await _sync.getAdminUser(refLog);
-  const userid = admins[0].Id;
-  const libraries = await _sync.getItem(undefined,userid);
-  const data = [];
+
   let insertMessage='';
   let deleteCounter = 0;
-  //for each item in library run get item using that id as the ParentId (This gets the children of the parent id)
-  for (let i = 0; i < libraries.length; i++) {
-    const item = libraries[i];
-    let libraryItems = await _sync.getItem(item.Id,userid);
-    const libraryItemsWithParent = libraryItems.map((items) => ({
-      ...items,
-      ...{ ParentId: item.Id },
-    }));
-    data.push(...libraryItemsWithParent);
-  }
 
 
   const existingIds = await db
@@ -377,7 +338,7 @@ async function syncLibraryItems(refLog)
 
 }
 
-async function syncShowItems(refLog)
+async function syncShowItems(refLog,data)
 {
  try{
   refLog.loggedData.push({ color: "lawngreen", Message: "Syncing... 2/3" });
@@ -391,7 +352,7 @@ async function syncShowItems(refLog)
     return;
   }
 
-  const _sync = new sync(config[0].JF_HOST, config[0].JF_API_KEY);
+  // const _sync = new sync(config[0].JF_HOST, config[0].JF_API_KEY);
   const { rows: shows } = await db.query(`SELECT *	FROM public.jf_library_items where "Type"='Series'`);
 
   let insertSeasonsCount = 0;
@@ -405,8 +366,8 @@ async function syncShowItems(refLog)
 
   //loop for each show
   for (const show of shows) {
-    const allSeasons = await _sync.getSeasonsAndEpisodes(show.Id,'Seasons');
-    const allEpisodes =await _sync.getSeasonsAndEpisodes(show.Id,'Episodes');
+    const allSeasons =  data.filter((item) => item.Type==='Season' && item.SeriesId===show.Id);
+    const allEpisodes =data.filter((item) => item.Type==='Episode' && item.SeriesId===show.Id);
 
     const existingIdsSeasons = await db.query(`SELECT *	FROM public.jf_library_seasons where "SeriesId" = '${show.Id}'`).then((res) => res.rows.map((row) => row.Id));
     let existingIdsEpisodes = [];
@@ -429,8 +390,6 @@ async function syncShowItems(refLog)
     seasonsToInsert = await allSeasons.map(jf_library_seasons_mapping);
     episodesToInsert = await allEpisodes.map(jf_library_episodes_mapping);
 
-    seasonsToInsert=seasonsToInsert.filter((item)=>item.Id !== undefined);
-    episodesToInsert=episodesToInsert.filter((item)=>item.Id !== undefined);
     //Bulkinsert new data not on db
     if (seasonsToInsert.length !== 0) {
       let result = await db.insertBulk("jf_library_seasons",seasonsToInsert,jf_library_seasons_columns);
@@ -712,34 +671,72 @@ async function removeOrphanedData(refLog)
 
 async function fullSync()
 {
-  let startTime = moment();
-  let refLog={loggedData:[],result:'Success'};
-  await syncUserData(refLog);
-  await syncLibraryFolders(refLog);
-  await syncLibraryItems(refLog);
-  await syncShowItems(refLog);
-  await syncItemInfo(refLog);
-  await removeOrphanedData(refLog);
-  const uuid = randomUUID();
-
-  let endTime = moment();
- 
-  let diffInSeconds = endTime.diff(startTime, 'seconds');
-
-  const log=
+  try
   {
-    "Id":uuid,
-    "Name":"Jellyfin Sync",
-    "Type":"Task",
-    "ExecutionType":"Automatic",
-    "Duration":diffInSeconds,
-    "TimeRun":startTime,
-    "Log":JSON.stringify(refLog.loggedData),
-    "Result":refLog.result
+    let startTime = moment();
+    let refLog={loggedData:[],result:'Success'};
+  
+    const { rows } = await db.query('SELECT * FROM app_config where "ID"=1');
+    if (rows[0].JF_HOST === null || rows[0].JF_API_KEY === null) {
+      res.send({ error: "Config Details Not Found" });
+      refLog.loggedData.push({ Message: "Error: Config details not found!" });
+      refLog.result='Failed';
+      return;
+    }
+  
+    const _sync = new sync(rows[0].JF_HOST, rows[0].JF_API_KEY);
+  
+    const admins = await _sync.getAdminUser(refLog);
+    const userid = admins[0].Id;
+    const libraries = await _sync.getItem('userid',userid,{recursive:false}); //getting all root folders aka libraries + items
+    const data=[];
 
-  };
-   logging.insertLog(log);
+    //for each item in library run get item using that id as the ParentId (This gets the children of the parent id)
+  for (let i = 0; i < libraries.length; i++) {
+    const item = libraries[i];
+    let libraryItems = await _sync.getItem('parentId',item.Id);
+    const libraryItemsWithParent = libraryItems.map((items) => ({
+      ...items,
+      ...{ ParentId: item.Id },
+    }));
+    data.push(...libraryItemsWithParent);
+  }
+    const library_items=data.filter((item) => ['Movie','Audio','Series'].includes(item.Type));
+    const seasons_and_episodes=data.filter((item) => ['Season','Episode'].includes(item.Type));
 
+    await syncUserData(refLog);
+  
+    await syncLibraryFolders(refLog,libraries);
+    await syncLibraryItems(refLog,library_items);
+    await syncShowItems(refLog,seasons_and_episodes);
+    await syncItemInfo(refLog);
+    await removeOrphanedData(refLog);
+    const uuid = randomUUID();
+  
+    let endTime = moment();
+   
+    let diffInSeconds = endTime.diff(startTime, 'seconds');
+  
+    const log=
+    {
+      "Id":uuid,
+      "Name":"Jellyfin Sync",
+      "Type":"Task",
+      "ExecutionType":"Automatic",
+      "Duration":diffInSeconds,
+      "TimeRun":startTime,
+      "Log":JSON.stringify(refLog.loggedData),
+      "Result":refLog.result
+  
+    };
+     logging.insertLog(log);
+  
+    
+  }catch(error)
+  {
+    console.log(error);
+  }
+  
 
 }
 
@@ -750,16 +747,45 @@ async function fullSync()
 router.get("/beingSync", async (req, res) => {
   socket.clearMessages();
   let refLog={loggedData:[],result:'Success'};
-
   let startTime = moment();
+
+  const { rows } = await db.query('SELECT * FROM app_config where "ID"=1');
+  if (rows[0].JF_HOST === null || rows[0].JF_API_KEY === null) {
+    res.send({ error: "Config Details Not Found" });
+    refLog.loggedData.push({ Message: "Error: Config details not found!" });
+    refLog.result='Failed';
+    return;
+  }
+
+  const _sync = new sync(rows[0].JF_HOST, rows[0].JF_API_KEY);
+
+  const admins = await _sync.getAdminUser(refLog);
+  const userid = admins[0].Id;
+  const libraries = await _sync.getItem('userid',userid,{recursive:false}); //getting all root folders aka libraries + items
+  const data=[];
+
+    //for each item in library run get item using that id as the ParentId (This gets the children of the parent id)
+  for (let i = 0; i < libraries.length; i++) {
+    const item = libraries[i];
+    let libraryItems = await _sync.getItem('parentId',item.Id);
+    const libraryItemsWithParent = libraryItems.map((items) => ({
+      ...items,
+      ...{ ParentId: item.Id },
+    }));
+    data.push(...libraryItemsWithParent);
+  }
+
+  const library_items=data.filter((item) => ['Movie','Audio','Series'].includes(item.Type));
+  const seasons_and_episodes=data.filter((item) => ['Season','Episode'].includes(item.Type));
+
   await syncUserData(refLog);
-  await syncLibraryFolders(refLog);
-  await syncLibraryItems(refLog);
-  await syncShowItems(refLog);
+
+  await syncLibraryFolders(refLog,libraries);
+  await syncLibraryItems(refLog,library_items);
+  await syncShowItems(refLog,seasons_and_episodes);
   await syncItemInfo(refLog);
   await removeOrphanedData(refLog);
   const uuid = randomUUID();
-
   let endTime = moment();
  
   let diffInSeconds = endTime.diff(startTime, 'seconds');
