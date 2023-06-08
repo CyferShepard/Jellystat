@@ -8,11 +8,15 @@ import LibraryStatComponent from "./libraryStatCard/library-stat-component";
 
 import TvLineIcon from "remixicon-react/TvLineIcon";
 import FilmLineIcon from "remixicon-react/FilmLineIcon";
+import FileMusicLineIcon from "remixicon-react/FileMusicLineIcon";
+import CheckboxMultipleBlankLineIcon from "remixicon-react/CheckboxMultipleBlankLineIcon";
 
 export default function LibraryOverView() {
   const token = localStorage.getItem('token');
   const SeriesIcon=<TvLineIcon size={"100%"} /> ;
   const MovieIcon=<FilmLineIcon size={"100%"} /> ;
+  const MusicIcon=<FileMusicLineIcon size={"100%"} /> ;
+  const MixedIcon=<CheckboxMultipleBlankLineIcon size={"100%"} /> ;
   const [data, setData] = useState();
 
 
@@ -46,7 +50,8 @@ export default function LibraryOverView() {
 
         <LibraryStatComponent data={data.filter((stat) => stat.CollectionType === "movies")} heading={"MOVIE LIBRARIES"} units={"MOVIES"} icon={MovieIcon}/>
         <LibraryStatComponent data={data.filter((stat) => stat.CollectionType === "tvshows")} heading={"SHOW LIBRARIES"} units={"SERIES / SEASONS / EPISODES"} icon={SeriesIcon}/>
-        <LibraryStatComponent data={data.filter((stat) => stat.CollectionType === "music")} heading={"MUSIC LIBRARIES"} units={"SONGS"} icon={SeriesIcon}/>
+        <LibraryStatComponent data={data.filter((stat) => stat.CollectionType === "music")} heading={"MUSIC LIBRARIES"} units={"SONGS"} icon={MusicIcon}/>
+        <LibraryStatComponent data={data.filter((stat) => stat.CollectionType === "mixed")} heading={"MIXED LIBRARIES"} units={"ITEMS"} icon={MixedIcon}/>
 
     </div>
     </div>

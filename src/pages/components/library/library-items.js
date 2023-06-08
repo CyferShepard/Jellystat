@@ -78,7 +78,9 @@ function LibraryItems(props) {
       </div>
         
         <div className="media-items-container">
-        {filteredData.map((item) => (
+        {filteredData.sort((a, b) =>
+              a.Name.localeCompare(b.Name)
+            ).map((item) => (
                     <MoreItemCards data={item} base_url={config.hostUrl} key={item.Id+item.SeasonNumber+item.EpisodeNumber}/>
           ))}
 

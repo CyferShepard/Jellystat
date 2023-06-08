@@ -22,6 +22,7 @@
     max-height: 170px;
 
     overflow: hidden;
+    border-radius: 8px 8px 0px 0px;
 
 }
 .library-card-banner
@@ -46,3 +47,10 @@
 }
 
 
+.default_library_image
+{
+    background-color: var(--secondary-background-color);
+    width: 100%;
+    height: 170px;
+    border-radius: 8px 8px 0px 0px;
+}

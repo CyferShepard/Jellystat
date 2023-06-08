@@ -1,4 +1,4 @@
-import React from "react";
+import React, {useState} from "react";
 import { Link } from "react-router-dom";
 import "../../css/library/library-card.css";
 
@@ -6,7 +6,19 @@ import Card from 'react-bootstrap/Card';
 import Row from 'react-bootstrap/Row';
 import Col from 'react-bootstrap/Col';
 
+import TvLineIcon from "remixicon-react/TvLineIcon";
+import FilmLineIcon from "remixicon-react/FilmLineIcon";
+import FileMusicLineIcon from "remixicon-react/FileMusicLineIcon";
+import CheckboxMultipleBlankLineIcon from "remixicon-react/CheckboxMultipleBlankLineIcon";
+
 function LibraryCard(props) {
+  const [imageLoaded, setImageLoaded] = useState(true);
+  const SeriesIcon=<TvLineIcon size={"50%"} color="white"/> ;
+  const MovieIcon=<FilmLineIcon size={"50%"} color="white"/> ;
+  const MusicIcon=<FileMusicLineIcon size={"50%"}    color="white"/> ;
+  const MixedIcon=<CheckboxMultipleBlankLineIcon size={"50%"}    color="white"/> ;
+
+  const default_image=<div className="default_library_image d-flex justify-content-center align-items-center">{props.data.CollectionType==='tvshows' ? SeriesIcon : props.data.CollectionType==='movies'? MovieIcon : props.data.CollectionType==='music'? MusicIcon : MixedIcon} </div>;
 
   function formatFileSize(sizeInBytes) {
     const sizeInKB = sizeInBytes / 1024; // 1 KB = 1024 bytes
@@ -83,11 +95,18 @@ function LibraryCard(props) {
       <Card className="bg-transparent lib-card rounded-3">
           <Link to={`/libraries/${props.data.Id}`}>
             <div className="library-card-image">
-              <Card.Img
-                  variant="top"
-                  className="library-card-banner"
-                  src={"/proxy/Items/Images/Primary?id=" + props.data.Id + "&fillWidth=800&quality=50"}
-              />
+
+              {imageLoaded?
+
+               <Card.Img
+               variant="top"
+               className="library-card-banner"
+               src={"/proxy/Items/Images/Primary?id=" + props.data.Id + "&fillWidth=800&quality=50"}
+               onError={() =>setImageLoaded(false)}
+               />
+               :
+              default_image
+              }
             </div>
           </Link>
 
