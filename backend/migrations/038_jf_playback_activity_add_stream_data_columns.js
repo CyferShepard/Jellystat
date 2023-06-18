@@ -6,6 +6,7 @@ exports.up = async function(knex) {
     await knex.schema.alterTable('jf_playback_activity', function(table) {
       table.json('MediaStreams');
       table.json('TranscodingInfo');
+      table.json('PlayState');
       table.text('OriginalContainer');
       table.text('RemoteEndPoint');
     });
@@ -20,6 +21,7 @@ exports.down = async function(knex) {
     await knex.schema.alterTable('jf_playback_activity', function(table) {
       table.dropColumn('MediaStreams');
       table.dropColumn('TranscodingInfo');
+      table.dropColumn('PlayState');
       table.dropColumn('OriginalContainer');
       table.dropColumn('RemoteEndPoint');
     });
