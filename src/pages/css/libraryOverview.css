@@ -4,8 +4,9 @@
   grid-template-columns: repeat(auto-fit, minmax(320px, 520px));
   grid-auto-rows: 200px;/* max-width+offset so 215 + 20*/
 
+  background-color: var(--secondary-background-color);
   border-radius: 8px;
-  /* margin-right: 20px; */
+  padding: 20px;
 }
 
 .library-stat-card
@@ -84,12 +85,8 @@
 
   .library-banner-image
   {
-
-    
     height: 180px;
-    width: 120px;
-
-    
+    width: 120px;   
   }
 
   

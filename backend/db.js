@@ -1,5 +1,6 @@
 const { Pool } = require('pg');
 const pgp = require("pg-promise")();
+const {update_query : update_query_map} = require("./models/bulk_insert_update_handler");
 
 
 const _POSTGRES_USER=process.env.POSTGRES_USER;
@@ -62,7 +63,7 @@ async function deleteBulk(table_name, data) {
   } finally {
     client.release();
   }
-  return ({Result:result,message:message});
+  return ({Result:result,message:'Bulk delete error:'+message});
 }
 
 async function insertBulk(table_name, data,columns) {
@@ -71,17 +72,11 @@ async function insertBulk(table_name, data,columns) {
   let message='';
   try {
       await client.query("BEGIN");
-
-      const query = pgp.helpers.insert(
-        data,
-        columns,
-        table_name
-      );
-      await client.query(query);
-
+      const update_query= update_query_map.find(query => query.table === table_name).query;
       await client.query("COMMIT");
-
-      message=(data.length + " Rows Inserted.");
+      const cs = new pgp.helpers.ColumnSet(columns, { table: table_name });
+      const query = pgp.helpers.insert(data, cs) + update_query; // Update the column names accordingly
+      await client.query(query);
 
   } catch (error) {
     await client.query('ROLLBACK');
@@ -90,7 +85,7 @@ async function insertBulk(table_name, data,columns) {
   } finally {
     client.release();
   }
-  return ({Result:result,message:message});
+  return ({Result:result,message:'Bulk insert error: '+message});
 }
 
 async function query(text, params)  {

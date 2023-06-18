@@ -1,9 +1,11 @@
+
+@import './variables.module.css';
 .global-stats-container
 {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(350px, 400px));
     grid-auto-rows: 120px;
-    background-color: rgb(100, 100, 100,0.2);
+    background-color:  var(--secondary-background-color);
     padding: 20px;
     border-radius: 8px;
     font-size: 1.3em;
@@ -31,7 +33,7 @@
 .stat-value
 {
     text-align: right;
-    color: #00A4DC;
+    color:  var(--secondary-color);
     font-weight: 500;
     font-size: 1.1em;
     margin: 0;

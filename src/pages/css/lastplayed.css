@@ -1,17 +1,17 @@
+@import './variables.module.css';
 .last-played-container {
 
     display: flex;
-    overflow-x: auto;
-    background-color: rgb(100, 100, 100,0.2);
+    overflow-x: scroll;
+    background-color:  var(--secondary-background-color);
     padding: 20px;
     border-radius: 8px;
     color: white;
     margin-bottom: 20px;
     min-height: 300px;
-
-
-
+ 
 }
+
 .last-played-container::-webkit-scrollbar {
     width: 5px; /* set scrollbar width */
   }
@@ -42,19 +42,27 @@
 
     width: 150px;
     border-radius: 8px;
+       background-color:  var(--background-color);
 
 }
+
 
 .episode{
   width: 220px !important;
   height: 128px !important;
+
 }
 
+.episode-card{
+  width: 220px !important;
+
+
+}
 
 
 .last-card-banner {
   width: 150px;
-  height: 224px;
+  height: 220px;
   transition: opacity 0.2s ease-in-out;
 }
 
@@ -75,19 +83,22 @@
 }
 
 .last-item-details {
-
-
     width: 90%;
-    /* height: 30%; */
     position: relative;
-    /* padding-top: 10px; */
     margin: 10px;
-
-    /* background-color: #f71b1b;  */
 }
 
+.last-item-details a{
+  text-decoration: none !important;
+  color: white !important;
+}
+
+.last-item-details a:hover{
+  color:  var(--secondary-color) !important;
+}
+
+
 .last-item-name {
-    /* width: 185px; */
     overflow: hidden;
     text-overflow: ellipsis;
 
@@ -111,6 +122,6 @@
 .last-last-played{
     font-size: 0.8em;
     margin-bottom: 5px;
-    color: #00a4dc;
+    color: var(--secondary-color);
 }
 

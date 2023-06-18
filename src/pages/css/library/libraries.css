@@ -2,13 +2,9 @@
 {
     color: white;
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(420px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    grid-gap: 20px;
+
 
 }
 
-/* .library-banner-image
-{
-    border-radius: 5px;
-    max-width: 500px;
-    max-height: 500px;
-} */

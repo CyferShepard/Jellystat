@@ -2,9 +2,25 @@ const express = require("express");
 const pgp = require("pg-promise")();
 const db = require("./db");
 const axios = require("axios");
+const https = require('https');
+
+const logging=require("./logging");
+
+const agent = new https.Agent({
+  rejectUnauthorized: (process.env.REJECT_SELF_SIGNED_CERTIFICATES || 'true').toLowerCase() ==='true'
+});
+
+
+
+const axios_instance = axios.create({
+  httpsAgent: agent
+});
 
 const wss = require("./WebsocketHandler");
 const socket=wss;
+
+const moment = require('moment');
+const { randomUUID }  = require('crypto');
 
 
 const router = express.Router();
@@ -19,6 +35,17 @@ const {columnsPlaybackReporting,mappingPlaybackReporting}= require("./models/jf_
 const {jf_users_columns,jf_users_mapping,} = require("./models/jf_users");
 
 /////////////////////////////////////////Functions
+
+function getErrorLineNumber(error) {
+  const stackTrace = error.stack.split('\n');
+  const errorLine = stackTrace[1].trim();
+  const lineNumber = errorLine.substring(
+    errorLine.lastIndexOf('\\') + 1,
+    errorLine.lastIndexOf(')')
+  );
+  return lineNumber;
+}
+
 class sync {
   constructor(hostUrl, apiKey) {
     this.hostUrl = hostUrl;
@@ -28,8 +55,7 @@ class sync {
   async getUsers() {
     try {
       const url = `${this.hostUrl}/Users`;
-      console.log("getAdminUser: ", url);
-      const response = await axios.get(url, {
+      const response = await axios_instance.get(url, {
         headers: {
           "X-MediaBrowser-Token": this.apiKey,
         },
@@ -41,45 +67,72 @@ class sync {
     }
   }
 
-  async getAdminUser() {
+  async getAdminUser(refLog) {
     try {
       const url = `${this.hostUrl}/Users`;
-      console.log("getAdminUser: ", url);
-      const response = await axios.get(url, {
+      const response = await axios_instance.get(url, {
         headers: {
           "X-MediaBrowser-Token": this.apiKey,
         },
       });
+
+      if(!response || typeof response.data !== 'object' || !Array.isArray(response.data))
+      {
+        res.status(503);
+        res.send({ error: "Invalid Response from Users API Call.", user_response:response });
+        return;
+      }
+  
       const adminUser = response.data.filter(
         (user) => user.Policy.IsAdministrator === true
       );
       return adminUser || null;
     } catch (error) {
       console.log(error);
+      refLog.loggedData.push({ Message: "Error Getting AdminId: "+error});
+      refLog.result='Failed';
       return [];
     }
   }
 
-  async getItem(itemID,userid) {
+  async getItem(key,id,params) {
     try {
 
-      let url = `${this.hostUrl}/users/${userid}/Items`;
-      if (itemID !== undefined) {
-        url += `?ParentID=${itemID}`;
-      }
-      const response = await axios.get(url, {
-        headers: {
-          "X-MediaBrowser-Token": this.apiKey,
-        },
-      });
 
-      const results = response.data.Items;
-      if (itemID === undefined) {
-        return results.filter((type) =>
-          ["tvshows", "movies","music"].includes(type.CollectionType)
-        );
+      let url = `${this.hostUrl}/Items?${key}=${id}`;
+      let startIndex=params && params.startIndex ? params.startIndex :0;
+      let increment=params && params.increment ? params.startIndex :200;
+      let recursive=params && params.recursive!==undefined  ? params.recursive :true;
+      let total=200;
+
+      let final_response=[];
+      while(startIndex<total && total !== undefined)
+      {
+        const response = await axios_instance.get(url, {
+          headers: {
+            "X-MediaBrowser-Token": this.apiKey,
+          },        
+          params:{
+            startIndex:startIndex,
+            recursive:recursive,
+            limit:increment
+          },
+        });
+
+        total=response.data.TotalRecordCount;
+        startIndex+=increment;
+
+         final_response=[...final_response, ...response.data.Items];
+
+      }
+
+
+      // const results = response.data.Items;
+      if (key === 'userid') {
+        return final_response.filter((type) => !["boxsets","playlists"].includes(type.CollectionType));
       } else {
-        return results;
+        // return final_response.filter((item) => item.ImageTags.Primary);
+        return final_response;
       }
     } catch (error) {
       console.log(error);
@@ -87,34 +140,13 @@ class sync {
     }
   }
 
-  async getSeasonsAndEpisodes(itemID, type) {
-    try {
-
-      let url = `${this.hostUrl}/shows/${itemID}/${type}`;
-      if (itemID !== undefined) {
-        url += `?ParentID=${itemID}`;
-      }
-      const response = await axios.get(url, {
-        headers: {
-          "X-MediaBrowser-Token": this.apiKey,
-        },
-      });
-
-      return response.data.Items;
-    } catch (error) {
-      console.log(error);
-      return [];
-    }
-  }
-
-  
 
   async getItemInfo(itemID,userid) {
     try {
 
       let url = `${this.hostUrl}/Items/${itemID}/playbackinfo?userId=${userid}`;
 
-      const response = await axios.get(url, {
+      const response = await axios_instance.get(url, {
         headers: {
           "X-MediaBrowser-Token": this.apiKey,
         },
@@ -130,141 +162,132 @@ class sync {
 }
 ////////////////////////////////////////API Methods
 
-async function syncUserData()
+async function syncUserData(refLog)
 {
-  const { rows } = await db.query('SELECT * FROM app_config where "ID"=1');
-  if (rows[0].JF_HOST === null || rows[0].JF_API_KEY === null) {
-    res.send({ error: "Config Details Not Found" });
-    socket.sendMessageToClients({ Message: "Error: Config details not found!" });
-    return;
-  }
-
-  const _sync = new sync(rows[0].JF_HOST, rows[0].JF_API_KEY);
-
-  const data = await _sync.getUsers();
-
-  const existingIds = await db
-    .query('SELECT "Id" FROM jf_users')
-    .then((res) => res.rows.map((row) => row.Id)); // get existing library Ids from the db
-
-  let dataToInsert = [];
-  //filter fix if jf_libraries is empty
-
-  if (existingIds.length === 0) {
-    dataToInsert = await data.map(jf_users_mapping);
-  } else {
-    dataToInsert = await data
-      .filter((row) => !existingIds.includes(row.Id))
-      .map(jf_users_mapping);
-  }
-
-  if (dataToInsert.length !== 0) {
-    let result = await db.insertBulk("jf_users",dataToInsert,jf_users_columns);
-    if (result.Result === "SUCCESS") {
-      socket.sendMessageToClients(dataToInsert.length + " Rows Inserted.");
-    } else {
-      socket.sendMessageToClients({
-        color: "red",
-        Message: "Error performing bulk insert:" + result.message,
-      });
-    }
-  }
-  
-  const toDeleteIds = existingIds.filter((id) =>!data.some((row) => row.Id === id ));
-  if (toDeleteIds.length > 0) {
-    let result = await db.deleteBulk("jf_users",toDeleteIds);
-    if (result.Result === "SUCCESS") {
-      socket.sendMessageToClients(toDeleteIds.length + " Rows Removed.");
-    } else {
-      socket.sendMessageToClients({color: "red",Message: result.message,});
+  try
+  {
+    const { rows } = await db.query('SELECT * FROM app_config where "ID"=1');
+    if (rows[0].JF_HOST === null || rows[0].JF_API_KEY === null) {
+      res.send({ error: "Config Details Not Found" });
+      refLog.loggedData.push({ Message: "Error: Config details not found!" });
+      refLog.result='Failed';
+      return;
     }
   
+    const _sync = new sync(rows[0].JF_HOST, rows[0].JF_API_KEY);
+  
+    const data = await _sync.getUsers();
+  
+    const existingIds = await db
+      .query('SELECT "Id" FROM jf_users')
+      .then((res) => res.rows.map((row) => row.Id)); // get existing library Ids from the db
+  
+    let dataToInsert = [];
+    //filter fix if jf_libraries is empty
+  
+    if (existingIds.length === 0) {
+      dataToInsert = await data.map(jf_users_mapping);
+    } else {
+      dataToInsert = await data
+        .filter((row) => !existingIds.includes(row.Id))
+        .map(jf_users_mapping);
+    }
+  
+    if (dataToInsert.length !== 0) {
+      let result = await db.insertBulk("jf_users",dataToInsert,jf_users_columns);
+      if (result.Result === "SUCCESS") {
+        refLog.loggedData.push(dataToInsert.length + " Rows Inserted.");
+      } else {
+        refLog.loggedData.push({
+          color: "red",
+          Message: "Error performing bulk insert:" + result.message,
+        });
+        refLog.result='Failed';
+      }
+    }
+    
+    const toDeleteIds = existingIds.filter((id) =>!data.some((row) => row.Id === id ));
+    if (toDeleteIds.length > 0) {
+      let result = await db.deleteBulk("jf_users",toDeleteIds);
+      if (result.Result === "SUCCESS") {
+        refLog.loggedData.push(toDeleteIds.length + " Rows Removed.");
+      } else {
+        refLog.loggedData.push({color: "red",Message: "Error: "+result.message,});
+        refLog.result='Failed';
+      }
+    
+    }
+
+  }catch(error)
+  {
+  refLog.loggedData.push({color: "red",Message: getErrorLineNumber(error)+ ": Error: "+error,});
+  refLog.result='Failed';
   }
+ 
+
 }
 
-async function syncLibraryFolders()
+async function syncLibraryFolders(refLog,data)
 {
+  try
+  {
+ 
+    const existingIds = await db
+      .query('SELECT "Id" FROM jf_libraries')
+      .then((res) => res.rows.map((row) => row.Id));
   
-  const { rows } = await db.query('SELECT * FROM app_config where "ID"=1');
-  if (rows[0].JF_HOST === null || rows[0].JF_API_KEY === null) {
-    res.send({ error: "Config Details Not Found" });
-    socket.sendMessageToClients({ Message: "Error: Config details not found!" });
-    return;
-  }
-
-  const _sync = new sync(rows[0].JF_HOST, rows[0].JF_API_KEY);
-  const admins = await _sync.getAdminUser();
-  const userid = admins[0].Id;
-  const data = await _sync.getItem(undefined,userid); //getting all root folders aka libraries
-
-  const existingIds = await db
-    .query('SELECT "Id" FROM jf_libraries')
-    .then((res) => res.rows.map((row) => row.Id));
-
-
-  let dataToInsert = [];
-  //filter fix if jf_libraries is empty
-
-  if (existingIds.length === 0) {
-    dataToInsert = await data.map(jf_libraries_mapping);
-  } else {
-    dataToInsert = await data.filter((row) => !existingIds.includes(row.Id)).map(jf_libraries_mapping);
-  }
-
-  if (dataToInsert.length !== 0) {
-    let result = await db.insertBulk("jf_libraries",dataToInsert,jf_libraries_columns);
-    if (result.Result === "SUCCESS") {
-      socket.sendMessageToClients(dataToInsert.length + " Rows Inserted.");
+  
+    let dataToInsert = [];
+    //filter fix if jf_libraries is empty
+  
+    if (existingIds.length === 0) {
+      dataToInsert = await data.map(jf_libraries_mapping);
     } else {
-      socket.sendMessageToClients({
-        color: "red",
-        Message: "Error performing bulk insert:" + result.message,
-      });
-    }
-  }
-
-  const toDeleteIds = existingIds.filter((id) =>!data.some((row) => row.Id === id ));
-  if (toDeleteIds.length > 0) {
-    let result = await db.deleteBulk("jf_libraries",toDeleteIds);
-    if (result.Result === "SUCCESS") {
-      socket.sendMessageToClients(toDeleteIds.length + " Rows Removed.");
-    } else {
-      socket.sendMessageToClients({color: "red",Message: result.message,});
+      dataToInsert = await data.filter((row) => !existingIds.includes(row.Id)).map(jf_libraries_mapping);
     }
   
-  } 
+    if (dataToInsert.length !== 0) {
+      let result = await db.insertBulk("jf_libraries",dataToInsert,jf_libraries_columns);
+      if (result.Result === "SUCCESS") {
+        refLog.loggedData.push(dataToInsert.length + " Rows Inserted.");
+      } else {
+        refLog.loggedData.push({
+          color: "red",
+          Message: "Error performing bulk insert:" + result.message,
+        });
+        refLog.result='Failed';
+      }
+    }
+  
+    const toDeleteIds = existingIds.filter((id) =>!data.some((row) => row.Id === id ));
+    if (toDeleteIds.length > 0) {
+      let result = await db.deleteBulk("jf_libraries",toDeleteIds);
+      if (result.Result === "SUCCESS") {
+        refLog.loggedData.push(toDeleteIds.length + " Rows Removed.");
+      } else {
+        refLog.loggedData.push({color: "red",Message:  "Error: "+result.message,});
+        refLog.result='Failed';
+      }
+    
+    } 
+  }
+  catch(error)
+  {
+    refLog.loggedData.push({color: "red",Message: getErrorLineNumber(error)+ ": Error: "+error,});
+    refLog.result='Failed';
+  }
+  
 }
-async function syncLibraryItems()
+async function syncLibraryItems(refLog,data)
 {
-  const { rows: config } = await db.query('SELECT * FROM app_config where "ID"=1' );
+  try{
+
+  refLog.loggedData.push({ color: "lawngreen", Message: "Syncing... 1/3" });
+  refLog.loggedData.push({color: "yellow",Message: "Beginning Library Item Sync",});
 
 
-  if (config[0].JF_HOST === null || config[0].JF_API_KEY === null) {
-    res.send({ error: "Config Details Not Found" });
-    return;
-  }
-
-  const _sync = new sync(config[0].JF_HOST, config[0].JF_API_KEY);
-  socket.sendMessageToClients({ color: "lawngreen", Message: "Syncing... 1/3" });
-
-  socket.sendMessageToClients({color: "yellow",Message: "Beginning Library Item Sync",});
-
-  const admins = await _sync.getAdminUser();
-  const userid = admins[0].Id;
-  const libraries = await _sync.getItem(undefined,userid);
-  const data = [];
-  let insertCounter = 0;
+  let insertMessage='';
   let deleteCounter = 0;
-  //for each item in library run get item using that id as the ParentId (This gets the children of the parent id)
-  for (let i = 0; i < libraries.length; i++) {
-    const item = libraries[i];
-    let libraryItems = await _sync.getItem(item.Id,userid);
-    const libraryItemsWithParent = libraryItems.map((items) => ({
-      ...items,
-      ...{ ParentId: item.Id },
-    }));
-    data.push(...libraryItemsWithParent);
-  }
 
 
   const existingIds = await db
@@ -274,26 +297,19 @@ async function syncLibraryItems()
   let dataToInsert = [];
   //filter fix if jf_libraries is empty
 
-
-  if (existingIds.length === 0) {
-    dataToInsert = await data.map(jf_library_items_mapping);
-  } else {
-    dataToInsert = await data
-      .filter((row) => !existingIds.includes(row.Id))
-      .map(jf_library_items_mapping);
-  }
-
+  dataToInsert = await data.map(jf_library_items_mapping);
+  dataToInsert=dataToInsert.filter((item)=>item.Id !== undefined);
 
   if (dataToInsert.length !== 0) {
-    
     let result = await db.insertBulk("jf_library_items",dataToInsert,jf_library_items_columns);
     if (result.Result === "SUCCESS") {
-      insertCounter += dataToInsert.length;
+      insertMessage = `${dataToInsert.length-existingIds.length} Rows Inserted. ${existingIds.length} Rows Updated.`;
     } else {
-      socket.sendMessageToClients({
+      refLog.loggedData.push({
         color: "red",
         Message: "Error performing bulk insert:" + result.message,
       });
+      refLog.result='Failed';
     }
   }
   
@@ -303,48 +319,57 @@ async function syncLibraryItems()
     if (result.Result === "SUCCESS") {
       deleteCounter +=toDeleteIds.length;
     } else {
-      socket.sendMessageToClients({color: "red",Message: result.message,});
+      refLog.loggedData.push({color: "red",Message:  "Error: "+result.message,});
+      refLog.result='Failed';
     }
   } 
   
-  socket.sendMessageToClients({color: "dodgerblue",Message: insertCounter + " Library Items Inserted.",});
-  socket.sendMessageToClients({color: "orange",Message: deleteCounter + " Library Items Removed.",});
-  socket.sendMessageToClients({ color: "yellow", Message: "Item Sync Complete" });
+  refLog.loggedData.push({color: "dodgerblue",Message: insertMessage,});
+  refLog.loggedData.push({color: "orange",Message: deleteCounter + " Library Items Removed.",});
+  refLog.loggedData.push({ color: "yellow", Message: "Item Sync Complete" });
 
-    // const { rows: cleanup } = await db.query('DELETE FROM jf_playback_activity where "NowPlayingItemId" not in (select "Id" from jf_library_items)' );
-    // socket.sendMessageToClients({ color: "orange", Message: cleanup.length+" orphaned activity logs removed" });
+  }catch(error)
+  {
+    refLog.loggedData.push({color: "red",Message:  getErrorLineNumber(error)+ ": Error: "+error,});
+    refLog.result='Failed';
+  }
+  
+
 
 }
 
-async function syncShowItems()
+async function syncShowItems(refLog,data)
 {
-  socket.sendMessageToClients({ color: "lawngreen", Message: "Syncing... 2/3" });
-  socket.sendMessageToClients({color: "yellow", Message: "Beginning Seasons and Episode sync",});
+ try{
+  refLog.loggedData.push({ color: "lawngreen", Message: "Syncing... 2/3" });
+  refLog.loggedData.push({color: "yellow", Message: "Beginning Seasons and Episode sync",});
 
   const { rows: config } = await db.query('SELECT * FROM app_config where "ID"=1');
 
   if (config[0].JF_HOST === null || config[0].JF_API_KEY === null) {
     res.send({ error: "Config Details Not Found" });
+    refLog.result='Failed';
     return;
   }
 
-  const _sync = new sync(config[0].JF_HOST, config[0].JF_API_KEY);
+  // const _sync = new sync(config[0].JF_HOST, config[0].JF_API_KEY);
   const { rows: shows } = await db.query(`SELECT *	FROM public.jf_library_items where "Type"='Series'`);
 
   let insertSeasonsCount = 0;
   let insertEpisodeCount = 0;
+  let updateSeasonsCount = 0;
+  let updateEpisodeCount = 0;
+
+
   let deleteSeasonsCount = 0;
   let deleteEpisodeCount = 0;
 
   //loop for each show
   for (const show of shows) {
-    const allSeasons = await _sync.getSeasonsAndEpisodes(show.Id,'Seasons');
-    const allEpisodes =await _sync.getSeasonsAndEpisodes(show.Id,'Episodes');
-
-
+    const allSeasons =  data.filter((item) => item.Type==='Season' && item.SeriesId===show.Id);
+    const allEpisodes =data.filter((item) => item.Type==='Episode' && item.SeriesId===show.Id);
 
     const existingIdsSeasons = await db.query(`SELECT *	FROM public.jf_library_seasons where "SeriesId" = '${show.Id}'`).then((res) => res.rows.map((row) => row.Id));
-
     let existingIdsEpisodes = [];
     if (existingIdsSeasons.length > 0) {
       existingIdsEpisodes = await db
@@ -357,41 +382,26 @@ async function syncShowItems()
         .then((res) => res.rows.map((row) => row.EpisodeId));
     }
 
-    //
+
 
     let seasonsToInsert = [];
     let episodesToInsert = [];
-    //filter fix if jf_libraries is empty
 
-    if (existingIdsSeasons.length === 0) {
-      // if there are no existing Ids in the table, map all items in the data array to the expected format
-      seasonsToInsert = await allSeasons.map(jf_library_seasons_mapping);
-    } else {
-      // otherwise, filter only new data to insert
-      seasonsToInsert = await allSeasons
-        .filter((row) => !existingIdsSeasons.includes(row.Id))
-        .map(jf_library_seasons_mapping);
-    }
+    seasonsToInsert = await allSeasons.map(jf_library_seasons_mapping);
+    episodesToInsert = await allEpisodes.map(jf_library_episodes_mapping);
 
-    if (existingIdsEpisodes.length === 0) {
-      // if there are no existing Ids in the table, map all items in the data array to the expected format
-      episodesToInsert = await allEpisodes.map(jf_library_episodes_mapping);
-    } else {
-      // otherwise, filter only new data to insert
-      episodesToInsert = await allEpisodes.filter((row) => !existingIdsEpisodes.includes(row.Id)).map(jf_library_episodes_mapping);
-    }
-
-    ///insert delete seasons
     //Bulkinsert new data not on db
     if (seasonsToInsert.length !== 0) {
       let result = await db.insertBulk("jf_library_seasons",seasonsToInsert,jf_library_seasons_columns);
       if (result.Result === "SUCCESS") {
-        insertSeasonsCount += seasonsToInsert.length;
-      } else {
-        socket.sendMessageToClients({
+        insertSeasonsCount+=seasonsToInsert.length-existingIdsSeasons.length;
+        updateSeasonsCount+=existingIdsSeasons.length;
+        } else {
+        refLog.loggedData.push({
           color: "red",
           Message: "Error performing bulk insert:" + result.message,
         });
+        refLog.result='Failed';
       }
     } 
     const toDeleteIds = existingIdsSeasons.filter((id) =>!allSeasons.some((row) => row.Id === id ));
@@ -401,7 +411,8 @@ async function syncShowItems()
       if (result.Result === "SUCCESS") {
         deleteSeasonsCount +=toDeleteIds.length;
       } else {
-        socket.sendMessageToClients({color: "red",Message: result.message,});
+        refLog.loggedData.push({color: "red",Message:  "Error: "+result.message,});
+        refLog.result='Failed';
       }
     
     } 
@@ -410,12 +421,14 @@ async function syncShowItems()
     if (episodesToInsert.length !== 0) {
       let result = await db.insertBulk("jf_library_episodes",episodesToInsert,jf_library_episodes_columns);
       if (result.Result === "SUCCESS") {
-        insertEpisodeCount += episodesToInsert.length;
+        insertEpisodeCount+=episodesToInsert.length-existingIdsEpisodes.length;
+        updateEpisodeCount+=existingIdsEpisodes.length;
       } else {
-        socket.sendMessageToClients({
+        refLog.loggedData.push({
           color: "red",
           Message: "Error performing bulk insert:" + result.message,
         });
+        refLog.result='Failed';
       }
     } 
 
@@ -426,30 +439,38 @@ async function syncShowItems()
       if (result.Result === "SUCCESS") {
         deleteEpisodeCount +=toDeleteEpisodeIds.length;
       } else {
-        socket.sendMessageToClients({color: "red",Message: result.message,});
+        refLog.loggedData.push({color: "red",Message:  "Error: "+result.message,});
+        refLog.result='Failed';
       }
     
     } 
 
-    socket.sendMessageToClients({ Message: "Sync complete for " + show.Name });
+ 
   }
 
-  socket.sendMessageToClients({color: "dodgerblue",Message: insertSeasonsCount + " Seasons inserted.",});
-  socket.sendMessageToClients({color: "orange",Message: deleteSeasonsCount + " Seasons Removed.",});
-  socket.sendMessageToClients({color: "dodgerblue",Message: insertEpisodeCount + " Episodes inserted.",});
-  socket.sendMessageToClients({color: "orange",Message: deleteEpisodeCount + " Episodes Removed.",});
-  socket.sendMessageToClients({ color: "yellow", Message: "Sync Complete" });
+  refLog.loggedData.push({color: "dodgerblue",Message: `Seasons: ${insertSeasonsCount} Rows Inserted. ${updateSeasonsCount} Rows Updated.`});
+  refLog.loggedData.push({color: "orange",Message: deleteSeasonsCount + " Seasons Removed.",});
+  refLog.loggedData.push({color: "dodgerblue",Message: `Episodes: ${insertEpisodeCount} Rows Inserted. ${updateEpisodeCount} Rows Updated.`});
+  refLog.loggedData.push({color: "orange",Message: deleteEpisodeCount + " Episodes Removed.",});
+  refLog.loggedData.push({ color: "yellow", Message: "Sync Complete" });
+ }catch(error)
+ {
+  refLog.loggedData.push({color: "red",Message:  getErrorLineNumber(error)+ ": Error: "+error,});
+  refLog.result='Failed';
+ }
 }
 
-async function syncItemInfo()
+async function syncItemInfo(refLog)
 {
-  socket.sendMessageToClients({ color: "lawngreen", Message: "Syncing... 3/3" });
-  socket.sendMessageToClients({color: "yellow", Message: "Beginning File Info Sync",});
+ try{
+  refLog.loggedData.push({ color: "lawngreen", Message: "Syncing... 3/4" });
+  refLog.loggedData.push({color: "yellow", Message: "Beginning File Info Sync",});
 
   const { rows: config } = await db.query('SELECT * FROM app_config where "ID"=1');
 
   if (config[0].JF_HOST === null || config[0].JF_API_KEY === null) {
     res.send({ error: "Config Details Not Found" });
+    refLog.result='Failed';
     return;
   }
 
@@ -462,7 +483,7 @@ async function syncItemInfo()
   let deleteItemInfoCount  = 0;
   let deleteEpisodeInfoCount = 0;
 
-  const admins = await _sync.getAdminUser();
+  const admins = await _sync.getAdminUser(refLog);
   const userid = admins[0].Id;
   //loop for each Movie
   for (const Item of Items) {
@@ -486,10 +507,11 @@ async function syncItemInfo()
       if (result.Result === "SUCCESS") {
         insertItemInfoCount += ItemInfoToInsert.length;
       } else {
-        socket.sendMessageToClients({
+        refLog.loggedData.push({
           color: "red",
           Message: "Error performing bulk insert:" + result.message,
         });
+        refLog.result='Failed';
       }
     } 
     const toDeleteItemInfoIds = existingItemInfo.filter((id) =>!data.some((row) => row.Id  === id ));
@@ -499,14 +521,14 @@ async function syncItemInfo()
       if (result.Result === "SUCCESS") {
         deleteItemInfoCount +=toDeleteItemInfoIds.length;
       } else {
-        socket.sendMessageToClients({color: "red",Message: result.message,});
+        refLog.loggedData.push({color: "red",Message:  "Error: "+result.message,});
+        refLog.result='Failed';
       }
     
     } 
   }
 
    //loop for each Episode
-   console.log("Episode") 
    for (const Episode of Episodes) {
     const data = await _sync.getItemInfo(Episode.EpisodeId,userid);
 
@@ -530,10 +552,11 @@ async function syncItemInfo()
       if (result.Result === "SUCCESS") {
         insertEpisodeInfoCount += EpisodeInfoToInsert.length;
       } else {
-        socket.sendMessageToClients({
+        refLog.loggedData.push({
           color: "red",
           Message: "Error performing bulk insert:" + result.message,
         });
+        refLog.result='Failed';
       }
     } 
     const toDeleteEpisodeInfoIds = existingEpisodeItemInfo.filter((id) =>!data.some((row) => row.Id  === id ));
@@ -543,18 +566,24 @@ async function syncItemInfo()
       if (result.Result === "SUCCESS") {
         deleteEpisodeInfoCount +=toDeleteEpisodeInfoIds.length;
       } else {
-        socket.sendMessageToClients({color: "red",Message: result.message,});
+        refLog.loggedData.push({color: "red",Message:  "Error: "+result.message,});
+        refLog.result='Failed';
       }
     
     }
     console.log(Episode.Name) 
   }
 
-  socket.sendMessageToClients({color: "dodgerblue",Message: insertItemInfoCount + " Item Info inserted.",});
-  socket.sendMessageToClients({color: "orange",Message: deleteItemInfoCount + " Item Info Removed.",});
-  socket.sendMessageToClients({color: "dodgerblue",Message: insertEpisodeInfoCount + " Episodes Info inserted.",});
-  socket.sendMessageToClients({color: "orange",Message: deleteEpisodeInfoCount + " Episodes Info Removed.",});
-  socket.sendMessageToClients({ color: "lawngreen", Message: "Sync Complete" });
+  refLog.loggedData.push({color: "dodgerblue",Message: insertItemInfoCount + " Item Info inserted.",});
+  refLog.loggedData.push({color: "orange",Message: deleteItemInfoCount + " Item Info Removed.",});
+  refLog.loggedData.push({color: "dodgerblue",Message: insertEpisodeInfoCount + " Episodes Info inserted.",});
+  refLog.loggedData.push({color: "orange",Message: deleteEpisodeInfoCount + " Episodes Info Removed.",});
+  refLog.loggedData.push({ color: "lawngreen", Message: "Info Sync Complete" });
+ }catch(error)
+ {
+  refLog.loggedData.push({color: "red",Message:  getErrorLineNumber(error)+ ": Error: "+error,});
+  refLog.result='Failed';
+ }
 }
 
 async function syncPlaybackPluginData()
@@ -595,7 +624,7 @@ async function syncPlaybackPluginData()
 
     const url = `${base_url}/user_usage_stats/submit_custom_query`;
 
-    const response = await axios.post(url, {
+    const response = await axios_instance.post(url, {
       CustomQueryString: query,
     }, {
       headers: {
@@ -614,10 +643,101 @@ async function syncPlaybackPluginData()
     }    
   
      } catch (error) {
-      console.log(error);
+      console.log(getErrorLineNumber(error)+ ": "+error);
      return [];
    }
    
+}
+
+async function removeOrphanedData(refLog)
+{
+ try{
+  refLog.loggedData.push({ color: "lawngreen", Message: "Syncing... 4/4" });
+  refLog.loggedData.push({color: "yellow", Message: "Removing Orphaned FileInfo/Episode/Season Records",});
+
+  await db.query('CALL jd_remove_orphaned_data()');
+
+  refLog.loggedData.push({color: "dodgerblue",Message: "Orphaned FileInfo/Episode/Season Removed.",});
+
+  refLog.loggedData.push({ color: "lawngreen", Message: "Sync Complete" });
+ }catch(error)
+ {
+  refLog.loggedData.push({color: "red",Message: getErrorLineNumber(error)+ ': Error:'+error,});
+  refLog.loggedData.push({ color: "red", Message: getErrorLineNumber(error)+ ": Cleanup Failed with errors" });
+  refLog.result='Failed';
+ }
+
+}
+
+async function fullSync()
+{
+  try
+  {
+    let startTime = moment();
+    let refLog={loggedData:[],result:'Success'};
+  
+    const { rows } = await db.query('SELECT * FROM app_config where "ID"=1');
+    if (rows[0].JF_HOST === null || rows[0].JF_API_KEY === null) {
+      res.send({ error: "Config Details Not Found" });
+      refLog.loggedData.push({ Message: "Error: Config details not found!" });
+      refLog.result='Failed';
+      return;
+    }
+  
+    const _sync = new sync(rows[0].JF_HOST, rows[0].JF_API_KEY);
+  
+    const admins = await _sync.getAdminUser(refLog);
+    const userid = admins[0].Id;
+    const libraries = await _sync.getItem('userid',userid,{recursive:false}); //getting all root folders aka libraries + items
+    const data=[];
+
+    //for each item in library run get item using that id as the ParentId (This gets the children of the parent id)
+  for (let i = 0; i < libraries.length; i++) {
+    const item = libraries[i];
+    let libraryItems = await _sync.getItem('parentId',item.Id);
+    const libraryItemsWithParent = libraryItems.map((items) => ({
+      ...items,
+      ...{ ParentId: item.Id },
+    }));
+    data.push(...libraryItemsWithParent);
+  }
+    const library_items=data.filter((item) => ['Movie','Audio','Series'].includes(item.Type));
+    const seasons_and_episodes=data.filter((item) => ['Season','Episode'].includes(item.Type));
+
+    await syncUserData(refLog);
+  
+    await syncLibraryFolders(refLog,libraries);
+    await syncLibraryItems(refLog,library_items);
+    await syncShowItems(refLog,seasons_and_episodes);
+    await syncItemInfo(refLog);
+    await removeOrphanedData(refLog);
+    const uuid = randomUUID();
+  
+    let endTime = moment();
+   
+    let diffInSeconds = endTime.diff(startTime, 'seconds');
+  
+    const log=
+    {
+      "Id":uuid,
+      "Name":"Jellyfin Sync",
+      "Type":"Task",
+      "ExecutionType":"Automatic",
+      "Duration":diffInSeconds,
+      "TimeRun":startTime,
+      "Log":JSON.stringify(refLog.loggedData),
+      "Result":refLog.result
+  
+    };
+     logging.insertLog(log);
+  
+    
+  }catch(error)
+  {
+    console.log(error);
+  }
+  
+
 }
 
 
@@ -626,14 +746,64 @@ async function syncPlaybackPluginData()
 ///////////////////////////////////////Sync All
 router.get("/beingSync", async (req, res) => {
   socket.clearMessages();
+  let refLog={loggedData:[],result:'Success'};
+  let startTime = moment();
 
-  await syncUserData();
-  await syncLibraryFolders();
-  await syncLibraryItems();
-  await syncShowItems();
-  await syncItemInfo();
+  const { rows } = await db.query('SELECT * FROM app_config where "ID"=1');
+  if (rows[0].JF_HOST === null || rows[0].JF_API_KEY === null) {
+    res.send({ error: "Config Details Not Found" });
+    refLog.loggedData.push({ Message: "Error: Config details not found!" });
+    refLog.result='Failed';
+    return;
+  }
 
+  const _sync = new sync(rows[0].JF_HOST, rows[0].JF_API_KEY);
+
+  const admins = await _sync.getAdminUser(refLog);
+  const userid = admins[0].Id;
+  const libraries = await _sync.getItem('userid',userid,{recursive:false}); //getting all root folders aka libraries + items
+  const data=[];
+
+    //for each item in library run get item using that id as the ParentId (This gets the children of the parent id)
+  for (let i = 0; i < libraries.length; i++) {
+    const item = libraries[i];
+    let libraryItems = await _sync.getItem('parentId',item.Id);
+    const libraryItemsWithParent = libraryItems.map((items) => ({
+      ...items,
+      ...{ ParentId: item.Id },
+    }));
+    data.push(...libraryItemsWithParent);
+  }
+
+  const library_items=data.filter((item) => ['Movie','Audio','Series'].includes(item.Type));
+  const seasons_and_episodes=data.filter((item) => ['Season','Episode'].includes(item.Type));
+
+  await syncUserData(refLog);
+
+  await syncLibraryFolders(refLog,libraries);
+  await syncLibraryItems(refLog,library_items);
+  await syncShowItems(refLog,seasons_and_episodes);
+  await syncItemInfo(refLog);
+  await removeOrphanedData(refLog);
+  const uuid = randomUUID();
+  let endTime = moment();
  
+  let diffInSeconds = endTime.diff(startTime, 'seconds');
+
+  const log=
+  {
+    "Id":uuid,
+    "Name":"Jellyfin Sync",
+    "Type":"Task",
+    "ExecutionType":"Manual",
+    "Duration":diffInSeconds,
+    "TimeRun":startTime,
+    "Log":JSON.stringify(refLog.loggedData),
+    "Result":refLog.result
+
+  };
+
+  logging.insertLog(log);
   res.send();
 
 });
@@ -689,4 +859,5 @@ router.get("/syncPlaybackPluginData", async (req, res) => {
 
 
 
-module.exports = router;
+module.exports = 
+{router,fullSync};

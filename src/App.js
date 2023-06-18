@@ -1,10 +1,7 @@
 // import logo from './logo.svg';
 import './App.css';
 import React, { useState, useEffect } from 'react';
-import {
-  Routes,
-  Route,
-} from "react-router-dom";
+import { Routes, Route } from "react-router-dom";
 import axios from 'axios';
 
 import Config from './lib/config';
@@ -25,15 +22,17 @@ import Libraries from './pages/libraries';
 import LibraryInfo from './pages/components/library-info';
 import ItemInfo from './pages/components/item-info';
 import ErrorPage from './pages/components/general/error';
+import About from './pages/about';
 
 
 import Testing from './pages/testing';
 import Activity from './pages/activity';
 import Statistics from './pages/statistics';
+import Datadebugger from './pages/data-debugger';
 
 function App() {
 
-  const [isConfigured, setisConfigured] = useState(false);
+  const [setupState, setSetupState] = useState(0);
   const [config, setConfig] = useState(null);
   const [loading, setLoading] = useState(true);
   const [errorFlag, seterrorFlag] = useState(false);
@@ -61,16 +60,15 @@ function App() {
         }
     };
 
-    if(!isConfigured)
+    if(setupState===0)
     {
       setLoading(false);
       axios
       .get("/auth/isConfigured")
       .then(async (response) => {
-        console.log(response);
         if(response.status===200)
         {
-          setisConfigured(true);
+          setSetupState(response.data.state);
          
         }
    
@@ -84,11 +82,11 @@ function App() {
        
     }
 
-    if (!config && isConfigured) {
+    if (!config && setupState>=1) {
         fetchConfig();
     }
 
-}, [config,isConfigured]);
+}, [config,setupState]);
 
 if (loading) {
   return <Loading />;
@@ -98,30 +96,34 @@ if (errorFlag) {
   return <ErrorPage message={"Error: Unable to connect to Jellystat Backend"} />;
 }
 
-if(isConfigured)
+if(!config && setupState===2)
   {
     if ((token===undefined || token===null) || !config) {
       return <Login />;
     }
   }
-  else{
+
+  if (setupState===0) {
     return <Signup />;
   }
+  if(setupState===1)
+    {
+      return <Setup />;
+ 
+    }
 
 
 
 
 
-if (config  && config.apiKey ===null) {
-  return <Setup />;
-}
 
-if (config  && isConfigured && token!==null){
+if (config  && setupState===2 && token!==null){
   return (
     <div className="App">
-      <Navbar />
-      <div>
-      <main>
+ 
+      <div className='d-flex flex-column flex-md-row'>
+      <Navbar/>
+      <main className='w-md-100'>
         <Routes>
         <Route path="/" element={<Home />} />
           <Route path="/settings" element={<Settings />} />
@@ -129,10 +131,12 @@ if (config  && isConfigured && token!==null){
           <Route path="/users/:UserId" element={<UserInfo />} />
           <Route path="/libraries" element={<Libraries />} />
           <Route path="/libraries/:LibraryId" element={<LibraryInfo />} />
-          <Route path="/item/:Id" element={<ItemInfo />} />
+          <Route path="/libraries/item/:Id" element={<ItemInfo />} />
           <Route path="/statistics" element={<Statistics />} />
           <Route path="/activity" element={<Activity />} />
           <Route path="/testing" element={<Testing />} />
+          <Route path="/about" element={<About />} />
+          <Route path="/debugger/data" element={<Datadebugger />} />
         </Routes>
       </main>
       </div>

@@ -1,10 +1,22 @@
 const db = require("../db");
 const pgp = require("pg-promise")();
 const axios = require("axios");
+
 const moment = require('moment');
 const { columnsPlayback, mappingPlayback } = require('../models/jf_playback_activity');
 const { jf_activity_watchdog_columns, jf_activity_watchdog_mapping } = require('../models/jf_activity_watchdog');
 const { randomUUID }  = require('crypto');
+const https = require('https');
+
+const agent = new https.Agent({
+  rejectUnauthorized: (process.env.REJECT_SELF_SIGNED_CERTIFICATES || 'true').toLowerCase() ==='true'
+});
+
+
+
+const axios_instance = axios.create({
+  httpsAgent: agent
+});
 
 async function ActivityMonitor(interval) {
   console.log("Activity Interval: " + interval);
@@ -30,7 +42,7 @@ async function ActivityMonitor(interval) {
       }
 
       const url = `${base_url}/Sessions`;
-      const response = await axios.get(url, {
+      const response = await axios_instance.get(url, {
         headers: {
           "X-MediaBrowser-Token": apiKey,
         },
@@ -116,7 +128,7 @@ async function ActivityMonitor(interval) {
             const updateQuery = pgp.helpers.update(WatchdogDataUpdated, cs,'jf_activity_watchdog' ) + ' WHERE v."Id" = t."Id"';
             await db.query(updateQuery)
               .then(result => {
-                console.log('Update successful', result.rowCount, 'rows updated');
+                // console.log('Update successful', result.rowCount, 'rows updated');
               })
               .catch(error => {
                 console.error('Error updating rows', error);
@@ -166,12 +178,12 @@ async function ActivityMonitor(interval) {
       if(toDeleteIds.length>0)
       {
         let result=await db.deleteBulk('jf_activity_watchdog',toDeleteIds)
-        console.log(result);
+        // console.log(result);
       }
       if(playbackToInsert.length>0)
       {
         let result=await db.insertBulk('jf_playback_activity',playbackToInsert,columnsPlayback);
-        console.log(result);
+        // console.log(result);
       }
 
 

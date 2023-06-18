@@ -1,4 +1,4 @@
-import React from "react";
+import React, {useState} from "react";
 import { Link } from "react-router-dom";
 import "../../css/library/library-card.css";
 
@@ -6,7 +6,19 @@ import Card from 'react-bootstrap/Card';
 import Row from 'react-bootstrap/Row';
 import Col from 'react-bootstrap/Col';
 
+import TvLineIcon from "remixicon-react/TvLineIcon";
+import FilmLineIcon from "remixicon-react/FilmLineIcon";
+import FileMusicLineIcon from "remixicon-react/FileMusicLineIcon";
+import CheckboxMultipleBlankLineIcon from "remixicon-react/CheckboxMultipleBlankLineIcon";
+
 function LibraryCard(props) {
+  const [imageLoaded, setImageLoaded] = useState(true);
+  const SeriesIcon=<TvLineIcon size={"50%"} color="white"/> ;
+  const MovieIcon=<FilmLineIcon size={"50%"} color="white"/> ;
+  const MusicIcon=<FileMusicLineIcon size={"50%"}    color="white"/> ;
+  const MixedIcon=<CheckboxMultipleBlankLineIcon size={"50%"}    color="white"/> ;
+
+  const default_image=<div className="default_library_image d-flex justify-content-center align-items-center">{props.data.CollectionType==='tvshows' ? SeriesIcon : props.data.CollectionType==='movies'? MovieIcon : props.data.CollectionType==='music'? MusicIcon : MixedIcon} </div>;
 
   function formatFileSize(sizeInBytes) {
     const sizeInKB = sizeInBytes / 1024; // 1 KB = 1024 bytes
@@ -36,23 +48,29 @@ function LibraryCard(props) {
 
 
   function formatTotalWatchTime(seconds) {
-    const hours = Math.floor(seconds / 3600); // 1 hour = 3600 seconds
-    const minutes = Math.floor((seconds % 3600) / 60); // 1 minute = 60 seconds
-    let formattedTime='';
-    if(hours)
-    {
-      formattedTime+=`${hours} hours`;
+    const days = Math.floor(seconds / 86400); // 1 day = 86400 seconds
+    const hours = Math.floor((seconds % 86400) / 3600); // 1 hour = 3600 seconds
+    const minutes = Math.floor(((seconds % 86400) % 3600) / 60); // 1 minute = 60 seconds
+    
+    let formattedTime = '';
+    if (days) {
+      formattedTime += `${days} day${days > 1 ? 's' : ''}`;
     }
-    if(minutes)
-    {
-      formattedTime+=` ${minutes} minutes`;
+    
+    if (hours) {
+      formattedTime += ` ${hours} hour${hours > 1 ? 's' : ''}`;
     }
-    if(!hours && !minutes)
-    {
-      formattedTime=`0 minutes`;
+    
+    if (minutes) {
+      formattedTime += ` ${minutes} minute${minutes > 1 ? 's' : ''}`;
     }
-  
-    return formattedTime ;
+    
+    if (!days && !hours && !minutes) {
+      formattedTime = '0 minutes';
+    }
+    
+    return formattedTime;
+    
   }
 
   function formatLastActivityTime(time) {
@@ -74,30 +92,24 @@ function LibraryCard(props) {
     return `${formattedTime}ago`;
   }
   return (
-      <Card className="bg-transparent lib-card border-0">
+      <Card className="bg-transparent lib-card rounded-3">
           <Link to={`/libraries/${props.data.Id}`}>
             <div className="library-card-image">
-              <Card.Img
-                  variant="top"
-                  className="library-card-banner"
-                  src={props.base_url + "/Items/" + props.data.Id + "/Images/Primary/?fillWidth=800&quality=50"}
-              />
+
+              {imageLoaded?
+
+               <Card.Img
+               variant="top"
+               className="library-card-banner"
+               src={"/proxy/Items/Images/Primary?id=" + props.data.Id + "&fillWidth=800&quality=50"}
+               onError={() =>setImageLoaded(false)}
+               />
+               :
+              default_image
+              }
             </div>
           </Link>
 
-       <Link to={`/libraries/${props.data.Id}`}>
-            <div
-              className="library-card-banner"
-              style={{
-                backgroundImage: `url(${
-                  props.base_url +
-                  "/Items/" +
-                  props.data.Id +
-                  "/Images/Primary/?fillWidth=400&quality=90"
-                })`,
-              }}
-            />
-      </Link>
 
           <Card.Body className="library-card-details">
             <Row className="space-between-end card-row">
@@ -107,17 +119,17 @@ function LibraryCard(props) {
 
             <Row className="space-between-end card-row">
               <Col className="card-label">Type</Col>
-              <Col className="text-end">{props.data.CollectionType==='tvshows' ? 'Series' : "Movies"}</Col>
+              <Col className="text-end">{props.data.CollectionType==='tvshows' ? 'Series' : props.data.CollectionType==='movies'? "Movies" : props.data.CollectionType==='music'? "Music" : 'Mixed'}</Col>
             </Row>
 
             <Row className="space-between-end card-row">
               <Col className="card-label">Total Files</Col>
-              <Col className="text-end">{props.metadata.files}</Col>
+              <Col className="text-end">{props.metadata && props.metadata.files  ? props.metadata.files :0}</Col>
             </Row>
 
             <Row className="space-between-end card-row">
               <Col className="card-label">Library Size</Col>
-              <Col className="text-end">{formatFileSize(props.metadata.Size)}</Col>
+              <Col className="text-end">{formatFileSize(props.metadata && props.metadata.Size ? props.metadata.Size:0)}</Col>
             </Row>
 
             <Row className="space-between-end card-row">
@@ -141,7 +153,7 @@ function LibraryCard(props) {
             </Row>
 
             <Row className="space-between-end card-row">
-              <Col className="card-label">{props.data.CollectionType==='tvshows' ? 'Series' : "Movies"}</Col>
+              <Col className="card-label">{props.data.CollectionType==='tvshows' ? 'Series' : props.data.CollectionType==='movies'? "Movies" : props.data.CollectionType==='music'? "Songs" : 'Files'}</Col>
               <Col className="text-end">{props.data.Library_Count}</Col>
             </Row>
 

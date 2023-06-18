@@ -1,10 +1,14 @@
+@import '../variables.module.css';
 .item-detail-container
 {
     color:white;
-    background-color: rgb(100, 100, 100,0.2);
-    padding: 20px;
+    background-color:  var(--secondary-background-color);
     margin: 20px 0;
-    border-radius: 8px;    
+}
+
+.item-banner-image
+{
+    margin-right: 20px;
 }
 
 .item-name
@@ -20,3 +24,12 @@
     object-fit: cover;
 }
 
+.item-details div a{
+    text-decoration: none !important;
+    color: white !important;
+  }
+  
+  .item-details div a:hover{
+    color: var(--secondary-color) !important;
+  }
+  

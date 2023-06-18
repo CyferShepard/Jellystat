@@ -18,15 +18,12 @@
     display: flex;
     flex-direction: column;
 
-    /* background-color: grey; */
     box-shadow: 0 0 20px rgba(255, 255, 255, 0.05);
 
     height: 320px;
     width: 185px;
     border-radius: 8px;
 
-
-    /* Add a third row that takes up remaining space */
 }
 
 
@@ -46,9 +43,7 @@
     width: 100%;
     height: 30%;
     position: relative;
-    /* margin: 8px; */
 
-    /* background-color: #f71b1b;  */
 }
 
 .recent-card-item-name {
@@ -58,10 +53,6 @@
     position: absolute;
     margin: 0;
 
-
-/* 
-
-    position: absolute; */
 }
 
 .recent-card-last-played{

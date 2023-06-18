@@ -1,8 +1,10 @@
-
-
+@import 'pages/css/variables.module.css';
 main{
-  margin-inline: 20px;
+  margin-inline: 20px; 
+  /* width: 100%; */
+  overflow: auto;
 }
+
 
 .App-logo {
   height: 40vmin;
@@ -17,7 +19,7 @@ main{
 
 body
 {
-  background-color: #1e1c22 !important;
+  background-color: var(--background-color) !important;
   /* background-color: #17151a; */
   color: white;
 }
@@ -37,6 +39,7 @@ h2{
     margin-top: 0.5em;
     margin-bottom: 0.5em;
 }
+
 
 
 
@@ -80,3 +83,26 @@ h2{
 }
 
 
+.btn-outline-primary
+{
+  color: white!important;
+  border-color: var(--primary-color) !important;
+  background-color: var(--background-color) !important;
+}
+
+.btn-outline-primary:hover
+{
+  background-color: var(--primary-color) !important;
+}
+
+.btn-outline-primary.active
+{
+  background-color: var(--primary-color) !important;
+
+}
+
+.btn-outline-primary:focus
+{
+  background-color: var(--primary-color) !important;
+
+}

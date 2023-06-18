@@ -1,9 +1,16 @@
 @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@500&display=swap');
+@import './variables.module.css';
 /* *{
     margin: 0;
     padding: 0;
     font-family: 'poppins',sans-serif;
 } */
+
+.login-show-password
+{
+    background-color: transparent !important;
+    border: 0 !important;
+}
 
 
 section{
@@ -12,8 +19,6 @@ section{
     align-items: center;
     min-height: 100vh;
     width: 100%;
-    
-    /* background: url('background6.jpg')no-repeat; */
     background-position: center;
     background-size: cover;
 }
@@ -41,36 +46,47 @@ h2{
     width: 310px;
     border-bottom: 2px solid #fff;
 }
-.inputbox label{
+.inputbox .form-label{
     position: absolute;
     top: 50%;
-    left: 5px;
     transform: translateY(-50%);
-    color: #fff;
+    color: #fff !important;
     font-size: 1em;
     pointer-events: none;
     transition: .2s;
 }
-input:focus ~ label,
-input:valid ~ label{
-top: -15px;
+.inputbox input:focus ~ .form-label,
+.inputbox input:not(:placeholder-shown) ~ .form-label
+{
+top: -10px;
 }
+
+
+.inputbox input:hover {
+
+    background: transparent !important;
+    box-shadow: none !important;
+
+}
+.inputbox input:focus {
+
+    background: transparent !important;
+    box-shadow: none !important;
+    color: #fff;
+
+}
+
+
 .inputbox input {
-    width: 100%;
+
     height: 50px;
     background: transparent;
     border: none;
     outline: none;
-    font-size: 1em;
+
     color: #fff;
 }
-.inputbox ion-icon{
-    position: absolute;
-    right: 8px;
-    color: #fff;
-    font-size: 1.2em;
-    top: 20px;
-}
+
 .forget{
     margin: -15px 0 15px ;
     font-size: .9em;
@@ -91,15 +107,27 @@ top: -15px;
     text-decoration: underline;
 }
 .setup-button{
+    color: white !important;
     width: 100%;
     height: 40px;
-    border-radius: 40px;
-    background: #fff;
-    border: none;
-    outline: none;
-    cursor: pointer;
-    font-size: 1em;
-    font-weight: 600;
+    border-radius: 40px !important;
+    background: var(--primary-color) !important;
+    border: none !important;
+    outline: none !important;
+    font-size: 1em !important;
+    font-weight: 600 !important;
+}
+
+.setup-button:hover{
+    color:  black  !important;
+    width: 100%;
+    height: 40px;
+    border-radius: 40px !important;
+    background: var(--secondary-color) !important;
+    border: none !important;
+    outline: none !important;
+    font-size: 1em !important;
+    font-weight: 600 !important;
 }
 .register{
     font-size: .9em;

@@ -1,7 +1,9 @@
+@import '../variables.module.css';
+
 .user-detail-container
 {
     color:white;
-    background-color: rgb(100, 100, 100,0.2);
+    background-color:  var(--secondary-background-color);
     padding: 20px;
     margin: 20px 0;
     border-radius: 8px;
@@ -23,14 +25,14 @@
     height: 100px;
     border-radius: 50%;
     object-fit: cover;
-    box-shadow: 0 0 10px 5px rgba(100,100,100,0.2);
+    box-shadow: 0 0 10px 5px  var(--secondary-background-color);
 }
 
 .user-image-container
 {
     width: 100px;
     height: 100px;
-    padding-right: 20px;
+    margin-right: 20px;
 
 
 }

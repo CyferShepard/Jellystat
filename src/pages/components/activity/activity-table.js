@@ -1,156 +1,319 @@
-import React ,{useState} from 'react';
+import React from 'react';
 import { Link } from "react-router-dom";
-// import { useParams } from 'react-router-dom';
+import { Button, ButtonGroup } from "react-bootstrap";
+
+
+import Table from '@mui/material/Table';
+import TableBody from '@mui/material/TableBody';
+import TableCell from '@mui/material/TableCell';
+import TableContainer from '@mui/material/TableContainer';
+import TableHead from '@mui/material/TableHead';
+import TableRow from '@mui/material/TableRow';
+import Collapse from '@mui/material/Collapse';
+import TableSortLabel from '@mui/material/TableSortLabel';
+import IconButton from '@mui/material/IconButton';
+import Box from '@mui/material/Box';
+import { visuallyHidden } from '@mui/utils';
+
+
+import AddCircleFillIcon from 'remixicon-react/AddCircleFillIcon';
+import IndeterminateCircleFillIcon from 'remixicon-react/IndeterminateCircleFillIcon';
 
 import '../../css/activity/activity-table.css';
+// localStorage.setItem('hour12',true);
 
 
+function formatTotalWatchTime(seconds) {
+  const hours = Math.floor(seconds / 3600);
+  const minutes = Math.floor((seconds % 3600) / 60);
+  const remainingSeconds = seconds % 60;
 
-function ActivityTable(props) {
+  let timeString = '';
 
-    const [sortConfig, setSortConfig] = useState({ key: null, direction: null });
-    const [currentPage, setCurrentPage] = useState(1);
+  if (hours > 0) {
+    timeString += `${hours} ${hours === 1 ? 'hr' : 'hrs'} `;
+  }
 
-    const [data, setData] = useState(props.data);
-  
-    function handleSort(key) {
-        const direction =
-          sortConfig.key === key && sortConfig.direction === "ascending"
-            ? "descending"
-            : "ascending";
-        setSortConfig({ key, direction });
-      }  
-    
-    function sortData(data, { key, direction }) {
-      if (!key) return data;
+  if (minutes > 0) {
+    timeString += `${minutes} ${minutes === 1 ? 'min' : 'mins'} `;
+  }
 
-      const sortedData = [...data];
+  if (remainingSeconds > 0) {
+    timeString += `${remainingSeconds} ${remainingSeconds === 1 ? 'second' : 'seconds'}`;
+  }
 
-      sortedData.sort((a, b) => {
-        if (a[key] < b[key]) return direction === "ascending" ? -1 : 1;
-        if (a[key] > b[key]) return direction === "ascending" ? 1 : -1;
-        return 0;
-      });
+  return timeString.trim();
+}
 
-      return sortedData;
-    }
+function Row(data) {
+  const { row } = data;
+  const [open, setOpen] = React.useState(false);
+  const twelve_hr = JSON.parse(localStorage.getItem('12hr'));
 
-    const options = {
-        day: "numeric",
-        month: "numeric",
-        year: "numeric",
-        hour: "numeric",
-        minute: "numeric",
-        second: "numeric",
-        hour12: false,
-      };
+  const options = {
+    day: "numeric",
+    month: "numeric",
+    year: "numeric",
+    hour: "numeric",
+    minute: "numeric",
+    second: "numeric",
+    hour12: twelve_hr,
+  };
 
 
-    const sortedData = sortData(data, sortConfig);
- 
-    const indexOfLastUser = currentPage * props.itemCount;
-    const indexOfFirstUser = indexOfLastUser - props.itemCount;
-    const currentData = sortedData.slice(indexOfFirstUser, indexOfLastUser);
-
-    const pageNumbers = [];
-    for (let i = 1; i <= Math.ceil(sortedData.length / props.itemCount); i++) {
-      pageNumbers.push(i);
-    }
-
-    const handleCollapse = (itemId) => {
-      setData(data.map(item => {
-        if ((item.NowPlayingItemId+item.EpisodeId) === itemId) {
-          return { ...item, isCollapsed: !item.isCollapsed };
-        } else {
-          return item;
-        }
-      }));
-    }
-    function formatTotalWatchTime(seconds) {
-      const hours = Math.floor(seconds / 3600); // 1 hour = 3600 seconds
-      const minutes = Math.floor((seconds % 3600) / 60); // 1 minute = 60 seconds
-      let formattedTime='';
-      if(hours)
-      {
-        formattedTime+=`${hours} hours`;
-      }
-      if(minutes)
-      {
-        formattedTime+=` ${minutes} minutes`;
-      }
-    
-      return formattedTime ;
-    }
-    
-  
-   
   return (
-    <div>
-     
-    <div className='activity-table'>
-        <div className='table-headers'>
-            <div onClick={() => handleSort("UserName")}>User</div>
-            <div onClick={() => handleSort("NowPlayingItemName")}>Title </div>
-            <div onClick={() => handleSort("ActivityDateInserted")}>Date</div>
-            <div onClick={() => handleSort("PlaybackDuration")}>Playback Duration</div>
-            <div onClick={() => handleSort("results")}>Total Plays</div>
-        </div>
+    <React.Fragment>
+      <TableRow sx={{ '& > *': { borderBottom: 'unset' } }}>
+        <TableCell>
+          <IconButton
+            aria-label="expand row"
+            size="small"
+            onClick={() => {if(row.results.length>1){setOpen(!open);}}}
+            >
+              {!open ? <AddCircleFillIcon opacity={row.results.length>1 ?1 : 0} cursor={row.results.length>1 ? "pointer":"default"}/> : <IndeterminateCircleFillIcon />}
+          </IconButton>
+        </TableCell>
+        <TableCell><Link to={`/users/${row.UserId}`} className='text-decoration-none'>{row.UserName}</Link></TableCell>
+        <TableCell><Link to={`/libraries/item/${row.EpisodeId || row.NowPlayingItemId}`} className='text-decoration-none'>{!row.SeriesName ? row.NowPlayingItemName : row.SeriesName+' - '+ row.NowPlayingItemName}</Link></TableCell>
+        <TableCell>{row.Client}</TableCell>
+        <TableCell>{Intl.DateTimeFormat('en-UK', options).format(new Date(row.ActivityDateInserted))}</TableCell>
+        {/* <TableCell>{formatTotalWatchTime(row.results && row.results.length>0 ?  row.results.reduce((acc, items) => acc +parseInt(items.PlaybackDuration),0): row.PlaybackDuration) || '0 minutes'}</TableCell> */}
+        <TableCell>{formatTotalWatchTime(row.PlaybackDuration) || '0 seconds'}</TableCell>
+        <TableCell>{row.results.length !==0 ? row.results.length : 1}</TableCell>
+      </TableRow>
+      <TableRow>
+        <TableCell style={{ paddingBottom: 0, paddingTop: 0 }} colSpan={7}>
+          <Collapse in={open} timeout="auto" unmountOnExit>
+            <Box sx={{ margin: 1 }}>
 
-    {currentData.map((item) => (
-
-                <div className='table-rows' key={item.NowPlayingItemId+item.EpisodeId} onClick={() => handleCollapse(item.NowPlayingItemId+item.EpisodeId)}>
-                    <div className='table-rows-content'>
-                      <div><Link to={`/users/${item.UserId}`}>{item.UserName}</Link></div>
-                      <div><Link to={`/item/${item.EpisodeId || item.NowPlayingItemId}`}>{!item.SeriesName ? item.NowPlayingItemName : item.SeriesName+' - '+ item.NowPlayingItemName}</Link></div>
-                      <div>{Intl.DateTimeFormat('en-UK', options).format(new Date(item.ActivityDateInserted))}</div>
-                      <div>{formatTotalWatchTime(item.PlaybackDuration) || '0 sec'}</div>
-                      <div>{item.results.length+1}</div>
-                    </div>
-                    <div className={`sub-table ${item.isCollapsed ? 'collapsed' : ''}`}>
-                    {item.results.map((sub_item,index) => (
-
-                         <div className='table-rows-content  bg-grey sub-row' key={sub_item.EpisodeId+index}>
-                            <div><Link to={`/users/${sub_item.UserId}`}>{sub_item.UserName}</Link></div>
-                            <div><Link to={`/item/${sub_item.EpisodeId || sub_item.NowPlayingItemId}`}>{!sub_item.SeriesName ? sub_item.NowPlayingItemName : sub_item.SeriesName+' - '+ sub_item.NowPlayingItemName}</Link></div>
-                            <div>{Intl.DateTimeFormat('en-UK', options).format(new Date(sub_item.ActivityDateInserted))}</div>
-                            <div></div>
-                            <div>1</div>
-                        </div>
-                                  ))}
-                    </div>
-                </div>
-          ))}
-    </div>
-
-
-
-      
-      
-      {props.itemCount>0  ?
-
-                <div className="pagination">
-                    <button className="page-btn" onClick={() => setCurrentPage(1)} disabled={currentPage === 1}>
-                      First
-                    </button>
-
-                    <button className="page-btn" onClick={() => setCurrentPage(currentPage - 1)} disabled={currentPage === 1}>
-                      Previous
-                    </button>
-
-                    <div className="page-number">{`Page ${currentPage} of ${pageNumbers.length}`}</div>
-
-                    <button className="page-btn" onClick={() => setCurrentPage(currentPage + 1)} disabled={currentPage === pageNumbers.length}>
-                      Next
-                    </button>
-
-                    <button className="page-btn" onClick={() => setCurrentPage(pageNumbers.length)} disabled={currentPage === pageNumbers.length}>
-                      Last
-                    </button>
-                </div>
-            :<></>
-
-        }
-    </div>
+              <Table aria-label="sub-activity" className='rounded-2'>
+                <TableHead>
+                  <TableRow>
+                    <TableCell>User</TableCell>
+                    <TableCell>Title</TableCell>
+                    <TableCell>Client</TableCell>
+                    <TableCell>Date</TableCell>
+                    <TableCell>Playback Duration</TableCell>
+                    <TableCell>Plays</TableCell>
+                  </TableRow>
+                </TableHead>
+                <TableBody>
+                  {row.results.sort((a, b) => new Date(b.ActivityDateInserted) - new Date(a.ActivityDateInserted)).map((resultRow) => (
+                    <TableRow key={resultRow.Id}>
+ 
+                        <TableCell><Link to={`/users/${resultRow.UserId}`} className='text-decoration-none'>{resultRow.UserName}</Link></TableCell>
+                        <TableCell><Link to={`/libraries/item/${resultRow.EpisodeId || resultRow.NowPlayingItemId}`} className='text-decoration-none'>{!resultRow.SeriesName ? resultRow.NowPlayingItemName : resultRow.SeriesName+' - '+ resultRow.NowPlayingItemName}</Link></TableCell>
+                        <TableCell>{resultRow.Client}</TableCell>
+                        <TableCell>{Intl.DateTimeFormat('en-UK', options).format(new Date(resultRow.ActivityDateInserted))}</TableCell>
+                        <TableCell>{formatTotalWatchTime(resultRow.PlaybackDuration) || '0 seconds'}</TableCell>
+                        <TableCell>1</TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </Box>
+          </Collapse>
+        </TableCell>
+      </TableRow>
+    </React.Fragment>
   );
 }
-export default ActivityTable;
+
+function EnhancedTableHead(props) {
+  const {  order, orderBy, onRequestSort } =
+    props;
+  const createSortHandler = (property) => (event) => {
+    onRequestSort(event, property);
+  };
+
+  const headCells = [
+    {
+      id: 'UserName',
+      numeric: false,
+      disablePadding: true,
+      label: 'Last User',
+    },
+    {
+      id: 'NowPlayingItemName',
+      numeric: false,
+      disablePadding: false,
+      label: 'Title',
+    },
+    {
+      id: 'Client',
+      numeric: false,
+      disablePadding: false,
+      label: 'Last Client',
+    },
+    {
+      id: 'ActivityDateInserted',
+      numeric: false,
+      disablePadding: false,
+      label: 'Date',
+    },
+    {
+      id: 'PlaybackDuration',
+      numeric: false,
+      disablePadding: false,
+      label: 'Total Playback',
+    },    
+    {
+      id: 'TotalPlays',
+      numeric: false,
+      disablePadding: false,
+      label: 'TotalPlays',
+    },
+  ];
+
+
+  return (
+    <TableHead>
+      <TableRow>
+        <TableCell/>
+        {headCells.map((headCell) => (
+          <TableCell
+            key={headCell.id}
+            align={headCell.numeric ? 'right' : 'left'}
+            padding={headCell.disablePadding ? 'none' : 'normal'}
+            sortDirection={orderBy === headCell.id ? order : false}
+          >
+            <TableSortLabel
+              active={orderBy === headCell.id}
+              direction={orderBy === headCell.id ? order : 'asc'}
+              onClick={createSortHandler(headCell.id)}
+            >
+              {headCell.label}
+              {orderBy === headCell.id ? (
+                <Box component="span" sx={visuallyHidden}>
+                  {order === 'desc' ? 'sorted descending' : 'sorted ascending'}
+                </Box>
+              ) : null}
+            </TableSortLabel>
+          </TableCell>
+        ))}
+      </TableRow>
+    </TableHead>
+  );
+}
+
+export default function ActivityTable(props) {
+  const [page, setPage] = React.useState(0);
+  const [rowsPerPage, setRowsPerPage] = React.useState(10);
+
+  const [order, setOrder] = React.useState('desc');
+  const [orderBy, setOrderBy] = React.useState('ActivityDateInserted');
+
+
+  if(rowsPerPage!==props.itemCount)
+  {
+    setRowsPerPage(props.itemCount);
+    setPage(0);
+  }
+
+
+  const handleNextPageClick = () => {
+    setPage((prevPage) => prevPage + 1);
+  };
+
+  const handlePreviousPageClick = () => {
+    setPage((prevPage) => prevPage - 1);
+  };
+
+
+    function descendingComparator(a, b, orderBy) {
+      if (b[orderBy] < a[orderBy]) {
+        return -1;
+      }
+      if (b[orderBy] > a[orderBy]) {
+        return 1;
+      }
+      return 0;
+    }
+   
+    // eslint-disable-next-line 
+    function getComparator(order, orderBy) {
+      return order === 'desc'
+        ? (a, b) => descendingComparator(a, b, orderBy)
+        : (a, b) => -descendingComparator(a, b, orderBy);
+    }
+    
+
+    function stableSort(array, comparator) {
+      const stabilizedThis = array.map((el, index) => [el, index]);
+
+      stabilizedThis.sort((a, b) => {
+
+        const order = comparator(a[0], b[0]);
+        if (order !== 0) {
+          return order;
+        }
+        return a[1] - b[1];
+        
+      });
+
+      return stabilizedThis.map((el) => el[0]);
+    }
+
+    const visibleRows = React.useMemo(
+      () =>
+        stableSort(props.data, getComparator(order, orderBy)).slice(
+          page * rowsPerPage,
+          page * rowsPerPage + rowsPerPage,
+        ),
+      [order, orderBy, page, rowsPerPage, getComparator, props.data],
+    );
+
+    const handleRequestSort = (event, property) => {
+      const isAsc = orderBy === property && order === 'asc';
+      setOrder(isAsc ? 'desc' : 'asc');
+      setOrderBy(property);
+    };
+  
+  
+  
+
+  return (
+    <>
+      <TableContainer className='rounded-2'>
+        <Table aria-label="collapsible table" >
+        <EnhancedTableHead
+              order={order}
+              orderBy={orderBy}
+              onRequestSort={handleRequestSort}
+              rowCount={rowsPerPage}
+            />
+          <TableBody>
+            {visibleRows.map((row) => (
+                <Row key={row.Id+row.NowPlayingItemId+row.EpisodeId} row={row} />
+              ))}
+              {props.data.length===0 ? <tr><td colSpan="7" style={{ textAlign: "center", fontStyle: "italic" ,color:"grey"}} className='py-2'>No Activity Found</td></tr> :''}
+            
+          </TableBody>
+        </Table>
+      </TableContainer>
+
+            <div className='d-flex justify-content-end my-2'>
+                <ButtonGroup className="pagination-buttons">
+                    <Button className="page-btn" onClick={()=>setPage(0)} disabled={page === 0}>
+                      First
+                    </Button>
+
+                    <Button className="page-btn" onClick={handlePreviousPageClick}  disabled={page === 0}>
+                      Previous
+                    </Button>
+
+                    <div className="page-number d-flex align-items-center justify-content-center">{`${page *rowsPerPage + 1}-${Math.min((page * rowsPerPage+ 1 ) +  (rowsPerPage - 1),props.data.length)} of ${props.data.length}`}</div>
+
+                    <Button className="page-btn" onClick={handleNextPageClick}  disabled={page >= Math.ceil(props.data.length / rowsPerPage) - 1}>
+                      Next
+                    </Button>
+
+                    <Button className="page-btn" onClick={()=>setPage(Math.ceil(props.data.length / rowsPerPage) - 1)} disabled={page >= Math.ceil(props.data.length / rowsPerPage) - 1}>
+                      Last
+                    </Button>
+                </ButtonGroup>
+            </div>
+    
+    </>
+  );
+}

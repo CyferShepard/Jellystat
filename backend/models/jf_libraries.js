@@ -15,7 +15,7 @@
         ServerId: item.ServerId,
         IsFolder: item.IsFolder,
         Type: item.Type,
-        CollectionType: item.CollectionType,
+        CollectionType: item.CollectionType? item.CollectionType : 'mixed',
         ImageTagsPrimary:
           item.ImageTags && item.ImageTags.Primary ? item.ImageTags.Primary : null,
       });

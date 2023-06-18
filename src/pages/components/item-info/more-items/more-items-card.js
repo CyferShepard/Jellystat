@@ -11,33 +11,32 @@ function MoreItemCards(props) {
   const { Id } = useParams();
   const [loaded, setLoaded] = useState(false);
   const [fallback, setFallback] = useState(false);
+
   return (
-    <div className={props.data.Type==="Episode" ? "last-card episode" : "last-card"}>
-     <Link to={`/item/${ (props.data.Type==="Episode" ? props.data.EpisodeId :  props.data.Id) }`}>
+    <div className={props.data.Type==="Episode" ? "last-card episode-card" : "last-card"}>
+     <Link to={`/libraries/item/${ (props.data.Type==="Episode" ? props.data.EpisodeId :  props.data.Id) }`}>
       <div className={props.data.Type==="Episode" ? "last-card-banner episode" : "last-card-banner"}>
-        {props.data.ImageBlurHashes && !loaded ? <Blurhash hash={props.data.ImageBlurHashes.Primary[props.data.ImageTags.Primary]} width={'100%'}   height={'100%'}/> : null}
+        {((props.data.ImageBlurHashes && props.data.ImageBlurHashes!=null) || (props.data.PrimaryImageHash && props.data.PrimaryImageHash!=null) ) && !loaded ? <Blurhash hash={props.data.PrimaryImageHash || props.data.ImageBlurHashes.Primary[props.data.ImageTags.Primary] } width={'100%'}   height={'100%'} className="rounded-3 overflow-hidden"/> : null}
 
         {fallback ? 
         <img
-          src={
-            `${
-              props.base_url +
-                "/Items/" +
-                Id +
-                "/Images/Primary?fillHeight=320&fillWidth=213&quality=50"}`
-          }
-          alt=""
-          onLoad={() => setLoaded(true)}
-          style={loaded ? { backgroundImage: `url(path/to/image.jpg)` } : { display: 'none' }}
-        />
+        src={
+          `${
+              "/Proxy/Items/Images/Primary?id=" +
+              Id +
+              "&fillHeight=320&fillWidth=213&quality=50"}`
+        }
+        alt=""
+        onLoad={() => setLoaded(true)}
+        style={loaded ? { backgroundImage: `url(path/to/image.jpg)` } : { display: 'none' }}
+      />
         : 
         <img
         src={
           `${
-            props.base_url +
-              "/Items/" +
+              "/Proxy/Items/Images/Primary?id=" +
               (props.data.Type==="Episode" ? props.data.EpisodeId :  props.data.Id) +
-              "/Images/Primary?fillHeight=320&fillWidth=213&quality=50"}`
+              "&fillHeight=320&fillWidth=213&quality=50"}`
         }
         alt=""
         onLoad={() => setLoaded(true)}

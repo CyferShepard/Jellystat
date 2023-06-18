@@ -7,11 +7,16 @@ import Row from 'react-bootstrap/Row';
 import Col from 'react-bootstrap/Col';
 import Button from 'react-bootstrap/Button';
 import Alert from 'react-bootstrap/Alert';
+import ToggleButton from 'react-bootstrap/ToggleButton';
+import ToggleButtonGroup from 'react-bootstrap/ToggleButtonGroup';
+
+import EyeFillIcon from 'remixicon-react/EyeFillIcon';
+import EyeOffFillIcon from 'remixicon-react/EyeOffFillIcon';
 
 
 
 import "../../css/settings/settings.css";
-import { ButtonGroup } from "react-bootstrap";
+import {  InputGroup } from "react-bootstrap";
 
 export default function SettingsConfig() {
   const [config, setConfig] = useState(null);
@@ -20,11 +25,23 @@ export default function SettingsConfig() {
   const [isSubmitted, setisSubmitted] = useState("");
   const [loadSate, setloadSate] = useState("Loading");
   const [submissionMessage, setsubmissionMessage] = useState("");
+  const token = localStorage.getItem('token');
+  const [twelve_hr, set12hr] = useState(localStorage.getItem('12hr') === 'true');
+
+  const storage_12hr = localStorage.getItem('12hr');
+
+  if(storage_12hr===null)
+  {
+    localStorage.setItem('12hr',false);
+    set12hr(false);
+  }else if(twelve_hr===null){
+    set12hr(Boolean(storage_12hr));
+  }
 
   useEffect(() => {
     Config()
       .then((config) => {
-        setFormValues({ JF_HOST: config.hostUrl, JF_API_KEY: config.apiKey });
+        setFormValues({ JF_HOST: config.hostUrl });
         setConfig(config);
         setloadSate("Loaded");
       })
@@ -38,37 +55,23 @@ export default function SettingsConfig() {
   }, []);
 
   async function validateSettings(_url, _apikey) {
-    let isValid = false;
-    let errorMessage = "";
-    await axios
-      .get(_url + "/system/configuration", {
-        headers: {
-          "X-MediaBrowser-Token": _apikey,
-        },
-      })
-      .then((response) => {
-        if (response.status === 200) {
-          isValid = true;
-        }
-      })
-      .catch((error) => {
-        // console.log(error.code);
-        if (error.code === "ERR_NETWORK") {
-          isValid = false;
-          errorMessage = `Error : Unable to connect to Jellyfin Server`;
-        } else if (error.response.status === 401) {
-          isValid = false;
-          errorMessage = `Error: ${error.response.status} Not Authorized. Please check API key`;
-        } else if (error.response.status === 404) {
-          isValid = false;
-          errorMessage = `Error ${error.response.status}: The requested URL was not found.`;
-        } else {
-          isValid = false;
-          errorMessage = `Error : ${error.response.status}`;
-        }
-      });
+    const result = await axios
+    .post("/api/validateSettings", {
+      url:_url,
+      apikey: _apikey
 
-    return { isValid: isValid, errorMessage: errorMessage };
+    }, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
+      },
+    })
+    .catch((error) => {
+      // let errorMessage= `Error : ${error}`;
+    });
+
+    let data=result.data;
+    return { isValid:data.isValid, errorMessage:data.errorMessage} ;
   }
 
   async function handleFormSubmit(event) {
@@ -77,7 +80,7 @@ export default function SettingsConfig() {
       formValues.JF_HOST,
       formValues.JF_API_KEY
     );
-    console.log(validation);
+    
     if (!validation.isValid) {
       setisSubmitted("Failed");
       setsubmissionMessage(validation.errorMessage);
@@ -115,28 +118,37 @@ export default function SettingsConfig() {
     return <div className="submit critical">{submissionMessage}</div>;
   }
 
+    
+  function toggle12Hr(is_12_hr){
+    set12hr(is_12_hr);
+    localStorage.setItem('12hr',is_12_hr);
+  };
+
 
 
 
     return (
-      <div className="general-settings-page">
-        <h1>General Settings</h1>
+      <div>
+        <h1>Settings</h1>
         <Form onSubmit={handleFormSubmit} className="settings-form">
           <Form.Group as={Row} className="mb-3" >
-            <Form.Label column className="fs-4">
+            <Form.Label column className="">
               Jellyfin Url
             </Form.Label>
             <Col sm="10">
-              <Form.Control  id="JF_HOST" name="JF_HOST" value={formValues.JF_HOST || ""} onChange={handleFormChange}  placeholder="http://127.0.0.1:8096 or http://example.jellyfin.server" />
+              <Form.Control  id="JF_HOST"  name="JF_HOST" value={formValues.JF_HOST || ""} onChange={handleFormChange}  placeholder="http://127.0.0.1:8096 or http://example.jellyfin.server" />
             </Col>
           </Form.Group>
 
           <Form.Group as={Row} className="mb-3">
-            <Form.Label column  className="fs-4">
+            <Form.Label column  className="">
               API Key
             </Form.Label>
             <Col sm="10">
-              <Form.Control id="JF_API_KEY" name="JF_API_KEY"  value={formValues.JF_API_KEY || ""} onChange={handleFormChange} type={showKey ? "text" : "password"} />
+            <InputGroup>
+              <Form.Control id="JF_API_KEY"  name="JF_API_KEY"  value={formValues.JF_API_KEY || ""} onChange={handleFormChange} type={showKey ? "text" : "password"} />
+              <Button variant="outline-primary" type="button" onClick={() => setKeyState(!showKey)}>{showKey?<EyeFillIcon/>:<EyeOffFillIcon/>}</Button>
+            </InputGroup> 
             </Col>
           </Form.Group>
           {isSubmitted !== "" ? (
@@ -152,13 +164,27 @@ export default function SettingsConfig() {
           ) : (
             <></>
           )}
-          <div className="d-flex flex-column flex-sm-row justify-content-end align-items-sm-center">
-            <ButtonGroup >
-              <Button variant="outline-success" type="submit"> Save </Button>
-              <Button variant="outline-secondary" type="button" onClick={() => setKeyState(!showKey)}>Show Key</Button>
-            </ButtonGroup>
+          <div className="d-flex flex-column flex-md-row justify-content-end align-items-md-center">
+          <Button variant="outline-success" type="submit"> Save </Button>
           </div>
+
         </Form>
+
+        <Form className="settings-form">
+         <Form.Group as={Row} className="mb-3">
+           <Form.Label column  className="">Hour Format</Form.Label>
+           <Col >
+              <ToggleButtonGroup type="checkbox" className="d-flex" >
+                  <ToggleButton variant="outline-primary" active={twelve_hr}  onClick={()=> {toggle12Hr(true);}}>12 Hours</ToggleButton>
+                  <ToggleButton variant="outline-primary" active={!twelve_hr}  onClick={()=>{toggle12Hr(false);}}>24 Hours</ToggleButton>
+               </ToggleButtonGroup>
+            </Col>  
+          </Form.Group>
+
+        </Form>
+
+
+
 
       </div>
       );
