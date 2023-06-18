@@ -2,7 +2,7 @@
 
 .sessions-container {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(auto, 520px));
+    grid-template-columns: repeat(auto-fit, minmax(320px, 520px));
     grid-auto-rows: 200px;/* max-width+offset so 215 + 20*/
     background-color: var(--secondary-background-color);
     border-radius: 8px;
@@ -90,10 +90,11 @@
 }
 
 
-.session-card-user-image {
+.card-user-image {
     border-radius: 50%;
-    max-width: 50px;
-
+    width: 50px;
+    top: 4vh;
+    grid-row: 1 / span 2;
 
 }
 
@@ -134,10 +135,8 @@
 }
 
 .card-device-image {
-    max-width: 40px;
-    margin-top:5px;
+    max-width: 35px;
     width: 100%;
-    height: min-content;
 }
 
 .card-client {
@@ -180,25 +179,3 @@ margin-bottom: 100%;
     color:  var(--secondary-color) !important;
   }
   
-
-  .ellipse
-{
-    display: -webkit-box;
-    -webkit-box-orient: vertical;
-    -webkit-line-clamp: 1;
-    overflow: hidden;
-    text-overflow: ellipsis;
-}
-
-
-
-@media (max-width: 350px) {
-    .card-device-image {
-        display: none;
-    }
-
-    .card-client-version, .session-card-user-image
-    {
-        display: none !important;
-    }
-  }

@@ -42,11 +42,11 @@ function Sessions() {
               setData(data.data.filter(row => row.NowPlayingItem !== undefined));
             }
 
-        })
-        .catch((error) => {
-          console.log(error);
-        });
-    }
+          })
+          .catch((error) => {
+            console.log(error);
+          });
+      }
     };
  
 

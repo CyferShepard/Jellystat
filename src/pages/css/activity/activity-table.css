@@ -21,17 +21,6 @@ th
 
 }
 
-.activity-client:hover
-{
-  color: var(--secondary-color) !important;
-
-}
-.activity-client:hover > span
-{
-
-  cursor: pointer;
-}
-
 
 
 td > a
@@ -39,9 +28,9 @@ td > a
   color: white;
 }
 
-td:hover > a 
+td:hover > a
 {
-  color: var(--secondary-color);
+  color: #00A4DC;
 }
 
 .page-number {
@@ -55,8 +44,8 @@ select option {
   width: 100%;
   border: none;
   
-}
-
+  }
+  
 .pagination-range .items
 {
 background-color: rgb(255, 255, 255, 0.1);
@@ -67,7 +56,7 @@ padding-inline: 10px;
 {
 padding-inline: 10px;
 align-self: center;
-  }
+}
 
 .pagination-range
 {
@@ -80,7 +69,7 @@ border-radius: 8px;
 font-size: 1.2em;
 align-self: flex-end;
 justify-content: space-between;
-  }
+}
 
 .pagination-range select
 {
@@ -111,22 +100,3 @@ font-size: 1em;
 {
   color: var(--secondary-color) !important;
 }
-
-.modal-header
-{
-  color:  white;
-  border-bottom: none !important;
-}
-
-
-.modal-footer
-{
-  border-top: none !important;
-}
-
-
-.modal-content
-{
-  background-color:  var(--secondary-background-color) !important;
-}
-

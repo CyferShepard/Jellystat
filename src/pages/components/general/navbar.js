@@ -25,7 +25,7 @@ export default function Navbar() {
         </BootstrapNavbar.Brand>
 
 
-          <Nav className="flex-row flex-md-column w-100 justify-content-between">
+          <Nav className="flex-row flex-md-column w-100">
             {navData.map((item) => {
               const locationString=location.pathname.toLocaleLowerCase();
               const isActive = locationString.includes(('/'+item.link).toLocaleLowerCase()) && ((locationString.length>0 && item.link.length>0) || (locationString.length===1 && item.link.length===0)); // check if the link is the current path
@@ -33,7 +33,7 @@ export default function Navbar() {
                 <Nav.Link
                   as={Link}
                   key={item.id}
-                  className={`navitem${isActive ? " active" : ""} `} // add the "active" class if the link is active
+                  className={`navitem${isActive ? " active" : ""} p-2`} // add the "active" class if the link is active
                   to={item.link}
                 >
                   {item.icon}
@@ -41,7 +41,7 @@ export default function Navbar() {
                 </Nav.Link>
               );
             })}
-            <Nav.Link className="navitem logout" href="#logout" onClick={handleLogout}>
+            <Nav.Link className="navitem  p-2 logout" href="#logout" onClick={handleLogout}>
               <LogoutBoxLineIcon />
               <span className="d-none d-md-block nav-text">Logout</span>
             </Nav.Link>

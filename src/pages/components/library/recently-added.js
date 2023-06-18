@@ -31,8 +31,8 @@ function RecentlyAdded(props) {
         if(props.LibraryId)
         {
             url+=`?libraryid=${props.LibraryId}`;
-      }
-
+        }
+     
         const itemData = await axios.get(url, {
           headers: {
             Authorization: `Bearer ${config.token}`,

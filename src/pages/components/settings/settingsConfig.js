@@ -61,14 +61,14 @@ export default function SettingsConfig() {
       apikey: _apikey
 
     }, {
-        headers: {
+      headers: {
         Authorization: `Bearer ${token}`,
         "Content-Type": "application/json",
-        },
-      })
-      .catch((error) => {
+      },
+    })
+    .catch((error) => {
       // let errorMessage= `Error : ${error}`;
-      });
+    });
 
     let data=result.data;
     return { isValid:data.isValid, errorMessage:data.errorMessage} ;
@@ -118,7 +118,7 @@ export default function SettingsConfig() {
     return <div className="submit critical">{submissionMessage}</div>;
   }
 
-
+    
   function toggle12Hr(is_12_hr){
     set12hr(is_12_hr);
     localStorage.setItem('12hr',is_12_hr);
@@ -165,7 +165,7 @@ export default function SettingsConfig() {
             <></>
           )}
           <div className="d-flex flex-column flex-md-row justify-content-end align-items-md-center">
-              <Button variant="outline-success" type="submit"> Save </Button>
+          <Button variant="outline-success" type="submit"> Save </Button>
           </div>
 
         </Form>

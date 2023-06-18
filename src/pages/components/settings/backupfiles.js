@@ -14,114 +14,114 @@ import TableRow from '@mui/material/TableRow';
 import  Alert  from "react-bootstrap/Alert";
 
 
-    
+
 import "../../css/settings/backups.css";
-    
+
 const token = localStorage.getItem('token');
 
 
 function Row(file) {
   const { data } = file;
 
-      async function downloadBackup(filename) {
-        const url=`/data/files/${filename}`;
-        axios({
-            url: url,
-            headers: {
-                Authorization: `Bearer ${token}`,
-                "Content-Type": "application/json",
-              },
-            method: 'GET',
-            responseType: 'blob',
-          }).then(response => {
-            const url = window.URL.createObjectURL(new Blob([response.data]));
-            const link = document.createElement('a');
-            link.href = url;
-            link.setAttribute('download', filename);
-            document.body.appendChild(link);
-            link.click();
-            link.parentNode.removeChild(link);
-          });
-      }
-
-      async function restoreBackup(filename) {
-        const url=`/data/restore/${filename}`;
-        axios
-        .get(url, {
-          headers: {
+  async function downloadBackup(filename) {
+    const url=`/data/files/${filename}`;
+    axios({
+        url: url,
+        headers: {
             Authorization: `Bearer ${token}`,
             "Content-Type": "application/json",
           },
-        })
-        .then((response) => {
+        method: 'GET',
+        responseType: 'blob',
+      }).then(response => {
+        const url = window.URL.createObjectURL(new Blob([response.data]));
+        const link = document.createElement('a');
+        link.href = url;
+        link.setAttribute('download', filename);
+        document.body.appendChild(link);
+        link.click();
+        link.parentNode.removeChild(link);
+      });
+  }
+
+  async function restoreBackup(filename) {
+    const url=`/data/restore/${filename}`;
+    axios
+    .get(url, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
+      },
+    })
+    .then((response) => {
       BackupFiles().setshowAlert({visible:true,title:'Success',type:'success',message:response.data});
-        })
-        .catch((error) => {
+    })
+    .catch((error) => {
       BackupFiles().setshowAlert({visible:true,title:'Error',type:'danger',message:error.response.data});
-        });
+    });
 
 
-      }
+  }
 
-      async function deleteBackup(filename) {
-        const url=`/data/files/${filename}`;
-        axios
-        .delete(url, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json",
-          },
-        })
-        .then((response) => {
+  async function deleteBackup(filename) {
+    const url=`/data/files/${filename}`;
+    axios
+    .delete(url, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
+      },
+    })
+    .then((response) => {
       BackupFiles().setshowAlert({visible:true,title:'Success',type:'success',message:response.data});
-        })
-        .catch((error) => {
+    })
+    .catch((error) => {
       BackupFiles().setshowAlert({visible:true,title:'Error',type:'danger',message:error.response.data});
-        });
+    });
 
 
-      }
+  }
 
-      function formatFileSize(sizeInBytes) {
-        const sizeInKB = sizeInBytes / 1024; // 1 KB = 1024 bytes
-        if (sizeInKB < 1024) {
-          return `${sizeInKB.toFixed(2)} KB`;
+  function formatFileSize(sizeInBytes) {
+    const sizeInKB = sizeInBytes / 1024; // 1 KB = 1024 bytes
+    if (sizeInKB < 1024) {
+      return `${sizeInKB.toFixed(2)} KB`;
+    } else {
+      const sizeInMB = sizeInKB / 1024; // 1 MB = 1024 KB
+      if (sizeInMB < 1024) {
+        return `${sizeInMB.toFixed(2)} MB`;
+      } else {
+        const sizeInGB = sizeInMB / 1024; // 1 GB = 1024 MB
+        if (sizeInGB < 1024) {
+          return `${sizeInGB.toFixed(2)} GB`;
         } else {
-          const sizeInMB = sizeInKB / 1024; // 1 MB = 1024 KB
-          if (sizeInMB < 1024) {
-            return `${sizeInMB.toFixed(2)} MB`;
+          const sizeInTB = sizeInGB / 1024; // 1 TB = 1024 GB
+          if (sizeInTB < 1024) {
+            return `${sizeInTB.toFixed(2)} TB`;
           } else {
-            const sizeInGB = sizeInMB / 1024; // 1 GB = 1024 MB
-            if (sizeInGB < 1024) {
-              return `${sizeInGB.toFixed(2)} GB`;
-            } else {
-              const sizeInTB = sizeInGB / 1024; // 1 TB = 1024 GB
-              if (sizeInTB < 1024) {
-                return `${sizeInTB.toFixed(2)} TB`;
-              } else {
-                const sizeInPB = sizeInTB / 1024; // 1 PB = 1024 TB
-                return `${sizeInPB.toFixed(2)} PB`;
-              }
-            }
+            const sizeInPB = sizeInTB / 1024; // 1 PB = 1024 TB
+            return `${sizeInPB.toFixed(2)} PB`;
           }
         }
       }
+    }
+  }
 
-  
+
 
 
 
   const twelve_hr = JSON.parse(localStorage.getItem('12hr'));
 
-      const options = {
-        day: "numeric",
-        month: "numeric",
-        year: "numeric",
-        hour: "numeric",
-        minute: "numeric",
-        second: "numeric",
+  const options = {
+    day: "numeric",
+    month: "numeric",
+    year: "numeric",
+    hour: "numeric",
+    minute: "numeric",
+    second: "numeric",
     hour12: twelve_hr,
-      };
+  };
 
 
 
@@ -159,10 +159,10 @@ export default function BackupFiles() {
 
 
     
-    function handleCloseAlert() {
-      setshowAlert({visible:false});
-    }
-    
+function handleCloseAlert() {
+  setshowAlert({visible:false});
+}
+
 const uploadFile = (file, onUploadProgress) => {
   const formData = new FormData();
   formData.append("file", file);
@@ -232,7 +232,7 @@ const handlePreviousPageClick = () => {
                   </p>
                 </Alert>
             )}
-                                
+
             <TableContainer className='rounded-2'>
                     <Table aria-label="collapsible table" >
                       <TableHead>
@@ -247,7 +247,7 @@ const handlePreviousPageClick = () => {
                         {files && files.sort((a, b) =>new Date(b.datecreated) - new Date(a.datecreated)).slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
                           .map((file,index) => (
                             <Row key={index} data={file} />
-                ))}
+                          ))}
                           {files.length===0 ? <tr><td colSpan="5" style={{ textAlign: "center", fontStyle: "italic" ,color:"grey"}}  className='py-2'>No Backups Found</td></tr> :''}
                             <TableRow>
                               <TableCell colSpan="5">
@@ -259,12 +259,12 @@ const handlePreviousPageClick = () => {
                             </TableRow>
                             
                       </TableBody>
-          </Table>
+                    </Table>
             </TableContainer>
 
             <div className='d-flex justify-content-end my-2'>
               
-         
+
 
                 <ButtonGroup className="pagination-buttons">
                     <Button className="page-btn" onClick={()=>setPage(0)} disabled={page === 0}>

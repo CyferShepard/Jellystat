@@ -369,6 +369,96 @@ router.post("/getUserHistory", async (req, res) => {
 
 
 
+router.post("/getLibraryHistory", async (req, res) => {
+  try {
+    const { libraryid } = req.body;
+    const { rows } = await db.query(
+      `select a.* from jf_playback_activity a join jf_library_items i on i."Id"=a."NowPlayingItemId"  where i."ParentId"='${libraryid}' order by "ActivityDateInserted" desc`
+    );
+    const groupedResults = {};
+    rows.forEach(row => {
+      if (groupedResults[row.NowPlayingItemId+row.EpisodeId]) {
+        groupedResults[row.NowPlayingItemId+row.EpisodeId].results.push(row);
+      } else {
+        groupedResults[row.NowPlayingItemId+row.EpisodeId] = {
+          ...row,
+          results: []
+        };
+        groupedResults[row.NowPlayingItemId+row.EpisodeId].results.push(row);
+      }
+    });
+    
+    res.send(Object.values(groupedResults));
+  } catch (error) {
+    console.log(error);
+    res.status(503);
+    res.send(error);
+  }
+});
+
+
+router.post("/getItemHistory", async (req, res) => {
+  try {
+    const { itemid } = req.body;
+
+    const { rows } = await db.query(
+      `select jf_playback_activity.*
+      from jf_playback_activity jf_playback_activity
+      where 
+      ("EpisodeId"='${itemid}' OR "SeasonId"='${itemid}' OR "NowPlayingItemId"='${itemid}');`
+    );
+    
+  
+
+    const groupedResults = rows.map(item => ({
+      ...item,
+      results: []
+    }));
+    
+
+    
+    res.send(groupedResults);
+  } catch (error) {
+    console.log(error);
+    res.status(503);
+    res.send(error);
+  }
+});
+
+router.post("/getUserHistory", async (req, res) => {
+  try {
+    const { userid } = req.body;
+
+    const { rows } = await db.query(
+      `select jf_playback_activity.*
+      from jf_playback_activity jf_playback_activity
+      where "UserId"='${userid}';`
+    );
+    
+    const groupedResults = {};
+    rows.forEach(row => {
+      if (groupedResults[row.NowPlayingItemId+row.EpisodeId]) {
+        groupedResults[row.NowPlayingItemId+row.EpisodeId].results.push(row);
+      } else {
+        groupedResults[row.NowPlayingItemId+row.EpisodeId] = {
+          ...row,
+          results: []
+        };
+        groupedResults[row.NowPlayingItemId+row.EpisodeId].results.push(row);
+      }
+    });
+    
+    res.send(Object.values(groupedResults));
+  } catch (error) {
+    console.log(error);
+    res.status(503);
+    res.send(error);
+  }
+});
+
+
+
+
 router.get("/getAdminUsers", async (req, res) => {
   try {
     const { rows:config } = await db.query('SELECT * FROM app_config where "ID"=1');

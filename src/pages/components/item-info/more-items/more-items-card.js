@@ -20,16 +20,16 @@ function MoreItemCards(props) {
 
         {fallback ? 
         <img
-          src={
-            `${
+        src={
+          `${
               "/Proxy/Items/Images/Primary?id=" +
-                Id +
+              Id +
               "&fillHeight=320&fillWidth=213&quality=50"}`
-          }
-          alt=""
-          onLoad={() => setLoaded(true)}
-          style={loaded ? { backgroundImage: `url(path/to/image.jpg)` } : { display: 'none' }}
-        />
+        }
+        alt=""
+        onLoad={() => setLoaded(true)}
+        style={loaded ? { backgroundImage: `url(path/to/image.jpg)` } : { display: 'none' }}
+      />
         : 
         <img
         src={

@@ -1,9 +1,14 @@
 @import 'pages/css/variables.module.css';
+@import 'pages/css/variables.module.css';
 main{
   margin-inline: 20px; 
   /* width: 100%; */
   overflow: auto;
+  margin-inline: 20px; 
+  /* width: 100%; */
+  overflow: auto;
 }
+
 
 
 .App-logo {
@@ -19,6 +24,7 @@ main{
 
 body
 {
+  background-color: var(--background-color) !important;
   background-color: var(--background-color) !important;
   /* background-color: #17151a; */
   color: white;
@@ -39,6 +45,7 @@ h2{
     margin-top: 0.5em;
     margin-bottom: 0.5em;
 }
+
 
 
 

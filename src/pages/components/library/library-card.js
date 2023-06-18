@@ -64,7 +64,7 @@ function LibraryCard(props) {
     if (minutes) {
       formattedTime += ` ${minutes} minute${minutes > 1 ? 's' : ''}`;
     }
-  
+    
     if (!days && !hours && !minutes) {
       formattedTime = '0 minutes';
     }
@@ -72,35 +72,6 @@ function LibraryCard(props) {
     return formattedTime;
     
   }
-  function ticksToTimeString(ticks) {
-    const seconds = Math.floor(ticks / 10000000);
-    const months = Math.floor(seconds / (86400 * 30)); // 1 month = 86400 seconds
-    const days = Math.floor((seconds % (86400 * 30)) / 86400); // 1 day = 86400 seconds
-    const hours = Math.floor((seconds % 86400) / 3600); // 1 hour = 3600 seconds
-    const minutes = Math.floor((seconds % 3600) / 60); // 1 minute = 60 seconds
-  
-    const timeComponents = [];
-  
-    if (months) {
-      timeComponents.push(`${months} Month${months > 1 ? 's' : ''}`);
-    }
-  
-    if (days) {
-      timeComponents.push(`${days} day${days > 1 ? 's' : ''}`);
-    }
-  
-    if (hours) {
-      timeComponents.push(`${hours} hour${hours > 1 ? 's' : ''}`);
-    }
-  
-    if (!months && minutes) {
-      timeComponents.push(`${minutes} minute${minutes > 1 ? 's' : ''}`);
-    }
-  
-    const formattedTime = timeComponents.length > 0 ? timeComponents.join(' ') : '0 minutes';
-    return formattedTime;
-  }
-  
 
   function formatLastActivityTime(time) {
     const units = {
@@ -127,31 +98,18 @@ function LibraryCard(props) {
 
               {imageLoaded?
 
-              <Card.Img
-                  variant="top"
-                  className="library-card-banner"
+               <Card.Img
+               variant="top"
+               className="library-card-banner"
                src={"/proxy/Items/Images/Primary?id=" + props.data.Id + "&fillWidth=800&quality=50"}
                onError={() =>setImageLoaded(false)}
-              />
+               />
                :
               default_image
               }
             </div>
           </Link>
 
-       <Link to={`/libraries/${props.data.Id}`}>
-            <div
-              className="library-card-banner"
-              style={{
-                backgroundImage: `url(${
-                  props.base_url +
-                  "/Items/" +
-                  props.data.Id +
-                  "/Images/Primary/?fillWidth=400&quality=90"
-                })`,
-              }}
-            />
-      </Link>
 
           <Card.Body className="library-card-details">
             <Row className="space-between-end card-row">
@@ -162,11 +120,6 @@ function LibraryCard(props) {
             <Row className="space-between-end card-row">
               <Col className="card-label">Type</Col>
               <Col className="text-end">{props.data.CollectionType==='tvshows' ? 'Series' : props.data.CollectionType==='movies'? "Movies" : props.data.CollectionType==='music'? "Music" : 'Mixed'}</Col>
-            </Row>
-
-            <Row className="space-between-end card-row">
-              <Col className="card-label">Total Time</Col>
-              <Col className="text-end">{ticksToTimeString(props.data && props.data.total_play_time ? props.data.total_play_time:0)}</Col>
             </Row>
 
             <Row className="space-between-end card-row">

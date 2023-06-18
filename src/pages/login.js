@@ -45,12 +45,12 @@ function Login() {
       username:JS_USERNAME,
         password: hashedPassword
 
-      }, {
-        headers: {
-          "Content-Type": "application/json",
-        },
-      })
-      .then(async (response) => {
+    }, {
+      headers: {
+        "Content-Type": "application/json",
+      },
+    })
+    .then(async (response) => {
 
 
         localStorage.setItem('token',response.data.token);
