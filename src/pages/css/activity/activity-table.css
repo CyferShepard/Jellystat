@@ -1,99 +1,132 @@
-div a
-{
-    text-decoration: none;
-    color: white;
-}
-
-.table-rows:hover
-{
-    background-color: rgba(0, 0, 0, 0.4);
-}
-
-.table-rows-content div:hover a
-{
-    color: #00A4DC;
-}
+@import '../variables.module.css';
 
 .activity-table
 {
-    background-color: rgba(100,100, 100, 0.2);
-    color: white;
+    background-color: var(--secondary-background-color);
+    color: white !important;
     
 }
 
-.table-rows-content{
-    margin-bottom: 10px;
-}
-
-
-.table-headers div {
-    background-color: rgba(0, 0, 0, 0.8);
-    border-bottom: 1px solid transparent;
-    border-right: 1px solid rgba(255, 255, 255, 0.05);
-    font-size: 1.2em;
-    cursor: pointer;
-}
-
-.table-headers div:hover {
-    border-bottom: 1px solid rgba(255, 255, 255, 0.5);
-}
-
-.table-headers, .table-rows-content
+td,th, td>button
 {
-    display: flex;
-    justify-content: space-between;
-    /* border-bottom: 1px solid rgba(255, 255, 255, 0.05); */
+  color: white !important;
+  background-color: var(--tertiary-background-color);
+
 }
 
-.table-headers div,
-.table-rows-content div
+th
 {
-  border-right: 1px solid rgba(255, 255, 255, 0.05);
+  color: white !important;
+  background-color: rgba(200, 200, 200, 0.2);
+
+}
+
+.activity-client:hover
+{
+  color: var(--secondary-color) !important;
+
+}
+.activity-client:hover > span
+{
+
+  cursor: pointer;
+}
+
+
+
+td > a
+{
+  color: white;
+}
+
+td:hover > a 
+{
+  color: var(--secondary-color);
+}
+
+.page-number {
+  margin-inline: 10px;
+  color: white;
+}
+
+select option {
+  background-color: var(--secondary-color);
+  outline: unset;
   width: 100%;
-  padding: 10px;
+  border: none;
+  
 }
 
-.table-headers div:last-child,
-.table-rows-content div:last-child
+.pagination-range .items
 {
-  border-right: none;
-
+background-color: rgb(255, 255, 255, 0.1);
+padding-inline: 10px;
 }
 
-.sub-table {
-    overflow: hidden;
-    max-height: 0; /* set the height to 0 to collapse the div */
-    opacity:0;
-    transition: all 0.3s ease;
+  .pagination-range .header
+{
+padding-inline: 10px;
+align-self: center;
   }
 
-  .collapsed {
-    transition: all 0.3s ease;
-    opacity: 100;
-    max-height: min-content;
+.pagination-range
+{
+width: 130px;
+height: 35px;
+color: white;
+display: flex;
+background-color:  var(--secondary-background-color);
+border-radius: 8px;
+font-size: 1.2em;
+align-self: flex-end;
+justify-content: space-between;
   }
 
-.sub-row{
-    color: darkgray;
-    margin-bottom: 0;
-}
-
-.sub-row a{
-    color: darkgray;
-}
-
-.sub-row a:hover{
-    color: #00A4DC;
-}
-
-
-
-.sub-row:last-child
+.pagination-range select
 {
-    margin-bottom: 50px;
+
+height: 35px;
+outline: none;
+border: none;
+border-radius: 8px;
+background-color: rgb(255, 255, 255, 0.1);
+color:white;
+font-size: 1em;
+
+
 }
 
-.bg-grey
+.page-btn
 {
-    background-color: rgb(100, 100, 100,0.2);
+  background-color:  var(--primary-color) !important;
+  border-color:  var(--primary-color)!important;
 }
+
+.MuiTableCell-head >  .Mui-active, .MuiTableSortLabel-icon
+{
+  color: var(--secondary-color) !important;
+}
+
+.MuiTableCell-head :hover
+{
+  color: var(--secondary-color) !important;
+}
+
+.modal-header
+{
+  color:  white;
+  border-bottom: none !important;
+}
+
+
+.modal-footer
+{
+  border-top: none !important;
+}
+
+
+.modal-content
+{
+  background-color:  var(--secondary-background-color) !important;
+}
+

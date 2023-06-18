@@ -27,7 +27,7 @@
             : null,
         SeriesName: item.SeriesName,
         SeriesId: item.SeriesId,
-        SeriesPrimaryImageTag: item.SeriesPrimaryImageTag,
+        SeriesPrimaryImageTag: item.SeriesPrimaryImageTag ? item.SeriesPrimaryImageTag : null,
       });
 
   module.exports = {

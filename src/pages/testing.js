@@ -9,7 +9,7 @@ import './css/library/libraries.css';
 // import LibraryOverView from './components/libraryOverview';
 // import HomeStatisticCards from './components/HomeStatisticCards';
 // import Sessions from './components/sessions/sessions';
-import DailyPlayStats from './components/statistics/daily-play-count';
+import MostActiveUsers from './components/statCards/most_active_users';
 
 
 
@@ -52,7 +52,7 @@ function Testing() {
   return (
     <div className='Activity'>
 
-  <DailyPlayStats/>
+  <MostActiveUsers/>
 
     </div>
 

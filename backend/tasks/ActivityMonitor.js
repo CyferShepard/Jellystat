@@ -18,7 +18,7 @@ async function ActivityMonitor(interval) {
       );
      
       
-      if(config.length===0)
+      if(!config || config.length===0)
       {
         return;
       }
@@ -171,7 +171,7 @@ async function ActivityMonitor(interval) {
       if(playbackToInsert.length>0)
       {
         let result=await db.insertBulk('jf_playback_activity',playbackToInsert,columnsPlayback);
-        console.log(result);
+        //  console.log(result);
       }
 
 
@@ -180,7 +180,17 @@ async function ActivityMonitor(interval) {
 
 
     } catch (error) {
-      // console.log(error);
+
+       if(error?.code==='ECONNREFUSED')
+       {
+        console.error('Error: Unable to connect to Jellyfin');
+       }else if(error?.code==='ERR_BAD_RESPONSE')
+       {
+        console.warn(error.response?.data);
+       }else
+       {
+        console.error(error);
+       }
       return [];
     }
   }, interval);

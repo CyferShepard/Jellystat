@@ -4,15 +4,22 @@ import axios from "axios";
 import Config from "../lib/config";
 import CryptoJS from 'crypto-js';
 import "./css/setup.css";
-// import LibrarySync from "./components/settings/librarySync";
+import Loading from "./components/general/loading";
+import Form from 'react-bootstrap/Form';
+import Button from 'react-bootstrap/Button';
+import { InputGroup,Row } from "react-bootstrap";
 
-// import Loading from './components/loading';
+import EyeFillIcon from 'remixicon-react/EyeFillIcon';
+import EyeOffFillIcon from 'remixicon-react/EyeOffFillIcon';
+
+
 
 function Signup() {
   const [config, setConfig] = useState(null);
   const [formValues, setFormValues] = useState({});
   const [processing, setProcessing] = useState(false);
   const [submitButtonText, setsubmitButtonText] = useState("Save");
+  const [showPassword, setShowPassword] = useState(false);
 
   function handleFormChange(event) {
     setFormValues({ ...formValues, [event.target.name]: event.target.value });
@@ -23,13 +30,13 @@ function Signup() {
     setProcessing(true);
     event.preventDefault();
 
-    let hashedPassword= CryptoJS.SHA3(formValues.password).toString();
+    let hashedPassword= CryptoJS.SHA3(formValues.JS_PASSWORD).toString();
 
     // Send a POST request to /api/setconfig/ with the updated configuration
     axios
       .post("/auth/createuser",
       {
-        username:formValues.username,
+        username:formValues.JS_USERNAME,
         password: hashedPassword
 
       }, {
@@ -76,38 +83,45 @@ function Signup() {
     }
   }, [config]);
 
+  if(!config)
+  {
+    return <Loading/>;
+  }
+
   return (
     <section>
-      <div className="form-box">
-        <form onSubmit={handleFormSubmit}>
-          <h2>Create User</h2>
-          <div className="inputbox">
-            <input
-              type="text"
-              id="username"
-              name="username"
-              value={formValues.username || ""}
-              onChange={handleFormChange}
-              required
-            />
-            <label htmlFor="username">Username</label>
-          </div>
-          <div className="inputbox">
-            <input
-              type="text"
-              id="password"
-              name="password"
-              value={formValues.password || ""}
-              onChange={handleFormChange}
-              required
-            />
-            <label htmlFor="password">Password</label>
-          </div>
+    <div className="form-box d-flex flex-column">
+    <h2>Sign Up</h2>
 
-          <button type="submit" className="setup-button">
+      <Form onSubmit={handleFormSubmit} className="mt-5">
+        <Form.Group as={Row} className="inputbox" >
+
+          
+            <Form.Control  id="JS_USERNAME"  name="JS_USERNAME" value={formValues.JS_USERNAME || ""} onChange={handleFormChange} placeholder=" "/>
+          
+          <Form.Label column>
+            Username
+          </Form.Label>
+        </Form.Group>
+
+        <Form.Group as={Row} className="inputbox" >
+
+          <InputGroup >
+            <Form.Control className="px-0"  id="JS_PASSWORD"  name="JS_PASSWORD" value={formValues.JS_PASSWORD || ""} onChange={handleFormChange} type={showPassword ? "text" : "password"} placeholder=" " />
+            <Button className="login-show-password" type="button" onClick={() => setShowPassword(!showPassword)}>{showPassword?<EyeFillIcon/>:<EyeOffFillIcon/>}</Button>
+            <Form.Label column >
+            Password
+          </Form.Label>
+          </InputGroup>
+
+        </Form.Group>
+
+
+        <Button type="submit" className="setup-button">
             {processing ? "Validating..." : submitButtonText}
-          </button>
-        </form>
+        </Button>
+
+      </Form>
       </div>
     </section>
   );

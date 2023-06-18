@@ -6,6 +6,8 @@ import ItemStatComponent from "./ItemStatComponent";
 
 import TvLineIcon from "remixicon-react/TvLineIcon";
 import FilmLineIcon from "remixicon-react/FilmLineIcon";
+import FileMusicLineIcon from "remixicon-react/FileMusicLineIcon";
+import CheckboxMultipleBlankLineIcon from "remixicon-react/CheckboxMultipleBlankLineIcon";
 
 function MVLibraries(props) {
   const [data, setData] = useState();
@@ -51,9 +53,14 @@ function MVLibraries(props) {
     return  <></>;
   }
 
+  const SeriesIcon=<TvLineIcon size={"100%"} /> ;
+  const MovieIcon=<FilmLineIcon size={"100%"} /> ;
+  const MusicIcon=<FileMusicLineIcon size={"100%"} /> ;
+  const MixedIcon=<CheckboxMultipleBlankLineIcon size={"100%"} /> ;
+
 
   return (
-    <ItemStatComponent icon={data[0].CollectionType==="tvshows"? <TvLineIcon color="white" size={'100%'}/> :  <FilmLineIcon color="white" size={'100%'}/> } data={data} heading={"MOST VIEWED LIBRARIES"} units={"Plays"}/>
+    <ItemStatComponent icon={data[0].CollectionType==="tvshows"? SeriesIcon: data[0].CollectionType==="movies"? MovieIcon : data[0].CollectionType==="music"? MusicIcon :MixedIcon} data={data} heading={"MOST VIEWED LIBRARIES"} units={"Plays"}/>
   );
 }
 

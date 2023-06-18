@@ -1,29 +1,32 @@
+@import '../variables.module.css';
 .show-key
 {
   margin-bottom: 20px;;
 }
 
 
+.settings{
+  background-color: var(--secondary-background-color);
+  padding: 20px;
+  border-radius: 8px;
+}
+
+.tasks {
+
+  color: white;
+  /* margin-inline: 10px; */
+
+}
+
 
 .settings-form {
 
     color: white;
-    /* width: 100%; */
     margin-top: 20px;
+    margin-inline: 10px;
 
   }
 
-  .settings-submit-button
-  {
-    background-color: #2196f3;
-    color: white;
-    padding: 10px 20px;
-    border-radius: 5px;
-    border: none;
-    cursor: pointer;
-    transition: all 0.3s ease-in-out;
-    margin-bottom: 10px;
-  }
 
   .form-row
   {
@@ -46,20 +49,6 @@
     max-width: 700px;
   }
 
-  /* .settings-form button {
-    background-color: #2196f3;
-    color: white;
-    padding: 10px 20px;
-    border-radius: 5px;
-    border: none;
-    cursor: pointer;
-    transition: all 0.3s ease-in-out;
-    margin-bottom: 10px;
-  } */
-
-  /* .settings-form button:hover {
-    background-color: #0d8bf2;
-  } */
 
   .submit
   {
@@ -67,22 +56,26 @@
     margin-bottom: 5px;
   }
 
-  .error
+
+
+
+  .settings-form > div> div> .form-control,
+  .settings-form > div> div> .input-group> .form-control
   {
-    color: #cc0000;
+    color: white !important;
+    background-color: var(--background-color) !important;
+    border-color: var(--background-color) !important;
   }
 
-  .success
+  .settings-form > div> div> .input-group> .btn
   {
-    color: #4BB543;
+    border: none !important;
   }
 
-  .critical
+  
+  .settings-form > div> div> .form-control:focus,
+  .settings-form > div> div> .input-group> .form-control:focus
   {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    color: #cc0000;
-
-    height: 90vh;
+    box-shadow: none !important;
+    border-color: var(--primary-color) !important;
   }

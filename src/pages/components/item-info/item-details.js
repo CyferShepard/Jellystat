@@ -70,7 +70,7 @@ function ItemDetails(props) {
           <div className="d-flex">
           <h1 className="">
             {props.data.SeriesId?
-               <Link to={`/item/${props.data.SeriesId}`}>{props.data.SeriesName || props.data.Name}</Link>
+               <Link to={`/libraries/item/${props.data.SeriesId}`}>{props.data.SeriesName || props.data.Name}</Link>
             :
               props.data.SeriesName || props.data.Name
             }
@@ -80,7 +80,7 @@ function ItemDetails(props) {
         </div>
 
         <div className="my-3">
-            {props.data.Type==="Episode"? <p><Link to={`/item/${props.data.SeasonId}`} className="fw-bold">{props.data.SeasonName}</Link> Episode {props.data.IndexNumber} - {props.data.Name}</p> : <></> }
+            {props.data.Type==="Episode"? <p><Link to={`/libraries/item/${props.data.SeasonId}`} className="fw-bold">{props.data.SeasonName}</Link> Episode {props.data.IndexNumber} - {props.data.Name}</p> : <></> }
             {props.data.Type==="Season"? <p>{props.data.Name}</p> : <></> }
             {props.data.FileName ?  <p style={{color:"lightgrey"}} className="fst-italic fs-6">File Name: {props.data.FileName}</p> :<></>}      
             {props.data.Path ? <p style={{color:"lightgrey"}} className="fst-italic fs-6">File Path: {props.data.Path}</p> :<></>}

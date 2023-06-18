@@ -1,12 +1,14 @@
+@import '../variables.module.css';
+
 .lib-card{
     color: white;
-    max-width: 400px;
+    /* max-width: 400px; */
 
 }
 
 .card-label
 {
-    color: #00A4DC;
+    color: var(--secondary-color);
 }
 
 .card-row .col
@@ -18,7 +20,9 @@
 .library-card-image
 {
     max-height: 170px;
+
     overflow: hidden;
+    border-radius: 8px 8px 0px 0px;
 
 }
 .library-card-banner
@@ -28,7 +32,7 @@
     background-repeat: no-repeat;
     background-size: cover;
     transition: all 0.2s ease-in-out;
-
+    max-height: 170px;
     
 }
 
@@ -39,7 +43,14 @@
 
 .library-card-details
 {
-    background-color: rgb(100, 100, 100,0.2) !important;
+    background-color: var(--secondary-background-color) !important;
 }
 
 
+.default_library_image
+{
+    background-color: var(--secondary-background-color);
+    width: 100%;
+    height: 170px;
+    border-radius: 8px 8px 0px 0px;
+}

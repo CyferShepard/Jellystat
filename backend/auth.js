@@ -3,7 +3,11 @@ const db = require("./db");
 const jwt = require('jsonwebtoken');
 
 
-const JWT_SECRET = process.env.JWT_SECRET ||'my-secret-jwt-key';
+const JWT_SECRET = process.env.JWT_SECRET;
+if (JWT_SECRET === undefined) {
+  console.log('JWT Secret cannot be undefined');
+  process.exit(1); // end the program with error status code
+}
 
 const router = express.Router();
 
@@ -13,8 +17,9 @@ router.post('/login', async (req, res) => {
     try{
       const { username, password } = req.body;
         
-      const { rows : login } = await db.query(`SELECT * FROM app_config where "APP_USER"='${username}' and "APP_PASSWORD"='${password}'`);
-  
+      const query = 'SELECT * FROM app_config WHERE ("APP_USER" = $1 AND "APP_PASSWORD" = $2) OR "REQUIRE_LOGIN" = false';
+      const values = [username, password];
+      const { rows: login } = await db.query(query, values);
       if(login.length>0)
       {
         const user = { id: 1, username: username };
@@ -44,9 +49,25 @@ router.post('/login', async (req, res) => {
   
       if(Configured.length>0)
       {
-        res.sendStatus(200);
+      if(Configured[0].JF_API_KEY && Configured[0].APP_USER && Configured[0].JF_API_KEY!==null  && Configured[0].APP_USER!==null)
+      {
+        
+        res.status(200);
+        res.send({state:2});
+      }else
+      if(Configured[0].APP_USER && Configured[0].APP_USER!==null)
+      {
+        
+        res.status(200);
+        res.send({state:1});
+      }else
+      {
+        res.status(200);
+        res.send({state:0});
+      }
       }else{
-        res.sendStatus(204);
+        res.status(200);
+        res.send({state:0});
       }
    
     }catch(error)

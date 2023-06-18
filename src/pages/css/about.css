@@ -1,0 +1,20 @@
+@import './variables.module.css';
+.about
+{
+    background-color: var(--second-background-color) !important;
+    border-color: transparent !important;
+    color: white !important;
+
+  
+}
+
+.about a
+{
+    text-decoration: none;
+}
+
+.about a:hover
+{
+    text-decoration: underline;
+}
+

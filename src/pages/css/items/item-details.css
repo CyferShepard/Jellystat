@@ -1,17 +1,23 @@
+@import '../variables.module.css';
 .item-detail-container
 {
     color:white;
-    background-color: rgb(100, 100, 100,0.2);
-    padding: 20px;
+    background-color:  var(--secondary-background-color);
     margin: 20px 0;
-    border-radius: 8px;    
+}
+
+.item-banner-image
+{
+    margin-right: 20px;
 }
 
 .item-name
 {
-    font-size: 2.5em;
-    font-weight: 500;
-    margin: 0;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 1;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 .item-image
 {
@@ -20,3 +26,15 @@
     object-fit: cover;
 }
 
+.item-details div a{
+    text-decoration: none !important;
+    color: white !important;
+  }
+  
+  .item-details div a:hover{
+    color: var(--secondary-color) !important;
+  }
+  
+  .hide-tab-titles {
+    display: none !important;
+  }

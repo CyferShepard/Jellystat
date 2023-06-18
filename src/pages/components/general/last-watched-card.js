@@ -33,16 +33,15 @@ function LastWatchedCard(props) {
   const [loaded, setLoaded] = useState(false);
   return (
     <div className="last-card">
-     <Link to={`/item/${props.data.EpisodeId||props.data.Id}`}>
+     <Link to={`/libraries/item/${props.data.EpisodeId||props.data.Id}`}>
       <div className="last-card-banner">
-        {loaded ? null : <Blurhash hash={props.data.PrimaryImageHash} width={'100%'}   height={'100%'}/>}
+        {!loaded && props.data.PrimaryImageHash && props.data.PrimaryImageHash!=null ? <Blurhash hash={props.data.PrimaryImageHash} width={'100%'}   height={'100%'} className="rounded-3 overflow-hidden"/> : null}
         <img
           src={
             `${
-              props.base_url +
-                "/Items/" +
+                "/Proxy/Items/Images/Primary?id=" +
                 props.data.Id +
-                "/Images/Primary?fillHeight=320&fillWidth=213&quality=50"}`
+                "&fillHeight=320&fillWidth=213&quality=50"}`
           }
           alt=""
           onLoad={() => setLoaded(true)}

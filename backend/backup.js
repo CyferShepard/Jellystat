@@ -3,8 +3,11 @@ const { Pool } = require('pg');
 const fs = require('fs');
 const path = require('path');
 const moment = require('moment');
+const { randomUUID }  = require('crypto');
+const multer = require('multer');
 
-const wss = require("./WebsocketHandler");
+// const wss = require("./WebsocketHandler");
+const Logging =require('./logging');
 
 const router = Router();
 
@@ -18,9 +21,19 @@ const postgresDatabase = process.env.POSTGRES_DATABASE || 'jfstat';
 // Tables to back up
 const tables = ['jf_libraries', 'jf_library_items', 'jf_library_seasons','jf_library_episodes','jf_users','jf_playback_activity','jf_playback_reporting_plugin_data','jf_item_info'];
 
-
+function checkFolderWritePermission(folderPath) {
+  try {
+    const testFile = `${folderPath}/.writableTest`;
+    fs.writeFileSync(testFile, '');
+    fs.unlinkSync(testFile);
+    return true;
+  } catch (error) {
+    return false;
+  }
+}
 // Backup function
-async function backup() {
+async function backup(refLog) {
+  refLog.logData.push({ color: "lawngreen", Message: "Starting Backup" });
   const pool = new Pool({
     user: postgresUser,
     password: postgresPassword,
@@ -35,23 +48,39 @@ async function backup() {
   try{
 
   let now = moment();
+  const backupfolder='./backup-data';
+
+  if (!fs.existsSync(backupfolder)) {
+    fs.mkdirSync(backupfolder);
+    console.log('Directory created successfully!');
+  }
+  if (!checkFolderWritePermission(backupfolder)) {
+    console.error('No write permissions for the folder:', backupfolder);
+    refLog.logData.push({ color: "red", Message: "Backup Failed: No write permissions for the folder: "+backupfolder });
+    refLog.logData.push({ color: "red", Message: "Backup Failed with errors"});
+    refLog.result='Failed';
+    await pool.end();
+    return;
+
+  }
+  
+
   const backupPath = `./backup-data/backup_${now.format('yyyy-MM-DD HH-mm-ss')}.json`;
   const stream = fs.createWriteStream(backupPath, { flags: 'a' });
   stream.on('error', (error) => {
-    console.error(error);
-    wss.sendMessageToClients({ color: "red", Message: "Backup Failed: "+error });
-    throw new Error(error);
+    refLog.logData.push({ color: "red", Message: "Backup Failed: "+error });
+    refLog.result='Failed';
+    return;
   });
   const backup_data=[];
   
-  wss.clearMessages();
-  wss.sendMessageToClients({ color: "yellow", Message: "Begin Backup "+backupPath });
+  refLog.logData.push({ color: "yellow", Message: "Begin Backup "+backupPath });
   for (let table of tables) {
     const query = `SELECT * FROM ${table}`;
 
     const { rows } = await pool.query(query);
     console.log(`Reading ${rows.length} rows for table ${table}`);
-    wss.sendMessageToClients({color: "dodgerblue",Message: `Saving ${rows.length} rows for table ${table}`});
+    refLog.logData.push({color: "dodgerblue",Message: `Saving ${rows.length} rows for table ${table}`});
 
     backup_data.push({[table]:rows});
     
@@ -60,12 +89,13 @@ async function backup() {
 
     await stream.write(JSON.stringify(backup_data));
     stream.end();
-    wss.sendMessageToClients({ color: "lawngreen", Message: "Backup Complete" });
+    refLog.logData.push({ color: "lawngreen", Message: "Backup Complete" });
 
   }catch(error)
   {
     console.log(error);
-    wss.sendMessageToClients({ color: "red", Message: "Backup Failed: "+error });
+    refLog.logData.push({ color: "red", Message: "Backup Failed: "+error });
+    refLog.result='Failed';
   }
  
 
@@ -88,9 +118,10 @@ function readFile(path) {
   });
 }
 
-async function restore(file) {
-  wss.clearMessages();
-  wss.sendMessageToClients({ color: "yellow", Message: "Restoring from Backup: "+file });
+async function restore(file,logData,result) {
+
+  logData.push({ color: "lawngreen", Message: "Starting Restore" });
+  logData.push({ color: "yellow", Message: "Restoring from Backup: "+file });
   const pool = new Pool({
     user: postgresUser,
     password: postgresPassword,
@@ -108,6 +139,9 @@ async function restore(file) {
       jsonData = await readFile(backupPath);
 
     } catch (err) {
+      logData.push({ color: "red",key:tableName ,Message: `Failed to read backup file`});
+        
+      result='Failed';
       console.error(err);
     }
 
@@ -126,8 +160,7 @@ async function restore(file) {
       for(let index in data)
       {
 
-        wss.sendMessageToClients({ color: "dodgerblue",key:tableName ,Message: `Restoring ${tableName} ${(((index)/(data.length-1))*100).toFixed(2)}%`});
-
+        logData.push({ color: "dodgerblue",key:tableName ,Message: `Restoring ${tableName} ${(((index)/(data.length-1))*100).toFixed(2)}%`});
         const keysWithQuotes = Object.keys(data[index]).map(key => `"${key}"`);
         const keyString = keysWithQuotes.join(", ");
 
@@ -149,18 +182,40 @@ async function restore(file) {
         const query=`INSERT INTO ${tableName} (${keyString}) VALUES(${valueString})  ON CONFLICT DO NOTHING`;
         const { rows } = await pool.query( query );
 
+
       }
   
 
     }
     await pool.end();
+    logData.push({ color: "lawngreen", Message: "Restore Complete" });
 
   }
 
 // Route handler for backup endpoint
 router.get('/backup', async (req, res) => {
   try {
-    await backup();
+    let startTime = moment();
+    let refLog={logData:[],result:'Success'};
+    await backup(refLog);
+
+    let endTime = moment();
+    let diffInSeconds = endTime.diff(startTime, 'seconds');
+    const uuid = randomUUID();
+    const log=
+    {
+      "Id":uuid,
+      "Name":"Backup",
+      "Type":"Task",
+      "ExecutionType":"Manual",
+      "Duration":diffInSeconds || 0,
+      "TimeRun":startTime,
+      "Log":JSON.stringify(refLog.logData),
+      "Result": refLog.result
+  
+    };
+  
+    Logging.insertLog(log);
     res.send('Backup completed successfully');
   } catch (error) {
     console.error(error);
@@ -169,16 +224,39 @@ router.get('/backup', async (req, res) => {
 });
 
 router.get('/restore/:filename', async (req, res) => {
+  let startTime = moment();
+  let logData=[];
+  let result='Success';
     try {
       const filePath = path.join(__dirname, backupfolder, req.params.filename);
-      await restore(filePath);
-      wss.sendMessageToClients({ color: "lawngreen", Message: `Restoring Complete` });
+   
+      await restore(filePath,logData,result);
+
       res.send('Restore completed successfully');
     } catch (error) {
       console.error(error);
-      wss.sendMessageToClients({ color: "red", Message: error });
       res.status(500).send('Restore failed');
     }
+
+    let endTime = moment();
+      let diffInSeconds = endTime.diff(startTime, 'seconds');
+      const uuid = randomUUID();
+
+      const log=
+      {
+        "Id":uuid,
+        "Name":"Restore",
+        "Type":"Task",
+        "ExecutionType":"Manual",
+        "Duration":diffInSeconds,
+        "TimeRun":startTime,
+        "Log":JSON.stringify(logData),
+        "Result": result
+    
+      };
+    
+      
+      Logging.insertLog(log);
   });
 
   //list backup files
@@ -186,6 +264,8 @@ router.get('/restore/:filename', async (req, res) => {
 
   
   router.get('/files', (req, res) => {
+    try
+    {  
     const directoryPath = path.join(__dirname, backupfolder);
     fs.readdir(directoryPath, (err, files) => {
       if (err) {
@@ -204,6 +284,12 @@ router.get('/restore/:filename', async (req, res) => {
         res.json(fileData);
       }
     });
+
+    }catch(error)
+    {
+        console.log(error);
+    }
+  
   });
 
 
@@ -215,9 +301,10 @@ router.get('/restore/:filename', async (req, res) => {
 
   //delete backup
   router.delete('/files/:filename', (req, res) => {
+
+    try{
     const filePath = path.join(__dirname, backupfolder, req.params.filename);
   
-    try{
       fs.unlink(filePath, (err) => {
         if (err) {
           console.error(err);
@@ -235,10 +322,35 @@ router.get('/restore/:filename', async (req, res) => {
     }
 
   });
+
+  
+  const storage = multer.diskStorage({
+    destination: function (req, file, cb) {
+      cb(null, path.join(__dirname, backupfolder)); // Set the destination folder for uploaded files
+    },
+    filename: function (req, file, cb) {
+      cb(null, file.originalname); // Set the file name
+    },
+  });
+  
+  const upload = multer({ storage: storage });
+  
+  
+  router.post("/upload", upload.single("file"), (req, res) => {
+    // Handle the uploaded file here
+    res.json({
+      fileName: req.file.originalname,
+      filePath: req.file.path,
+    });
+  });
   
   
   
 
 
 
-module.exports = router;
+module.exports = 
+{
+  router,
+  backup
+};

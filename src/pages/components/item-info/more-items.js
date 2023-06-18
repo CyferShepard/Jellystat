@@ -69,7 +69,7 @@ function MoreItems(props) {
         <h1 className="my-3">{props.data.Type==="Season" ? "Episodes" : "Seasons"}</h1>
         <div className="last-played-container">
         
-         {data.map((item) => (
+         {data.sort((a,b) => a.IndexNumber-b.IndexNumber).map((item) => (
                      <MoreItemCards data={item} base_url={config.hostUrl} key={item.Id}/>
           ))}
 

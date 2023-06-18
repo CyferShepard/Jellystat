@@ -5,8 +5,9 @@ import RecentlyAddedCard from "./RecentlyAdded/recently-added-card";
 
 import Config from "../../../lib/config";
 import "../../css/users/user-details.css";
+import ErrorBoundary from "../general/ErrorBoundary";
 
-function RecentlyPlayed(props) {
+function RecentlyAdded(props) {
   const [data, setData] = useState();
   const [config, setConfig] = useState();
 
@@ -22,32 +23,27 @@ function RecentlyPlayed(props) {
         }
       };
       
-    const fetchAdmin = async () => {
+
+
+    const fetchData = async () => {
       try {
-        let url=`/api/getAdminUsers`;
-        const adminData = await axios.get(url, {
+        let url=`/stats/getRecentlyAdded`;
+        if(props.LibraryId)
+        {
+            url+=`?libraryid=${props.LibraryId}`;
+      }
+
+        const itemData = await axios.get(url, {
           headers: {
             Authorization: `Bearer ${config.token}`,
             "Content-Type": "application/json",
           },
         });
-         return adminData.data[0].Id;
-        // setData(itemData.data);
-      } catch (error) {
-        console.log(error);
-      }
-    };
-
-    const fetchData = async () => {
-      try {
-        let adminId=await fetchAdmin();
-        let url=`${config.hostUrl}/users/${adminId}/Items/latest?parentId=${props.LibraryId}`;
-        const itemData = await axios.get(url, {
-          headers: {
-            "X-MediaBrowser-Token": config.apiKey,
-          },
-        });
-        setData(itemData.data);
+        
+        if(itemData && typeof itemData.data === 'object' && Array.isArray(itemData.data))
+        {
+          setData(itemData.data.filter((item) => ["Series", "Movie","Audio"].includes(item.Type)));
+        }
       } catch (error) {
         console.log(error);
       }
@@ -66,7 +62,11 @@ function RecentlyPlayed(props) {
   }, [data,config, props.LibraryId]);
 
 
-  if (!data || !config) {
+  if (!data && !config) {
+    return <></>;
+  }
+
+  if (!data && config) {
     return <></>;
   }
 
@@ -74,8 +74,10 @@ function RecentlyPlayed(props) {
     <div className="last-played">
         <h1 className="my-3">Recently Added</h1>
         <div className="last-played-container">
-        {data.filter((item) => ["Series", "Movie","Audio"].includes(item.Type)).map((item) => (
-                    <RecentlyAddedCard data={item} base_url={config.hostUrl} key={item.Id}/>
+        {data && data.map((item) => (
+                <ErrorBoundary key={item.Id}>
+                    <RecentlyAddedCard data={item} base_url={config.hostUrl} />
+                </ErrorBoundary>
           ))}
 
         </div>
@@ -84,4 +86,4 @@ function RecentlyPlayed(props) {
   );
 }
 
-export default RecentlyPlayed;
+export default RecentlyAdded;

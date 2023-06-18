@@ -1,24 +1,28 @@
+@import './variables.module.css';
 .grid-stat-cards
 {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(320px, 520px));
+  grid-template-columns: repeat(auto-fit, minmax(auto, 520px));
   grid-auto-rows: 200px;/* max-width+offset so 215 + 20*/
-  /* margin-right: 20px; */
   margin-top: 8px;
+  background-color: var(--secondary-background-color);
+  border-radius: 8px;
+  padding: 20px;
 }
 .stat-card{
   border: 0 !important;
-  background-color: rgba(100 100 100 / 0.1) !important;
+  background-color: var(--background-color)!important;
   color: white;
   max-width: 500px;
   max-height: 180px;
-  border-radius: 8px !important;
 }
 
 .stat-card-banner
 {
   max-width: 120px !important;
 }
+
+
 
 
 
@@ -30,7 +34,12 @@
 .stat-card-icon
 {
   width: 120px !important;
-  height: 180px;
+
+
+  position: relative;
+  top: 50%;
+  left: 65%;
+  transform: translate(-50%, -50%);
 }
 
 
@@ -44,9 +53,8 @@
   color: grey;
 }
 .stat-item-count {
-  /* width: 10%; */
   text-align: right;
-  color: #00A4DC;
+  color:  var(--secondary-color);
   font-weight: 500;
   font-size: 1.1em;
 
@@ -70,7 +78,7 @@
   height: 35px;
   color: white;
   display: flex;
-  background-color: rgb(100, 100, 100,0.3);
+  background-color:  var(--secondary-background-color);
   border-radius: 8px;
   font-size: 1.2em;
   align-self: flex-end;
@@ -112,4 +120,13 @@ input[type=number] {
 {
   padding-inline: 10px;
   align-self: center;
+}
+
+.stat-items div a{
+  text-decoration: none !important;
+  color: white !important;
+}
+
+.stat-items div a:hover{
+  color:  var(--secondary-color) !important;
 }

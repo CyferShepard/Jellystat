@@ -1,0 +1,46 @@
+@import '../variables.module.css';
+.version
+{
+    background-color: var(--background-color) !important;
+
+    color: white !important;
+    position: fixed !important;
+    bottom: 0;
+    max-width: 200px;
+    text-align: center;
+    width: 100%;
+
+  
+}
+
+
+.version a
+{
+    text-decoration: none;
+}
+
+.version a:hover
+{
+    text-decoration: underline;
+}
+
+.nav-pills > .nav-item , .nav-pills > .nav-item > .nav-link
+{
+    color: white !important;
+}
+
+.nav-pills > .nav-item .active  
+{
+    background-color: var(--primary-color) !important;
+    color: white !important;
+}
+
+.nav-pills > .nav-item :hover
+{
+    background-color: var(--primary-color) !important;
+}
+
+.nav-pills > .nav-item  .active> .nav-link
+{
+   color: white;
+}

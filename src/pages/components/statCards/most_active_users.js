@@ -10,6 +10,7 @@ function MostActiveUsers(props) {
   const [data, setData] = useState();
   const [days, setDays] = useState(30); 
   const [config, setConfig] = useState(null);
+  const [loaded, setLoaded]= useState(true);
 
 
   useEffect(() => {
@@ -64,19 +65,23 @@ function MostActiveUsers(props) {
   }, [data, config, days,props.days]);
 
 
-
-  // const handleImageError = () => {
-  //   setImgError(true);
-  // };
-
-
   if (!data || data.length === 0) {
     return  <></>;
   }
 
+  const UserImage = () => {
+    return (
+      <img src={`Proxy/Users/Images/Primary?id=${data[0].UserId}&fillWidth=100&quality=50`} 
+      width="100%" 
+      style={{borderRadius:'50%'}}
+      alt=""
+      onError={()=>setLoaded(false)}
+      />
+    );
+  };
 
   return (
-    <ItemStatComponent base_url={config.hostUrl} icon={<AccountCircleFillIcon color="white" size={"100%"}/>} data={data} heading={"MOST ACTIVE USERS"} units={"Plays"}/>
+    <ItemStatComponent icon={loaded ? <UserImage/> : <AccountCircleFillIcon size="100%" />}  data={data} heading={"MOST ACTIVE USERS"} units={"Plays"}/>
   );
 }
 

@@ -20,7 +20,14 @@
 - Jellyfin Statistics Plugin Integration
 - More to come
 
-## Getting Started
+## Getting Started with Development
+- Clone the project from git
+- set your env variables before strating the server (Variable names as per the docker compose file).
+- Run `npm init` to install necessary packages
+- Run `npm run start-server` to only run the backend nodejs server
+- Run `npm run start` to only run the frontend React UI
+- Run `npm run start-app` to run both backend and frontend at the same time
+
 
 ### Launching Jellystat using Docker
 
@@ -37,6 +44,7 @@ https://hub.docker.com/r/cyfershepard/jellystat
 ## Support
 
 - Bug reports and feature requests can be submitted via [GitHub Issues](https://github.com/CyferShepard/Jellystat/issues).
+- Join us in our [Discord](https://discord.gg/9SMBj2RyEe)
 
 ## API Documentation
 

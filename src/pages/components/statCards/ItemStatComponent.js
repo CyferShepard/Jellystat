@@ -4,6 +4,7 @@ import { Link } from "react-router-dom";
 import Card from 'react-bootstrap/Card';
 import Row from 'react-bootstrap/Row';
 import Col from 'react-bootstrap/Col';
+import  Tooltip  from "@mui/material/Tooltip";
 
 function ItemStatComponent(props) {
   const [loaded, setLoaded] = useState(false);
@@ -12,16 +13,16 @@ function ItemStatComponent(props) {
     setLoaded(true);
   }
 
-
+  const backgroundImage=`/proxy/Items/Images/Backdrop?id=${props.data[0].Id}&fillWidth=300&quality=10`;
 
   const cardStyle = {
-    backgroundImage: `url(${props.base_url}/Items/${props.data[0].Id}/Images/Backdrop/?fillWidth=300&quality=10), linear-gradient(to right, #00A4DC, #AA5CC3)`,
+    backgroundImage: `url(${backgroundImage}), linear-gradient(to right, #00A4DC, #AA5CC3)`,
     height:'100%',
     backgroundSize: 'cover',
   };
 
   const cardBgStyle = {
-    backdropFilter: 'blur(5px)',
+    backdropFilter: props.base_url ? 'blur(5px)' : 'blur(0px)',
     backgroundColor: 'rgb(0, 0, 0, 0.6)',
     height:'100%',
   };
@@ -43,14 +44,14 @@ function ItemStatComponent(props) {
             </div>
               :
               <>
-                {!loaded && (
+                {props.data && props.data[0] && props.data[0].PrimaryImageHash && props.data[0].PrimaryImageHash!=null && !loaded && (
                   <div className="position-absolute w-100 h-100">
-                    <Blurhash hash={props.data[0].PrimaryImageHash} width="100%" height="100%" />
+                    <Blurhash hash={props.data[0].PrimaryImageHash}  height={'100%'} className="rounded-3 overflow-hidden"/>
                   </div>
                 )}
                 <Card.Img
                   className="stat-card-image"
-                  src={props.base_url + "/Items/" + props.data[0].Id + "/Images/Primary?fillWidth=400&quality=90"}
+                  src={"Proxy/Items/Images/Primary?id=" + props.data[0].Id + "&fillWidth=400&quality=90"}
                   style={{ display: loaded ? 'block' : 'none' }}
                   onLoad={handleImageLoad}
                   onError={() => setLoaded(false)}
@@ -59,9 +60,9 @@ function ItemStatComponent(props) {
             }
 
           </Col>
-          <Col  className="stat-card-info w-100">
+          <Col  className="w-100">
             <Card.Body  className="w-100" >
-            <Card.Header className="d-flex justify-content-between border-0 p-0 bg-transparent stat-header">
+            <Card.Header className="d-flex justify-content-between border-0 p-0 bg-transparent">
                 <div>
                   <Card.Subtitle className="stat-items">{props.heading}</Card.Subtitle>
                 </div>
@@ -76,21 +77,31 @@ function ItemStatComponent(props) {
                   <div className="d-flex justify-content-between" key={item.Id || index}>
                     <Card.Text className="stat-item-index m-0">{index + 1}</Card.Text>
                     {item.UserId ? 
-                    <Link to={`/users/${item.UserId}`}>
-                      <Card.Text>{item.Name}</Card.Text>
+                    <Link to={`/users/${item.UserId}`}  className="item-name">
+                      <Tooltip title={item.Name} >
+                         <Card.Text>{item.Name}</Card.Text>
+                      </Tooltip>
+                    
                     </Link>
                     :
                       !item.Client && !props.icon ? 
-                      <Link to={`/item/${item.Id}`}>
-                        <Card.Text>{item.Name}</Card.Text>
+                      <Link to={`/libraries/item/${item.Id}`}  className="item-name">
+ 
+                        <Tooltip title={item.Name} >
+                          <Card.Text>{item.Name}</Card.Text>
+                        </Tooltip>
                       </Link>
                       :
                         !item.Client && props.icon ? 
-                        <Link to={`/libraries/${item.Id}`}>
-                          <Card.Text>{item.Name}</Card.Text>
+                        <Link to={`/libraries/${item.Id}`}  className="item-name">
+                          <Tooltip title={item.Name} >
+                           <Card.Text>{item.Name}</Card.Text>
+                          </Tooltip>
                         </Link>
                         :
-                        <Card.Text>{item.Client}</Card.Text>
+                        <Tooltip title={item.Client} >
+                          <Card.Text>{item.Client}</Card.Text>
+                       </Tooltip>
                     }
                   </div>
                   
