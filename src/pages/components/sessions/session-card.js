@@ -62,102 +62,112 @@ function sessionCard(props) {
   
   return (
     <Card className="stat-card" style={cardStyle}>
-    <div style={cardBgStyle}>
+    <div style={cardBgStyle} className="rounded-top">
       <Row className="h-100">
-        <Col className="stat-card-banner">
+        <Col className="d-none d-lg-block stat-card-banner">
               <Card.Img
                 variant="top"
-                className="stat-card-image rounded-0"
+                className="stat-card-image rounded-0 rounded-start"
                 src={"/Proxy/Items/Images/Primary?id=" + (props.data.session.NowPlayingItem.SeriesId ? props.data.session.NowPlayingItem.SeriesId : props.data.session.NowPlayingItem.Id) + "&fillHeight=320&fillWidth=213&quality=50"}
               />
 
 
         </Col>
-        <Col  className="w-100 mt-auto ">
+        <Col  className="w-100 h-100">
 
-          <Card.Body  className="w-100 pb-2" >
-            <Container className="p-0">
-              <Row className="position-absolute top-0">
-                  <Col className="col-auto d-flex justify-content-center">
-                  <img
-                   className="card-device-image"
-                   src={
-                  "/proxy/web/assets/img/devices/?devicename=" 
-                  +
-                  (props.data.session.Client.toLowerCase().includes("web") ? 
-                  ( clientData.find(item => props.data.session.DeviceName.toLowerCase().includes(item)) || "other")
-                  :
-                  ( clientData.find(item => props.data.session.Client.toLowerCase().includes(item)) || "other")
-                  )}
-                  alt=""
-                   />
-                  </Col>
-                 
-                  <Col>
-                    <Row> {props.data.session.DeviceName}</Row>
-                    <Row>    {props.data.session.Client + " " + props.data.session.ApplicationVersion}</Row>
-                    <Row>    {props.data.session.PlayState.PlayMethod+' '+ (props.data.session.NowPlayingItem.MediaStreams ? '( '+props.data.session.NowPlayingItem.MediaStreams.find(stream => stream.Level>0)?.Codec.toUpperCase()+(props.data.session.TranscodingInfo? ' - '+props.data.session.TranscodingInfo.VideoCodec.toUpperCase() : '')+' - '+convertBitrate(props.data.session.TranscodingInfo ? props.data.session.TranscodingInfo.Bitrate :props.data.session.NowPlayingItem.MediaStreams.find(stream => stream.Level>0)?.BitRate)+' )':'')}</Row>
+          <Card.Body  className="w-100 h-100 p-1 pb-2" >
+            <Container className="h-100 d-flex flex-column">
+              <Row className="d-flex flex-row flex-grow-1 justify-content-between">
+
+                  <Col className="col-auto">
+                    <Row className="ellipse"> {props.data.session.DeviceName}</Row>
+                    <Row className="ellipse card-client-version"> {props.data.session.Client + " " + props.data.session.ApplicationVersion}</Row>
+                    <Row className="d-flex flex-column flex-md-row">    
+                      <Col className="px-0 col-auto">{props.data.session.PlayState.PlayMethod}</Col> 
+                      <Col className="px-0 px-md-2 col-auto ellipse">{(props.data.session.NowPlayingItem.MediaStreams ? '( '+props.data.session.NowPlayingItem.MediaStreams.find(stream => stream.Type==='Video')?.Codec.toUpperCase()+(props.data.session.TranscodingInfo? ' - '+props.data.session.TranscodingInfo.VideoCodec.toUpperCase() : '')+' - '+convertBitrate(props.data.session.TranscodingInfo ? props.data.session.TranscodingInfo.Bitrate :props.data.session.NowPlayingItem.MediaStreams.find(stream => stream.Type==='Video')?.BitRate)+' )':'')}</Col>
+                    </Row>
                     
                   </Col>
-              </Row>
-
-              <Row className="justify-content-between">
-                <Col>
-                   <Card.Text>
-                   <Link to={`/libraries/item/${props.data.session.NowPlayingItem.Id}`} target="_blank">
-                     {props.data.session.NowPlayingItem.SeriesName ? (props.data.session.NowPlayingItem.SeriesName+" - "+ props.data.session.NowPlayingItem.Name) : (props.data.session.NowPlayingItem.Name)}
-                   </Link> 
-                   </Card.Text>
-                </Col>
 
 
-                <Col className="col-auto">
-                   <Row className="d-flex">
-                      <Col className="col-auto px-0">
-                        {props.data.session.UserPrimaryImageTag !== undefined ? (
-                          <img
-                            className="card-user-image"
-                            src={
-                              "/Proxy/Users/Images/Primary?id=" +
-                              props.data.session.UserId +
-                              "&quality=50"
-                            }
-                            alt=""
-                          />
-                        ) : (
-                          <AccountCircleFillIcon />
-                        )}
-                      </Col>
-
-                      <Col className="col-auto">
-                       <Card.Text className="text-end">
-                          <Tooltip title={props.data.session.UserName} >
-                             <Link to={`/users/${props.data.session.UserId}`}>{props.data.session.UserName}</Link> 
-                          </Tooltip>
-                       </Card.Text>
-                      </Col>
-           
-                      </Row>
-                </Col>
+                  <Col className="col-auto d-flex justify-content-center">
+                    <img
+                     className="card-device-image"
+                     src={
+                    "/proxy/web/assets/img/devices/?devicename=" 
+                    +
+                    (props.data.session.Client.toLowerCase().includes("web") ? 
+                    ( clientData.find(item => props.data.session.DeviceName.toLowerCase().includes(item)) || "other")
+                    :
+                    ( clientData.find(item => props.data.session.Client.toLowerCase().includes(item)) || "other")
+                    )}
+                    alt=""
+                     />
+                  </Col>
+                 
               </Row>
 
               {props.data.session.NowPlayingItem.Type==='Episode' ? 
-                
-                <Row>
-
-                <Col className="col-auto">
-                         <Card.Text className="text-end">
-                            {'S'+props.data.session.NowPlayingItem.ParentIndexNumber +' - E'+ props.data.session.NowPlayingItem.IndexNumber}
-                         </Card.Text>
-                        </Col>
+                <Row className="d-flex flex-row justify-content-between">
+                  <Col className="p-0">
+                     <Card.Text>
+                     <Link to={`/libraries/item/${props.data.session.NowPlayingItem.Id}`} target="_blank"  className="item-name"> 
+                       {props.data.session.NowPlayingItem.SeriesName ? (props.data.session.NowPlayingItem.SeriesName+" - "+ props.data.session.NowPlayingItem.Name) : (props.data.session.NowPlayingItem.Name)}
+                     </Link> 
+                     </Card.Text>
+                  </Col>
                 </Row>
                 :
                 <></>
-              
               }
 
+             
+                
+                <Row className="d-flex flex-row justify-content-between">
+                    {props.data.session.NowPlayingItem.Type==='Episode' ? 
+                      <Col className="col-auto p-0">
+                               <Card.Text >
+                                  {'S'+props.data.session.NowPlayingItem.ParentIndexNumber +' - E'+ props.data.session.NowPlayingItem.IndexNumber}
+                               </Card.Text>
+                      </Col>
+
+                    :
+                      <Col className="p-0">
+                          <Card.Text>
+                          <Link to={`/libraries/item/${props.data.session.NowPlayingItem.Id}`} target="_blank"  className="item-name"> 
+                            {props.data.session.NowPlayingItem.SeriesName ? (props.data.session.NowPlayingItem.SeriesName+" - "+ props.data.session.NowPlayingItem.Name) : (props.data.session.NowPlayingItem.Name)}
+                          </Link> 
+                          </Card.Text>
+                      </Col>
+                    }
+
+                <Col className="d-flex flex-row justify-content-end text-end col-auto">
+
+                {props.data.session.UserPrimaryImageTag !== undefined ? (
+                    <img
+                      className="session-card-user-image"
+                      src={
+                        "/Proxy/Users/Images/Primary?id=" +
+                        props.data.session.UserId +
+                        "&quality=50"
+                      }
+                      alt=""
+                    />
+                  ) : (
+                    <AccountCircleFillIcon  className="session-card-user-image"/>
+                  )}
+                 <Card.Text >
+                    <Tooltip title={props.data.session.UserName} >
+                       <Link to={`/users/${props.data.session.UserId}`} className="item-name" style={{maxWidth:'15ch'}}>{props.data.session.UserName}</Link> 
+                    </Tooltip>
+                 </Card.Text>
+                  
+                </Col>
+
+              </Row>
+
               <Row className="d-flex">
-                <Col className="col-auto">
+                <Col className="col-auto p-0">
 
                   {props.data.session.PlayState.IsPaused ?
                      <PauseFillIcon /> 

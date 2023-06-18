@@ -53,7 +53,8 @@ function ItemInfo() {
   }
 
   const fetchData = async () => {
-    if(config && (!data || data.notfound)){
+    if(config){
+      console.log('fetch');
       setRefresh(true);
     try {
       const itemData = await axios.post(`/api/getItemDetails`, {
@@ -101,7 +102,7 @@ useEffect(() => {
 
   const intervalId = setInterval(fetchData, 60000 * 5);
   return () => clearInterval(intervalId);
-});
+}, [config, Id]);
 
 
 
@@ -117,7 +118,6 @@ if(!data || refresh)
 if(data && data.notfound)
 {
   return <ItemNotFound message="Item not found" itemId={Id} fetchdataMethod={fetchData}/>;
-  // return <ItemNotFound message={data.message}/>;
 }
 
 const cardStyle = {

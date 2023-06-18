@@ -602,7 +602,7 @@ async function syncItemInfo(refLog)
       }
     
     }
-    console.log(Episode.Name) 
+    // console.log(Episode.Name) 
   }
 
   refLog.loggedData.push({color: "dodgerblue",Message: insertItemInfoCount + " Item Info inserted. "+updateItemInfoCount +" Item Info Updated"});

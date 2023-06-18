@@ -21,6 +21,17 @@ th
 
 }
 
+.activity-client:hover
+{
+  color: var(--secondary-color) !important;
+
+}
+.activity-client:hover > span
+{
+
+  cursor: pointer;
+}
+
 
 
 td > a
@@ -28,9 +39,9 @@ td > a
   color: white;
 }
 
-td:hover > a
+td:hover > a 
 {
-  color: #00A4DC;
+  color: var(--secondary-color);
 }
 
 .page-number {
@@ -100,3 +111,22 @@ font-size: 1em;
 {
   color: var(--secondary-color) !important;
 }
+
+.modal-header
+{
+  color:  white;
+  border-bottom: none !important;
+}
+
+
+.modal-footer
+{
+  border-top: none !important;
+}
+
+
+.modal-content
+{
+  background-color:  var(--secondary-background-color) !important;
+}
+

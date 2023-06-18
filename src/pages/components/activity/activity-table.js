@@ -22,14 +22,9 @@ import IndeterminateCircleFillIcon from 'remixicon-react/IndeterminateCircleFill
 import StreamInfo from './stream_info';
 
 import '../../css/activity/activity-table.css';
-// localStorage.setItem('hour12',true);
 
 // localStorage.setItem('hour12',true);
 
-function formatTotalWatchTime(seconds) {
-  const hours = Math.floor(seconds / 3600);
-  const minutes = Math.floor((seconds % 3600) / 60);
-  const remainingSeconds = seconds % 60;
 
 function formatTotalWatchTime(seconds) {
   const hours = Math.floor(seconds / 3600);
