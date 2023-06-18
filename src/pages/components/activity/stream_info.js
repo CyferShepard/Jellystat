@@ -64,25 +64,25 @@ function Row(logs) {
 
         <TableRow>
           <TableCell className="py-0 pb-1" >Codec</TableCell>
-          <TableCell className="py-0 pb-1" >{data.TranscodingInfo ? data.TranscodingInfo.VideoCodec?.toUpperCase() : '-'}</TableCell>
+          <TableCell className="py-0 pb-1" >{data.TranscodingInfo ? data.TranscodingInfo.VideoCodec?.toUpperCase() : data.MediaStreams ? data.MediaStreams.find(stream => stream.Type === 'Video')?.Codec?.toUpperCase() : '-'}</TableCell>
           <TableCell className="py-0 pb-1" >{data.MediaStreams ? data.MediaStreams.find(stream => stream.Type === 'Video')?.Codec?.toUpperCase() : '-'}</TableCell>
         </TableRow>
 
         <TableRow>
           <TableCell className="py-0 pb-3" >Bitrate</TableCell>
-          <TableCell className="py-0 pb-3" >{convertBitrate(data.TranscodingInfo ? data.TranscodingInfo.Bitrate : null)}</TableCell>
+          <TableCell className="py-0 pb-3" >{convertBitrate(data.TranscodingInfo ? data.TranscodingInfo.Bitrate : data.MediaStreams ? data.MediaStreams.find(stream => stream.Type === 'Video')?.BitRate : null)}</TableCell>
           <TableCell className="py-0 pb-3" >{convertBitrate(data.MediaStreams ? data.MediaStreams.find(stream => stream.Type === 'Video')?.BitRate : null)}</TableCell>
         </TableRow>
 
         <TableRow>
           <TableCell className="py-0 pb-1" >Width</TableCell>
-          <TableCell className="py-0 pb-1" >{data.TranscodingInfo ? data.TranscodingInfo.Width : '-'}</TableCell>
+          <TableCell className="py-0 pb-1" >{data.TranscodingInfo ? data.TranscodingInfo.Width : data.MediaStreams ? data.MediaStreams.find(stream => stream.Type === 'Video')?.Width : '-'}</TableCell>
           <TableCell className="py-0 pb-1" >{data.MediaStreams ? data.MediaStreams.find(stream => stream.Type === 'Video')?.Width : '-'}</TableCell>
         </TableRow>
 
         <TableRow>
           <TableCell className="py-0 pb-3" >Height</TableCell>
-          <TableCell className="py-0 pb-3" >{data.TranscodingInfo?.IsVideoDirect ? data.MediaStreams?.find(stream => stream.Type === 'Video')?.Height : data.TranscodingInfo?.Height || '-'}</TableCell>
+          <TableCell className="py-0 pb-3" >{data.TranscodingInfo? data.TranscodingInfo?.Height :data.MediaStreams?.find(stream => stream.Type === 'Video')?.Height }</TableCell>
           <TableCell className="py-0 pb-3" >{data.MediaStreams ? data.MediaStreams.find(stream => stream.Type === 'Video')?.Height : '-'}</TableCell>
         </TableRow>
 
