@@ -73,7 +73,7 @@ export default function Tasks() {
         <div className="tasks">
           <h1 className="py-3">Tasks</h1>
 
-<TableContainer className='rounded-2'>
+            <TableContainer className='rounded-2'>
                     <Table aria-label="collapsible table" >
                       <TableHead>
                         <TableRow>

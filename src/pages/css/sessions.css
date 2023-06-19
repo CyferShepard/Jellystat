@@ -90,7 +90,8 @@
 
 .session-card-user-image {
     border-radius: 50%;
-    max-width: 50px;
+    max-width: 30px;
+    max-height: 30px;
 
 
 }

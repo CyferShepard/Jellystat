@@ -1,33 +1,58 @@
 const db = require("../db");
-
+const moment = require('moment');
 const sync = require("../sync");
 
-async function SyncTask(interval) {
-  console.log("LibraryMonitor Interval: " + interval);
+async function SyncTask() {
 
+let interval=10000;
 
-  setInterval(async () => {
-    try {
-      const { rows: config } = await db.query(
-        'SELECT * FROM app_config where "ID"=1'
-      );
-     
-      
-    
-      if (config.length===0 || config[0].JF_HOST === null || config[0].JF_API_KEY === null) {
+async function intervalCallback() {
+ clearInterval(intervalTask); 
+ try{
+    let current_time = moment();
+    const { rows: config } = await db.query(
+          'SELECT * FROM app_config where "ID"=1'
+         );
+
+    if (config.length===0 || config[0].JF_HOST === null || config[0].JF_API_KEY === null) 
+    {
         return;
-      }
-
-      sync.fullSync();
-
-
-
-
-    } catch (error) {
-      // console.log(error);
-      return [];
     }
-  }, interval);
+  
+  
+    const last_execution=await db.query( `SELECT "TimeRun"
+                                          FROM public.jf_logging
+                                          WHERE "Name"='Jellyfin Sync' AND "Result"='Success'
+                                          ORDER BY "TimeRun" DESC
+                                          LIMIT 1`).then((res) => res.rows);
+    if(last_execution.length!==0)
+    { 
+        let last_execution_time = moment(last_execution[0].TimeRun).add(10, 'minutes');
+  
+        if(current_time.isAfter(last_execution_time)===false)
+        {
+            intervalTask = setInterval(intervalCallback, interval); 
+            return;
+        }
+    }
+
+
+    console.log('Running Scheduled Sync');
+    await sync.fullSync();
+    console.log('Scheduled Sync Complete');
+    
+    } catch (error) 
+    {
+        console.log(error);
+        return [];
+    }
+
+    intervalTask = setInterval(intervalCallback, interval); 
+  }
+
+let intervalTask = setInterval(intervalCallback, interval);
+
+
 }
 
 module.exports = {

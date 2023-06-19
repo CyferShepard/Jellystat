@@ -50,15 +50,15 @@ module.exports = function(app) {
       changeOrigin: true,
     })
   );
-  app.use(
-    `/ws`,
-    createProxyMiddleware({
-      target: `ws://127.0.0.1:${process.env.WS_PORT || 3004}`,
-      ws: true,
-      changeOrigin: true,
-      secure: false,
-    })
-  );
+  // app.use(
+  //   `/ws`,
+  //   createProxyMiddleware({
+  //     target: `ws://127.0.0.1:${process.env.WS_PORT || 3004}`,
+  //     ws: true,
+  //     changeOrigin: true,
+  //     secure: false,
+  //   })
+  // );
   
   console.log(`Proxy middleware applied`);
 };

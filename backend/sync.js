@@ -16,8 +16,8 @@ const axios_instance = axios.create({
   httpsAgent: agent
 });
 
-const wss = require("./WebsocketHandler");
-const socket=wss;
+// const wss = require("./WebsocketHandler");
+// const socket=wss;
 
 const moment = require('moment');
 const { randomUUID }  = require('crypto');
@@ -619,8 +619,8 @@ async function syncItemInfo(refLog)
 
 async function syncPlaybackPluginData()
 {
-  socket.sendMessageToClients({ color: "lawngreen", Message: "Syncing... 5/5" });
-  socket.sendMessageToClients({color: "yellow", Message: "Beginning File Info Sync",});
+  // socket.sendMessageToClients({ color: "lawngreen", Message: "Syncing... 5/5" });
+  // socket.sendMessageToClients({color: "yellow", Message: "Beginning File Info Sync",});
 
   try {
     const { rows: config } = await db.query(
@@ -796,7 +796,7 @@ async function fullSync()
 
 ///////////////////////////////////////Sync All
 router.get("/beingSync", async (req, res) => {
-  socket.clearMessages();
+  // socket.clearMessages();
   let refLog={loggedData:[],result:'Success'};
   let startTime = moment();
 

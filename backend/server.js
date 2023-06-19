@@ -71,8 +71,8 @@ try{
         console.log(`Server listening on http://${LISTEN_IP}:${PORT}`);
 
         ActivityMonitor.ActivityMonitor(1000);
-        SyncTask.SyncTask(60000*10);
-        BackupTask.BackupTask(60000*60*24);
+        SyncTask.SyncTask();
+        BackupTask.BackupTask();
       });
     });
   });
