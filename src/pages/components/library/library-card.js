@@ -18,7 +18,7 @@ function LibraryCard(props) {
   const MusicIcon=<FileMusicLineIcon size={"50%"}    color="white"/> ;
   const MixedIcon=<CheckboxMultipleBlankLineIcon size={"50%"}    color="white"/> ;
 
-  const default_image=<div className="default_library_image d-flex justify-content-center align-items-center">{props.data.CollectionType==='tvshows' ? SeriesIcon : props.data.CollectionType==='movies'? MovieIcon : props.data.CollectionType==='music'? MusicIcon : MixedIcon} </div>;
+  const default_image=<div className="default_library_image default_library_image_hover d-flex justify-content-center align-items-center">{props.data.CollectionType==='tvshows' ? SeriesIcon : props.data.CollectionType==='movies'? MovieIcon : props.data.CollectionType==='music'? MusicIcon : MixedIcon} </div>;
 
   function formatFileSize(sizeInBytes) {
     const sizeInKB = sizeInBytes / 1024; // 1 KB = 1024 bytes
@@ -129,7 +129,7 @@ function LibraryCard(props) {
 
                <Card.Img
                variant="top"
-               className="library-card-banner"
+               className="library-card-banner library-card-banner-hover"
                src={"/proxy/Items/Images/Primary?id=" + props.data.Id + "&fillWidth=800&quality=50"}
                onError={() =>setImageLoaded(false)}
                />

@@ -17,6 +17,7 @@ const postgresPassword = process.env.POSTGRES_PASSWORD;
 const postgresIp = process.env.POSTGRES_IP;
 const postgresPort = process.env.POSTGRES_PORT;
 const postgresDatabase = process.env.POSTGRES_DATABASE || 'jfstat';
+const backupfolder='backup-data';
 
 // Tables to back up
 const tables = ['jf_libraries', 'jf_library_items', 'jf_library_seasons','jf_library_episodes','jf_users','jf_playback_activity','jf_playback_reporting_plugin_data','jf_item_info'];
@@ -48,15 +49,15 @@ async function backup(refLog) {
   try{
 
   let now = moment();
-  const backupfolder='./backup-data';
+  const backuppath='./'+backupfolder;
 
-  if (!fs.existsSync(backupfolder)) {
-    fs.mkdirSync(backupfolder);
+  if (!fs.existsSync(backuppath)) {
+    fs.mkdirSync(backuppath);
     console.log('Directory created successfully!');
   }
-  if (!checkFolderWritePermission(backupfolder)) {
-    console.error('No write permissions for the folder:', backupfolder);
-    refLog.logData.push({ color: "red", Message: "Backup Failed: No write permissions for the folder: "+backupfolder });
+  if (!checkFolderWritePermission(backuppath)) {
+    console.error('No write permissions for the folder:', backuppath);
+    refLog.logData.push({ color: "red", Message: "Backup Failed: No write permissions for the folder: "+backuppath });
     refLog.logData.push({ color: "red", Message: "Backup Failed with errors"});
     refLog.result='Failed';
     await pool.end();
@@ -79,7 +80,6 @@ async function backup(refLog) {
     const query = `SELECT * FROM ${table}`;
 
     const { rows } = await pool.query(query);
-    console.log(`Reading ${rows.length} rows for table ${table}`);
     refLog.logData.push({color: "dodgerblue",Message: `Saving ${rows.length} rows for table ${table}`});
 
     backup_data.push({[table]:rows});
@@ -90,6 +90,53 @@ async function backup(refLog) {
     await stream.write(JSON.stringify(backup_data));
     stream.end();
     refLog.logData.push({ color: "lawngreen", Message: "Backup Complete" });
+    refLog.logData.push({ color: "dodgerblue", Message: "Removing old backups" });
+
+     //Cleanup excess backups
+  let deleteCount=0;
+  const directoryPath = path.join(__dirname, backupfolder);
+  
+  const files = await new Promise((resolve, reject) => {
+    fs.readdir(directoryPath, (err, files) => {
+      if (err) {
+        reject(err);
+      } else {
+        resolve(files);
+      }
+    });
+  });
+
+  let fileData = files.filter(file => file.endsWith('.json'))
+    .map(file => {
+      const filePath = path.join(directoryPath, file);
+      const stats = fs.statSync(filePath);
+      return {
+        name: file,
+        size: stats.size,
+        datecreated: stats.birthtime
+      };
+    });
+
+  fileData = fileData.sort((a, b) => new Date(b.datecreated) - new Date(a.datecreated)).slice(5);
+
+  for (var oldBackup of fileData) {
+    const oldBackupFile = path.join(__dirname, backupfolder, oldBackup.name);
+
+    await new Promise((resolve, reject) => {
+      fs.unlink(oldBackupFile, (err) => {
+        if (err) {
+          reject(err);
+        } else {
+          resolve();
+        }
+      });
+    });
+
+    deleteCount += 1;
+    refLog.logData.push({ color: "yellow", Message: `${oldBackupFile} has been deleted.` });
+  }
+
+  refLog.logData.push({ color: "lawngreen", Message: deleteCount+" backups removed." });
 
   }catch(error)
   {
@@ -100,6 +147,8 @@ async function backup(refLog) {
  
 
   await pool.end();
+
+ 
 }
 
 // Restore function
@@ -259,8 +308,7 @@ router.get('/restore/:filename', async (req, res) => {
       Logging.insertLog(log);
   });
 
-  //list backup files
-  const backupfolder='backup-data';
+
 
   
   router.get('/files', (req, res) => {

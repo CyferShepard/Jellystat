@@ -9,8 +9,7 @@ import './css/library/libraries.css';
 // import LibraryOverView from './components/libraryOverview';
 // import HomeStatisticCards from './components/HomeStatisticCards';
 // import Sessions from './components/sessions/sessions';
-import MostActiveUsers from './components/statCards/most_active_users';
-
+import LibrarySelector from './library_selector';
 
 
 
@@ -52,7 +51,7 @@ function Testing() {
   return (
     <div className='Activity'>
 
-  <MostActiveUsers/>
+  <LibrarySelector/>
 
     </div>
 

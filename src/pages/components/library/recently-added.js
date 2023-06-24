@@ -3,26 +3,17 @@ import axios from "axios";
 
 import RecentlyAddedCard from "./RecentlyAdded/recently-added-card";
 
-import Config from "../../../lib/config";
 import "../../css/users/user-details.css";
 import ErrorBoundary from "../general/ErrorBoundary";
 
 function RecentlyAdded(props) {
   const [data, setData] = useState();
-  const [config, setConfig] = useState();
+  const token = localStorage.getItem('token');
 
 
   useEffect(() => {
 
-    const fetchConfig = async () => {
-        try {
-          const newConfig = await Config();
-          setConfig(newConfig);
-        } catch (error) {
-            console.log(error);
-        }
-      };
-      
+
 
 
     const fetchData = async () => {
@@ -35,38 +26,32 @@ function RecentlyAdded(props) {
      
         const itemData = await axios.get(url, {
           headers: {
-            Authorization: `Bearer ${config.token}`,
+            Authorization: `Bearer ${token}`,
             "Content-Type": "application/json",
           },
         });
         
         if(itemData && typeof itemData.data === 'object' && Array.isArray(itemData.data))
         {
-          setData(itemData.data.filter((item) => ["Series", "Movie","Audio"].includes(item.Type)));
+          setData(itemData.data.filter((item) => ["Series", "Movie","Audio","Episode"].includes(item.Type)));
         }
       } catch (error) {
         console.log(error);
       }
     };
 
-    if (!data && config) {
+    if (!data) {
       fetchData();
     }
 
-    if (!config) {
-        fetchConfig();
-    }
+
 
     const intervalId = setInterval(fetchData, 60000 * 5);
     return () => clearInterval(intervalId);
-  }, [data,config, props.LibraryId]);
+  }, [data, props.LibraryId]);
 
 
-  if (!data && !config) {
-    return <></>;
-  }
-
-  if (!data && config) {
+  if (!data) {
     return <></>;
   }
 
@@ -76,7 +61,7 @@ function RecentlyAdded(props) {
         <div className="last-played-container">
         {data && data.map((item) => (
                 <ErrorBoundary key={item.Id}>
-                    <RecentlyAddedCard data={item} base_url={config.hostUrl} />
+                    <RecentlyAddedCard data={item}/>
                 </ErrorBoundary>
           ))}
 

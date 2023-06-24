@@ -36,34 +36,29 @@ async function deleteBulk(table_name, data) {
   try {
     await client.query('BEGIN');
 
-    // const AllIds = data.map((row) => row.Id);
-
-    if (data.length !== 0) {
+    if (data && data.length !== 0) {
       
       const deleteQuery = {
         text: `DELETE FROM ${table_name} WHERE "Id" IN (${pgp.as.csv(
           data
         )})`
       };
-      // console.log(deleteQuery);
+      //  console.log(deleteQuery);
       await client.query(deleteQuery);
     } 
-    // else {
-    //   await client.query(`DELETE FROM ${table_name}`);
-    //   console.log('Delete All');
-    // }
+
 
     await client.query('COMMIT');
     message=(data.length + " Rows removed.");
 
   } catch (error) {
     await client.query('ROLLBACK');
-    message=(''+ error);
+    message=('Bulk delete error: '+ error);
     result='ERROR';
   } finally {
     client.release();
   }
-  return ({Result:result,message:'Bulk delete error:'+message});
+  return ({Result:result,message:''+message});
 }
 
 async function insertBulk(table_name, data,columns) {

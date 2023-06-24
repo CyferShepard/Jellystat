@@ -105,6 +105,7 @@ function Row(data) {
           </IconButton>
         </TableCell>
         <TableCell><Link to={`/users/${row.UserId}`} className='text-decoration-none'>{row.UserName}</Link></TableCell>
+        <TableCell>{row.RemoteEndPoint || '-'}</TableCell>
         <TableCell><Link to={`/libraries/item/${row.EpisodeId || row.NowPlayingItemId}`} className='text-decoration-none'>{!row.SeriesName ? row.NowPlayingItemName : row.SeriesName+' - '+ row.NowPlayingItemName}</Link></TableCell>
         <TableCell className='activity-client' ><span onClick={()=>openModal(row)}>{row.Client}</span></TableCell>
         <TableCell>{Intl.DateTimeFormat('en-UK', options).format(new Date(row.ActivityDateInserted))}</TableCell>
@@ -112,7 +113,7 @@ function Row(data) {
         <TableCell>{row.results.length !==0 ? row.results.length : 1}</TableCell>
       </TableRow>
       <TableRow>
-        <TableCell style={{ paddingBottom: 0, paddingTop: 0 }} colSpan={7}>
+        <TableCell style={{ paddingBottom: 0, paddingTop: 0 }} colSpan={8}>
           <Collapse in={open} timeout="auto" unmountOnExit>
             <Box sx={{ margin: 1 }}>
 
@@ -120,6 +121,7 @@ function Row(data) {
                 <TableHead>
                   <TableRow>
                     <TableCell>User</TableCell>
+                    <TableCell>IP Address</TableCell>
                     <TableCell>Title</TableCell>
                     <TableCell>Client</TableCell>
                     <TableCell>Date</TableCell>
@@ -131,6 +133,7 @@ function Row(data) {
                   {row.results.sort((a, b) => new Date(b.ActivityDateInserted) - new Date(a.ActivityDateInserted)).map((resultRow) => (
                     <TableRow key={resultRow.Id}>
                         <TableCell><Link to={`/users/${resultRow.UserId}`} className='text-decoration-none'>{resultRow.UserName}</Link></TableCell>
+                        <TableCell>{resultRow.RemoteEndPoint || '-'}</TableCell>
                         <TableCell><Link to={`/libraries/item/${resultRow.EpisodeId || resultRow.NowPlayingItemId}`} className='text-decoration-none'>{!resultRow.SeriesName ? resultRow.NowPlayingItemName : resultRow.SeriesName+' - '+ resultRow.NowPlayingItemName}</Link></TableCell>
                         <TableCell className='activity-client' ><span onClick={()=>openModal(resultRow)}>{resultRow.Client}</span></TableCell>
                         <TableCell>{Intl.DateTimeFormat('en-UK', options).format(new Date(resultRow.ActivityDateInserted))}</TableCell>
@@ -159,8 +162,14 @@ function EnhancedTableHead(props) {
     {
       id: 'UserName',
       numeric: false,
-      disablePadding: true,
-      label: 'Last User',
+      disablePadding: false,
+      label: 'User',
+    },
+    {
+      id: 'RemoteEndPoint',
+      numeric: false,
+      disablePadding: false,
+      label: 'IP Address',
     },
     {
       id: 'NowPlayingItemName',
@@ -172,7 +181,7 @@ function EnhancedTableHead(props) {
       id: 'Client',
       numeric: false,
       disablePadding: false,
-      label: 'Last Client',
+      label: 'Client',
     },
     {
       id: 'ActivityDateInserted',
@@ -190,7 +199,7 @@ function EnhancedTableHead(props) {
       id: 'TotalPlays',
       numeric: false,
       disablePadding: false,
-      label: 'TotalPlays',
+      label: 'Total Plays',
     },
   ];
 
@@ -315,7 +324,7 @@ export default function ActivityTable(props) {
             {visibleRows.map((row) => (
                 <Row key={row.Id+row.NowPlayingItemId+row.EpisodeId} row={row} />
               ))}
-              {props.data.length===0 ? <tr><td colSpan="7" style={{ textAlign: "center", fontStyle: "italic" ,color:"grey"}} className='py-2'>No Activity Found</td></tr> :''}
+              {props.data.length===0 ? <tr><td colSpan="8" style={{ textAlign: "center", fontStyle: "italic" ,color:"grey"}} className='py-2'>No Activity Found</td></tr> :''}
             
           </TableBody>
         </Table>

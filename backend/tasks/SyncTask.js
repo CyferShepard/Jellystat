@@ -38,7 +38,7 @@ async function intervalCallback() {
 
 
     console.log('Running Scheduled Sync');
-    await sync.fullSync();
+    await sync.fullSync('Automatic');
     console.log('Scheduled Sync Complete');
     
     } catch (error) 

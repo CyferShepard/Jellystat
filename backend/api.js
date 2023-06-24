@@ -180,10 +180,6 @@ router.post("/getItemDetails", async (req, res) => {
   try{
 
     const { Id } = req.body;
-
-
-    //
-
     let query= `SELECT im."Name" "FileName",im.*,i.* FROM jf_library_items i left join jf_item_info im on i."Id" = im."Id" where i."Id"='${Id}'`;
   
 
@@ -800,6 +796,92 @@ router.post("/getLibraries", async (req, res) => {
     res.status(503);
     res.send(error);
   }
+});
+
+router.get('/TrackedLibraries', async(req, res) => {
+  const { rows: config } = await db.query('SELECT * FROM app_config where "ID"=1');
+
+  if (config[0].JF_HOST === null || config[0].JF_API_KEY === null) {
+    res.send({ error: "Config Details Not Found" });
+    return;
+  }
+
+
+
+  let url=`${config[0].JF_HOST}/Library/MediaFolders`;
+
+  const response_data = await axios_instance.get(url, {
+    headers: {
+      "X-MediaBrowser-Token":  config[0].JF_API_KEY ,
+    },
+  });
+
+  const filtered_items=response_data.data.Items.filter((type) => !["boxsets","playlists"].includes(type.CollectionType))
+
+  const excluded_libraries=await db.query('SELECT settings FROM app_config where "ID"=1').then((res) => res.rows);
+  if(excluded_libraries.length>0)
+  {
+    const libraries =excluded_libraries[0].settings?.ExcludedLibraries||[];
+
+    const librariesWithTrackedStatus = filtered_items.map((items) => ({
+      ...items,
+      ...{ Tracked: !libraries.includes(items.Id)},
+    }));
+    res.send(librariesWithTrackedStatus);
+    
+  }else
+  {
+    res.status(404);
+    res.send({ error: "Settings Not Found" });
+  }
+
+
+
+});
+
+router.post('/setExcludedLibraries', async(req, res) => {
+
+  const { libraryID } = req.body;
+
+  const { rows: config } = await db.query('SELECT * FROM app_config where "ID"=1');
+
+  if (config[0].JF_HOST === null || config[0].JF_API_KEY === null || !libraryID) {
+    res.status(404);
+    res.send({ error: "Config Details Not Found" });
+    return;
+  }
+
+
+  const settingsjson=await db.query('SELECT settings FROM app_config where "ID"=1').then((res) => res.rows);
+  if(settingsjson.length>0)
+  {
+    const settings =settingsjson[0].settings||{};
+
+
+      let libraries=settings.ExcludedLibraries||[];
+      if(libraries.includes(libraryID))
+      {
+        libraries = libraries.filter(item => item !== libraryID);
+      }else{
+        libraries.push(libraryID);
+      }
+      settings.ExcludedLibraries=libraries;
+
+      let query='UPDATE app_config SET settings=$1 where "ID"=1';
+
+    
+      const { rows } = await db.query(
+        query,
+        [settings]
+      );
+
+      res.send("Settings updated succesfully");
+
+    
+  }
+
+
+
 });
 
 

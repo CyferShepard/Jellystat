@@ -271,21 +271,20 @@ async function syncLibraryFolders(refLog,data)
 {
   try
   {
- 
+
     const existingIds = await db
       .query('SELECT "Id" FROM jf_libraries')
       .then((res) => res.rows.map((row) => row.Id));
-  
-  
+
+
     let dataToInsert = [];
-    //filter fix if jf_libraries is empty
-  
+
     if (existingIds.length === 0) {
       dataToInsert = await data.map(jf_libraries_mapping);
     } else {
       dataToInsert = await data.filter((row) => !existingIds.includes(row.Id)).map(jf_libraries_mapping);
     }
-  
+
     if (dataToInsert.length !== 0) {
       let result = await db.insertBulk("jf_libraries",dataToInsert,jf_libraries_columns);
       if (result.Result === "SUCCESS") {
@@ -299,12 +298,20 @@ async function syncLibraryFolders(refLog,data)
       }
     }
   
-    const toDeleteIds = existingIds.filter((id) =>!data.some((row) => row.Id === id ));
+//----------------------DELETE FUNCTION
+    //GET EPISODES IN SEASONS
+    //GET SEASONS IN SHOWS
+    //GET SHOWS IN LIBRARY
+    //FINALY DELETE LIBRARY
     if (toDeleteIds.length > 0) {
+      const ItemsToDelete=await db.query(`SELECT "Id" FROM jf_library_items where "ParentId" in (${toDeleteIds.map(id => `'${id}'`).join(',')})`).then((res) => res.rows.map((row) => row.Id));
+      let resultItem=await db.deleteBulk("jf_library_items",ItemsToDelete);
+      console.log(resultItem.message);
       let result = await db.deleteBulk("jf_libraries",toDeleteIds);
       if (result.Result === "SUCCESS") {
         refLog.loggedData.push(toDeleteIds.length + " Rows Removed.");
       } else {
+      
         refLog.loggedData.push({color: "red",Message:  "Error: "+result.message,});
         refLog.result='Failed';
       }
@@ -322,10 +329,14 @@ async function syncLibraryItems(refLog,data)
 {
   try{
 
+    let existingLibraryIds = await db
+    .query('SELECT "Id" FROM jf_libraries')
+    .then((res) => res.rows.map((row) => row.Id));
+
   refLog.loggedData.push({ color: "lawngreen", Message: "Syncing... 1/3" });
   refLog.loggedData.push({color: "yellow",Message: "Beginning Library Item Sync",});
 
-
+  data=data.filter((row) => existingLibraryIds.includes(row.ParentId));
   let insertMessage='';
   let deleteCounter = 0;
 
@@ -343,7 +354,7 @@ async function syncLibraryItems(refLog,data)
   if (dataToInsert.length !== 0) {
     let result = await db.insertBulk("jf_library_items",dataToInsert,jf_library_items_columns);
     if (result.Result === "SUCCESS") {
-      insertMessage = `${dataToInsert.length-existingIds.length} Rows Inserted. ${existingIds.length} Rows Updated.`;
+      insertMessage = `${dataToInsert.length-existingIds.length >0 ? dataToInsert.length-existingIds.length : 0} Rows Inserted. ${existingIds.length} Rows Updated.`;
     } else {
       refLog.loggedData.push({
         color: "red",
@@ -488,9 +499,9 @@ async function syncShowItems(refLog,data)
  
   }
 
-  refLog.loggedData.push({color: "dodgerblue",Message: `Seasons: ${insertSeasonsCount} Rows Inserted. ${updateSeasonsCount} Rows Updated.`});
+  refLog.loggedData.push({color: "dodgerblue",Message: `Seasons: ${insertSeasonsCount > 0 ? insertSeasonsCount : 0} Rows Inserted. ${updateSeasonsCount} Rows Updated.`});
   refLog.loggedData.push({color: "orange",Message: deleteSeasonsCount + " Seasons Removed.",});
-  refLog.loggedData.push({color: "dodgerblue",Message: `Episodes: ${insertEpisodeCount} Rows Inserted. ${updateEpisodeCount} Rows Updated.`});
+  refLog.loggedData.push({color: "dodgerblue",Message: `Episodes: ${insertEpisodeCount > 0 ? insertEpisodeCount : 0} Rows Inserted. ${updateEpisodeCount} Rows Updated.`});
   refLog.loggedData.push({color: "orange",Message: deleteEpisodeCount + " Episodes Removed.",});
   refLog.loggedData.push({ color: "yellow", Message: "Sync Complete" });
  }catch(error)
@@ -605,9 +616,9 @@ async function syncItemInfo(refLog)
     // console.log(Episode.Name) 
   }
 
-  refLog.loggedData.push({color: "dodgerblue",Message: insertItemInfoCount + " Item Info inserted. "+updateItemInfoCount +" Item Info Updated"});
+  refLog.loggedData.push({color: "dodgerblue",Message: (insertItemInfoCount >0 ? insertItemInfoCount : 0) + " Item Info inserted. "+updateItemInfoCount +" Item Info Updated"});
   refLog.loggedData.push({color: "orange",Message: deleteItemInfoCount + " Item Info Removed.",});
-  refLog.loggedData.push({color: "dodgerblue",Message: insertEpisodeInfoCount + " Episodes Info inserted. "+updateEpisodeInfoCount +" Episodes Info Updated"});
+  refLog.loggedData.push({color: "dodgerblue",Message: (insertEpisodeInfoCount > 0 ? insertEpisodeInfoCount:0) + " Episodes Info inserted. "+updateEpisodeInfoCount +" Episodes Info Updated"});
   refLog.loggedData.push({color: "orange",Message: deleteEpisodeInfoCount + " Episodes Info Removed.",});
   refLog.loggedData.push({ color: "lawngreen", Message: "Info Sync Complete" });
  }catch(error)
@@ -719,7 +730,7 @@ async function updateLibraryStatsData(refLog)
 }
 
 
-async function fullSync()
+async function fullSync(taskType)
 {
   try
   {
@@ -773,7 +784,7 @@ async function fullSync()
       "Id":uuid,
       "Name":"Jellyfin Sync",
       "Type":"Task",
-      "ExecutionType":"Automatic",
+      "ExecutionType":taskType,
       "Duration":diffInSeconds,
       "TimeRun":startTime,
       "Log":JSON.stringify(refLog.loggedData),
@@ -796,66 +807,14 @@ async function fullSync()
 
 ///////////////////////////////////////Sync All
 router.get("/beingSync", async (req, res) => {
-  // socket.clearMessages();
-  let refLog={loggedData:[],result:'Success'};
-  let startTime = moment();
 
   const { rows } = await db.query('SELECT * FROM app_config where "ID"=1');
   if (rows[0].JF_HOST === null || rows[0].JF_API_KEY === null) {
     res.send({ error: "Config Details Not Found" });
-    refLog.loggedData.push({ Message: "Error: Config details not found!" });
-    refLog.result='Failed';
     return;
   }
 
-  const _sync = new sync(rows[0].JF_HOST, rows[0].JF_API_KEY);
-
-  const admins = await _sync.getAdminUser(refLog);
-  const userid = admins[0].Id;
-  const libraries = await _sync.getItems('userid',userid,{recursive:false}); //getting all root folders aka libraries + items
-  const data=[];
-
-    //for each item in library run get item using that id as the ParentId (This gets the children of the parent id)
-  for (let i = 0; i < libraries.length; i++) {
-    const item = libraries[i];
-    let libraryItems = await _sync.getItems('parentId',item.Id);
-    const libraryItemsWithParent = libraryItems.map((items) => ({
-      ...items,
-      ...{ ParentId: item.Id },
-    }));
-    data.push(...libraryItemsWithParent);
-  }
-
-  const library_items=data.filter((item) => ['Movie','Audio','Series'].includes(item.Type));
-  const seasons_and_episodes=data.filter((item) => ['Season','Episode'].includes(item.Type));
-
-  await syncUserData(refLog);
-
-  await syncLibraryFolders(refLog,libraries);
-  await syncLibraryItems(refLog,library_items);
-  await syncShowItems(refLog,seasons_and_episodes);
-  await syncItemInfo(refLog);
-  await updateLibraryStatsData(refLog);
-  await removeOrphanedData(refLog);
-  const uuid = randomUUID();
-  let endTime = moment();
- 
-  let diffInSeconds = endTime.diff(startTime, 'seconds');
-
-  const log=
-  {
-    "Id":uuid,
-    "Name":"Jellyfin Sync",
-    "Type":"Task",
-    "ExecutionType":"Manual",
-    "Duration":diffInSeconds,
-    "TimeRun":startTime,
-    "Log":JSON.stringify(refLog.loggedData),
-    "Result":refLog.result
-
-  };
-
-  logging.insertLog(log);
+  await fullSync('Manual');
   res.send();
 
 });

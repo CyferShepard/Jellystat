@@ -4,7 +4,7 @@ exports.up = async function(knex) {
   const hasTable = await knex.schema.hasTable('app_config');
   if (hasTable) {
     await knex.schema.alterTable('app_config', function(table) {
-      table.json('settings').defaultTo({settings:{time_format:'12hr'}});
+      table.json('settings').defaultTo({time_format:'12hr'});
     });
   }
 }catch (error) {
