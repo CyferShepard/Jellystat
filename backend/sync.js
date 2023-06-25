@@ -218,22 +218,10 @@ async function syncUserData(refLog)
   
     const data = await _sync.getUsers();
   
-    const existingIds = await db
-      .query('SELECT "Id" FROM jf_users')
-      .then((res) => res.rows.map((row) => row.Id)); // get existing library Ids from the db
+    let dataToInsert = await data.map(jf_users_mapping);
+
   
-    let dataToInsert = [];
-    //filter fix if jf_libraries is empty
-  
-    if (existingIds.length === 0) {
-      dataToInsert = await data.map(jf_users_mapping);
-    } else {
-      dataToInsert = await data
-        .filter((row) => !existingIds.includes(row.Id))
-        .map(jf_users_mapping);
-    }
-  
-    if (dataToInsert.length !== 0) {
+    if (dataToInsert.length >0) {
       let result = await db.insertBulk("jf_users",dataToInsert,jf_users_columns);
       if (result.Result === "SUCCESS") {
         refLog.loggedData.push(dataToInsert.length + " Rows Inserted.");
@@ -257,6 +245,9 @@ async function syncUserData(refLog)
       }
     
     }
+
+    //update usernames on log table where username does not match the user table
+    await db.query('UPDATE jf_playback_activity a SET "UserName" = u."Name" FROM jf_users u WHERE u."Id" = a."UserId" AND u."Name" <> a."UserName"');
 
   }catch(error)
   {
@@ -303,10 +294,11 @@ async function syncLibraryFolders(refLog,data)
     //GET SEASONS IN SHOWS
     //GET SHOWS IN LIBRARY
     //FINALY DELETE LIBRARY
+    const toDeleteIds = existingIds.filter((id) =>!data.some((row) => row.Id === id ));
     if (toDeleteIds.length > 0) {
       const ItemsToDelete=await db.query(`SELECT "Id" FROM jf_library_items where "ParentId" in (${toDeleteIds.map(id => `'${id}'`).join(',')})`).then((res) => res.rows.map((row) => row.Id));
       let resultItem=await db.deleteBulk("jf_library_items",ItemsToDelete);
-      console.log(resultItem.message);
+
       let result = await db.deleteBulk("jf_libraries",toDeleteIds);
       if (result.Result === "SUCCESS") {
         refLog.loggedData.push(toDeleteIds.length + " Rows Removed.");

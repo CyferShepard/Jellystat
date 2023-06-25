@@ -16,12 +16,10 @@ import  Tooltip  from "@mui/material/Tooltip";
 function ticksToTimeString(ticks) {
   // Convert ticks to seconds
   const seconds = Math.floor(ticks / 10000000);
-
   // Calculate hours, minutes, and remaining seconds
   const hours = Math.floor(seconds / 3600);
   const minutes = Math.floor((seconds % 3600) / 60);
   const remainingSeconds = seconds % 60;
-
   // Format the time string as hh:MM:ss
   const timeString = `${hours.toString().padStart(2, "0")}:${minutes
     .toString()
@@ -45,8 +43,6 @@ function convertBitrate(bitrate) {
 }
 
 function sessionCard(props) {
-  // Access data passed in as a prop using `props.data`
-
   const cardStyle = {
     backgroundImage: `url(Proxy/Items/Images/Backdrop?id=${(props.data.session.NowPlayingItem.SeriesId ? props.data.session.NowPlayingItem.SeriesId : props.data.session.NowPlayingItem.Id)}&fillHeight=320&fillWidth=213&quality=80), linear-gradient(to right, #00A4DC, #AA5CC3)`,
     height:'100%',

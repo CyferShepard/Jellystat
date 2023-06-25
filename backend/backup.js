@@ -205,11 +205,9 @@ async function restore(file,logData,result) {
     {
       const data = Object.values(table)[0];
       const tableName=Object.keys(table)[0];
-
+      logData.push({ color: "dodgerblue",key:tableName ,Message: `Restoring ${tableName}`});
       for(let index in data)
       {
-
-        logData.push({ color: "dodgerblue",key:tableName ,Message: `Restoring ${tableName} ${(((index)/(data.length-1))*100).toFixed(2)}%`});
         const keysWithQuotes = Object.keys(data[index]).map(key => `"${key}"`);
         const keyString = keysWithQuotes.join(", ");
 

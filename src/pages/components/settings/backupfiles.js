@@ -22,6 +22,7 @@ const token = localStorage.getItem('token');
 
 function Row(file) {
   const { data } = file;
+  const [disabled, setDisabled] = useState(false);
 
   async function downloadBackup(filename) {
     const url=`/data/files/${filename}`;
@@ -46,6 +47,7 @@ function Row(file) {
 
   async function restoreBackup(filename) {
     const url=`/data/restore/${filename}`;
+    setDisabled(true);
     axios
     .get(url, {
       headers: {
@@ -54,10 +56,14 @@ function Row(file) {
       },
     })
     .then((response) => {
-      BackupFiles().setshowAlert({visible:true,title:'Success',type:'success',message:response.data});
+      const alert={visible:true,title:'Success',type:'success',message:response.data};
+      setDisabled(false);
+      file.handleRowActionMessage(alert);
     })
     .catch((error) => {
-      BackupFiles().setshowAlert({visible:true,title:'Error',type:'danger',message:error.response.data});
+      const alert={visible:true,title:'Error',type:'danger',message:error.response.data};
+      setDisabled(false);
+      file.handleRowActionMessage(alert);
     });
 
 
@@ -65,6 +71,7 @@ function Row(file) {
 
   async function deleteBackup(filename) {
     const url=`/data/files/${filename}`;
+    setDisabled(true);
     axios
     .delete(url, {
       headers: {
@@ -73,10 +80,14 @@ function Row(file) {
       },
     })
     .then((response) => {
-      BackupFiles().setshowAlert({visible:true,title:'Success',type:'success',message:response.data});
+      const alert={visible:true,title:'Success',type:'success',message:response.data};
+      setDisabled(false);
+      file.handleRowActionMessage(alert);
     })
     .catch((error) => {
-      BackupFiles().setshowAlert({visible:true,title:'Error',type:'danger',message:error.response.data});
+      const alert={visible:true,title:'Error',type:'danger',message:error.response.data};
+      setDisabled(false);
+      file.handleRowActionMessage(alert);
     });
 
 
@@ -107,10 +118,6 @@ function Row(file) {
     }
   }
 
-
-
-
-
   const twelve_hr = JSON.parse(localStorage.getItem('12hr'));
 
   const options = {
@@ -133,7 +140,7 @@ function Row(file) {
         <TableCell>{formatFileSize(data.size)}</TableCell>
         <TableCell className="">
           <div className="d-flex justify-content-center">
-            <DropdownButton title="Actions" variant="outline-primary"> 
+            <DropdownButton title="Actions" variant="outline-primary" disabled={disabled}> 
               <Dropdown.Item as="button" variant="primary" onClick={()=>downloadBackup(data.name)}>Download</Dropdown.Item>
               <Dropdown.Item as="button" variant="warning" onClick={()=>restoreBackup(data.name)}>Restore</Dropdown.Item>
               <Dropdown.Divider ></Dropdown.Divider>
@@ -218,6 +225,11 @@ const handleNextPageClick = () => {
 const handlePreviousPageClick = () => {
   setPage((prevPage) => prevPage - 1);
 };
+
+const handleRowActionMessage= (alertState) => {
+  setshowAlert({visible:alertState.visible,title:alertState.title,type:alertState.type,message:alertState.message});
+};
+
       
 
     
@@ -246,7 +258,7 @@ const handlePreviousPageClick = () => {
                       <TableBody>
                         {files && files.sort((a, b) =>new Date(b.datecreated) - new Date(a.datecreated)).slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
                           .map((file,index) => (
-                            <Row key={index} data={file} />
+                            <Row key={index} data={file} handleRowActionMessage={handleRowActionMessage}/>
                           ))}
                           {files.length===0 ? <tr><td colSpan="5" style={{ textAlign: "center", fontStyle: "italic" ,color:"grey"}}  className='py-2'>No Backups Found</td></tr> :''}
                             <TableRow>
