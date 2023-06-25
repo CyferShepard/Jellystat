@@ -218,10 +218,14 @@ async function syncUserData(refLog)
   
     const data = await _sync.getUsers();
   
+    const existingIds = await db
+      .query('SELECT "Id" FROM jf_users')
+      .then((res) => res.rows.map((row) => row.Id)); // get existing library Ids from the db
+  
     let dataToInsert = await data.map(jf_users_mapping);
 
   
-    if (dataToInsert.length >0) {
+    if (dataToInsert.length !== 0) {
       let result = await db.insertBulk("jf_users",dataToInsert,jf_users_columns);
       if (result.Result === "SUCCESS") {
         refLog.loggedData.push(dataToInsert.length + " Rows Inserted.");
@@ -248,6 +252,7 @@ async function syncUserData(refLog)
 
     //update usernames on log table where username does not match the user table
     await db.query('UPDATE jf_playback_activity a SET "UserName" = u."Name" FROM jf_users u WHERE u."Id" = a."UserId" AND u."Name" <> a."UserName"');
+
 
   }catch(error)
   {
