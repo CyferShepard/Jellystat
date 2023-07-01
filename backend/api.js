@@ -56,7 +56,7 @@ router.post("/setconfig", async (req, res) => {
 
   console.log(`ENDPOINT CALLED: /setconfig: `);
 });
-router.post("/setPreferedAdmin", async (req, res) => {
+router.post("/setPreferredAdmin", async (req, res) => {
   try {
     const { userid, username } = req.body;
     const { rows: config } = await db.query(
@@ -79,7 +79,7 @@ router.post("/setPreferedAdmin", async (req, res) => {
     if (settingsjson.length > 0) {
       const settings = settingsjson[0].settings || {};
 
-      settings.prefered_admin = {userid:userid,username:username};
+      settings.preferred_admin = {userid:userid,username:username};
   
       let query = 'UPDATE app_config SET settings=$1 where "ID"=1';
   

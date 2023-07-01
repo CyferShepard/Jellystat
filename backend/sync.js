@@ -860,7 +860,7 @@ router.post("/fetchItem", async (req, res) => {
   
     const _sync = new sync(config[0].JF_HOST, config[0].JF_API_KEY);
    
-    let userid=config[0].settings?.prefered_admin?.userid;
+    let userid=config[0].settings?.preferred_admin?.userid;
 
     if(!userid)
     {

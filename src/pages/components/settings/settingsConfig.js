@@ -46,7 +46,7 @@ export default function SettingsConfig() {
       .then((config) => {
         setFormValues({ JF_HOST: config.hostUrl });
         setConfig(config);
-        setSelectedAdmin(config.settings?.prefered_admin);
+        setSelectedAdmin(config.settings?.preferred_admin);
         setloadSate("Loaded");
       })
       .catch((error) => {
@@ -144,7 +144,7 @@ export default function SettingsConfig() {
   
 
     axios
-    .post("/api/setPreferedAdmin/", 
+    .post("/api/setPreferredAdmin/", 
     {
       userid:userid,
       username:username
@@ -229,11 +229,11 @@ export default function SettingsConfig() {
         </Form>
         <Form className="settings-form">
          <Form.Group as={Row} className="mb-3">
-           <Form.Label column  className="">Select Prefered Admin Account</Form.Label>
+           <Form.Label column  className="">Select Preferred Admin Account</Form.Label>
            <Col>
               <Dropdown className="w-100">
                 <Dropdown.Toggle variant="outline-primary" id="dropdown-basic" className="w-100">
-                {selectedAdmin ? selectedAdmin.username : 'Select a Prefered Admin'}
+                {selectedAdmin ? selectedAdmin.username : 'Select a Preferred Admin'}
                 </Dropdown.Toggle>
 
                 <Dropdown.Menu className="w-100" >
