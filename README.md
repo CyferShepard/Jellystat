@@ -40,7 +40,7 @@ https://hub.docker.com/r/cyfershepard/jellystat
 <img src="./screenshots/Users.PNG">
 <img src="./screenshots/Activity.PNG">
 <img src="./screenshots/Libraries.PNG">
-<img src="./screenshots/settings.PNG.PNG">
+<img src="./screenshots/settings.PNG">
 
 ## Support
 
