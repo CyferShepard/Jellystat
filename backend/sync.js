@@ -134,6 +134,31 @@ class sync {
     }
   }
 
+  async getLibrariesFromApi() {
+    try {
+
+
+      let url = `${this.hostUrl}/Library/MediaFolders`;
+
+
+      const response_data = await axios_instance.get(url, {
+        headers: {
+          "X-MediaBrowser-Token": this.apiKey,
+        },
+      });
+    
+      const filtered_libraries = response_data.data.Items.filter(
+        (type) => !["boxsets", "playlists"].includes(type.CollectionType)
+      );
+    
+
+
+      return filtered_libraries;
+    } catch (error) {
+      console.log(error);
+      return [];
+    }
+  }
 
   async getItems(key,id,params) {
     try {
@@ -743,10 +768,8 @@ async function fullSync(taskType)
     }
   
     const _sync = new sync(rows[0].JF_HOST, rows[0].JF_API_KEY);
-  
-    const admins = await _sync.getAdminUser(refLog);
-    const userid = admins[0].Id;
-    const libraries = await _sync.getItems('userid',userid,{recursive:false}); //getting all root folders aka libraries + items
+
+    const libraries = await _sync.getLibrariesFromApi(); 
     const data=[];
 
     //for each item in library run get item using that id as the ParentId (This gets the children of the parent id)
@@ -836,8 +859,14 @@ router.post("/fetchItem", async (req, res) => {
     }
   
     const _sync = new sync(config[0].JF_HOST, config[0].JF_API_KEY);
-    const admins = await _sync.getAdminUser();
-    const userid = admins[0].Id;
+   
+    let userid=config[0].settings?.prefered_admin?.userid;
+
+    if(!userid)
+    {
+      const admins = await _sync.getAdminUser();
+      userid = admins[0].Id;
+    }
 
     let item=await _sync.getItem(itemId);
     const libraryItemWithParent = item.map((items) => ({

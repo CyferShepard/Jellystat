@@ -25,7 +25,7 @@ router.get("/test", async (req, res) => {
 router.get("/getconfig", async (req, res) => {
   try {
     const { rows } = await db.query(
-      'SELECT "JF_HOST","APP_USER","REQUIRE_LOGIN" FROM app_config where "ID"=1'
+      'SELECT "JF_HOST","APP_USER","REQUIRE_LOGIN", settings FROM app_config where "ID"=1'
     );
     res.send(rows);
   } catch (error) {
@@ -50,6 +50,48 @@ router.post("/setconfig", async (req, res) => {
 
     const { rows } = await db.query(query, [JF_HOST, JF_API_KEY]);
     res.send(rows);
+  } catch (error) {
+    console.log(error);
+  }
+
+  console.log(`ENDPOINT CALLED: /setconfig: `);
+});
+router.post("/setPreferedAdmin", async (req, res) => {
+  try {
+    const { userid, username } = req.body;
+    const { rows: config } = await db.query(
+      'SELECT * FROM app_config where "ID"=1'
+    );
+  
+    if (
+      config[0].JF_HOST === null ||
+      config[0].JF_API_KEY === null 
+    ) {
+      res.status(404);
+      res.send({ error: "Config Details Not Found" });
+      return;
+    }
+  
+    const settingsjson = await db
+      .query('SELECT settings FROM app_config where "ID"=1')
+      .then((res) => res.rows);
+      
+    if (settingsjson.length > 0) {
+      const settings = settingsjson[0].settings || {};
+
+      settings.prefered_admin = {userid:userid,username:username};
+  
+      let query = 'UPDATE app_config SET settings=$1 where "ID"=1';
+  
+      const { rows } = await db.query(query, [settings]);
+  
+      res.send("Settings updated succesfully");
+    }else
+    {
+      res.status(404)
+      res.send("Settings not found");
+    }
+
   } catch (error) {
     console.log(error);
   }
@@ -760,6 +802,7 @@ router.post("/setExcludedLibraries", async (req, res) => {
   const settingsjson = await db
     .query('SELECT settings FROM app_config where "ID"=1')
     .then((res) => res.rows);
+    
   if (settingsjson.length > 0) {
     const settings = settingsjson[0].settings || {};
 
@@ -776,6 +819,53 @@ router.post("/setExcludedLibraries", async (req, res) => {
     const { rows } = await db.query(query, [settings]);
 
     res.send("Settings updated succesfully");
+  }else
+  {
+    res.status(404)
+    res.send("Settings not found");
+  }
+
+});
+
+router.get("/getAdminUsers", async (req, res) => {
+  try {
+    const { rows: config } = await db.query(
+      'SELECT * FROM app_config where "ID"=1'
+    );
+
+    if (
+      config.length === 0 ||
+      config[0].JF_HOST === null ||
+      config[0].JF_API_KEY === null
+    ) {
+      res.status(503);
+      res.send({ error: "Config Details Not Found" });
+      return;
+    }
+
+    let url = `${config[0].JF_HOST}/Users`;
+
+    const response = await axios_instance.get(url, {
+      headers: {
+        "X-MediaBrowser-Token": config[0].JF_API_KEY,
+      },
+    });
+
+    if(!response || typeof response.data !== 'object' || !Array.isArray(response.data))
+      {
+        res.status(503);
+        res.send({ error: "Invalid Response from Users API Call.", user_response:response });
+        return;
+      }
+  
+      const adminUser = response.data.filter(
+        (user) => user.Policy.IsAdministrator === true
+      );
+
+    res.send(adminUser);
+  } catch (error) {
+    res.status(503);
+    res.send(error);
   }
 });
 

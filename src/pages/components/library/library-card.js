@@ -120,6 +120,7 @@ function LibraryCard(props) {
   
     return `${formattedTime}ago`;
   }
+  
   return (
       <Card className="bg-transparent lib-card rounded-3">
           <Link to={`/libraries/${props.data.Id}`}>
@@ -178,7 +179,7 @@ function LibraryCard(props) {
 
             <Row className="space-between-end card-row">
               <Col className="card-label">Last Played</Col>
-              <Col className="text-end">{props.data.ItemName ? props.data.ItemName : 'n/a'}</Col>
+              <Col className="text-end">{props.data.ItemName || 'n/a'}</Col>
             </Row>
 
             <Row className="space-between-end card-row">
