@@ -1,6 +1,6 @@
 <p align="center">
 
-**Jellystat** is a free and open source Statistics App for Jellyfin!
+**Jellystat** is a free and open source Statistics App for Jellyfin! (This project is still in development - expect some weirdness)
 
 ## Current Features
 
@@ -40,6 +40,7 @@ https://hub.docker.com/r/cyfershepard/jellystat
 <img src="./screenshots/Users.PNG">
 <img src="./screenshots/Activity.PNG">
 <img src="./screenshots/Libraries.PNG">
+<img src="./screenshots/settings.PNG.PNG">
 
 ## Support
 

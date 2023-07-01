@@ -96,8 +96,6 @@ useEffect(() => {
           },
         });
         setKeys(apiKeyData.data);
-        console.log(apiKeyData);
-        console.log('KeyData');
       } catch (error) {
         console.log(error);
       }
@@ -107,7 +105,7 @@ useEffect(() => {
 
     const intervalId = setInterval(fetchData, 1000 * 5);
     return () => clearInterval(intervalId);
-  }, [token]);
+  }, []);
 
 
 const handleNextPageClick = () => {

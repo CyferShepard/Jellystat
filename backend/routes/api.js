@@ -267,10 +267,7 @@ router.get("/keys", async (req,res) => {
 });
 
 router.delete("/keys", async (req,res) => {
-  console.log('Delete API Key');
-  console.log(req);
-  console.log(res);
-  const { key } = req.body;
+   const { key } = req.body;
   
   if(!key)
   {

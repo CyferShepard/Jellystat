@@ -48,7 +48,7 @@ function RecentlyAdded(props) {
 
     const intervalId = setInterval(fetchData, 60000 * 5);
     return () => clearInterval(intervalId);
-  }, [data, props.LibraryId]);
+  }, [data, props.LibraryId,token]);
 
 
   if (!data) {
