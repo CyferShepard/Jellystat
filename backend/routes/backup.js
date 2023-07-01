@@ -66,8 +66,10 @@ async function backup(refLog) {
   }
   
 
-  const backupPath = `./backup-data/backup_${now.format('yyyy-MM-DD HH-mm-ss')}.json`;
-  const stream = fs.createWriteStream(backupPath, { flags: 'a' });
+  // const backupPath = `../backup-data/backup_${now.format('yyyy-MM-DD HH-mm-ss')}.json`;
+  const directoryPath = path.join(__dirname, '..', backupfolder,`backup_${now.format('yyyy-MM-DD HH-mm-ss')}.json`);
+  
+  const stream = fs.createWriteStream(directoryPath, { flags: 'a' });
   stream.on('error', (error) => {
     refLog.logData.push({ color: "red", Message: "Backup Failed: "+error });
     refLog.result='Failed';
@@ -75,7 +77,7 @@ async function backup(refLog) {
   });
   const backup_data=[];
   
-  refLog.logData.push({ color: "yellow", Message: "Begin Backup "+backupPath });
+  refLog.logData.push({ color: "yellow", Message: "Begin Backup "+directoryPath });
   for (let table of tables) {
     const query = `SELECT * FROM ${table}`;
 
@@ -94,10 +96,10 @@ async function backup(refLog) {
 
      //Cleanup excess backups
   let deleteCount=0;
-  const directoryPath = path.join(__dirname, backupfolder);
+  const directoryPathDelete = path.join(__dirname, '..', backupfolder);
   
   const files = await new Promise((resolve, reject) => {
-    fs.readdir(directoryPath, (err, files) => {
+    fs.readdir(directoryPathDelete, (err, files) => {
       if (err) {
         reject(err);
       } else {
@@ -108,7 +110,7 @@ async function backup(refLog) {
 
   let fileData = files.filter(file => file.endsWith('.json'))
     .map(file => {
-      const filePath = path.join(directoryPath, file);
+      const filePath = path.join(directoryPathDelete, file);
       const stats = fs.statSync(filePath);
       return {
         name: file,
@@ -120,7 +122,7 @@ async function backup(refLog) {
   fileData = fileData.sort((a, b) => new Date(b.datecreated) - new Date(a.datecreated)).slice(5);
 
   for (var oldBackup of fileData) {
-    const oldBackupFile = path.join(__dirname, backupfolder, oldBackup.name);
+    const oldBackupFile = path.join(__dirname, '..', backupfolder, oldBackup.name);
 
     await new Promise((resolve, reject) => {
       fs.unlink(oldBackupFile, (err) => {
@@ -275,7 +277,7 @@ router.get('/restore/:filename', async (req, res) => {
   let logData=[];
   let result='Success';
     try {
-      const filePath = path.join(__dirname, backupfolder, req.params.filename);
+      const filePath = path.join(__dirname, '..', backupfolder, req.params.filename);
    
       await restore(filePath,logData,result);
 
@@ -312,7 +314,7 @@ router.get('/restore/:filename', async (req, res) => {
   router.get('/files', (req, res) => {
     try
     {  
-    const directoryPath = path.join(__dirname, backupfolder);
+    const directoryPath = path.join(__dirname, '..', backupfolder);
     fs.readdir(directoryPath, (err, files) => {
       if (err) {
         res.status(500).send('Unable to read directory');
@@ -341,7 +343,7 @@ router.get('/restore/:filename', async (req, res) => {
 
   //download backup file
   router.get('/files/:filename', (req, res) => {
-    const filePath = path.join(__dirname, backupfolder, req.params.filename);
+    const filePath = path.join(__dirname, '..', backupfolder, req.params.filename);
     res.download(filePath);
   });
 
@@ -349,7 +351,7 @@ router.get('/restore/:filename', async (req, res) => {
   router.delete('/files/:filename', (req, res) => {
 
     try{
-    const filePath = path.join(__dirname, backupfolder, req.params.filename);
+    const filePath = path.join(__dirname, '..', backupfolder, req.params.filename);
   
       fs.unlink(filePath, (err) => {
         if (err) {
@@ -372,7 +374,7 @@ router.get('/restore/:filename', async (req, res) => {
   
   const storage = multer.diskStorage({
     destination: function (req, file, cb) {
-      cb(null, path.join(__dirname, backupfolder)); // Set the destination folder for uploaded files
+      cb(null, path.join(__dirname, '..', backupfolder)); // Set the destination folder for uploaded files
     },
     filename: function (req, file, cb) {
       cb(null, file.originalname); // Set the file name
