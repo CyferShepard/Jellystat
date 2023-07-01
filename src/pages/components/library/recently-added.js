@@ -18,7 +18,7 @@ function RecentlyAdded(props) {
 
     const fetchData = async () => {
       try {
-        let url=`/stats/getRecentlyAdded`;
+        let url=`/proxy/getRecentlyAdded`;
         if(props.LibraryId)
         {
             url+=`?libraryid=${props.LibraryId}`;

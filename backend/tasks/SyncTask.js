@@ -1,6 +1,6 @@
 const db = require("../db");
 const moment = require('moment');
-const sync = require("../sync");
+const sync = require("../routes/sync");
 
 async function SyncTask() {
 

@@ -35,7 +35,7 @@ function UserInfo() {
     const fetchData = async () => {
       if(config){
       try {
-        const userData = await axios.post(`/stats/getUserDetails`, {
+        const userData = await axios.post(`/api/getUserDetails`, {
           userid: UserId,
         }, {
           headers: {

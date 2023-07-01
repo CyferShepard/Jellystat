@@ -61,7 +61,7 @@ export default function SettingsConfig() {
       const fetchAdmins = async () => {
         try {
   
-          const adminData = await axios.get(`/api/getAdminUsers`,  {
+          const adminData = await axios.get(`/proxy/getAdminUsers`,  {
             headers: {
               Authorization: `Bearer ${token}`,
               "Content-Type": "application/json",

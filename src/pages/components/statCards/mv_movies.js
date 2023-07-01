@@ -29,10 +29,10 @@ function MVMusic(props) {
 
     const fetchLibraries = () => {
       if (config) {
-        const url = `/stats/getMostViewedMovies`;
+        const url = `/stats/getMostViewedByType`;
 
         axios
-        .post(url, {days:props.days}, {
+        .post(url, {days:props.days, type:'Movie'}, {
           headers: {
             Authorization: `Bearer ${config.token}`,
             "Content-Type": "application/json",

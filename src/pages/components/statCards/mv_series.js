@@ -27,10 +27,10 @@ function MVSeries(props) {
 
     const fetchLibraries = () => {
       if (config) {
-        const url = `/stats/getMostViewedSeries`;
+        const url = `/stats/getMostViewedByType`;
 
         axios
-        .post(url, {days:props.days}, {
+        .post(url, {days:props.days, type:'Series'}, {
           headers: {
             Authorization: `Bearer ${config.token}`,
             "Content-Type": "application/json",

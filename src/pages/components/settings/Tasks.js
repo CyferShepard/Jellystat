@@ -46,7 +46,7 @@ export default function Tasks() {
         setProcessing(true);
 
         await axios
-        .get("/data/backup", {
+        .get("/backup/beginBackup", {
           headers: {
             Authorization: `Bearer ${token}`,
             "Content-Type": "application/json",

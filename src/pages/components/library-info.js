@@ -31,7 +31,7 @@ function LibraryInfo() {
     const fetchData = async () => {
       try {
         console.log('getdata');
-        const libraryrData = await axios.post(`/stats/getLibraryDetails`, {
+        const libraryrData = await axios.post(`/api/getLibrary`, {
           libraryid: LibraryId,
         }, {
           headers: {

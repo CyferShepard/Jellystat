@@ -1,7 +1,7 @@
 const db = require("../db");
-const Logging = require("../logging");
+const Logging = require("../routes/logging");
 
-const backup = require("../backup");
+const backup = require("../routes/backup");
 const moment = require('moment');
 const { randomUUID }  = require('crypto');
 

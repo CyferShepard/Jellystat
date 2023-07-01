@@ -5,6 +5,7 @@ import SettingsConfig from "./components/settings/settingsConfig";
 import Tasks from "./components/settings/Tasks";
 import BackupFiles from "./components/settings/backupfiles";
 import SecuritySettings from "./components/settings/security";
+import ApiKeys from "./components/settings/apiKeys";
 
 import Logs from "./components/settings/logs";
 
@@ -32,6 +33,10 @@ export default function Settings() {
 
           <Tab eventKey="tabBackup" className='bg-transparent  my-2' title='Backup'  style={{minHeight:'500px'}}>
           <BackupFiles/>
+          </Tab>
+
+          <Tab eventKey="tabKeys" className='bg-transparent  my-2' title='API Keys'  style={{minHeight:'500px'}}>
+          <ApiKeys/>
           </Tab>
 
           <Tab eventKey="tabLogs" className='bg-transparent  my-2' title='Logs'  style={{minHeight:'500px'}}>

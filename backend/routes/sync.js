@@ -1,6 +1,6 @@
 const express = require("express");
 const pgp = require("pg-promise")();
-const db = require("./db");
+const db = require("../db");
 const axios = require("axios");
 const https = require('https');
 
@@ -25,14 +25,14 @@ const { randomUUID }  = require('crypto');
 
 const router = express.Router();
 
-const {jf_libraries_columns,jf_libraries_mapping,} = require("./models/jf_libraries");
-const {jf_library_items_columns,jf_library_items_mapping,} = require("./models/jf_library_items");
-const {jf_library_seasons_columns,jf_library_seasons_mapping,} = require("./models/jf_library_seasons");
-const {jf_library_episodes_columns,jf_library_episodes_mapping,} = require("./models/jf_library_episodes");
-const {jf_item_info_columns,jf_item_info_mapping,} = require("./models/jf_item_info");
-const {columnsPlaybackReporting,mappingPlaybackReporting}= require("./models/jf_playback_reporting_plugin_data");
+const {jf_libraries_columns,jf_libraries_mapping,} = require("../models/jf_libraries");
+const {jf_library_items_columns,jf_library_items_mapping,} = require("../models/jf_library_items");
+const {jf_library_seasons_columns,jf_library_seasons_mapping,} = require("../models/jf_library_seasons");
+const {jf_library_episodes_columns,jf_library_episodes_mapping,} = require("../models/jf_library_episodes");
+const {jf_item_info_columns,jf_item_info_mapping,} = require("../models/jf_item_info");
+const {columnsPlaybackReporting,mappingPlaybackReporting}= require("../models/jf_playback_reporting_plugin_data");
 
-const {jf_users_columns,jf_users_mapping,} = require("./models/jf_users");
+const {jf_users_columns,jf_users_mapping,} = require("../models/jf_users");
 
 /////////////////////////////////////////Functions
 

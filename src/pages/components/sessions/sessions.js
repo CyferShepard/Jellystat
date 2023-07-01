@@ -27,7 +27,7 @@ function Sessions() {
     const fetchData = () => {
 
       if (config) {
-        const url = `/api/getSessions`;
+        const url = `/proxy/getSessions`;
 
         axios
         .get(url, {

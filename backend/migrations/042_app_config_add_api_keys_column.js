@@ -4,7 +4,7 @@ exports.up = async function(knex) {
   const hasTable = await knex.schema.hasTable('app_config');
   if (hasTable) {
     await knex.schema.alterTable('app_config', function(table) {
-      table.json('settings').defaultTo({time_format:'12hr'});
+      table.json('api_keys');
     });
   }
 }catch (error) {
@@ -15,7 +15,7 @@ exports.up = async function(knex) {
 exports.down = async function(knex) {
   try {
     await knex.schema.alterTable('app_config', function(table) {
-      table.dropColumn('settings');
+      table.dropColumn('api_keys');
     });
   } catch (error) {
     console.error(error);

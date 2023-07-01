@@ -240,7 +240,7 @@ async function restore(file,logData,result) {
   }
 
 // Route handler for backup endpoint
-router.get('/backup', async (req, res) => {
+router.get('/beginBackup', async (req, res) => {
   try {
     let startTime = moment();
     let refLog={logData:[],result:'Success'};

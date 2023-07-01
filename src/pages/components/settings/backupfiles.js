@@ -25,7 +25,7 @@ function Row(file) {
   const [disabled, setDisabled] = useState(false);
 
   async function downloadBackup(filename) {
-    const url=`/data/files/${filename}`;
+    const url=`/backup/files/${filename}`;
     axios({
         url: url,
         headers: {
@@ -46,7 +46,7 @@ function Row(file) {
   }
 
   async function restoreBackup(filename) {
-    const url=`/data/restore/${filename}`;
+    const url=`/backup/restore/${filename}`;
     setDisabled(true);
     axios
     .get(url, {
@@ -70,7 +70,7 @@ function Row(file) {
   }
 
   async function deleteBackup(filename) {
-    const url=`/data/files/${filename}`;
+    const url=`/backup/files/${filename}`;
     setDisabled(true);
     axios
     .delete(url, {
@@ -174,7 +174,7 @@ const uploadFile = (file, onUploadProgress) => {
   const formData = new FormData();
   formData.append("file", file);
 
-  return axios.post("/data/upload", formData, {
+  return axios.post("/backup/upload", formData, {
     headers: {
       Authorization: `Bearer ${token}`,
       "Content-Type": "multipart/form-data",
@@ -199,7 +199,7 @@ const handleFileSelect = (event) => {
 useEffect(() => {
     const fetchData = async () => {
       try {
-        const backupFiles = await axios.get(`/data/files`, {
+        const backupFiles = await axios.get(`/backup/files`, {
           headers: {
             Authorization: `Bearer ${token}`,
             "Content-Type": "application/json",
