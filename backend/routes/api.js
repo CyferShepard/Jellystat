@@ -243,8 +243,8 @@ router.get("/keys", async (req,res) => {
   );
 
   if (
-    config[0].JF_HOST === null ||
-    config[0].JF_API_KEY === null
+    config[0]?.JF_HOST === null ||
+    config[0]?.JF_API_KEY === null
   ) {
     res.status(404);
     res.send({ error: "Config Details Not Found" });
