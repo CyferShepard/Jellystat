@@ -81,7 +81,7 @@ function Libraries() {
 
       <div xs={1} md={2} lg={4} className="g-0 libraries-container">
       {data &&
-          data.map((item) => (
+          data.sort((a,b) => a.Name-b.Name).map((item) => (
                 <ErrorBoundary key={item.Id} >
                   <LibraryCard data={item} metadata={metadata.find(data => data.Id === item.Id)} base_url={config.hostUrl}/>
                 </ErrorBoundary>

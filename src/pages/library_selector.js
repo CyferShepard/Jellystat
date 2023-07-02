@@ -6,6 +6,9 @@ import "./css/library/libraries.css";
 import Loading from "./components/general/loading";
 import SelectionCard from "./components/LibrarySelector/SelectionCard";
 import ErrorBoundary from "./components/general/ErrorBoundary";
+import InformationLineIcon from "remixicon-react/InformationLineIcon";
+
+import { Tooltip } from "@mui/material";
 
 
 function LibrarySelector() {
@@ -58,11 +61,10 @@ function LibrarySelector() {
   if (!data) {
     return <Loading />;
   }
-  console.log(data);
 
   return (
     <div className="libraries">
-      <h1 className="py-4">Select Libraries to Import and Track</h1>
+    <h1 className="py-4">Select Libraries to Import  <Tooltip title={"Activity for Items within these libraries are still Tracked - Even when not imported."}><span> <InformationLineIcon/></span></Tooltip></h1>
 
       <div xs={1} md={2} lg={4} className="g-0 libraries-container">
       {data &&

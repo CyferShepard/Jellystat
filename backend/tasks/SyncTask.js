@@ -22,7 +22,7 @@ async function intervalCallback() {
   
     const last_execution=await db.query( `SELECT "TimeRun"
                                           FROM public.jf_logging
-                                          WHERE "Name"='Jellyfin Sync' AND "Result"='Success'
+                                          WHERE "Name"='Jellyfin Sync'
                                           ORDER BY "TimeRun" DESC
                                           LIMIT 1`).then((res) => res.rows);
     if(last_execution.length!==0)

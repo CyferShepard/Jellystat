@@ -18,7 +18,7 @@ function SelectionCard(props) {
   const MixedIcon=<CheckboxMultipleBlankLineIcon size={"50%"}    color="white"/> ;
   const token = localStorage.getItem('token');
 
-  const default_image=<div className="default_library_image d-flex justify-content-center align-items-center">{props.data.CollectionType==='tvshows' ? SeriesIcon : props.data.CollectionType==='movies'? MovieIcon : props.data.CollectionType==='music'? MusicIcon : MixedIcon} </div>;
+  const default_image=<div className="default_library_image-inv d-flex justify-content-center align-items-center">{props.data.CollectionType==='tvshows' ? SeriesIcon : props.data.CollectionType==='movies'? MovieIcon : props.data.CollectionType==='music'? MusicIcon : MixedIcon} </div>;
 
   const handleChange = async () => {
     await axios
@@ -63,7 +63,7 @@ function SelectionCard(props) {
  
 
 
-          <Card.Body className="library-card-details rounded-bottom">
+          <Card.Body className="library-card-details-inv rounded-bottom">
             <Row className="space-between-end card-row">
               <Col className="card-label">Library</Col>
               <Col className="text-end">{props.data.Name}</Col>
@@ -81,7 +81,6 @@ function SelectionCard(props) {
                     <Form>
                       <Form.Check
                         type="switch"
-                        id="tracker-switch"
                         checked={checked}
                         onChange={handleChange}
                       />

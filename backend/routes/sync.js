@@ -770,11 +770,17 @@ async function fullSync(taskType)
     const _sync = new sync(rows[0].JF_HOST, rows[0].JF_API_KEY);
 
     const libraries = await _sync.getLibrariesFromApi(); 
+
+    const excluded_libraries= rows[0].settings.ExcludedLibraries||[];
+    console.log(excluded_libraries);
+
+    const filtered_libraries=libraries.filter((library)=> !excluded_libraries.includes(library.Id));
+
     const data=[];
 
     //for each item in library run get item using that id as the ParentId (This gets the children of the parent id)
-  for (let i = 0; i < libraries.length; i++) {
-    const item = libraries[i];
+  for (let i = 0; i < filtered_libraries.length; i++) {
+    const item = filtered_libraries[i];
     let libraryItems = await _sync.getItems('parentId',item.Id);
     const libraryItemsWithParent = libraryItems.map((items) => ({
       ...items,
@@ -787,7 +793,7 @@ async function fullSync(taskType)
 
     await syncUserData(refLog);
   
-    await syncLibraryFolders(refLog,libraries);
+    await syncLibraryFolders(refLog,filtered_libraries);
     await syncLibraryItems(refLog,library_items);
     await syncShowItems(refLog,seasons_and_episodes);
     await syncItemInfo(refLog);
