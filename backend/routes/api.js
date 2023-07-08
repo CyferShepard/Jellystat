@@ -483,7 +483,7 @@ router.get("/dataValidator", async (req, res) => {
     for (let i = 0; i < libraries.length; i++) {
       const library = libraries[i];
 
-      let item_url = `${config[0].JF_HOST}/Users/${adminUser[0].Id}/Items?ParentID=${library.Id}`;
+      let item_url = `${config[0].JF_HOST}/Users/${userid}/Items?ParentID=${library.Id}`;
       const response_data_item = await axios_instance.get(item_url, {
         headers: {
           "X-MediaBrowser-Token": config[0].JF_API_KEY,

@@ -24,6 +24,7 @@ const jf_activity_watchdog_columns = [
     { name: 'PlayState', mod: ':json' },
     "OriginalContainer",
     "RemoteEndPoint",
+    "ServerId",
   ]; 
 
 
@@ -49,6 +50,7 @@ const jf_activity_watchdog_columns = [
     PlayState: item.PlayState? item.PlayState : null,
     OriginalContainer: item.NowPlayingItem && item.NowPlayingItem.Container ? item.NowPlayingItem.Container : null,
     RemoteEndPoint:  item.RemoteEndPoint || null,
+    ServerId:  item.ServerId || null,
   });
 
   module.exports = {

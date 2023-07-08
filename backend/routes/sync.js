@@ -3,6 +3,8 @@ const pgp = require("pg-promise")();
 const db = require("../db");
 const axios = require("axios");
 const https = require('https');
+const moment = require('moment');
+const { randomUUID }  = require('crypto');
 
 const logging=require("./logging");
 
@@ -18,9 +20,6 @@ const axios_instance = axios.create({
 
 // const wss = require("./WebsocketHandler");
 // const socket=wss;
-
-const moment = require('moment');
-const { randomUUID }  = require('crypto');
 
 
 const router = express.Router();
@@ -232,13 +231,7 @@ async function syncUserData(refLog)
   try
   {
     const { rows } = await db.query('SELECT * FROM app_config where "ID"=1');
-    if (rows[0].JF_HOST === null || rows[0].JF_API_KEY === null) {
-      res.send({ error: "Config Details Not Found" });
-      refLog.loggedData.push({ Message: "Error: Config details not found!" });
-      refLog.result='Failed';
-      return;
-    }
-  
+
     const _sync = new sync(rows[0].JF_HOST, rows[0].JF_API_KEY);
   
     const data = await _sync.getUsers();
@@ -355,7 +348,7 @@ async function syncLibraryItems(refLog,data)
     .query('SELECT "Id" FROM jf_libraries')
     .then((res) => res.rows.map((row) => row.Id));
 
-  refLog.loggedData.push({ color: "lawngreen", Message: "Syncing... 1/3" });
+  refLog.loggedData.push({ color: "lawngreen", Message: "Syncing... 1/4" });
   refLog.loggedData.push({color: "yellow",Message: "Beginning Library Item Sync",});
 
   data=data.filter((row) => existingLibraryIds.includes(row.ParentId));
@@ -414,18 +407,9 @@ async function syncLibraryItems(refLog,data)
 async function syncShowItems(refLog,data)
 {
  try{
-  refLog.loggedData.push({ color: "lawngreen", Message: "Syncing... 2/3" });
+  refLog.loggedData.push({ color: "lawngreen", Message: "Syncing... 2/4" });
   refLog.loggedData.push({color: "yellow", Message: "Beginning Seasons and Episode sync",});
 
-  const { rows: config } = await db.query('SELECT * FROM app_config where "ID"=1');
-
-  if (config[0].JF_HOST === null || config[0].JF_API_KEY === null) {
-    res.send({ error: "Config Details Not Found" });
-    refLog.result='Failed';
-    return;
-  }
-
-  // const _sync = new sync(config[0].JF_HOST, config[0].JF_API_KEY);
   const { rows: shows } = await db.query(`SELECT *	FROM public.jf_library_items where "Type"='Series'`);
 
   let insertSeasonsCount = 0;
@@ -541,12 +525,6 @@ async function syncItemInfo(refLog)
 
   const { rows: config } = await db.query('SELECT * FROM app_config where "ID"=1');
 
-  if (config[0].JF_HOST === null || config[0].JF_API_KEY === null) {
-    res.send({ error: "Config Details Not Found" });
-    refLog.result='Failed';
-    return;
-  }
-
   const _sync = new sync(config[0].JF_HOST, config[0].JF_API_KEY);
   const { rows: Items } = await db.query(`SELECT *	FROM public.jf_library_items where "Type" not in ('Series','Folder')`);
   const { rows: Episodes } = await db.query(`SELECT *	FROM public.jf_library_episodes`);
@@ -642,7 +620,7 @@ async function syncItemInfo(refLog)
   refLog.loggedData.push({color: "orange",Message: deleteItemInfoCount + " Item Info Removed.",});
   refLog.loggedData.push({color: "dodgerblue",Message: (insertEpisodeInfoCount > 0 ? insertEpisodeInfoCount:0) + " Episodes Info inserted. "+updateEpisodeInfoCount +" Episodes Info Updated"});
   refLog.loggedData.push({color: "orange",Message: deleteEpisodeInfoCount + " Episodes Info Removed.",});
-  refLog.loggedData.push({ color: "lawngreen", Message: "Info Sync Complete" });
+  refLog.loggedData.push({ color: "yellow", Message: "Info Sync Complete" });
  }catch(error)
  {
   refLog.loggedData.push({color: "red",Message:  getErrorLineNumber(error)+ ": Error: "+error,});
@@ -650,10 +628,30 @@ async function syncItemInfo(refLog)
  }
 }
 
-async function syncPlaybackPluginData()
+async function removeOrphanedData(refLog)
 {
-  // socket.sendMessageToClients({ color: "lawngreen", Message: "Syncing... 5/5" });
-  // socket.sendMessageToClients({color: "yellow", Message: "Beginning File Info Sync",});
+ try{
+  refLog.loggedData.push({ color: "lawngreen", Message: "Syncing... 4/4" });
+  refLog.loggedData.push({color: "yellow", Message: "Removing Orphaned FileInfo/Episode/Season Records",});
+
+  await db.query('CALL jd_remove_orphaned_data()');
+
+  refLog.loggedData.push({color: "dodgerblue",Message: "Orphaned FileInfo/Episode/Season Removed.",});
+
+  refLog.loggedData.push({ color: "Yellow", Message: "Sync Complete" });
+ }catch(error)
+ {
+  refLog.loggedData.push({color: "red",Message: getErrorLineNumber(error)+ ': Error:'+error,});
+  refLog.loggedData.push({ color: "red", Message: getErrorLineNumber(error)+ ": Cleanup Failed with errors" });
+  refLog.result='Failed';
+ }
+
+}
+
+async function syncPlaybackPluginData(refLog)
+{
+  refLog.loggedData.push({ color: "lawngreen", Message: "Syncing..." });
+
 
   try {
     const { rows: config } = await db.query(
@@ -665,26 +663,71 @@ async function syncPlaybackPluginData()
     {
       return;
     }
-    const base_url = config[0].JF_HOST;
-    const apiKey = config[0].JF_API_KEY;
+
+    const base_url = config[0]?.JF_HOST;
+    const apiKey = config[0]?.JF_API_KEY;
   
-    if (base_url === null || config[0].JF_API_KEY === null) {
+    if (base_url === null || apiKey === null) {
       return;
     }
 
-    const { rows: pbData } = await db.query(
-      'SELECT * FROM jf_playback_reporting_plugin_data order by rowid desc limit 1'
-    );
+    //Playback Reporting Plugin Check
+    const pluginURL = `${base_url}/plugins`;
 
-    let query=`SELECT rowid, * FROM PlaybackActivity`;
+    const pluginResponse = await axios_instance.get(pluginURL,
+    {
+      headers: {
+        "X-MediaBrowser-Token": apiKey,
+      },
+    });
 
     
+    const hasPlaybackReportingPlugin=pluginResponse.data?.filter((plugins) => plugins?.ConfigurationFileName==='Jellyfin.Plugin.PlaybackReporting.xml');
 
-    if(pbData[0])
+    if(!hasPlaybackReportingPlugin || hasPlaybackReportingPlugin.length===0)
     {
-      query+=' where rowid > '+pbData[0].rowid;
+      refLog.loggedData.push({color: "lawngreen", Message: "Playback Reporting Plugin not detected. Skipping step.",});
+      return;
     }
+
+    //
+
+    refLog.loggedData.push({color: "dodgerblue", Message: "Determining query constraints.",});
+    const OldestPlaybackActivity = await db
+    .query('SELECT  MIN("ActivityDateInserted") "OldestPlaybackActivity" FROM public.jf_playback_activity')
+    .then((res) => res.rows[0]?.OldestPlaybackActivity);
+
+    const MaxPlaybackReportingPluginID = await db
+    .query('SELECT MAX(rowid) "MaxRowId" FROM jf_playback_reporting_plugin_data')
+    .then((res) => res.rows[0]?.MaxRowId);
+
+
+    //Query Builder
+    let query=`SELECT rowid, * FROM PlaybackActivity`;
+
+    if(OldestPlaybackActivity)
+    {
+      const formattedDateTime = moment(OldestPlaybackActivity).format('YYYY-MM-DD HH:mm:ss');
+
+      query=query+` WHERE DateCreated < '${formattedDateTime}'`;
+
+      if(MaxPlaybackReportingPluginID)
+      {
+  
+        query=query+` AND rowid > ${MaxPlaybackReportingPluginID}`;
+  
+      }
+
+    }else if(MaxPlaybackReportingPluginID)
+    {
+      query=query+` WHERE rowid > ${MaxPlaybackReportingPluginID}`;
+    }
+
     query+=' order by rowid';
+
+    refLog.loggedData.push({color: "dodgerblue", Message: "Query built. Executing.",});
+
+    //
 
     const url = `${base_url}/user_usage_stats/submit_custom_query`;
 
@@ -702,34 +745,48 @@ async function syncPlaybackPluginData()
 
 
     if (DataToInsert.length !== 0) {
+      refLog.loggedData.push({color: "dodgerblue", Message: `Inserting ${DataToInsert.length} Rows.`,});
       let result=await db.insertBulk("jf_playback_reporting_plugin_data",DataToInsert,columnsPlaybackReporting);
-      console.log(result);
+
+      if (result.Result === "SUCCESS") {
+        refLog.loggedData.push({color: "dodgerblue", Message: `${DataToInsert.length} Rows have been inserted.`,});
+
+      } else {
+      
+        refLog.loggedData.push({color: "red",Message:  "Error: "+result.message,});
+        refLog.result='Failed';
+      }
+      
+
+    }else
+    {
+      refLog.loggedData.push({color: "dodgerblue", Message: `No new data to insert.`,});
     }    
+    await importPlaybackDatatoActivityTable(refLog);
   
      } catch (error) {
-      console.log(getErrorLineNumber(error)+ ": "+error);
-     return [];
+      refLog.loggedData.push({color: "red",Message:  "Error: "+error,});
+      refLog.result='Failed';
    }
    
+   
 }
-
-async function removeOrphanedData(refLog)
+async function importPlaybackDatatoActivityTable(refLog)
 {
  try{
-  refLog.loggedData.push({ color: "lawngreen", Message: "Syncing... 4/4" });
-  refLog.loggedData.push({color: "yellow", Message: "Removing Orphaned FileInfo/Episode/Season Records",});
+  refLog.loggedData.push({ color: "yellow", Message: "Running process to format data to be inserted into the Activity Table" });
 
-  await db.query('CALL jd_remove_orphaned_data()');
+  await db.query('CALL ji_insert_playback_plugin_data_to_activity_table()');
 
-  refLog.loggedData.push({color: "dodgerblue",Message: "Orphaned FileInfo/Episode/Season Removed.",});
+  refLog.loggedData.push({color: "dodgerblue",Message: "Process complete. Data has been inserted.",});
 
-  refLog.loggedData.push({ color: "lawngreen", Message: "Sync Complete" });
  }catch(error)
  {
   refLog.loggedData.push({color: "red",Message: getErrorLineNumber(error)+ ': Error:'+error,});
   refLog.loggedData.push({ color: "red", Message: getErrorLineNumber(error)+ ": Cleanup Failed with errors" });
   refLog.result='Failed';
  }
+ refLog.loggedData.push({color: "lawngreen", Message: `Playback Reporting Plugin Sync Complete`,});
 
 }
 
@@ -760,7 +817,7 @@ async function fullSync(taskType)
     let refLog={loggedData:[],result:'Success'};
   
     const { rows } = await db.query('SELECT * FROM app_config where "ID"=1');
-    if (rows[0].JF_HOST === null || rows[0].JF_API_KEY === null) {
+    if (rows[0]?.JF_HOST === null || rows[0]?.JF_API_KEY === null) {
       res.send({ error: "Config Details Not Found" });
       refLog.loggedData.push({ Message: "Error: Config details not found!" });
       refLog.result='Failed';
@@ -772,7 +829,6 @@ async function fullSync(taskType)
     const libraries = await _sync.getLibrariesFromApi(); 
 
     const excluded_libraries= rows[0].settings.ExcludedLibraries||[];
-    console.log(excluded_libraries);
 
     const filtered_libraries=libraries.filter((library)=> !excluded_libraries.includes(library.Id));
 
@@ -797,8 +853,10 @@ async function fullSync(taskType)
     await syncLibraryItems(refLog,library_items);
     await syncShowItems(refLog,seasons_and_episodes);
     await syncItemInfo(refLog);
-    await updateLibraryStatsData(refLog);
     await removeOrphanedData(refLog);
+
+    await updateLibraryStatsData(refLog);
+
     const uuid = randomUUID();
   
     let endTime = moment();
@@ -922,8 +980,38 @@ router.post("/fetchItem", async (req, res) => {
 
 //////////////////////////////////////////////////////syncPlaybackPluginData
 router.get("/syncPlaybackPluginData", async (req, res) => {
-  await syncPlaybackPluginData();
-  res.send();
+  let startTime = moment();
+  let refLog={loggedData:[],result:'Success'};
+
+  const { rows } = await db.query('SELECT * FROM app_config where "ID"=1');
+  if (rows[0]?.JF_HOST === null || rows[0]?.JF_API_KEY === null) {
+    res.send({ error: "Config Details Not Found" });
+    refLog.loggedData.push({ Message: "Error: Config details not found!" });
+    refLog.result='Failed';
+    return;
+  }
+
+  await syncPlaybackPluginData(refLog);
+  const uuid = randomUUID();
+  
+    let endTime = moment();
+   
+    let diffInSeconds = endTime.diff(startTime, 'seconds');
+  
+    const log=
+    {
+      "Id":uuid,
+      "Name":"Jellyfin Playback Reporting Plugin Sync",
+      "Type":"Task",
+      "ExecutionType":"Manual",
+      "Duration":diffInSeconds,
+      "TimeRun":startTime,
+      "Log":JSON.stringify(refLog.loggedData),
+      "Result":refLog.result
+  
+    };
+     logging.insertLog(log);
+  res.send("syncPlaybackPluginData Complete");
 
 });
 

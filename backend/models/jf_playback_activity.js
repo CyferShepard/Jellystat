@@ -19,7 +19,8 @@
         { name: 'TranscodingInfo', mod: ':json' },
         { name: 'PlayState', mod: ':json' },
         "OriginalContainer",
-        "RemoteEndPoint"
+        "RemoteEndPoint",
+        "ServerId"
       ]; 
 
 
@@ -44,7 +45,8 @@
         TranscodingInfo: item.TranscodingInfo? item.TranscodingInfo : null,
         PlayState: item.PlayState? item.PlayState : null,
         OriginalContainer: item.OriginalContainer ? item.OriginalContainer : null,
-        RemoteEndPoint: item.RemoteEndPoint ? item.RemoteEndPoint : null
+        RemoteEndPoint: item.RemoteEndPoint ? item.RemoteEndPoint : null,
+        ServerId: item.ServerId ? item.ServerId : null,
       });
 
   module.exports = {
