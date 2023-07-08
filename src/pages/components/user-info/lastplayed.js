@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import axios from "axios";
 
 import LastWatchedCard from "../general/last-watched-card";
+import ErrorBoundary from "../general/ErrorBoundary";
 
 import Config from "../../../lib/config";
 import "../../css/users/user-details.css";
@@ -63,7 +64,10 @@ function LastPlayed(props) {
         <h1 className="my-3">Last Watched</h1>
         <div className="last-played-container">
         {data.map((item) => (
-                    <LastWatchedCard data={item} base_url={config.hostUrl} key={item.Id+item.EpisodeNumber}/>
+                   
+                    <ErrorBoundary>
+                       <LastWatchedCard data={item} base_url={config.hostUrl} key={item.Id+item.EpisodeNumber}/>
+                  </ErrorBoundary>
           ))}
 
         </div>
