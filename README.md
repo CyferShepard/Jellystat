@@ -10,14 +10,15 @@
 - User Overview and activity
 - Watch statisitcs
 - Backup and restore Data
+- Auto sync library items
+- Jellyfin Statistics Plugin Integration
 
 ## Required Development
 - Responsive UI
 - Code Optimizations
 - Security Testing
 - More Validations and Error Handling
-- Auto sync library items
-- Jellyfin Statistics Plugin Integration
+- Multi-Server support
 - More to come
 
 ## Getting Started with Development
