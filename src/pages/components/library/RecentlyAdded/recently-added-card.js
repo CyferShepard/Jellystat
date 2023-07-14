@@ -16,18 +16,20 @@ function RecentlyAddedCard(props) {
         <img
           src={
             `${"/Proxy/Items/Images/Primary?id=" +
-                props.data.Id +
+            (props.data.Type==="Episode"? props.data.SeriesId :props.data.Id) +
                 "&fillHeight=320&fillWidth=213&quality=50"}`
           }
           alt=""
           onLoad={() => setLoaded(true)}
-          style={loaded ? { backgroundImage: `url(path/to/image.jpg)` } : { display: 'none' }}
+          style={loaded ? { } : { display: 'none' }}
         />
       </div>
     </Link>
 
       <div className="last-item-details">
-        <div className="last-item-name"> {props.data.Name}</div>
+
+        <div className="last-item-name"> {(props.data.Type==="Episode"? props.data.SeriesName :props.data.Name)}</div>
+
       </div>
 
       

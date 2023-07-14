@@ -13,9 +13,11 @@
 
 .item-name
 {
-    font-size: 2.5em;
-    font-weight: 500;
-    margin: 0;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 1;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 .item-image
 {
@@ -33,3 +35,6 @@
     color: var(--secondary-color) !important;
   }
   
+  .hide-tab-titles {
+    display: none !important;
+  }

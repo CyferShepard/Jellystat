@@ -1,6 +1,6 @@
 {
   "name": "jfstat",
-  "version": "1.0.4.9",
+  "version": "1.0.5.0",
   "private": true,
   "dependencies": {
     "@emotion/react": "^11.10.6",
@@ -22,6 +22,7 @@
     "concurrently": "^7.6.0",
     "cors": "^2.8.5",
     "crypto-js": "^4.1.1",
+    "dottie": "^2.0.6",
     "file-saver": "^2.0.5",
     "github-api": "^3.4.0",
     "http-proxy-middleware": "^2.0.6",
@@ -42,6 +43,7 @@
     "react-scripts": "5.0.1",
     "recharts": "^2.5.0",
     "remixicon-react": "^1.0.0",
+    "semver": "^7.5.3",
     "sequelize": "^6.29.0",
     "web-vitals": "^2.1.4",
     "ws": "^8.13.0"

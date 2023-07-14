@@ -2,7 +2,7 @@
 .grid-stat-cards
 {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(320px, 520px));
+  grid-template-columns: repeat(auto-fit, minmax(auto, 520px));
   grid-auto-rows: 200px;/* max-width+offset so 215 + 20*/
   margin-top: 8px;
   background-color: var(--secondary-background-color);

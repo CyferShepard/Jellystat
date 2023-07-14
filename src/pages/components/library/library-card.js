@@ -18,7 +18,7 @@ function LibraryCard(props) {
   const MusicIcon=<FileMusicLineIcon size={"50%"}    color="white"/> ;
   const MixedIcon=<CheckboxMultipleBlankLineIcon size={"50%"}    color="white"/> ;
 
-  const default_image=<div className="default_library_image d-flex justify-content-center align-items-center">{props.data.CollectionType==='tvshows' ? SeriesIcon : props.data.CollectionType==='movies'? MovieIcon : props.data.CollectionType==='music'? MusicIcon : MixedIcon} </div>;
+  const default_image=<div className="default_library_image default_library_image_hover d-flex justify-content-center align-items-center">{props.data.CollectionType==='tvshows' ? SeriesIcon : props.data.CollectionType==='movies'? MovieIcon : props.data.CollectionType==='music'? MusicIcon : MixedIcon} </div>;
 
   function formatFileSize(sizeInBytes) {
     const sizeInKB = sizeInBytes / 1024; // 1 KB = 1024 bytes
@@ -72,6 +72,35 @@ function LibraryCard(props) {
     return formattedTime;
     
   }
+  function ticksToTimeString(ticks) {
+    const seconds = Math.floor(ticks / 10000000);
+    const months = Math.floor(seconds / (86400 * 30)); // 1 month = 86400 seconds
+    const days = Math.floor((seconds % (86400 * 30)) / 86400); // 1 day = 86400 seconds
+    const hours = Math.floor((seconds % 86400) / 3600); // 1 hour = 3600 seconds
+    const minutes = Math.floor((seconds % 3600) / 60); // 1 minute = 60 seconds
+  
+    const timeComponents = [];
+  
+    if (months) {
+      timeComponents.push(`${months} Month${months > 1 ? 's' : ''}`);
+    }
+  
+    if (days) {
+      timeComponents.push(`${days} day${days > 1 ? 's' : ''}`);
+    }
+  
+    if (hours) {
+      timeComponents.push(`${hours} hour${hours > 1 ? 's' : ''}`);
+    }
+  
+    if (!months && minutes) {
+      timeComponents.push(`${minutes} minute${minutes > 1 ? 's' : ''}`);
+    }
+  
+    const formattedTime = timeComponents.length > 0 ? timeComponents.join(' ') : '0 minutes';
+    return formattedTime;
+  }
+  
 
   function formatLastActivityTime(time) {
     const units = {
@@ -91,6 +120,7 @@ function LibraryCard(props) {
   
     return `${formattedTime}ago`;
   }
+  
   return (
       <Card className="bg-transparent lib-card rounded-3">
           <Link to={`/libraries/${props.data.Id}`}>
@@ -100,7 +130,7 @@ function LibraryCard(props) {
 
                <Card.Img
                variant="top"
-               className="library-card-banner"
+               className="library-card-banner library-card-banner-hover"
                src={"/proxy/Items/Images/Primary?id=" + props.data.Id + "&fillWidth=800&quality=50"}
                onError={() =>setImageLoaded(false)}
                />
@@ -120,6 +150,11 @@ function LibraryCard(props) {
             <Row className="space-between-end card-row">
               <Col className="card-label">Type</Col>
               <Col className="text-end">{props.data.CollectionType==='tvshows' ? 'Series' : props.data.CollectionType==='movies'? "Movies" : props.data.CollectionType==='music'? "Music" : 'Mixed'}</Col>
+            </Row>
+
+            <Row className="space-between-end card-row">
+              <Col className="card-label">Total Time</Col>
+              <Col className="text-end">{ticksToTimeString(props.data && props.data.total_play_time ? props.data.total_play_time:0)}</Col>
             </Row>
 
             <Row className="space-between-end card-row">
@@ -144,7 +179,7 @@ function LibraryCard(props) {
 
             <Row className="space-between-end card-row">
               <Col className="card-label">Last Played</Col>
-              <Col className="text-end">{props.data.ItemName ? props.data.ItemName : 'n/a'}</Col>
+              <Col className="text-end">{props.data.ItemName || 'n/a'}</Col>
             </Row>
 
             <Row className="space-between-end card-row">

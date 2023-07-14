@@ -28,10 +28,10 @@ function MPMovies(props) {
 
     const fetchLibraries = () => {
       if (config) {
-        const url = `/stats/getMostPopularMovies`;
+        const url = `/stats/getMostPopularByType`;
 
         axios
-        .post(url, {days:props.days}, {
+        .post(url, {days:props.days, type:'Movie'}, {
           headers: {
             Authorization: `Bearer ${config.token}`,
             "Content-Type": "application/json",

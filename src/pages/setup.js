@@ -51,14 +51,14 @@ function Setup() {
       apikey: _apikey
 
     }, {
-      headers: {
+        headers: {
         Authorization: `Bearer ${token}`,
         "Content-Type": "application/json",
-      },
-    })
-    .catch((error) => {
+        },
+      })
+      .catch((error) => {
      
-    });
+      });
 
     let data=result.data;
     return { isValid:data.isValid, errorMessage:data.errorMessage} ;
@@ -137,7 +137,7 @@ function Setup() {
     <section>
       <div className="form-box d-flex flex-column">
       <h2>Setup Jellyfin</h2>
-    
+
         <Form onSubmit={handleFormSubmit} className="mt-5">
           <Form.Group as={Row} className="inputbox" >
  

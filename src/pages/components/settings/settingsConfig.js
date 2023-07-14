@@ -9,6 +9,7 @@ import Button from 'react-bootstrap/Button';
 import Alert from 'react-bootstrap/Alert';
 import ToggleButton from 'react-bootstrap/ToggleButton';
 import ToggleButtonGroup from 'react-bootstrap/ToggleButtonGroup';
+import Dropdown  from 'react-bootstrap/Dropdown';
 
 import EyeFillIcon from 'remixicon-react/EyeFillIcon';
 import EyeOffFillIcon from 'remixicon-react/EyeOffFillIcon';
@@ -20,6 +21,8 @@ import {  InputGroup } from "react-bootstrap";
 
 export default function SettingsConfig() {
   const [config, setConfig] = useState(null);
+  const [admins, setAdmins] = useState();
+  const [selectedAdmin, setSelectedAdmin] = useState('');
   const [showKey, setKeyState] = useState(false);
   const [formValues, setFormValues] = useState({});
   const [isSubmitted, setisSubmitted] = useState("");
@@ -43,6 +46,7 @@ export default function SettingsConfig() {
       .then((config) => {
         setFormValues({ JF_HOST: config.hostUrl });
         setConfig(config);
+        setSelectedAdmin(config.settings?.preferred_admin);
         setloadSate("Loaded");
       })
       .catch((error) => {
@@ -52,7 +56,29 @@ export default function SettingsConfig() {
           "Error Retrieving Configuration. Unable to contact Backend Server"
         );
       });
-  }, []);
+
+
+      const fetchAdmins = async () => {
+        try {
+  
+          const adminData = await axios.get(`/proxy/getAdminUsers`,  {
+            headers: {
+              Authorization: `Bearer ${token}`,
+              "Content-Type": "application/json",
+            },
+          });
+          setAdmins(adminData.data);
+  
+        } catch (error) {
+          console.log(error);
+        }
+      };
+  
+      fetchAdmins();
+
+
+
+  }, [token]);
 
   async function validateSettings(_url, _apikey) {
     const result = await axios
@@ -110,6 +136,38 @@ export default function SettingsConfig() {
   function handleFormChange(event) {
     setFormValues({ ...formValues, [event.target.name]: event.target.value });
   }
+
+  function updateAdmin(event) {
+
+    const username=event.target.textContent;
+    const userid=event.target.getAttribute('value');
+  
+
+    axios
+    .post("/api/setPreferredAdmin/", 
+    {
+      userid:userid,
+      username:username
+    }, {
+      headers: {
+        Authorization: `Bearer ${config.token}`,
+        "Content-Type": "application/json",
+      },
+    })
+    .then((response) => {
+      console.log("Config updated successfully:", response.data);
+      setisSubmitted("Success");
+      setsubmissionMessage("Successfully updated configuration");
+      setSelectedAdmin({username:username, userid:userid});
+    })
+    .catch((error) => {
+      console.log("Error updating config:", error);
+      setisSubmitted("Failed");
+      setsubmissionMessage("Error Updating Configuration: ", error);
+    });
+  }
+
+
   if (loadSate === "Loading") {
     return <Loading />;
   }
@@ -169,6 +227,28 @@ export default function SettingsConfig() {
           </div>
 
         </Form>
+        <Form className="settings-form">
+         <Form.Group as={Row} className="mb-3">
+           <Form.Label column  className="">Select Preferred Admin Account</Form.Label>
+           <Col>
+              <Dropdown className="w-100">
+                <Dropdown.Toggle variant="outline-primary" id="dropdown-basic" className="w-100">
+                {selectedAdmin ? selectedAdmin.username : 'Select a Preferred Admin'}
+                </Dropdown.Toggle>
+
+                <Dropdown.Menu className="w-100" >
+                {admins && admins.sort((a, b) => a.Name - b.Name)
+                          .map((admin) => (
+    
+                            <Dropdown.Item onClick={updateAdmin} value={admin.Id} key={admin.Id}>{admin.Name}</Dropdown.Item>
+                          ))}
+
+                </Dropdown.Menu>
+              </Dropdown>
+            </Col>  
+          </Form.Group>
+
+        </Form>
 
         <Form className="settings-form">
          <Form.Group as={Row} className="mb-3">
@@ -182,6 +262,8 @@ export default function SettingsConfig() {
           </Form.Group>
 
         </Form>
+
+
 
 
 

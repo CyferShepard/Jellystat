@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link } from "react-router-dom";
-import { Button, ButtonGroup } from "react-bootstrap";
+import { Button, ButtonGroup,Modal } from "react-bootstrap";
 
 
 import Table from '@mui/material/Table';
@@ -19,7 +19,10 @@ import { visuallyHidden } from '@mui/utils';
 import AddCircleFillIcon from 'remixicon-react/AddCircleFillIcon';
 import IndeterminateCircleFillIcon from 'remixicon-react/IndeterminateCircleFillIcon';
 
+import StreamInfo from './stream_info';
+
 import '../../css/activity/activity-table.css';
+
 // localStorage.setItem('hour12',true);
 
 
@@ -50,6 +53,21 @@ function Row(data) {
   const [open, setOpen] = React.useState(false);
   const twelve_hr = JSON.parse(localStorage.getItem('12hr'));
 
+  
+  const [modalState,setModalState]= React.useState(false);
+  const [modalData,setModalData]= React.useState();
+
+  
+  const openModal = (data) => {
+    setModalData(data);
+    setModalState(!modalState);
+  };
+  
+
+
+
+
+
   const options = {
     day: "numeric",
     month: "numeric",
@@ -63,6 +81,19 @@ function Row(data) {
 
   return (
     <React.Fragment>
+
+      <Modal show={modalState} onHide={()=>setModalState(false)} >
+        <Modal.Header>
+          <Modal.Title>Stream Info: {!row.SeriesName ? row.NowPlayingItemName : row.SeriesName+' - '+ row.NowPlayingItemName} ({row.UserName})</Modal.Title>
+        </Modal.Header>
+        <StreamInfo data={modalData}/>
+        <Modal.Footer>
+          <Button variant="outline-primary" onClick={()=>setModalState(false)}>
+            Close
+          </Button>
+        </Modal.Footer>
+      </Modal>
+
       <TableRow sx={{ '& > *': { borderBottom: 'unset' } }}>
         <TableCell>
           <IconButton
@@ -74,15 +105,15 @@ function Row(data) {
           </IconButton>
         </TableCell>
         <TableCell><Link to={`/users/${row.UserId}`} className='text-decoration-none'>{row.UserName}</Link></TableCell>
+        <TableCell>{row.RemoteEndPoint || '-'}</TableCell>
         <TableCell><Link to={`/libraries/item/${row.EpisodeId || row.NowPlayingItemId}`} className='text-decoration-none'>{!row.SeriesName ? row.NowPlayingItemName : row.SeriesName+' - '+ row.NowPlayingItemName}</Link></TableCell>
-        <TableCell>{row.Client}</TableCell>
+        <TableCell className='activity-client' ><span onClick={()=>openModal(row)}>{row.Client}</span></TableCell>
         <TableCell>{Intl.DateTimeFormat('en-UK', options).format(new Date(row.ActivityDateInserted))}</TableCell>
-        {/* <TableCell>{formatTotalWatchTime(row.results && row.results.length>0 ?  row.results.reduce((acc, items) => acc +parseInt(items.PlaybackDuration),0): row.PlaybackDuration) || '0 minutes'}</TableCell> */}
         <TableCell>{formatTotalWatchTime(row.PlaybackDuration) || '0 seconds'}</TableCell>
         <TableCell>{row.results.length !==0 ? row.results.length : 1}</TableCell>
       </TableRow>
       <TableRow>
-        <TableCell style={{ paddingBottom: 0, paddingTop: 0 }} colSpan={7}>
+        <TableCell style={{ paddingBottom: 0, paddingTop: 0 }} colSpan={8}>
           <Collapse in={open} timeout="auto" unmountOnExit>
             <Box sx={{ margin: 1 }}>
 
@@ -90,6 +121,7 @@ function Row(data) {
                 <TableHead>
                   <TableRow>
                     <TableCell>User</TableCell>
+                    <TableCell>IP Address</TableCell>
                     <TableCell>Title</TableCell>
                     <TableCell>Client</TableCell>
                     <TableCell>Date</TableCell>
@@ -100,10 +132,10 @@ function Row(data) {
                 <TableBody>
                   {row.results.sort((a, b) => new Date(b.ActivityDateInserted) - new Date(a.ActivityDateInserted)).map((resultRow) => (
                     <TableRow key={resultRow.Id}>
- 
                         <TableCell><Link to={`/users/${resultRow.UserId}`} className='text-decoration-none'>{resultRow.UserName}</Link></TableCell>
+                        <TableCell>{resultRow.RemoteEndPoint || '-'}</TableCell>
                         <TableCell><Link to={`/libraries/item/${resultRow.EpisodeId || resultRow.NowPlayingItemId}`} className='text-decoration-none'>{!resultRow.SeriesName ? resultRow.NowPlayingItemName : resultRow.SeriesName+' - '+ resultRow.NowPlayingItemName}</Link></TableCell>
-                        <TableCell>{resultRow.Client}</TableCell>
+                        <TableCell className='activity-client' ><span onClick={()=>openModal(resultRow)}>{resultRow.Client}</span></TableCell>
                         <TableCell>{Intl.DateTimeFormat('en-UK', options).format(new Date(resultRow.ActivityDateInserted))}</TableCell>
                         <TableCell>{formatTotalWatchTime(resultRow.PlaybackDuration) || '0 seconds'}</TableCell>
                         <TableCell>1</TableCell>
@@ -130,8 +162,14 @@ function EnhancedTableHead(props) {
     {
       id: 'UserName',
       numeric: false,
-      disablePadding: true,
-      label: 'Last User',
+      disablePadding: false,
+      label: 'User',
+    },
+    {
+      id: 'RemoteEndPoint',
+      numeric: false,
+      disablePadding: false,
+      label: 'IP Address',
     },
     {
       id: 'NowPlayingItemName',
@@ -143,7 +181,7 @@ function EnhancedTableHead(props) {
       id: 'Client',
       numeric: false,
       disablePadding: false,
-      label: 'Last Client',
+      label: 'Client',
     },
     {
       id: 'ActivityDateInserted',
@@ -161,7 +199,7 @@ function EnhancedTableHead(props) {
       id: 'TotalPlays',
       numeric: false,
       disablePadding: false,
-      label: 'TotalPlays',
+      label: 'Total Plays',
     },
   ];
 
@@ -268,7 +306,7 @@ export default function ActivityTable(props) {
       setOrder(isAsc ? 'desc' : 'asc');
       setOrderBy(property);
     };
-  
+
   
   
 
@@ -286,7 +324,7 @@ export default function ActivityTable(props) {
             {visibleRows.map((row) => (
                 <Row key={row.Id+row.NowPlayingItemId+row.EpisodeId} row={row} />
               ))}
-              {props.data.length===0 ? <tr><td colSpan="7" style={{ textAlign: "center", fontStyle: "italic" ,color:"grey"}} className='py-2'>No Activity Found</td></tr> :''}
+              {props.data.length===0 ? <tr><td colSpan="8" style={{ textAlign: "center", fontStyle: "italic" ,color:"grey"}} className='py-2'>No Activity Found</td></tr> :''}
             
           </TableBody>
         </Table>

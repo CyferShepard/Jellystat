@@ -41,9 +41,9 @@ function Login() {
   {
 
     axios
-    .post("/auth/login", {
+      .post("/auth/login", {
       username:JS_USERNAME,
-      password: hashedPassword
+        password: hashedPassword
 
     }, {
       headers: {
@@ -53,7 +53,7 @@ function Login() {
     .then(async (response) => {
 
 
-      localStorage.setItem('token',response.data.token);
+        localStorage.setItem('token',response.data.token);
       setProcessing(false);
       if(JS_USERNAME)
       {
@@ -63,16 +63,16 @@ function Login() {
       }
 
 
-    })
-    .catch((error) => {
-      let errorMessage= `Error : ${error.response.status}`;
-      if (error.code === "ERR_NETWORK") {
-        errorMessage = `Unable to connect to Jellyfin Server`;
-      } else if (error.response.status === 401) {
-        errorMessage = `Invalid Username or Password`;
-      } else if (error.response.status === 404) {
-        errorMessage = `Error ${error.response.status}: The requested URL was not found.`;
-      }
+      })
+      .catch((error) => {
+        let errorMessage= `Error : ${error.response.status}`;
+        if (error.code === "ERR_NETWORK") {
+          errorMessage = `Unable to connect to Jellyfin Server`;
+        } else if (error.response.status === 401) {
+          errorMessage = `Invalid Username or Password`;
+        } else if (error.response.status === 404) {
+          errorMessage = `Error ${error.response.status}: The requested URL was not found.`;
+        }
       if(JS_USERNAME)
       {
         setsubmitButtonText(errorMessage);
@@ -80,8 +80,8 @@ function Login() {
 
       
     
-      setProcessing(false);
-    });
+        setProcessing(false);
+      });
   }
 
 
@@ -100,7 +100,7 @@ function Login() {
         }
       }
     };
-    
+
 
     if (!config) {
       fetchConfig();
@@ -117,8 +117,8 @@ function Login() {
   return (
     <section>
       <div className="form-box d-flex flex-column">
-      <h2>Login</h2>
-    
+          <h2>Login</h2>
+
         <Form onSubmit={handleFormSubmit} className="mt-5">
           <Form.Group as={Row} className="inputbox" >
  

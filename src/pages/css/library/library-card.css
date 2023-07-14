@@ -33,10 +33,11 @@
     background-size: cover;
     transition: all 0.2s ease-in-out;
     max-height: 170px;
+    height: 170px;
     
 }
 
-.library-card-banner:hover
+.library-card-banner-hover:hover, .default_library_image_hover:hover
 {
     opacity: 0.5;
 }
@@ -46,6 +47,12 @@
     background-color: var(--secondary-background-color) !important;
 }
 
+.library-card-details-inv
+{
+    background-color: var(--background-color) !important;
+}
+
+
 
 .default_library_image
 {
@@ -53,4 +60,33 @@
     width: 100%;
     height: 170px;
     border-radius: 8px 8px 0px 0px;
+    transition: all 0.2s ease-in-out;
 }
+
+.default_library_image-inv
+{
+    background-color: var(--background-color);
+    width: 100%;
+    height: 170px;
+    border-radius: 8px 8px 0px 0px;
+    transition: all 0.2s ease-in-out;
+}
+
+.form-switch .form-check-input {
+    border-color: var(--primary-color) !important;
+}
+  
+.form-switch .form-check-input:checked {
+  background-color: var(--primary-color);
+}
+
+.form-switch .form-check-input:focus {
+    box-shadow: none !important;
+    border-color: var(--primary-color) !important;
+}
+
+.form-switch .form-check-input:hover {
+    box-shadow: none !important;
+    border-color: var(--primary-color) !important;
+}
+

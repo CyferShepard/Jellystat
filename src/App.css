@@ -1,9 +1,14 @@
 @import 'pages/css/variables.module.css';
+@import 'pages/css/variables.module.css';
 main{
   margin-inline: 20px; 
   /* width: 100%; */
   overflow: auto;
+  margin-inline: 20px; 
+  /* width: 100%; */
+  overflow: auto;
 }
+
 
 
 .App-logo {
@@ -19,6 +24,7 @@ main{
 
 body
 {
+  background-color: var(--background-color) !important;
   background-color: var(--background-color) !important;
   /* background-color: #17151a; */
   color: white;
@@ -39,6 +45,7 @@ h2{
     margin-top: 0.5em;
     margin-bottom: 0.5em;
 }
+
 
 
 
@@ -106,3 +113,58 @@ h2{
   background-color: var(--primary-color) !important;
 
 }
+
+.btn-primary
+{
+  color: white!important;
+  border-color: var(--primary-color) !important;
+  background-color: var(--primary-color) !important;
+}
+
+.btn-primary:hover
+{
+  background-color: var(--primary-dark-color) !important;
+}
+
+.btn-primary.active
+{
+  background-color: var(--primary-color) !important;
+
+}
+
+.btn-primary:focus
+{
+  background-color: var(--primary-color) !important;
+
+}
+
+.form-select
+{
+  background-color:var(--secondary-background-color) !important;
+  border-color:var(--secondary-background-color) !important ;
+  color: white !important;
+}
+
+.form-select:focus
+{
+  box-shadow: none !important;
+  border-color: var(--primary-color) !important;
+  color: white !important;
+}
+
+.form-select option {
+  background-color: var(--secondary-background-color) !important;
+  padding: 0 !important;
+  border-radius: 8px !important;
+  border-color: var(--primary-color) !important;
+}
+
+
+.form-select option:hover {
+  background-color: var(--primary-color) !important;
+  color: white !important;
+}
+
+
+
+

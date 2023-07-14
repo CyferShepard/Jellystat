@@ -5,10 +5,11 @@ import SettingsConfig from "./components/settings/settingsConfig";
 import Tasks from "./components/settings/Tasks";
 import BackupFiles from "./components/settings/backupfiles";
 import SecuritySettings from "./components/settings/security";
+import ApiKeys from "./components/settings/apiKeys";
+import LibrarySelector from "./library_selector";
 
 import Logs from "./components/settings/logs";
 
-// import TerminalComponent from "./components/settings/TerminalComponent";
 
 
 
@@ -24,10 +25,15 @@ export default function Settings() {
           <Tab eventKey="tabGeneral" className='bg-transparent my-2' title='Settings'  style={{minHeight:'500px'}}>
            <SettingsConfig/>
            <SecuritySettings/>
-
            <Tasks/>
-  
-  
+          </Tab>
+
+          <Tab eventKey="tabLibraries" className='bg-transparent  my-2' title='Library Settings'  style={{minHeight:'500px'}}>
+          <LibrarySelector/>
+          </Tab>
+
+          <Tab eventKey="tabKeys" className='bg-transparent  my-2' title='API Keys'  style={{minHeight:'500px'}}>
+          <ApiKeys/>
           </Tab>
 
           <Tab eventKey="tabBackup" className='bg-transparent  my-2' title='Backup'  style={{minHeight:'500px'}}>

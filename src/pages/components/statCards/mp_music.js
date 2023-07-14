@@ -26,10 +26,10 @@ function MPMusic(props) {
   
     const fetchLibraries = () => {
       if (config) {
-        const url = `/stats/getMostPopularMusic`;
+        const url = `/stats/getMostPopularByType`;
        
         axios
-          .post(url, { days: props.days }, {
+          .post(url, { days: props.days, type:'Audio' }, {
             headers: {
               Authorization: `Bearer ${config.token}`,
               "Content-Type": "application/json",

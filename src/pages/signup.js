@@ -92,7 +92,7 @@ function Signup() {
     <section>
     <div className="form-box d-flex flex-column">
     <h2>Sign Up</h2>
-  
+
       <Form onSubmit={handleFormSubmit} className="mt-5">
         <Form.Group as={Row} className="inputbox" >
 
@@ -118,12 +118,12 @@ function Signup() {
 
 
         <Button type="submit" className="setup-button">
-          {processing ? "Validating..." : submitButtonText}
+            {processing ? "Validating..." : submitButtonText}
         </Button>
 
       </Form>
-    </div>
-  </section>
+      </div>
+    </section>
   );
 }
 

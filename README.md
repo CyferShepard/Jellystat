@@ -1,6 +1,6 @@
 <p align="center">
 
-**Jellystat** is a free and open source Statistics App for Jellyfin!
+**Jellystat** is a free and open source Statistics App for Jellyfin! (This project is still in development - expect some weirdness)
 
 ## Current Features
 
@@ -10,19 +10,20 @@
 - User Overview and activity
 - Watch statisitcs
 - Backup and restore Data
+- Auto sync library items
+- Jellyfin Statistics Plugin Integration
 
 ## Required Development
 - Responsive UI
 - Code Optimizations
 - Security Testing
 - More Validations and Error Handling
-- Auto sync library items
-- Jellyfin Statistics Plugin Integration
+- Multi-Server support
 - More to come
 
 ## Getting Started with Development
 - Clone the project from git
-- set your env variables before starting the server (Variable names as per the docker compose file).
+- set your env variables before strating the server (Variable names as per the docker compose file).
 - Run `npm init` to install necessary packages
 - Run `npm run start-server` to only run the backend nodejs server
 - Run `npm run start` to only run the frontend React UI
@@ -40,6 +41,7 @@ https://hub.docker.com/r/cyfershepard/jellystat
 <img src="./screenshots/Users.PNG">
 <img src="./screenshots/Activity.PNG">
 <img src="./screenshots/Libraries.PNG">
+<img src="./screenshots/settings.PNG">
 
 ## Support
 

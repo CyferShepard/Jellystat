@@ -13,6 +13,8 @@ import TableRow from '@mui/material/TableRow';
 
 import { saveAs } from 'file-saver';
 
+import Loading from "./components/general/loading";
+
 
 
 
@@ -28,16 +30,14 @@ function Datadebugger() {
     const fetchData = async () => {
       try {
 
-        const libraryData = await axios.post(`/api/getLibraries`, {
-          itemid: undefined,
-        }, {
+        const libraryData = await axios.get(`/api/dataValidator`,  {
           headers: {
             Authorization: `Bearer ${token}`,
             "Content-Type": "application/json",
           },
         });
         setData(libraryData.data);
-        console.log(libraryData.data);
+
       } catch (error) {
         console.log(error);
       }
@@ -57,6 +57,11 @@ function Datadebugger() {
   
     saveAs(blob, filename+'.json');
   };
+
+  if(!data)
+  {
+    return <Loading/>;
+  }
 
 
   return (

@@ -35,7 +35,7 @@ function UserInfo() {
     const fetchData = async () => {
       if(config){
       try {
-        const userData = await axios.post(`/stats/getUserDetails`, {
+        const userData = await axios.post(`/api/getUserDetails`, {
           userid: UserId,
         }, {
           headers: {
@@ -102,8 +102,8 @@ function UserInfo() {
 
     <Tabs defaultActiveKey="tabOverview" activeKey={activeTab} variant='pills'>
           <Tab eventKey="tabOverview" className='bg-transparent'>
-            <GlobalStats UserId={UserId}/>
-            <LastPlayed UserId={UserId}/>
+       <GlobalStats UserId={UserId}/>
+       <LastPlayed UserId={UserId}/>
           </Tab>
           <Tab eventKey="tabActivity" className='bg-transparent'>
             <UserActivity UserId={UserId}/>

@@ -1,0 +1,98 @@
+
+/*based on https://drive.google.com/uc?export=view&id=1yTLwNiCZhIdCWolQldwq4spHQkgZDqkG */
+/* Small devices (landscape phones, 576px and up)*/
+@media (min-width: 576px) {
+    .rounded-sm {
+        border-radius: 8px !important;
+    }
+
+
+    .rounded-sm-start {
+        border-radius: 8px 0px 0px 8px !important;
+    }
+
+    .rounded-sm-end {
+        border-radius: 0px 8px 8px 0px !important;
+    }
+
+    .rounded-sm-top {
+        border-radius: 8px 8px 0px 0px  !important;
+    }
+
+    .rounded-sm-bottom {
+        border-radius: 0px 0px 8px 8px   !important;
+    }
+}
+
+
+/* Medium devices (tablets, 768px and up)*/
+@media (min-width: 768px) {
+    .rounded-md {
+        border-radius: 8px !important;
+    }
+
+
+    .rounded-md-start {
+        border-radius: 8px 0px 0px 8px !important;
+    }
+
+    .rounded-md-end {
+        border-radius: 0px 8px 8px 0px !important;
+    }
+
+    .rounded-md-top {
+        border-radius: 8px 8px 0px 0px  !important;
+    }
+
+    .rounded-md-bottom {
+        border-radius: 0px 0px 8px 8px   !important;
+    }
+}
+
+/* Large devices (desktops, 992px and up)*/
+@media (min-width: 992px) {
+    .rounded-lg {
+        border-radius: 8px !important;
+    }
+
+
+    .rounded-lg-start {
+        border-radius: 8px 0px 0px 8px !important;
+    }
+
+    .rounded-lg-end {
+        border-radius: 0px 8px 8px 0px !important;
+    }
+
+    .rounded-lg-top {
+        border-radius: 8px 8px 0px 0px  !important;
+    }
+
+    .rounded-lg-bottom {
+        border-radius: 0px 0px 8px 8px   !important;
+    }
+}
+
+/* Extra large devices (large desktops, 1200px and up)*/
+@media (min-width: 1200px) {
+    .rounded-xl {
+        border-radius: 8px !important;
+    }
+
+
+    .rounded-xl-start {
+        border-radius: 8px 0px 0px 8px !important;
+    }
+
+    .rounded-xl-end {
+        border-radius: 0px 8px 8px 0px !important;
+    }
+
+    .rounded-xl-top {
+        border-radius: 8px 8px 0px 0px  !important;
+    }
+
+    .rounded-xl-bottom {
+        border-radius: 0px 0px 8px 8px   !important;
+    }
+}

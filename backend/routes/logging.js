@@ -1,9 +1,9 @@
 
-const db = require("./db");
+const db = require("../db");
 
 
 
-const {jf_logging_columns,jf_logging_mapping,} = require("./models/jf_logging");
+const {jf_logging_columns,jf_logging_mapping,} = require("../models/jf_logging");
 const express = require("express");
 const router = express.Router();
 

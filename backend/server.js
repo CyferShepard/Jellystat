@@ -5,16 +5,19 @@ const knex = require('knex');
 const createdb = require('./create_database');
 const knexConfig = require('./migrations');
 
-const authRouter= require('./auth');
-const apiRouter = require('./api');
-const proxyRouter = require('./proxy');
-const {router: syncRouter} = require('./sync');
-const statsRouter = require('./stats');
-const {router: backupRouter}  = require('./backup');
+const authRouter= require('./routes/auth');
+const apiRouter = require('./routes/api');
+const proxyRouter = require('./routes/proxy');
+const {router: syncRouter} = require('./routes/sync');
+const statsRouter = require('./routes/stats');
+const {router: backupRouter}  = require('./routes/backup');
 const ActivityMonitor = require('./tasks/ActivityMonitor');
 const SyncTask = require('./tasks/SyncTask');
 const BackupTask = require('./tasks/BackupTask');
-const {router: logRouter} = require('./logging');
+const {router: logRouter} = require('./routes/logging');
+
+const dbInstance = require("./db");
+
 
 
 
@@ -36,29 +39,70 @@ app.use(cors());
 
 
 // JWT middleware
-function verifyToken(req, res, next) {
-  const authHeader = req.headers.authorization;
-  if (authHeader) {
-    const token = authHeader.split(' ')[1];
-    jwt.verify(token, JWT_SECRET, (err, user) => {
-      if (err) {
-        return res.sendStatus(403);
-      }
-      req.user = user;
+async function authenticate (req, res, next) {
+  const token  = req.headers.authorization;
+  const apiKey = req.headers['x-api-token'] || req.query.apiKey;
+
+
+  if (!token && !apiKey) {
+    return res.status(401).json({ message: 'Authentication failed. No token or API key provided.' });
+  }
+
+  if (token) {
+    const extracted_token=token.split(' ')[1];
+    if(!extracted_token || extracted_token==='null')
+    {
+      return res.sendStatus(403);
+    }
+    
+    try {
+      const decoded = jwt.verify(extracted_token, JWT_SECRET);
+      req.user = decoded.user;
       next();
-    });
+    } catch (error) {
+      console.log(error);
+      return res.status(401).json({ message: 'Invalid token' });
+    }
   } else {
-    res.sendStatus(401);
+
+    
+
+    if (apiKey) {
+      const keysjson = await dbInstance
+        .query('SELECT api_keys FROM app_config where "ID"=1')
+        .then((res) => res.rows[0].api_keys);
+
+
+      if(!keysjson || Object.keys(keysjson).length===0)
+      {
+        return res.status(404).json({ message: 'No API keys configured' });
+      }
+      const keys=  keysjson || [];
+
+      const keyExists = keys.some(obj => obj.key === apiKey);
+
+      if(keyExists)
+      {
+        next();
+      }else
+      {
+        return res.status(403).json({ message: 'Invalid API key' });
+      }
+
+      
+    }
+
+    
   }
 }
 
 app.use('/auth', authRouter); // mount the API router at /api, with JWT middleware
-app.use('/api', verifyToken, apiRouter); // mount the API router at /api, with JWT middleware
 app.use('/proxy', proxyRouter); // mount the API router at /api, with JWT middleware
-app.use('/sync', verifyToken, syncRouter); // mount the API router at /sync, with JWT middleware
-app.use('/stats', verifyToken, statsRouter); // mount the API router at /stats, with JWT middleware
-app.use('/data', verifyToken, backupRouter); // mount the API router at /stats, with JWT middleware
-app.use('/logs', verifyToken, logRouter); // mount the API router at /stats, with JWT middleware
+app.use('/api', authenticate , apiRouter); // mount the API router at /api, with JWT middleware
+app.use('/sync', authenticate , syncRouter); // mount the API router at /sync, with JWT middleware
+app.use('/stats', authenticate , statsRouter); // mount the API router at /stats, with JWT middleware
+app.use('/backup', authenticate , backupRouter); // mount the API router at /stats, with JWT middleware
+app.use('/logs', authenticate , logRouter); // mount the API router at /stats, with JWT middleware
 
 try{
   createdb.createDatabase().then((result) => {
@@ -71,8 +115,8 @@ try{
         console.log(`Server listening on http://${LISTEN_IP}:${PORT}`);
 
         ActivityMonitor.ActivityMonitor(1000);
-        SyncTask.SyncTask(60000*10);
-        BackupTask.BackupTask(60000*60*24);
+        SyncTask.SyncTask();
+        BackupTask.BackupTask();
       });
     });
   });

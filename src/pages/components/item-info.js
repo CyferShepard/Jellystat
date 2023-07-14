@@ -12,7 +12,7 @@ import "../css/items/item-details.css";
 
 import MoreItems from "./item-info/more-items";
 import ItemActivity from "./item-info/item-activity";
-import ErrorPage from "./general/error";
+import ItemNotFound from "./item-info/item-not-found";
 
 
 import Config from "../../lib/config";
@@ -52,21 +52,9 @@ function ItemInfo() {
     return timeString;
   }
 
-  
-useEffect(() => {
-
-
-  const fetchConfig = async () => {
-      try {
-        const newConfig = await Config();
-        setConfig(newConfig);
-      } catch (error) {
-          console.log(error);
-      }
-    };
-
   const fetchData = async () => {
     if(config){
+      console.log('fetch');
       setRefresh(true);
     try {
       const itemData = await axios.post(`/api/getItemDetails`, {
@@ -89,6 +77,21 @@ useEffect(() => {
   }
 
   };
+
+
+  
+useEffect(() => {
+
+
+  const fetchConfig = async () => {
+      try {
+        const newConfig = await Config();
+        setConfig(newConfig);
+      } catch (error) {
+          console.log(error);
+      }
+    };
+
 
 
   fetchData();
@@ -114,7 +117,7 @@ if(!data || refresh)
 
 if(data && data.notfound)
 {
-  return <ErrorPage message={data.message}/>;
+  return <ItemNotFound message="Item not found" itemId={Id} fetchdataMethod={fetchData}/>;
 }
 
 const cardStyle = {
@@ -189,8 +192,8 @@ const cardBgStyle = {
     </div>
 
       
-        <Tabs defaultActiveKey="tabOverview" activeKey={activeTab} variant='pills'>
-          <Tab eventKey="tabOverview" className='bg-transparent'>
+        <Tabs defaultActiveKey="tabOverview" activeKey={activeTab} variant='pills' className="hide-tab-titles">
+          <Tab eventKey="tabOverview" title='' className='bg-transparent'>
             <GlobalStats ItemId={Id}/>
              {["Series","Season"].includes(data && data.Type)?
              <MoreItems data={data}/>
@@ -198,7 +201,7 @@ const cardBgStyle = {
              <></>
             }
           </Tab>
-          <Tab eventKey="tabActivity" className='bg-transparent'>
+          <Tab eventKey="tabActivity" title='' className='bg-transparent'>
             <ItemActivity itemid={Id}/>
           </Tab>
         </Tabs>

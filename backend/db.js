@@ -36,34 +36,29 @@ async function deleteBulk(table_name, data) {
   try {
     await client.query('BEGIN');
 
-    // const AllIds = data.map((row) => row.Id);
-
-    if (data.length !== 0) {
+    if (data && data.length !== 0) {
       
       const deleteQuery = {
         text: `DELETE FROM ${table_name} WHERE "Id" IN (${pgp.as.csv(
           data
         )})`
       };
-      // console.log(deleteQuery);
+      //  console.log(deleteQuery);
       await client.query(deleteQuery);
     } 
-    // else {
-    //   await client.query(`DELETE FROM ${table_name}`);
-    //   console.log('Delete All');
-    // }
+
 
     await client.query('COMMIT');
     message=(data.length + " Rows removed.");
 
   } catch (error) {
     await client.query('ROLLBACK');
-    message=('Error: '+ error);
+    message=('Bulk delete error: '+ error);
     result='ERROR';
   } finally {
     client.release();
   }
-  return ({Result:result,message:'Bulk delete error:'+message});
+  return ({Result:result,message:''+message});
 }
 
 async function insertBulk(table_name, data,columns) {
@@ -80,12 +75,12 @@ async function insertBulk(table_name, data,columns) {
 
   } catch (error) {
     await client.query('ROLLBACK');
-    message=('Error: '+ error);
+    message=(''+ error);
     result='ERROR';
   } finally {
     client.release();
   }
-  return ({Result:result,message:'Bulk insert error: '+message});
+  return ({Result:result,message:message?'Bulk insert error: '+message:''});
 }
 
 async function query(text, params)  {
@@ -93,7 +88,27 @@ async function query(text, params)  {
     const result = await pool.query(text, params);
     return result;
   } catch (error) {
-    console.error('Error occurred while executing query:', error);
+
+    if(error?.routine==='auth_failed')
+    {
+     console.log('Error 401: Unable to Authenticate with Postgres DB');
+    }else
+    if(error?.code==='ENOTFOUND')
+    {
+     console.log('Error: Unable to Connect to Postgres DB');
+    }else
+    if(error?.code==='ERR_SOCKET_BAD_PORT')
+    {
+     console.log('Error: Invalid Postgres DB Port Range. Port should be >= 0 and < 65536.');
+    }else
+    if(error?.code==='ECONNREFUSED')
+    {
+     console.log('Error: Postgres DB Connection refused at '+error.address+':'+error.port);
+    }else
+    {
+     console.error('Error occurred while executing query:', error);
+    }
+    return [];
     // throw error;
   }
 }

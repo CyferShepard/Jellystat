@@ -1,4 +1,3 @@
-      ////////////////////////// pn delete move to playback
       const columnsPlayback = [
         "Id",
         "IsPaused",
@@ -16,6 +15,12 @@
         "PlaybackDuration",
         "PlayMethod",
         "ActivityDateInserted",
+        { name: 'MediaStreams', mod: ':json' },
+        { name: 'TranscodingInfo', mod: ':json' },
+        { name: 'PlayState', mod: ':json' },
+        "OriginalContainer",
+        "RemoteEndPoint",
+        "ServerId"
       ]; 
 
 
@@ -36,6 +41,12 @@
         PlaybackDuration: item.PlaybackDuration !== undefined ? item.PlaybackDuration: 0,
         PlayMethod: item.PlayState.PlayMethod  !== undefined ?  item.PlayState.PlayMethod : item.PlayMethod ,
         ActivityDateInserted: item.ActivityDateInserted !== undefined ?  item.ActivityDateInserted: new Date().toISOString(),
+        MediaStreams: item.MediaStreams ? item.MediaStreams : null ,
+        TranscodingInfo: item.TranscodingInfo? item.TranscodingInfo : null,
+        PlayState: item.PlayState? item.PlayState : null,
+        OriginalContainer: item.OriginalContainer ? item.OriginalContainer : null,
+        RemoteEndPoint: item.RemoteEndPoint ? item.RemoteEndPoint : null,
+        ServerId: item.ServerId ? item.ServerId : null,
       });
 
   module.exports = {

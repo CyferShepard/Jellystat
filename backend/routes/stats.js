@@ -1,19 +1,8 @@
 // api.js
 const express = require("express");
-const db = require("./db");
-const axios=require("axios");
+const db = require("../db");
 
 const router = express.Router();
-const https = require('https');
-
-
-
-const agent = new https.Agent({
-  rejectUnauthorized: (process.env.REJECT_SELF_SIGNED_CERTIFICATES || 'true').toLowerCase() ==='true'
-});
-const axios_instance = axios.create({
-  httpsAgent: agent
-});
 
 
 
@@ -27,15 +16,26 @@ router.get("/getLibraryOverview", async (req, res) => {
   }
 });
 
-router.post("/getMostViewedSeries", async (req, res) => {
+router.post("/getMostViewedByType", async (req, res) => {
   try {
-    const { days } = req.body;
+    const { days,type } = req.body;
+
+    const valid_types=['Audio','Movie','Series'];
+
     let _days = days;
     if (days === undefined) {
       _days = 30;
     }
+
+    if(!valid_types.includes(type))
+    {
+      res.status(503);
+      return res.send('Invalid Type Value');
+    }
+  
+
     const { rows } = await db.query(
-      `select * from fs_most_played_items(${_days-1},'Series') limit 5`
+      `select * from fs_most_played_items(${_days-1},'${type}') limit 5`
     );
     res.send(rows);
   } catch (error) {
@@ -44,41 +44,34 @@ router.post("/getMostViewedSeries", async (req, res) => {
   }
 });
 
-router.post("/getMostViewedMovies", async (req, res) => {
+router.post("/getMostPopularByType", async (req, res) => {
   try {
-    const { days } = req.body;
+    const { days,type } = req.body;
+
+    const valid_types=['Audio','Movie','Series'];
+
     let _days = days;
     if (days === undefined) {
       _days = 30;
     }
+
+    if(!valid_types.includes(type))
+    {
+      res.status(503);
+      return res.send('Invalid Type Value');
+    }
+
     const { rows } = await db.query(
-      `select * from fs_most_played_items(${_days-1},'Movie') limit 5`
+      `select * from fs_most_popular_items(${_days-1},'${type}') limit 5`
     );
     res.send(rows);
   } catch (error) {
-    console.log('/getMostViewedMovies');
-    console.log(error);
     res.status(503);
     res.send(error);
   }
 });
 
-router.post("/getMostViewedMusic", async (req, res) => {
-  try {
-    const { days } = req.body;
-    let _days = days;
-    if (days === undefined) {
-      _days = 30;
-    }
-    const { rows } = await db.query(
-      `select * from fs_most_played_items(${_days-1},'Audio') limit 5`
-    );
-    res.send(rows);
-  } catch (error) {
-    res.status(503);
-    res.send(error);
-  }
-});
+
 
 router.post("/getMostViewedLibraries", async (req, res) => {
   try {
@@ -131,56 +124,6 @@ router.post("/getMostActiveUsers", async (req, res) => {
   }
 });
 
-router.post("/getMostPopularMovies", async (req, res) => {
-  try {
-    const { days } = req.body;
-    let _days = days;
-    if (days === undefined) {
-      _days = 30;
-    }
-    const { rows } = await db.query(
-      `select * from fs_most_popular_items(${_days-1},'Movie') limit 5`
-    );
-    res.send(rows);
-  } catch (error) {
-    res.status(503);
-    res.send(error);
-  }
-});
-
-router.post("/getMostPopularSeries", async (req, res) => {
-  try {
-    const { days } = req.body;
-    let _days = days;
-    if (days === undefined) {
-      _days = 30;
-    }
-    const { rows } = await db.query(
-      `select * from fs_most_popular_items(${_days-1},'Series') limit 5`
-    );
-    res.send(rows);
-  } catch (error) {
-    res.status(503);
-    res.send(error);
-  }
-});
-
-router.post("/getMostPopularMusic", async (req, res) => {
-  try {
-    const { days } = req.body;
-    let _days = days;
-    if (days === undefined) {
-      _days = 30;
-    }
-    const { rows } = await db.query(
-      `select * from fs_most_popular_items(${_days-1},'Audio') limit 5`
-    );
-    res.send(rows);
-  } catch (error) {
-    res.status(503);
-    res.send(error);
-  }
-});
 
 router.get("/getPlaybackActivity", async (req, res) => {
   try {
@@ -201,13 +144,14 @@ router.get("/getAllUserActivity", async (req, res) => {
   }
 });
 
-router.post("/getUserDetails", async (req, res) => {
+
+router.post("/getUserLastPlayed", async (req, res) => {
   try {
     const { userid } = req.body;
     const { rows } = await db.query(
-      `select * from jf_users where "Id"='${userid}'`
+      `select * from fs_last_user_activity('${userid}') limit 15`
     );
-    res.send(rows[0]);
+    res.send(rows);
   } catch (error) {
     console.log(error);
     res.status(503);
@@ -215,6 +159,7 @@ router.post("/getUserDetails", async (req, res) => {
   }
 });
 
+//Global Stats
 router.post("/getGlobalUserStats", async (req, res) => {
   try {
     const { hours,userid } = req.body;
@@ -233,25 +178,20 @@ router.post("/getGlobalUserStats", async (req, res) => {
   }
 });
 
-router.post("/getUserLastPlayed", async (req, res) => {
+router.post("/getGlobalItemStats", async (req, res) => {
   try {
-    const { userid } = req.body;
+    const { hours,itemid } = req.body;
+    let _hours = hours;
+    if (hours === undefined) {
+      _hours = 24;
+    }
     const { rows } = await db.query(
-      `select * from fs_last_user_activity('${userid}') limit 15`
-    );
-    res.send(rows);
-  } catch (error) {
-    console.log(error);
-    res.status(503);
-    res.send(error);
-  }
-});
-
-router.post("/getLibraryDetails", async (req, res) => {
-  try {
-    const { libraryid } = req.body;
-    const { rows } = await db.query(
-      `select * from jf_libraries where "Id"='${libraryid}'`
+      `select count(*)"Plays",
+      sum("PlaybackDuration") total_playback_duration
+      from jf_playback_activity jf_playback_activity
+      where 
+      ("EpisodeId"='${itemid}' OR "SeasonId"='${itemid}' OR "NowPlayingItemId"='${itemid}')
+      AND jf_playback_activity."ActivityDateInserted" BETWEEN CURRENT_DATE - INTERVAL '1 hour' * ${_hours} AND NOW();`
     );
     res.send(rows[0]);
   } catch (error) {
@@ -280,6 +220,8 @@ router.post("/getGlobalLibraryStats", async (req, res) => {
 });
 
 
+
+
 router.get("/getLibraryCardStats", async (req, res) => {
   try {
     const { rows } = await db.query("select * from js_library_stats_overview");
@@ -300,6 +242,24 @@ router.get("/getLibraryMetadata", async (req, res) => {
   }
 });
 
+router.post("/getLibraryItemsWithStats", async (req, res) => {
+  try{
+    const  {libraryid}  = req.body;
+    console.log(`ENDPOINT CALLED: /getLibraryItems: `+libraryid);
+    const { rows } = await db.query(
+      `SELECT * FROM jf_library_items_with_playcount_playtime where "ParentId"='${libraryid}'`
+    );
+    res.send(rows);
+  
+
+  }catch(error)
+  {
+    console.log(error);
+  }
+
+ 
+});
+
 
 router.post("/getLibraryLastPlayed", async (req, res) => {
   try {
@@ -314,58 +274,6 @@ router.post("/getLibraryLastPlayed", async (req, res) => {
     res.send(error);
   }
 });
-
-router.get("/getRecentlyAdded", async (req, res) => {
-  try {
-
-    const { libraryid } = req.query;
-    const { rows: config } = await db.query('SELECT * FROM app_config where "ID"=1');
-
-    if (config.length===0 || config[0].JF_HOST === null || config[0].JF_API_KEY === null) {
-      res.status(503);
-      res.send({ error: "Config Details Not Found" });
-      return;
-    }
-
-    const adminurl = `${config[0].JF_HOST}/Users`;
-
-    const response = await axios_instance.get(adminurl, {
-      headers: {
-        "X-MediaBrowser-Token":  config[0].JF_API_KEY ,
-      },
-    });
-
-    if(!response || typeof response.data !== 'object' || !Array.isArray(response.data))
-    {
-      res.status(503);
-      res.send({ error: "Invalid Response from Users API Call.", user_response:response });
-      return;
-    }
-
-    const adminUser = response.data.filter(
-      (user) => user.Policy.IsAdministrator === true
-    );
-   
-
-    let url=`${config[0].JF_HOST}/users/${adminUser[0].Id}/Items/latest`;
-    if(libraryid)
-    {
-      url+=`?parentId=${libraryid}`;
-    }
-    
-    const response_data = await axios_instance.get(url, {
-      headers: {
-        "X-MediaBrowser-Token":  config[0].JF_API_KEY ,
-      },
-    });
-    res.send(response_data.data);
-  } catch (error) {
-    res.status(503);
-    res.send(error);
-  }
-});
-
-
 
 
 router.post("/getViewsOverTime", async (req, res) => {
@@ -454,7 +362,6 @@ const finalData = {libraries:libraries,stats:Object.values(reorganizedData)};
   }
 });
 
-
 router.post("/getViewsByHour", async (req, res) => {
   try {
     const { days } = req.body;
@@ -489,29 +396,6 @@ stats.forEach((item) => {
 });
 const finalData = {libraries:libraries,stats:Object.values(reorganizedData)};
     res.send(finalData);
-  } catch (error) {
-    console.log(error);
-    res.status(503);
-    res.send(error);
-  }
-});
-
-router.post("/getGlobalItemStats", async (req, res) => {
-  try {
-    const { hours,itemid } = req.body;
-    let _hours = hours;
-    if (hours === undefined) {
-      _hours = 24;
-    }
-    const { rows } = await db.query(
-      `select count(*)"Plays",
-      sum("PlaybackDuration") total_playback_duration
-      from jf_playback_activity jf_playback_activity
-      where 
-      ("EpisodeId"='${itemid}' OR "SeasonId"='${itemid}' OR "NowPlayingItemId"='${itemid}')
-      AND jf_playback_activity."ActivityDateInserted" BETWEEN CURRENT_DATE - INTERVAL '1 hour' * ${_hours} AND NOW();`
-    );
-    res.send(rows[0]);
   } catch (error) {
     console.log(error);
     res.status(503);

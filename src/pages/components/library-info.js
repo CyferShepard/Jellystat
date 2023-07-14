@@ -31,7 +31,7 @@ function LibraryInfo() {
     const fetchData = async () => {
       try {
         console.log('getdata');
-        const libraryrData = await axios.post(`/stats/getLibraryDetails`, {
+        const libraryrData = await axios.post(`/api/getLibrary`, {
           libraryid: LibraryId,
         }, {
           headers: {
@@ -55,7 +55,7 @@ function LibraryInfo() {
   {
     return <Loading/>;
   }
-
+  
    
   return (
     <div>
@@ -84,12 +84,12 @@ function LibraryInfo() {
   </div>
           <Tabs defaultActiveKey="tabOverview" activeKey={activeTab} variant='pills'>
           <Tab eventKey="tabOverview" className='bg-transparent'>
-            <LibraryGlobalStats LibraryId={LibraryId}/>
+       <LibraryGlobalStats LibraryId={LibraryId}/>
             <ErrorBoundary>
               <RecentlyAdded LibraryId={LibraryId}/>
             </ErrorBoundary>
            
-            <LibraryLastWatched LibraryId={LibraryId}/>
+       <LibraryLastWatched LibraryId={LibraryId}/>
           </Tab>
           <Tab eventKey="tabActivity" className='bg-transparent'>
             <LibraryActivity LibraryId={LibraryId}/>

@@ -142,7 +142,7 @@ useEffect(() => {
 
     const intervalId = setInterval(fetchData, 60000 * 5);
     return () => clearInterval(intervalId);
-  }, [data]);
+  }, []);
 
 
 const handleNextPageClick = () => {

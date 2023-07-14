@@ -79,3 +79,17 @@
     box-shadow: none !important;
     border-color: var(--primary-color) !important;
   }
+
+.dropdown-item, .dropdown-menu
+  {
+  background-color: var(--background-color) !important;
+  color: white !important;
+
+  }
+
+  .dropdown-item:hover
+  {
+  background-color: var(--primary-color) !important;
+  color: white !important;
+  }
+  
