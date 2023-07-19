@@ -16,10 +16,18 @@ jobs:
       with:
         username: ${{ secrets.DOCKER_USERNAME }}
         password: ${{ secrets.DOCKER_TOKEN }}
-    - name: Build Docker image
+    - name: Build Docker image for ARM
       uses: docker/build-push-action@v2
       with:
         context: .
-        dockerfile: ./Dockerfile-arm
+        dockerfile: ./docker-arm  # Specify the path to the 'docker-arm' Dockerfile
         push: true
-        tags: cyfershepard/jellystat:arm32v7
+        tags: cyfershepard/jellystat:unstable-arm  # Tag for ARM32 image
+
+    - name: Build Docker image for AMD64 (optional)
+      uses: docker/build-push-action@v2
+      with:
+        context: .
+        dockerfile: ./Dockerfile  # Specify the path to the default Dockerfile for AMD64
+        push: true
+        tags: cyfershepard/jellystat:amd64  # Tag for AMD64 image
