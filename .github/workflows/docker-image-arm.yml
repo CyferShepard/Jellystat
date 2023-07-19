@@ -20,14 +20,14 @@ jobs:
       uses: docker/build-push-action@v2
       with:
         context: .
-        dockerfile: ./docker-arm  # Specify the path to the 'docker-arm' Dockerfile
+        dockerfile: ./Dockerfile-arm
         push: true
-        tags: cyfershepard/jellystat:unstable-arm  # Tag for ARM32 image
+        tags: cyfershepard/jellystat:unstable-arm
 
     - name: Build Docker image for AMD64 (optional)
       uses: docker/build-push-action@v2
       with:
         context: .
-        dockerfile: ./Dockerfile-arm  # Specify the path to the default Dockerfile for AMD64
+        dockerfile: ./Dockerfile-arm
         push: true
-        tags: cyfershepard/jellystat:arm  # Tag for AMD64 image
+        tags: cyfershepard/jellystat:arm
