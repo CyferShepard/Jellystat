@@ -22,4 +22,4 @@ jobs:
         context: .
         dockerfile: ./Dockerfile-arm
         push: true
-        tags: cyfershepard/jellystat:arm
+        tags: cyfershepard/jellystat:arm32v7
