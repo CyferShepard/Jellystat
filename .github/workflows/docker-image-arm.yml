@@ -30,4 +30,4 @@ jobs:
         context: .
         dockerfile: ./Dockerfile-arm  # Specify the path to the default Dockerfile for AMD64
         push: true
-        tags: cyfershepard/jellystat:amd64  # Tag for AMD64 image
+        tags: cyfershepard/jellystat:arm  # Tag for AMD64 image
