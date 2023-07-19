@@ -28,6 +28,6 @@ jobs:
       uses: docker/build-push-action@v2
       with:
         context: .
-        dockerfile: ./Dockerfile  # Specify the path to the default Dockerfile for AMD64
+        dockerfile: ./Dockerfile-arm  # Specify the path to the default Dockerfile for AMD64
         push: true
         tags: cyfershepard/jellystat:amd64  # Tag for AMD64 image
