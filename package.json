@@ -1,6 +1,6 @@
 {
   "name": "jfstat",
-  "version": "1.0.5.0",
+  "version": "1.0.5",
   "private": true,
   "dependencies": {
     "@emotion/react": "^11.10.6",
