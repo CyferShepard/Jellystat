@@ -18,6 +18,9 @@ const {router: logRouter} = require('./routes/logging');
 
 const dbInstance = require("./db");
 
+const http = require('http');
+const {setupWebSocketServer} = require('./ws'); 
+
 
 
 
@@ -34,8 +37,11 @@ if (JWT_SECRET === undefined) {
 }
 
 app.use(express.json()); // middleware to parse JSON request bodies
-app.use(cors());
 
+
+const server = http.createServer(app);
+setupWebSocketServer(server); 
+app.use(cors());
 
 
 // JWT middleware
@@ -96,13 +102,13 @@ async function authenticate (req, res, next) {
   }
 }
 
-app.use('/auth', authRouter); // mount the API router at /api, with JWT middleware
-app.use('/proxy', proxyRouter); // mount the API router at /api, with JWT middleware
+app.use('/auth', authRouter); // mount the API router at /auth
+app.use('/proxy', proxyRouter); // mount the API router at /proxy
 app.use('/api', authenticate , apiRouter); // mount the API router at /api, with JWT middleware
 app.use('/sync', authenticate , syncRouter); // mount the API router at /sync, with JWT middleware
 app.use('/stats', authenticate , statsRouter); // mount the API router at /stats, with JWT middleware
-app.use('/backup', authenticate , backupRouter); // mount the API router at /stats, with JWT middleware
-app.use('/logs', authenticate , logRouter); // mount the API router at /stats, with JWT middleware
+app.use('/backup', authenticate , backupRouter); // mount the API router at /backup, with JWT middleware
+app.use('/logs', authenticate , logRouter); // mount the API router at /logs, with JWT middleware
 
 try{
   createdb.createDatabase().then((result) => {
@@ -111,7 +117,7 @@ try{
     }
   
     db.migrate.latest().then(() => {
-      app.listen(PORT, async () => {
+      server.listen(PORT, async () => {
         console.log(`Server listening on http://${LISTEN_IP}:${PORT}`);
 
         ActivityMonitor.ActivityMonitor(1000);

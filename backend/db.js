@@ -62,6 +62,22 @@ async function deleteBulk(table_name, data) {
 }
 
 async function insertBulk(table_name, data,columns) {
+  //dedupe data
+
+if (Array.isArray(data)) {
+  data= data.reduce((accumulator, currentItem) => {
+      const isDuplicate = accumulator.some(item =>  currentItem.Id ? (item.Id === currentItem.Id) : (item.rowid === currentItem.rowid));
+    
+      if (!isDuplicate) {
+        accumulator.push(currentItem);
+      }
+    
+      return accumulator;
+    }, []);
+  }
+
+
+  //
   const client = await pool.connect();
   let result='SUCCESS';
   let message='';

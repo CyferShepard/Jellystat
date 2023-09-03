@@ -9,6 +9,7 @@ import { InputGroup,Row } from "react-bootstrap";
 
 import EyeFillIcon from 'remixicon-react/EyeFillIcon';
 import EyeOffFillIcon from 'remixicon-react/EyeOffFillIcon';
+import logo_dark from './images/icon-b-512.png';
 
 // import LibrarySync from "./components/settings/librarySync";
 
@@ -117,7 +118,11 @@ function Login() {
   return (
     <section>
       <div className="form-box d-flex flex-column">
-          <h2>Login</h2>
+        
+        
+          <img src={logo_dark} style={{height:"100px"}} className="px-2" alt=''/>
+          <h1>Jellystat</h1>
+
 
         <Form onSubmit={handleFormSubmit} className="mt-5">
           <Form.Group as={Row} className="inputbox" >

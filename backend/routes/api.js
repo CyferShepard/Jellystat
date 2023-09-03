@@ -164,32 +164,40 @@ router.get("/TrackedLibraries", async (req, res) => {
   }
 
   let url = `${config[0].JF_HOST}/Library/MediaFolders`;
+  try
+  {
 
-  const response_data = await axios_instance.get(url, {
-    headers: {
-      "X-MediaBrowser-Token": config[0].JF_API_KEY,
-    },
-  });
-
-  const filtered_items = response_data.data.Items.filter(
-    (type) => !["boxsets", "playlists"].includes(type.CollectionType)
-  );
-
-  const excluded_libraries = await db
-    .query('SELECT settings FROM app_config where "ID"=1')
-    .then((res) => res.rows);
-  if (excluded_libraries.length > 0) {
-    const libraries = excluded_libraries[0].settings?.ExcludedLibraries || [];
-
-    const librariesWithTrackedStatus = filtered_items.map((items) => ({
-      ...items,
-      ...{ Tracked: !libraries.includes(items.Id) },
-    }));
-    res.send(librariesWithTrackedStatus);
-  } else {
-    res.status(404);
-    res.send({ error: "Settings Not Found" });
+    const response_data = await axios_instance.get(url, {
+      headers: {
+        "X-MediaBrowser-Token": config[0].JF_API_KEY,
+      },
+    });
+  
+    const filtered_items = response_data.data.Items.filter(
+      (type) => !["boxsets", "playlists"].includes(type.CollectionType)
+    );
+  
+    const excluded_libraries = await db
+      .query('SELECT settings FROM app_config where "ID"=1')
+      .then((res) => res.rows);
+    if (excluded_libraries.length > 0) {
+      const libraries = excluded_libraries[0].settings?.ExcludedLibraries || [];
+  
+      const librariesWithTrackedStatus = filtered_items.map((items) => ({
+        ...items,
+        ...{ Tracked: !libraries.includes(items.Id) },
+      }));
+      res.send(librariesWithTrackedStatus);
+    } else {
+      res.status(404);
+      res.send({ error: "Settings Not Found" });
+    }
+  }catch(error)
+  {
+      res.status(503);
+      res.send({ error: "Error: "+error });
   }
+
 });
 
 router.post("/setExcludedLibraries", async (req, res) => {
@@ -281,6 +289,7 @@ router.delete("/keys", async (req,res) => {
   );
 
   if (
+    config.length===0 ||
     config[0].JF_HOST === null ||
     config[0].JF_API_KEY === null
   ) {
@@ -363,6 +372,82 @@ router.post("/keys", async (req, res) => {
 
   await db.query(query, [JSON.stringify(keys)]);
   res.send(keys);
+
+});
+
+router.get("/getTaskSettings", async (req, res) => {
+
+
+  try
+  {
+    const settingsjson = await db
+    .query('SELECT settings FROM app_config where "ID"=1')
+    .then((res) => res.rows);
+
+    if (settingsjson.length > 0) {
+      const settings = settingsjson[0].settings || {};
+  
+      let tasksettings = settings.Tasks || {};
+      res.send(tasksettings);
+      
+    }else {
+      res.status(404);
+      res.send({ error: "Task Settings Not Found" });
+    }
+    
+    
+  }catch(error)
+  {
+      res.status(503);
+      res.send({ error: "Error: "+error });
+  }
+
+});
+
+router.post("/setTaskSettings", async (req, res) => {
+  const { taskname,Interval } = req.body;
+
+  try
+  {
+    const settingsjson = await db
+    .query('SELECT settings FROM app_config where "ID"=1')
+    .then((res) => res.rows);
+
+    if (settingsjson.length > 0) {
+      const settings = settingsjson[0].settings || {};
+      if(!settings.Tasks)
+      {
+        settings.Tasks = {};
+      }
+  
+      let tasksettings = settings.Tasks;
+      if(!tasksettings[taskname])
+      {
+        tasksettings[taskname]={};
+      }
+      tasksettings[taskname].Interval=Interval;
+
+      settings.Tasks=tasksettings;
+
+      let query = 'UPDATE app_config SET settings=$1 where "ID"=1';
+
+      await db.query(query, [settings]);
+      res.status(200);
+      res.send(tasksettings);
+      
+    }else {
+      res.status(404);
+      res.send({ error: "Task Settings Not Found" });
+    }
+    
+    
+  }catch(error)
+  {
+      res.status(503);
+      res.send({ error: "Error: "+error });
+  }
+
+
 
 });
 
