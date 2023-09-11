@@ -8,6 +8,7 @@ const {jf_logging_columns,jf_logging_mapping,} = require("../models/jf_logging")
 const express = require("express");
 const router = express.Router();
 
+
 router.get("/getLogs", async (req, res) => {
   try {
     const { rows } = await db.query(`SELECT * FROM jf_logging order by "TimeRun" desc LIMIT 50 `);

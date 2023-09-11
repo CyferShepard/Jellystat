@@ -41,8 +41,7 @@ router.get('/web/assets/img/devices/', async(req, res) => {
     return; // Add this line
   })
   .catch((error) => {
-    console.error(error);
-    res.status(500).send('Error fetching image: '+error);
+    res.status(error?.response?.status || 500).send('Error fetching image: '+error);
   });
   
 });
@@ -76,8 +75,7 @@ router.get('/Items/Images/Backdrop/', async(req, res) => {
       }
     })
     .catch((error) => {
-      // console.error(error);
-      res.status(500).send('Error fetching image: '+error);
+      res.status(error?.response?.status || 500).send('Error fetching image: '+error);
     });
   });
 
@@ -107,8 +105,7 @@ router.get('/Items/Images/Backdrop/', async(req, res) => {
       }
     })
     .catch((error) => {
-      // console.error(error);
-      res.status(500).send('Error fetching image: '+error);
+      res.status(error?.response?.status || 500).send('Error fetching image: '+error);
     });
   });
 
@@ -139,8 +136,7 @@ router.get('/Items/Images/Backdrop/', async(req, res) => {
       }
     })
     .catch((error) => {
-      // console.error(error);
-      res.status(500).send('Error fetching image: '+error);
+      res.status(error?.response?.status || 500).send('Error fetching image: '+error);
     });
   });
 

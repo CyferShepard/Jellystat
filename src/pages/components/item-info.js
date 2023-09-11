@@ -54,7 +54,6 @@ function ItemInfo() {
 
   const fetchData = async () => {
     if(config){
-      console.log('fetch');
       setRefresh(true);
     try {
       const itemData = await axios.post(`/api/getItemDetails`, {
@@ -102,6 +101,7 @@ useEffect(() => {
 
   const intervalId = setInterval(fetchData, 60000 * 5);
   return () => clearInterval(intervalId);
+  // eslint-disable-next-line 
 }, [config, Id]);
 
 

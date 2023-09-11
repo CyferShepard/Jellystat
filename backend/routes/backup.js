@@ -1,4 +1,4 @@
-const { Router } = require('express');
+const express = require("express");
 const { Pool } = require('pg');
 const fs = require('fs');
 const path = require('path');
@@ -14,7 +14,7 @@ const taskName = require('../logging/taskName');
 
 const { sendUpdate } = require('../ws');
 
-const router = Router();
+const router = express.Router();
 
 // Database connection parameters
 const postgresUser = process.env.POSTGRES_USER;

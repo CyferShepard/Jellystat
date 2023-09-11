@@ -91,7 +91,10 @@ export default function Tasks() {
         {value:15, display:"15 Minutes"},
         {value:30, display:"30 Minutes"},
         {value:60, display:"1 Hour"},
-        {value:1440, display:"1 Day"}];
+        {value:720, display:"12 Hours"},
+        {value:1440, display:"1 Day"},
+        {value:10080, display:"1 Week"}
+      ];
 
       return (
         <div className="tasks">

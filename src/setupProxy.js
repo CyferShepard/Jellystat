@@ -57,6 +57,13 @@ module.exports = function(app) {
       changeOrigin: true,
     })
   );
+  app.use(
+    '/swagger',
+    createProxyMiddleware({
+      target: `http://127.0.0.1:${process.env.PORT || 3003}`,
+      changeOrigin: true,
+    })
+  );
 
   
   console.log(`Proxy middleware applied`);

@@ -19,12 +19,14 @@ const axios_instance = axios.create({
 const router = express.Router();
 
 router.get("/test", async (req, res) => {
+
   console.log(`ENDPOINT CALLED: /test`);
   res.send("Backend Responded Succesfully");
 });
 
 
-//Settings and config endpoints
+
+
 router.get("/getconfig", async (req, res) => {
   try {
     const { rows } = await db.query(
@@ -974,7 +976,10 @@ router.post("/validateSettings", async (req, res) => {
   } catch (error) {
     isValid = false;
     errorMessage = `Error: ${error}`;
+    
   }
+
+  console.log({ isValid: isValid, errorMessage: errorMessage });
 
   res.send({ isValid: isValid, errorMessage: errorMessage });
 });
