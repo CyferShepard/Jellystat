@@ -281,7 +281,7 @@ function Users() {
       return 0;
     }
 
-    if (orderBy === 'TotalPlays') {
+    if (orderBy === 'TotalPlays'  || orderBy === 'TotalWatchTime') {
       let order_a = parseInt(a[orderBy]);
       let order_b = parseInt(b[orderBy]);
     

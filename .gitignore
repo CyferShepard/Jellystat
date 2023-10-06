@@ -9,6 +9,7 @@
 /coverage
 /backend/backup-data
 .vscode
+.idea
 
 # production
 /build
