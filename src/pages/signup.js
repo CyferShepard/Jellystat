@@ -11,6 +11,7 @@ import { InputGroup,Row } from "react-bootstrap";
 
 import EyeFillIcon from 'remixicon-react/EyeFillIcon';
 import EyeOffFillIcon from 'remixicon-react/EyeOffFillIcon';
+import logo_dark from './images/icon-b-512.png';
 
 
 
@@ -18,7 +19,7 @@ function Signup() {
   const [config, setConfig] = useState(null);
   const [formValues, setFormValues] = useState({});
   const [processing, setProcessing] = useState(false);
-  const [submitButtonText, setsubmitButtonText] = useState("Save");
+  const [submitButtonText, setsubmitButtonText] = useState("Create User");
   const [showPassword, setShowPassword] = useState(false);
 
   function handleFormChange(event) {
@@ -91,7 +92,9 @@ function Signup() {
   return (
     <section>
     <div className="form-box d-flex flex-column">
-    <h2>Sign Up</h2>
+    <img src={logo_dark} style={{height:"100px"}} className="px-2" alt=''/>
+    <h1>Jellystat</h1>
+    <span className="fts-text">First Time Setup Step 1 of 2</span>
 
       <Form onSubmit={handleFormSubmit} className="mt-5">
         <Form.Group as={Row} className="inputbox" >

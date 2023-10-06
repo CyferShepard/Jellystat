@@ -7,6 +7,7 @@ import { InputGroup,Row } from "react-bootstrap";
 
 import EyeFillIcon from 'remixicon-react/EyeFillIcon';
 import EyeOffFillIcon from 'remixicon-react/EyeOffFillIcon';
+import logo_dark from './images/icon-b-512.png';
 
 import "./css/setup.css";
 const token = localStorage.getItem('token');
@@ -16,7 +17,7 @@ function Setup() {
   const [config, setConfig] = useState(null);
   const [formValues, setFormValues] = useState({});
   const [processing, setProcessing] = useState(false);
-  const [submitButtonText, setsubmitButtonText] = useState("Save");
+  const [submitButtonText, setsubmitButtonText] = useState("Save Jellyfin Details");
   const [showPassword, setShowPassword] = useState(false);
 
   function handleFormChange(event) {
@@ -136,7 +137,9 @@ function Setup() {
   return (
     <section>
       <div className="form-box d-flex flex-column">
-      <h2>Setup Jellyfin</h2>
+      <img src={logo_dark} style={{height:"100px"}} className="px-2" alt=''/>
+       <h1>Jellystat</h1>
+       <span className="fts-text">First Time Setup Step 2 of 2</span>
 
         <Form onSubmit={handleFormSubmit} className="mt-5">
           <Form.Group as={Row} className="inputbox" >

@@ -78,9 +78,9 @@ function formatDurationTime(seconds) {
           <IconButton
             aria-label="expand row"
             size="small"
-            onClick={() => {if(data.Log.length>1){setOpen(!open);}}}
+            onClick={() => {if(data.Log.length>0){setOpen(!open);}}}
             >
-              {!open ? <AddCircleFillIcon opacity={data.Log.length>1 ?1 : 0} cursor={data.Log.length>1 ? "pointer":"default"}/> : <IndeterminateCircleFillIcon />}
+              {!open ? <AddCircleFillIcon opacity={data.Log.length>0 ?1 : 0} cursor={data.Log.length>1 ? "pointer":"default"}/> : <IndeterminateCircleFillIcon />}
           </IconButton>
         </TableCell>
         <TableCell>{data.Name}</TableCell>
@@ -88,7 +88,7 @@ function formatDurationTime(seconds) {
         <TableCell>{Intl.DateTimeFormat('en-UK', options).format(new Date(data.TimeRun))}</TableCell>
         <TableCell>{formatDurationTime(data.Duration)}</TableCell>
         <TableCell>{data.ExecutionType}</TableCell>
-        <TableCell><div className={`badge ${ data.Result.toLowerCase() ==='success' ? 'text-bg-success' : 'text-bg-danger '} rounded-pill text-uppercase`} >{data.Result}</div></TableCell>
+        <TableCell><div className={`badge ${ data.Result.toLowerCase() ==='success' ? 'text-bg-success' : data.Result.toLowerCase() ==='running' ? 'text-bg-warning' : 'text-bg-danger '} rounded-pill text-uppercase`} >{data.Result}</div></TableCell>
 
       </TableRow>
       <TableRow>
@@ -140,7 +140,7 @@ useEffect(() => {
 
     fetchData();
 
-    const intervalId = setInterval(fetchData, 60000 * 5);
+    const intervalId = setInterval(fetchData, 1000 * 5);
     return () => clearInterval(intervalId);
   }, []);
 

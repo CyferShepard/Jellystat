@@ -2,20 +2,23 @@
 export const taskList = [
     {
         id: 0,
-        name: "Synchronize with Jellyfin",
-        type: "Import",
+        name: "JellyfinSync",
+        description: "Synchronize with Jellyfin",
+        type: "Job",
         link: "/sync/beingSync"
     },
     {
         id: 1,
-        name: "Import Playback Reporting Plugin Data",
+        name: "Jellyfin Playback Reporting Plugin Sync",
+        description: "Import Playback Reporting Plugin Data",
         type: "Import",
         link: "/sync/syncPlaybackPluginData"
     },
     {
         id: 2,
-        name: "Backup Jellystat",
-        type: "Process",
+        name: "Backup",
+        description: "Backup Jellystat",
+        type: "Job",
         link: "/backup/beginBackup"
     }
 

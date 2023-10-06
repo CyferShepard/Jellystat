@@ -44,6 +44,6 @@ TAG_MESSAGE="Release version $NEW_VERSION"
 git tag -a "$NEW_VERSION" -m "$TAG_MESSAGE"
 
 # Push the tag to the remote repository
-git push origin "$NEW_VERSION"
+git push lasylv "$NEW_VERSION"
 
 echo "Tag $NEW_VERSION has been created and pushed to the remote repository."
