@@ -19,8 +19,3 @@ services:
       - jellystat-db
 networks:
   default:
-logging:
-      driver: "json-file"
-      options:
-        max-file: "5"   # number of files or file count
-        max-size: "10m" # file size

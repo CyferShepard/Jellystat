@@ -17,6 +17,7 @@ const BackupTask = require('./tasks/BackupTask');
 const {router: logRouter} = require('./routes/logging');
 
 const dbInstance = require("./db");
+const path = require("path");
 
 
 
@@ -35,7 +36,7 @@ if (JWT_SECRET === undefined) {
 
 app.use(express.json()); // middleware to parse JSON request bodies
 app.use(cors());
-
+app.use(express.static(path.join(__dirname, 'static')));
 
 
 // JWT middleware
