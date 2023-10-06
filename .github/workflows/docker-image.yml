@@ -21,7 +21,7 @@ jobs:
       uses: docker/metadata-action@v5
       with:
         # list of Docker images to use as base name for tags
-        images: ${{ github.repository }}
+        images: ghcr.io/${{ github.repository }}
         # generate Docker tags based on the following events/attributes
         tags: |
           type=ref,event=branch
@@ -43,4 +43,4 @@ jobs:
         context: .
         push: true
         tags: ${{ steps.meta.outputs.tags }}
-        platforms: linux/amd64,linux/arm64,linux/arm/v7
+#        platforms: linux/amd64,linux/arm64,linux/arm/v7
