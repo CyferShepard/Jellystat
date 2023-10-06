@@ -1,5 +1,5 @@
 const GitHub = require('github-api');
-const packageJson = require('../package.json');
+const packageJson = require('./package.json');
 const {compareVersions} =require('compare-versions');
 
 async function checkForUpdates() {

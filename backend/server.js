@@ -36,7 +36,7 @@ if (JWT_SECRET === undefined) {
 
 app.use(express.json()); // middleware to parse JSON request bodies
 app.use(cors());
-app.use(express.static(path.join(__dirname, '..', 'static')));
+app.use(express.static(path.join(__dirname, 'static')));
 
 
 // JWT middleware
