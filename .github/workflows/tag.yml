@@ -1,11 +1,11 @@
 name: Trigger Release
 on:
-  release:
-    types:
-      - published
+  push:
+    branches: [main]
 
 jobs:
   build:
+    if: "!startsWith(github.event.head_commit.message, 'Skip')"
     runs-on: ubuntu-latest
     steps:
     - name: Checkout repository
@@ -15,5 +15,4 @@ jobs:
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
-        major-wording: 'BREAKING'
         tag-prefix:  'v'
