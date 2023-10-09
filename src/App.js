@@ -59,7 +59,8 @@ function App() {
 
       socket.on(listener.task, (message) => {
  
-        if(message && message.type==="Start")
+
+        if(message && (message.type==="Start" || !listener.ref.current))
         {
           listener.ref.current = toast.info(message?.message||message, { autoClose: 15000 });
         }else if(message && message.type==="Update")
@@ -72,6 +73,8 @@ function App() {
         {
           toast.update( listener.ref.current, {render: (message?.message||message) ,  type: toast.TYPE.SUCCESS, autoClose: 5000 });
         }
+
+        
        
       });
     });

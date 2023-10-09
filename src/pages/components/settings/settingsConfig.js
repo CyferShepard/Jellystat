@@ -93,7 +93,7 @@ export default function SettingsConfig() {
       },
     })
     .catch((error) => {
-      // let errorMessage= `Error : ${error}`;
+      console.log("Error Validating config:", error);
     });
 
     let data=result.data;

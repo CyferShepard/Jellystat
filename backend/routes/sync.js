@@ -81,9 +81,9 @@ class sync {
 
       if(!response || typeof response.data !== 'object' || !Array.isArray(response.data))
       {
-        res.status(503);
-        res.send({ error: "Invalid Response from Users API Call.", user_response:response });
-        return;
+        
+        console.log("Invalid Response from Users API Call: "+response);
+        return [];
       }
   
       const adminUser = response.data.filter(

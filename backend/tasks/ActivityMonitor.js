@@ -52,6 +52,12 @@ async function ActivityMonitor(interval) {
       /////get data from jf_activity_monitor
       const WatchdogData=await db.query('SELECT * FROM jf_activity_watchdog').then((res) => res.rows);
 
+      /////return if no necessary changes made to reduce resource consumtion
+      if(SessionData.length===0 && WatchdogData.length===0)
+      {
+        return;
+      }
+
       // //compare to sessiondata
 
       let WatchdogDataToInsert = [];
@@ -142,7 +148,7 @@ async function ActivityMonitor(interval) {
         })();
       }
 
-      //delete from db no longer in session data and insert into stats db (still to make)
+      //delete from db no longer in session data and insert into stats db
       //Bulk delete from db thats no longer on api
 
       const toDeleteIds = WatchdogData.filter((id) =>!SessionData.some((row) => row.Id === id.Id)).map((row) => row.Id);

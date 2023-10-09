@@ -22,43 +22,50 @@ let interval=10000;
 let taskDelay=15; //in minutes
 
 
-try{//get interval from db
+
+
+async function fetchTaskSettings()
+{
+  try{//get interval from db
 
   
-  const settingsjson = await db
-    .query('SELECT settings FROM app_config where "ID"=1')
-    .then((res) => res.rows);
+    const settingsjson = await db
+      .query('SELECT settings FROM app_config where "ID"=1')
+      .then((res) => res.rows);
+      
+    if (settingsjson.length > 0) {
+      const settings = settingsjson[0].settings || {};
+  
+      let synctasksettings = settings.Tasks?.JellyfinSync || {};
+  
+      if (synctasksettings.Interval) {
+        taskDelay=synctasksettings.Interval;
+      } else {
+        synctasksettings.Interval=taskDelay;
+        
+        if(!settings.Tasks)
+        {
+          settings.Tasks = {};
+        }
+        if(!settings.Tasks.JellyfinSync)
+        {
+          settings.Tasks.JellyfinSync = {};
+        }
+        settings.Tasks.JellyfinSync = synctasksettings;
     
-  if (settingsjson.length > 0) {
-    const settings = settingsjson[0].settings || {};
-
-    let synctasksettings = settings.Tasks?.JellyfinSync || {};
-
-    if (synctasksettings.Interval) {
-      taskDelay=synctasksettings.Interval;
-    } else {
-      synctasksettings.Interval=taskDelay;
+    
+        let query = 'UPDATE app_config SET settings=$1 where "ID"=1';
+    
+        await db.query(query, [settings]);
+      }
+  
+  
     }
-
-    if(!settings.Tasks)
-    {
-      settings.Tasks = {};
-    }
-    if(!settings.Tasks.JellyfinSync)
-    {
-      settings.Tasks.JellyfinSync = {};
-    }
-    settings.Tasks.JellyfinSync = synctasksettings;
-
-
-    let query = 'UPDATE app_config SET settings=$1 where "ID"=1';
-
-    await db.query(query, [settings]);
   }
-}
-catch(error)
-{
-  console.log('Sync Task Settings Error: '+error);
+  catch(error)
+  {
+    console.log('Sync Task Settings Error: '+error);
+  }
 }
 
 
@@ -84,6 +91,7 @@ async function intervalCallback() {
                                           LIMIT 1`).then((res) => res.rows);
     if(last_execution.length!==0)
     { 
+        await fetchTaskSettings();
         let last_execution_time = moment(last_execution[0].TimeRun).add(taskDelay, 'minutes');
 
         if(!current_time.isAfter(last_execution_time) || last_execution[0].Result ===taskstate.RUNNING)
