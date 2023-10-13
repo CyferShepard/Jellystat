@@ -1,52 +1,62 @@
-<p align="center">
+# Jellystat
 
-**Jellystat** is a free and open source Statistics App for Jellyfin! (This project is still in development - expect some weirdness)
+**Jellystat** is a free and open source statistics web application for Jellyfin.
 
-## Current Features
+## Quickstart Docker
 
-- Session Monitoring and logging
-- Statistics for all Libraries and Users
-- Watch History
-- User Overview and activity
-- Watch statisitcs
-- Backup and restore Data
-- Auto sync library items
-- Jellyfin Statistics Plugin Integration
+Here is an example Docker Compose file.
 
-## Required Development
-- Responsive UI
-- Code Optimizations
-- Security Testing
-- More Validations and Error Handling
-- Multi-Server support
-- More to come
+```yaml
+version: "3"
+services:
+  jellystat:
+    container_name: jellystat
+    image: ghcr.io/jellystat:latest
+    environment:
+      POSTGRES_USER: jellystat
+      POSTGRES_PASSWORD: mypassword
+      POSTGRES_IP: jellystat-db
+      POSTGRES_PORT: 5432
+      JWT_SECRET: "my-secret-jwt-key"
+    depends_on:
+      - jellystat-db
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./backup-data:/app/backend/backup-data
 
-## Getting Started with Development
-- Clone the project from git
-- set your env variables before strating the server (Variable names as per the docker compose file).
+  jellystat-db:
+    container_name: jellystat-db
+    image: postgres:15-alpine
+    environment:
+      POSTGRES_DB: "jfstat"
+      POSTGRES_USER: jellystat
+      POSTGRES_PASSWORD: mypassword
+    volumes:
+      - ./postgres-data:/var/lib/postgresql/data
+
+networks:
+  default:
+```
+
+## Start development
+
+- Fork and clone the project on Github
+- Start a PostgreSQL server locally (you can use the example above and expose port `5432`` locally)
+- Configure environment variable locally (the one in the Docker Compose example)
 - Run `npm init` to install necessary packages
 - Run `npm run start-server` to only run the backend nodejs server
 - Run `npm run start` to only run the frontend React UI
 - Run `npm run start-app` to run both backend and frontend at the same time
 
-
-### Launching Jellystat using Docker
-
-TODO
-
 ## Screenshots
 
-<img src="./screenshots/Home.PNG">
-<img src="./screenshots/Users.PNG">
-<img src="./screenshots/Activity.PNG">
-<img src="./screenshots/Libraries.PNG">
-<img src="./screenshots/settings.PNG">
+![Home](./screenshots/Home.png)
+![Users](./screenshots/Users.png)
+![Activity](./screenshots/Activity.png)
+![Libraries](./screenshots/Libraries.png)
+![Settings](./screenshots/settings.png)
 
-## Support
+## Original project
 
-- Bug reports and feature requests can be submitted via [GitHub Issues](https://github.com/CyferShepard/Jellystat/issues).
-- Join us in our [Discord](https://discord.gg/9SMBj2RyEe)
-
-## API Documentation
-
-To-do
+This project is a fork from [`CyferShepard/Jellystat`](https://github.com/CyferShepard/Jellystat), with some improvements. Thanks a lot to him for this work released under an MIT license.
