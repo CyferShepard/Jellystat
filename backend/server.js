@@ -20,7 +20,6 @@ const dbInstance = require("./db");
 const path = require("path");
 
 const http = require('http');
-const {setupWebSocketServer} = require('./ws');
 
 
 
@@ -41,8 +40,6 @@ app.use(express.json()); // middleware to parse JSON request bodies
 
 
 const server = http.createServer(app);
-setupWebSocketServer(server);
-app.use(cors());
 app.use(express.static(path.join(__dirname, 'static')));
 
 // JWT middleware

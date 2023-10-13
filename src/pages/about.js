@@ -13,12 +13,6 @@ export default function SettingsAbout() {
   const token = localStorage.getItem('token');
   const [data, setData] = useState();
 
-    
-
-  if(!data)
-  {
-    return <Loading/>;
-  }
 
 
     return (
@@ -32,7 +26,7 @@ export default function SettingsAbout() {
                   Github:
                  </Col>
                  <Col>
-                 <a href="https://github.com/opspotes/Jellystat" target="_blank" rel="noreferrer" > https://github.com/CyferShepard/Jellystat</a>
+                 <a href="https://github.com/opspotes/Jellystat" target="_blank" rel="noreferrer" > https://github.com/opspotes/Jellystat</a>
                  </Col>
              </Row>
        </Card.Body>

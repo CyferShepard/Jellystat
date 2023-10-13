@@ -1,6 +1,6 @@
 {
   "name": "jfstat-server",
-  "version": "1.0.8",
+  "version": "2.0.0",
   "private": true,
   "dependencies": {
     "@jellyfin/sdk": "^0.8.2",

@@ -5,7 +5,6 @@ import { Routes, Route } from "react-router-dom";
 import axios from 'axios';
 
 
-import socket from './socket'; 
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
@@ -52,37 +51,6 @@ function App() {
     {task:'BackupTask',ref:React.useRef(null)},
     {task:'TaskError',ref:React.useRef(null)},
   ];
-
-  useEffect(() => {
-
-    wsListeners.forEach((listener) => {
-
-      socket.on(listener.task, (message) => {
- 
-        if(message && message.type==="Start")
-        {
-          listener.ref.current = toast.info(message?.message||message, { autoClose: 15000 });
-        }else if(message && message.type==="Update")
-        {
-          toast.update( listener.ref.current, {render: (message?.message||message) ,  type: toast.TYPE.INFO, autoClose: 15000 });
-        }else if(message && message.type==="Error")
-        {
-          toast.update( listener.ref.current, {render: (message?.message||message) ,  type: toast.TYPE.ERROR, autoClose: 5000 });
-        }else if(message && message.type==="Success")
-        {
-          toast.update( listener.ref.current, {render: (message?.message||message) ,  type: toast.TYPE.SUCCESS, autoClose: 5000 });
-        }
-       
-      });
-    });
-   
-    return () => {
-      wsListeners.forEach((listener) => {
-        socket.off(listener.task);
-      });
- 
-    };
-  });
 
   useEffect(() => {
 
@@ -185,7 +153,6 @@ if (config  && setupState===2 && token!==null){
         </Routes>
       </main>
       </div>
-      <ToastContainer theme="dark" position="bottom-right" limit={5} pauseOnFocusLoss={false}  hideProgressBar/>
     </div>
 
   );

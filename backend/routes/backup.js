@@ -12,7 +12,6 @@ const triggertype = require('../logging/triggertype');
 const taskstate = require('../logging/taskstate');
 const taskName = require('../logging/taskName');
 
-const { sendUpdate } = require('../ws');
 
 const router = Router();
 
@@ -259,7 +258,6 @@ router.get('/beginBackup', async (req, res) => {
     
       if(last_execution[0].Result ===taskstate.RUNNING)
       {
-      sendUpdate("TaskError","Error: Backup is already running");
       res.send();
       return;
       }
@@ -272,7 +270,6 @@ router.get('/beginBackup', async (req, res) => {
     await backup(refLog);
     Logging.updateLog(uuid,refLog.logData,taskstate.SUCCESS);
     res.send('Backup completed successfully');
-    sendUpdate("TaskComplete",{message:triggertype+" Backup Completed"});
   } catch (error) {
     console.error(error);
     res.status(500).send('Backup failed');
@@ -292,7 +289,6 @@ router.get('/restore/:filename', async (req, res) => {
       Logging.updateLog(uuid,refLog.logData,taskstate.SUCCESS);
 
       res.send('Restore completed successfully');
-      sendUpdate("TaskComplete",{message:"Restore completed successfully"});
     } catch (error) {
       console.error(error);
       res.status(500).send('Restore failed');

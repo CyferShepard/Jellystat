@@ -6,7 +6,6 @@ const https = require('https');
 const moment = require('moment');
 const { randomUUID }  = require('crypto');
 
-const { sendUpdate } = require('../ws');
 
 const logging=require("./logging");
 const taskName=require("../logging/taskName");
@@ -263,7 +262,6 @@ class sync {
 
 async function syncUserData()
 {
-  sendUpdate("SyncTask",{type:"Update",message:"Syncing User Data"});
   const { rows } = await db.query('SELECT * FROM app_config where "ID"=1');
 
   const _sync = new sync(rows[0].JF_HOST, rows[0].JF_API_KEY);
@@ -291,7 +289,6 @@ async function syncUserData()
 
 async function syncLibraryFolders(data)
 {
-  sendUpdate("SyncTask",{type:"Update",message:"Syncing Library Folders"});
     const _sync = new sync();
     const existingIds = await _sync.getExistingIDsforTable('jf_libraries');// get existing library Ids from the db
 
@@ -309,7 +306,6 @@ async function syncLibraryFolders(data)
     //FINALY DELETE LIBRARY
     const toDeleteIds = existingIds.filter((id) =>!data.some((row) => row.Id === id ));
     if (toDeleteIds.length > 0) {
-      sendUpdate("SyncTask",{type:"Update",message:"Cleaning Up Old Library Data"});
 
       const ItemsToDelete=await db.query(`SELECT "Id" FROM jf_library_items where "ParentId" in (${toDeleteIds.map(id => `'${id}'`).join(',')})`).then((res) => res.rows.map((row) => row.Id));
       if (ItemsToDelete.length > 0) {
@@ -327,7 +323,6 @@ async function syncLibraryItems(data)
   const existingLibraryIds = await _sync.getExistingIDsforTable('jf_libraries');// get existing library Ids from the db
 
   syncTask.loggedData.push({ color: "lawngreen", Message: "Syncing... 1/4" });
-  sendUpdate("SyncTask",{type:"Update",message:"Beginning Library Item Sync (1/4)"});
   syncTask.loggedData.push({color: "yellow",Message: "Beginning Library Item Sync",});
 
   data=data.filter((row) => existingLibraryIds.includes(row.ParentId));
@@ -358,7 +353,6 @@ async function syncShowItems(data)
 {
  
   syncTask.loggedData.push({ color: "lawngreen", Message: "Syncing... 2/4" });
-  sendUpdate("SyncTask",{type:"Update",message:"Beginning Show Item Sync (2/4)"});
   syncTask.loggedData.push({color: "yellow", Message: "Beginning Seasons and Episode sync",});
 
   const { rows: shows } = await db.query(`SELECT *	FROM public.jf_library_items where "Type"='Series'`);
@@ -466,7 +460,6 @@ async function syncShowItems(data)
 async function syncItemInfo()
 {
   syncTask.loggedData.push({ color: "lawngreen", Message: "Syncing... 3/4" });
-  sendUpdate("SyncTask",{type:"Update",message:"Beginning Item Info Sync (3/4)"});
   syncTask.loggedData.push({color: "yellow", Message: "Beginning File Info Sync",});
 
   const { rows: config } = await db.query('SELECT * FROM app_config where "ID"=1');
@@ -500,7 +493,6 @@ async function syncItemInfo()
   //loop for each Movie
   for (const Item of Items) {
     current_item++;
-    sendUpdate("SyncTask",{type:"Update",message:`Syncing Item Info ${((current_item/all_items)*100).toFixed(2)}%`});
     const data = await _sync.getItemInfo(Item.Id,userid);
 
     const existingItemInfo = await db.query(`SELECT *	FROM public.jf_item_info where "Id" = '${Item.Id}'`).then((res) => res.rows.map((row) => row.Id));
@@ -541,7 +533,6 @@ async function syncItemInfo()
    //loop for each Episode
    for (const Episode of Episodes) {
     current_episode++;
-    sendUpdate("SyncTask",{type:"Update",message:`Syncing Episode Info ${((current_episode/all_episodes)*100).toFixed(2)}%`});
     const data = await _sync.getItemInfo(Episode.EpisodeId,userid);
 
 
@@ -585,13 +576,11 @@ async function syncItemInfo()
   syncTask.loggedData.push({color: "dodgerblue",Message: (insertEpisodeInfoCount > 0 ? insertEpisodeInfoCount:0) + " Episodes Info inserted. "+updateEpisodeInfoCount +" Episodes Info Updated"});
   syncTask.loggedData.push({color: "orange",Message: deleteEpisodeInfoCount + " Episodes Info Removed.",});
   syncTask.loggedData.push({ color: "yellow", Message: "Info Sync Complete" });
-  sendUpdate("SyncTask",{type:"Update",message:"Info Sync Complete"});
 }
 
 async function removeOrphanedData()
 {
   syncTask.loggedData.push({ color: "lawngreen", Message: "Syncing... 4/4" });
-  sendUpdate("SyncTask",{type:"Update",message:"Cleaning up FileInfo/Episode/Season Records (4/4)"});
   syncTask.loggedData.push({color: "yellow", Message: "Removing Orphaned FileInfo/Episode/Season Records",});
 
   await db.query('CALL jd_remove_orphaned_data()');
@@ -745,7 +734,6 @@ async function fullSync(triggertype)
   syncTask={loggedData:[],uuid:uuid};
   try
   {
-    sendUpdate("SyncTask",{type:"Start",message:triggertype+" Sync Started"});
     logging.insertLog(uuid,triggertype,taskName.sync);
     const { rows } = await db.query('SELECT * FROM app_config where "ID"=1');
     if (rows[0]?.JF_HOST === null || rows[0]?.JF_API_KEY === null) {
@@ -762,7 +750,6 @@ async function fullSync(triggertype)
     {
       syncTask.loggedData.push({ Message: "Error: No Libararies found to sync." });
       logging.updateLog(syncTask.uuid,syncTask.loggedData,taskstate.FAILED);
-      sendUpdate("SyncTask",{type:"Success",message:triggertype+" Sync Completed"});
       return;
     }
 
@@ -775,15 +762,12 @@ async function fullSync(triggertype)
     //for each item in library run get item using that id as the ParentId (This gets the children of the parent id)
   for (let i = 0; i < filtered_libraries.length; i++) {
     const item = filtered_libraries[i];
-    sendUpdate("SyncTask",{type:"Update",message:"Fetching Data for Library : "+item.Name + ` (${(i+1)}/${filtered_libraries.length})`});
     let libraryItems = await _sync.getItems('parentId',item.Id);
-    sendUpdate("SyncTask",{type:"Update",message:"Mapping Data for Library : "+item.Name});
     const libraryItemsWithParent = libraryItems.map((items) => ({
       ...items,
       ...{ ParentId: item.Id },
     }));
     data.push(...libraryItemsWithParent);
-    sendUpdate("SyncTask",{type:"Update",message:"Data Fetched for Library : "+item.Name});
 
   }
     const library_items=data.filter((item) => ['Movie','Audio','Series'].includes(item.Type));
@@ -811,14 +795,12 @@ async function fullSync(triggertype)
 
     logging.updateLog(syncTask.uuid,syncTask.loggedData,taskstate.SUCCESS);
 
-    sendUpdate("SyncTask",{type:"Success",message:triggertype+" Sync Completed"});
   
     
   }catch(error)
   {
     syncTask.loggedData.push({color: "red",Message: getErrorLineNumber(error)+ ": Error: "+error,});
     logging.updateLog(syncTask.uuid,syncTask.loggedData,taskstate.FAILED);
-    sendUpdate("SyncTask",{type:"Error",message:triggertype+" Sync Halted with Errors"});
   }
   
 
@@ -847,7 +829,6 @@ router.get("/beingSync", async (req, res) => {
 
     if(last_execution[0].Result ===taskstate.RUNNING)
     {
-    sendUpdate("TaskError","Error: Sync is already running");
     res.send();
     return;
     }
@@ -941,7 +922,6 @@ router.get("/syncPlaybackPluginData", async (req, res) => {
   try
   {
     logging.insertLog(uuid,triggertype.Manual,taskName.import);
-    sendUpdate("PlaybackSyncTask",{type:"Start",message:"Playback Plugin Sync Started"});
   
     const { rows } = await db.query('SELECT * FROM app_config where "ID"=1');
     if (rows[0]?.JF_HOST === null || rows[0]?.JF_API_KEY === null) {
@@ -955,7 +935,6 @@ router.get("/syncPlaybackPluginData", async (req, res) => {
     await syncPlaybackPluginData();
   
     logging.updateLog(PlaybacksyncTask.uuid,PlaybacksyncTask.loggedData,taskstate.SUCCESS);
-    sendUpdate("PlaybackSyncTask",{type:"Success",message:"Playback Plugin Sync Completed"});
     res.send("syncPlaybackPluginData Complete");
   }catch(error)
   {

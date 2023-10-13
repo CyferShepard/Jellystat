@@ -5,7 +5,6 @@ import LogoutBoxLineIcon from "remixicon-react/LogoutBoxLineIcon";
 import logo_dark from '../../images/icon-b-512.png';
 import "../../css/navbar.css";
 import React from "react";
-import VersionCard from "./version-card";
 
 export default function Navbar() {
   const handleLogout = () => {
@@ -49,7 +48,6 @@ export default function Navbar() {
 
 
           </div>
-      <VersionCard/>
 
     </BootstrapNavbar>
   );
