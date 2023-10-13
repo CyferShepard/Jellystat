@@ -32,8 +32,7 @@
 
 ### Launching Jellystat using Docker
 
-Check out our dockerhub to run Jellystat:
-https://hub.docker.com/r/cyfershepard/jellystat
+TODO
 
 ## Screenshots
 

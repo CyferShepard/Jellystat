@@ -3,7 +3,6 @@ const express = require("express");
 const axios = require("axios");
 const db = require("../db");
 const https = require("https");
-const { checkForUpdates } = require("../version-control");
 const { randomUUID }  = require('crypto');
 
 const agent = new https.Agent({
@@ -451,16 +450,6 @@ router.post("/setTaskSettings", async (req, res) => {
 
 });
 
-
-//Jellystat functions
-router.get("/CheckForUpdates", async (req, res) => {
-  try {
-    let result = await checkForUpdates();
-    res.send(result);
-  } catch (error) {
-    console.log(error);
-  }
-});
 
 router.get("/dataValidator", async (req, res) => {
   try {
