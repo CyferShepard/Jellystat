@@ -1,48 +1,42 @@
-@import '../variables.module.css';
+@import "../variables.module.css";
 .media-items-container {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 150px));
+  grid-gap: 20px;
 
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(150px, 150px));
-    grid-gap: 20px;
-
-    background-color:  var(--secondary-background-color);
-    padding: 20px;
-    border-radius: 8px;
-    color: white;
-    margin-bottom: 20px;
-    min-height: 300px;
+  background-color: var(--secondary-background-color);
+  padding: 20px;
+  border-radius: 8px;
+  color: white;
+  margin-bottom: 20px;
+  min-height: 300px;
 }
 
 .media-items-container::-webkit-scrollbar {
-    width: 5px; /* set scrollbar width */
-  }
+  width: 5px; /* set scrollbar width */
+}
 
-  .media-items-container::-webkit-scrollbar-track {
-    background-color: transparent; /* set track color */
-  }
+.media-items-container::-webkit-scrollbar-track {
+  background-color: transparent; /* set track color */
+}
 
-  .media-items-container::-webkit-scrollbar-thumb {
-    background-color: #8888884d; /* set thumb color */
-    border-radius: 5px; /* round corners */
-    width: 5px;
-  }
+.media-items-container::-webkit-scrollbar-thumb {
+  background-color: #8888884d; /* set thumb color */
+  border-radius: 5px; /* round corners */
+  width: 5px;
+}
 
+.media-items-container::-webkit-scrollbar-thumb:hover {
+  background-color: #88888883; /* set thumb color */
+}
 
+.library-items > div > div > .form-control {
+  color: white !important;
+  background-color: var(--secondary-background-color) !important;
+  border-color: var(--secondary-background-color) !important;
+}
 
-  .media-items-container::-webkit-scrollbar-thumb:hover {
-    background-color: #88888883; /* set thumb color */
-  }
-
-  .library-items > div>div> .form-control
-  {
-    color: white !important;
-    background-color: var(--secondary-background-color) !important;
-    border-color: var(--secondary-background-color) !important;
-  }
-
-  
-  .library-items > div> div>.form-control:focus
-  {
-    box-shadow: none !important;
-    border-color: var(--primary-color) !important;
-  }
+.library-items > div > div > .form-control:focus {
+  box-shadow: none !important;
+  border-color: var(--primary-color) !important;
+}

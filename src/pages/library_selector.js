@@ -10,7 +10,6 @@ import InformationLineIcon from "remixicon-react/InformationLineIcon";
 
 import { Tooltip } from "@mui/material";
 
-
 function LibrarySelector() {
   const [data, setData] = useState();
   const [config, setConfig] = useState(null);
@@ -28,8 +27,7 @@ function LibrarySelector() {
     };
 
     const fetchLibraries = () => {
-      if(config)
-      {
+      if (config) {
         const url = `/api/TrackedLibraries`;
         axios
           .get(url, {
@@ -44,10 +42,8 @@ function LibrarySelector() {
           .catch((error) => {
             console.log(error);
           });
-
       }
     };
-
 
     if (!config) {
       fetchConfig();
@@ -56,7 +52,7 @@ function LibrarySelector() {
     fetchLibraries();
     const intervalId = setInterval(fetchLibraries, 60000 * 60);
     return () => clearInterval(intervalId);
-  }, [ config]);
+  }, [config]);
 
   if (!data) {
     return <Loading />;
@@ -64,18 +60,28 @@ function LibrarySelector() {
 
   return (
     <div className="libraries">
-    <h1 className="py-4">Select Libraries to Import  <Tooltip title={"Activity for Items within these libraries are still Tracked - Even when not imported."}><span> <InformationLineIcon/></span></Tooltip></h1>
+      <h1 className="py-4">
+        Select Libraries to Import{" "}
+        <Tooltip
+          title={
+            "Activity for Items within these libraries are still Tracked - Even when not imported."
+          }
+        >
+          <span>
+            {" "}
+            <InformationLineIcon />
+          </span>
+        </Tooltip>
+      </h1>
 
       <div xs={1} md={2} lg={4} className="g-0 libraries-container">
-      {data &&
+        {data &&
           data.map((item) => (
-                <ErrorBoundary key={item.Id} >
-                  <SelectionCard data={item}  base_url={config.hostUrl}/>
-                </ErrorBoundary>
-
-            ))}
+            <ErrorBoundary key={item.Id}>
+              <SelectionCard data={item} base_url={config.hostUrl} />
+            </ErrorBoundary>
+          ))}
       </div>
-      
     </div>
   );
 }

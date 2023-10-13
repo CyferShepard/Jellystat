@@ -10,7 +10,7 @@ import Loading from "./loading";
 
 function PlaybackActivity() {
   const [data, setData] = useState([]);
-//   const [config, setConfig] = useState(null);
+  //   const [config, setConfig] = useState(null);
   const [sortConfig, setSortConfig] = useState({ key: null, direction: null });
 
   function handleSort(key) {
@@ -36,22 +36,18 @@ function PlaybackActivity() {
   }
 
   useEffect(() => {
-
-
     const fetchData = () => {
-      
-        axios
-          .get('/stats/getPlaybackActivity')
-          .then((data) => {
-            console.log("data");
-            setData(data.data);
-            console.log(data);
-          })
-          .catch((error) => {
-            console.log(error);
-          });
+      axios
+        .get("/stats/getPlaybackActivity")
+        .then((data) => {
+          console.log("data");
+          setData(data.data);
+          console.log(data);
+        })
+        .catch((error) => {
+          console.log(error);
+        });
     };
-
 
     if (data.length === 0) {
       fetchData();
@@ -90,8 +86,12 @@ function PlaybackActivity() {
             <th onClick={() => handleSort("UserName")}>User</th>
             <th onClick={() => handleSort("NowPlayingItemName")}>Watched</th>
             <th onClick={() => handleSort("NowPlayingItemName")}>Episode</th>
-            <th onClick={() => handleSort("PlaybackDuration")}>Playback Duration</th>
-            <th onClick={() => handleSort("ActivityDateInserted")}>Playback Timestamp</th>
+            <th onClick={() => handleSort("PlaybackDuration")}>
+              Playback Duration
+            </th>
+            <th onClick={() => handleSort("ActivityDateInserted")}>
+              Playback Timestamp
+            </th>
           </tr>
         </thead>
         <tbody>
@@ -99,9 +99,14 @@ function PlaybackActivity() {
             <tr key={item.user_id}>
               <td>{item.UserName}</td>
               <td>{item.SeriesName || item.NowPlayingItemName}</td>
-              <td>{item.SeriesName ? item.NowPlayingItemName: '' }</td>
+              <td>{item.SeriesName ? item.NowPlayingItemName : ""}</td>
               <td>{convertSecondsToHMS(item.PlaybackDuration)}</td>
-              <td>{new Date(item.ActivityDateInserted).toLocaleString("en-GB", options)}</td>
+              <td>
+                {new Date(item.ActivityDateInserted).toLocaleString(
+                  "en-GB",
+                  options,
+                )}
+              </td>
             </tr>
           ))}
         </tbody>

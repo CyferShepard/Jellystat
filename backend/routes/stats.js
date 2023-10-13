@@ -4,8 +4,6 @@ const db = require("../db");
 
 const router = express.Router();
 
-
-
 router.get("/getLibraryOverview", async (req, res) => {
   try {
     const { rows } = await db.query("SELECT * FROM jf_library_count_view");
@@ -18,24 +16,23 @@ router.get("/getLibraryOverview", async (req, res) => {
 
 router.post("/getMostViewedByType", async (req, res) => {
   try {
-    const { days,type } = req.body;
+    const { days, type } = req.body;
 
-    const valid_types=['Audio','Movie','Series'];
+    const valid_types = ["Audio", "Movie", "Series"];
 
     let _days = days;
     if (days === undefined) {
       _days = 30;
     }
 
-    if(!valid_types.includes(type))
-    {
+    if (!valid_types.includes(type)) {
       res.status(503);
-      return res.send('Invalid Type Value');
+      return res.send("Invalid Type Value");
     }
-  
 
     const { rows } = await db.query(
-      `select * from fs_most_played_items($1,'${type}') limit 5`, [_days-1]
+      `select * from fs_most_played_items($1,'${type}') limit 5`,
+      [_days - 1],
     );
     res.send(rows);
   } catch (error) {
@@ -46,23 +43,23 @@ router.post("/getMostViewedByType", async (req, res) => {
 
 router.post("/getMostPopularByType", async (req, res) => {
   try {
-    const { days,type } = req.body;
+    const { days, type } = req.body;
 
-    const valid_types=['Audio','Movie','Series'];
+    const valid_types = ["Audio", "Movie", "Series"];
 
     let _days = days;
     if (days === undefined) {
       _days = 30;
     }
 
-    if(!valid_types.includes(type))
-    {
+    if (!valid_types.includes(type)) {
       res.status(503);
-      return res.send('Invalid Type Value');
+      return res.send("Invalid Type Value");
     }
 
     const { rows } = await db.query(
-      `select * from fs_most_popular_items($1,$2) limit 5`, [_days-1, type]
+      `select * from fs_most_popular_items($1,$2) limit 5`,
+      [_days - 1, type],
     );
     res.send(rows);
   } catch (error) {
@@ -70,8 +67,6 @@ router.post("/getMostPopularByType", async (req, res) => {
     res.send(error);
   }
 });
-
-
 
 router.post("/getMostViewedLibraries", async (req, res) => {
   try {
@@ -81,7 +76,8 @@ router.post("/getMostViewedLibraries", async (req, res) => {
       _days = 30;
     }
     const { rows } = await db.query(
-      `select * from fs_most_viewed_libraries($1)`, [_days-1]
+      `select * from fs_most_viewed_libraries($1)`,
+      [_days - 1],
     );
     res.send(rows);
   } catch (error) {
@@ -98,7 +94,8 @@ router.post("/getMostUsedClient", async (req, res) => {
       _days = 30;
     }
     const { rows } = await db.query(
-      `select * from fs_most_used_clients($1) limit 5`, [_days-1]
+      `select * from fs_most_used_clients($1) limit 5`,
+      [_days - 1],
     );
     res.send(rows);
   } catch (error) {
@@ -115,15 +112,15 @@ router.post("/getMostActiveUsers", async (req, res) => {
       _days = 30;
     }
     const { rows } = await db.query(
-      `select * from fs_most_active_user($1) limit 5`, [_days-1]
+      `select * from fs_most_active_user($1) limit 5`,
+      [_days - 1],
     );
-   res.send(rows);
+    res.send(rows);
   } catch (error) {
     res.status(503);
     res.send(error);
   }
 });
-
 
 router.get("/getPlaybackActivity", async (req, res) => {
   try {
@@ -144,12 +141,12 @@ router.get("/getAllUserActivity", async (req, res) => {
   }
 });
 
-
 router.post("/getUserLastPlayed", async (req, res) => {
   try {
     const { userid } = req.body;
     const { rows } = await db.query(
-      `select * from fs_last_user_activity($1) limit 15`, [userId]
+      `select * from fs_last_user_activity($1) limit 15`,
+      [userId],
     );
     res.send(rows);
   } catch (error) {
@@ -162,14 +159,15 @@ router.post("/getUserLastPlayed", async (req, res) => {
 //Global Stats
 router.post("/getGlobalUserStats", async (req, res) => {
   try {
-    const { hours,userid } = req.body;
+    const { hours, userid } = req.body;
     let _hours = hours;
     if (hours === undefined) {
       _hours = 24;
     }
-    const { rows } = await db.query(
-      `select * from fs_user_stats($1,$2)`, [_hours, userid]
-    );
+    const { rows } = await db.query(`select * from fs_user_stats($1,$2)`, [
+      _hours,
+      userid,
+    ]);
     res.send(rows[0]);
   } catch (error) {
     console.log(error);
@@ -180,7 +178,7 @@ router.post("/getGlobalUserStats", async (req, res) => {
 
 router.post("/getGlobalItemStats", async (req, res) => {
   try {
-    const { hours,itemid } = req.body;
+    const { hours, itemid } = req.body;
     let _hours = hours;
     if (hours === undefined) {
       _hours = 24;
@@ -191,7 +189,8 @@ router.post("/getGlobalItemStats", async (req, res) => {
       from jf_playback_activity jf_playback_activity
       where 
       ("EpisodeId"=$1 OR "SeasonId"=$1 OR "NowPlayingItemId"=$1)
-      AND jf_playback_activity."ActivityDateInserted" BETWEEN CURRENT_DATE - INTERVAL '1 hour' * $2 AND NOW();`, [itemid, _hours]
+      AND jf_playback_activity."ActivityDateInserted" BETWEEN CURRENT_DATE - INTERVAL '1 hour' * $2 AND NOW();`,
+      [itemid, _hours],
     );
     res.send(rows[0]);
   } catch (error) {
@@ -203,14 +202,15 @@ router.post("/getGlobalItemStats", async (req, res) => {
 
 router.post("/getGlobalLibraryStats", async (req, res) => {
   try {
-    const { hours,libraryid } = req.body;
+    const { hours, libraryid } = req.body;
     let _hours = hours;
     if (hours === undefined) {
       _hours = 24;
     }
-    const { rows } = await db.query(
-      `select * from fs_library_stats($1,$2)`, [_hours, libraryid]
-    );
+    const { rows } = await db.query(`select * from fs_library_stats($1,$2)`, [
+      _hours,
+      libraryid,
+    ]);
     res.send(rows[0]);
   } catch (error) {
     console.log(error);
@@ -218,9 +218,6 @@ router.post("/getGlobalLibraryStats", async (req, res) => {
     res.send(error);
   }
 });
-
-
-
 
 router.get("/getLibraryCardStats", async (req, res) => {
   try {
@@ -243,29 +240,25 @@ router.get("/getLibraryMetadata", async (req, res) => {
 });
 
 router.post("/getLibraryItemsWithStats", async (req, res) => {
-  try{
-    const  {libraryid}  = req.body;
-    console.log(`ENDPOINT CALLED: /getLibraryItems: `+libraryid);
+  try {
+    const { libraryid } = req.body;
+    console.log(`ENDPOINT CALLED: /getLibraryItems: ` + libraryid);
     const { rows } = await db.query(
-      `SELECT * FROM jf_library_items_with_playcount_playtime where "ParentId"=$1`, [libraryid]
+      `SELECT * FROM jf_library_items_with_playcount_playtime where "ParentId"=$1`,
+      [libraryid],
     );
     res.send(rows);
-  
-
-  }catch(error)
-  {
+  } catch (error) {
     console.log(error);
   }
-
- 
 });
-
 
 router.post("/getLibraryLastPlayed", async (req, res) => {
   try {
     const { libraryid } = req.body;
     const { rows } = await db.query(
-      `select * from fs_last_library_activity($1) limit 15`, [libraryid]
+      `select * from fs_last_library_activity($1) limit 15`,
+      [libraryid],
     );
     res.send(rows);
   } catch (error) {
@@ -275,44 +268,45 @@ router.post("/getLibraryLastPlayed", async (req, res) => {
   }
 });
 
-
 router.post("/getViewsOverTime", async (req, res) => {
   try {
     const { days } = req.body;
     let _days = days;
-    if (days=== undefined) {
+    if (days === undefined) {
       _days = 30;
     }
-    const { rows:stats } = await db.query(
-      `select * from fs_watch_stats_over_time($1)`, [_days]
+    const { rows: stats } = await db.query(
+      `select * from fs_watch_stats_over_time($1)`,
+      [_days],
     );
 
-    const { rows:libraries } = await db.query(
-      `select distinct "Id","Name" from jf_libraries`
+    const { rows: libraries } = await db.query(
+      `select distinct "Id","Name" from jf_libraries`,
     );
 
-    
-const reorganizedData = {};
+    const reorganizedData = {};
 
-stats.forEach((item) => {
-  const library = item.Library;
-  const count = item.Count;
-  const date = new Date(item.Date).toLocaleDateString('en-US', {
-    year: 'numeric',
-    month: 'short',
-    day: '2-digit'
-  });
+    stats.forEach((item) => {
+      const library = item.Library;
+      const count = item.Count;
+      const date = new Date(item.Date).toLocaleDateString("en-US", {
+        year: "numeric",
+        month: "short",
+        day: "2-digit",
+      });
 
+      if (!reorganizedData[date]) {
+        reorganizedData[date] = {
+          Key: date,
+        };
+      }
 
-  if (!reorganizedData[date]) {
-    reorganizedData[date] = {
-      Key:date
+      reorganizedData[date] = { ...reorganizedData[date], [library]: count };
+    });
+    const finalData = {
+      libraries: libraries,
+      stats: Object.values(reorganizedData),
     };
-  }
-  
-  reorganizedData[date]= { ...reorganizedData[date], [library]: count};
-});
-const finalData = {libraries:libraries,stats:Object.values(reorganizedData)};
     res.send(finalData);
   } catch (error) {
     console.log(error);
@@ -325,35 +319,37 @@ router.post("/getViewsByDays", async (req, res) => {
   try {
     const { days } = req.body;
     let _days = days;
-    if (days=== undefined) {
+    if (days === undefined) {
       _days = 30;
     }
-    const { rows:stats } = await db.query(
-      `select * from fs_watch_stats_popular_days_of_week($1)`, [_days]
+    const { rows: stats } = await db.query(
+      `select * from fs_watch_stats_popular_days_of_week($1)`,
+      [_days],
     );
 
-    const { rows:libraries } = await db.query(
-      `select distinct "Id","Name" from jf_libraries`
+    const { rows: libraries } = await db.query(
+      `select distinct "Id","Name" from jf_libraries`,
     );
 
-    
-const reorganizedData = {};
+    const reorganizedData = {};
 
-stats.forEach((item) => {
-  const library = item.Library;
-  const count = item.Count;
-  const day = item.Day;
+    stats.forEach((item) => {
+      const library = item.Library;
+      const count = item.Count;
+      const day = item.Day;
 
+      if (!reorganizedData[day]) {
+        reorganizedData[day] = {
+          Key: day,
+        };
+      }
 
-  if (!reorganizedData[day]) {
-    reorganizedData[day] = {
-      Key:day
+      reorganizedData[day] = { ...reorganizedData[day], [library]: count };
+    });
+    const finalData = {
+      libraries: libraries,
+      stats: Object.values(reorganizedData),
     };
-  }
-  
-  reorganizedData[day]= { ...reorganizedData[day], [library]: count};
-});
-const finalData = {libraries:libraries,stats:Object.values(reorganizedData)};
     res.send(finalData);
   } catch (error) {
     console.log(error);
@@ -366,35 +362,37 @@ router.post("/getViewsByHour", async (req, res) => {
   try {
     const { days } = req.body;
     let _days = days;
-    if (days=== undefined) {
+    if (days === undefined) {
       _days = 30;
     }
-    const { rows:stats } = await db.query(
-      `select * from fs_watch_stats_popular_hour_of_day($1)`, [_days]
+    const { rows: stats } = await db.query(
+      `select * from fs_watch_stats_popular_hour_of_day($1)`,
+      [_days],
     );
 
-    const { rows:libraries } = await db.query(
-      `select distinct "Id","Name" from jf_libraries`
+    const { rows: libraries } = await db.query(
+      `select distinct "Id","Name" from jf_libraries`,
     );
 
-    
-const reorganizedData = {};
+    const reorganizedData = {};
 
-stats.forEach((item) => {
-  const library = item.Library;
-  const count = item.Count;
-  const hour = item.Hour;
+    stats.forEach((item) => {
+      const library = item.Library;
+      const count = item.Count;
+      const hour = item.Hour;
 
+      if (!reorganizedData[hour]) {
+        reorganizedData[hour] = {
+          Key: hour,
+        };
+      }
 
-  if (!reorganizedData[hour]) {
-    reorganizedData[hour] = {
-      Key:hour
+      reorganizedData[hour] = { ...reorganizedData[hour], [library]: count };
+    });
+    const finalData = {
+      libraries: libraries,
+      stats: Object.values(reorganizedData),
     };
-  }
-  
-  reorganizedData[hour]= { ...reorganizedData[hour], [library]: count};
-});
-const finalData = {libraries:libraries,stats:Object.values(reorganizedData)};
     res.send(finalData);
   } catch (error) {
     console.log(error);
@@ -402,8 +400,5 @@ const finalData = {libraries:libraries,stats:Object.values(reorganizedData)};
     res.send(error);
   }
 });
-
-
-
 
 module.exports = router;

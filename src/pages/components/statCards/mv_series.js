@@ -2,16 +2,13 @@ import React, { useState, useEffect } from "react";
 import axios from "axios";
 import Config from "../../../lib/config";
 
-
 import ItemStatComponent from "./ItemStatComponent";
-
 
 function MVSeries(props) {
   const [data, setData] = useState();
-  const [days, setDays] = useState(30); 
+  const [days, setDays] = useState(30);
 
   const [config, setConfig] = useState(null);
-
 
   useEffect(() => {
     const fetchConfig = async () => {
@@ -30,12 +27,16 @@ function MVSeries(props) {
         const url = `/stats/getMostViewedByType`;
 
         axios
-        .post(url, {days:props.days, type:'Series'}, {
-          headers: {
-            Authorization: `Bearer ${config.token}`,
-            "Content-Type": "application/json",
-          },
-        })
+          .post(
+            url,
+            { days: props.days, type: "Series" },
+            {
+              headers: {
+                Authorization: `Bearer ${config.token}`,
+                "Content-Type": "application/json",
+              },
+            },
+          )
           .then((data) => {
             setData(data.data);
           })
@@ -44,7 +45,6 @@ function MVSeries(props) {
           });
       }
     };
- 
 
     if (!config) {
       fetchConfig();
@@ -57,19 +57,22 @@ function MVSeries(props) {
       setDays(props.days);
       fetchLibraries();
     }
-  
 
     const intervalId = setInterval(fetchLibraries, 60000 * 5);
     return () => clearInterval(intervalId);
-  }, [data, config, days,props.days]);
+  }, [data, config, days, props.days]);
 
   if (!data || data.length === 0) {
-    return  <></>;
+    return <></>;
   }
 
-
   return (
-    <ItemStatComponent  base_url={config.hostUrl} data={data} heading={"MOST VIEWED SERIES"} units={"Plays"}/>
+    <ItemStatComponent
+      base_url={config.hostUrl}
+      data={data}
+      heading={"MOST VIEWED SERIES"}
+      units={"Plays"}
+    />
   );
 }
 

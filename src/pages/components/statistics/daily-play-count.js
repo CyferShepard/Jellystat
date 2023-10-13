@@ -6,15 +6,11 @@ import Chart from "./chart";
 import "../../css/stats.css";
 
 function DailyPlayStats(props) {
-
   const [stats, setStats] = useState();
   const [libraries, setLibraries] = useState();
   const [days, setDays] = useState(20);
   const token = localStorage.getItem("token");
-  
 
-
-  
   useEffect(() => {
     const fetchLibraries = () => {
       const url = `/stats/getViewsOverTime`;
@@ -28,7 +24,7 @@ function DailyPlayStats(props) {
               Authorization: `Bearer ${token}`,
               "Content-Type": "application/json",
             },
-          }
+          },
         )
         .then((data) => {
           setStats(data.data.stats);
@@ -49,7 +45,7 @@ function DailyPlayStats(props) {
 
     const intervalId = setInterval(fetchLibraries, 60000 * 5);
     return () => clearInterval(intervalId);
-  }, [stats,libraries, days, props.days, token]);
+  }, [stats, libraries, days, props.days, token]);
 
   if (!stats) {
     return <></>;
@@ -66,10 +62,12 @@ function DailyPlayStats(props) {
   }
   return (
     <div className="main-widget">
-      <h2 className="text-start my-2">Daily Play Count Per Library - Last {days} Days</h2>
+      <h2 className="text-start my-2">
+        Daily Play Count Per Library - Last {days} Days
+      </h2>
 
       <div className="graph">
-         <Chart libraries={libraries} stats={stats} />
+        <Chart libraries={libraries} stats={stats} />
       </div>
     </div>
   );

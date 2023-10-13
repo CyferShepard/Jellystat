@@ -1,4 +1,4 @@
-exports.up = function(knex) {
+exports.up = function (knex) {
   const query = `
   DROP VIEW js_library_stats_overview;
 CREATE OR REPLACE VIEW public.js_library_stats_overview
@@ -57,16 +57,14 @@ CREATE OR REPLACE VIEW public.js_library_stats_overview
      LEFT JOIN jf_library_episodes e ON e."EpisodeId" = latest_activity."EpisodeId"
   ORDER BY l."Id", latest_activity."ActivityDateInserted" DESC;
   `;
-  
-  return knex.schema.raw(query).catch(function(error) {
+
+  return knex.schema.raw(query).catch(function (error) {
     console.error(error);
   });
 };
 
-
-
-  exports.down = function(knex) {
-    return knex.schema.raw(`
+exports.down = function (knex) {
+  return knex.schema.raw(`
     CREATE OR REPLACE VIEW public.js_library_stats_overview
     AS
     SELECT DISTINCT ON (l."Id") l."Id",
@@ -122,5 +120,4 @@ CREATE OR REPLACE VIEW public.js_library_stats_overview
         LEFT JOIN jf_library_episodes e ON e."EpisodeId" = latest_activity."EpisodeId"
      ORDER BY l."Id", latest_activity."ActivityDateInserted" DESC;
     `);
-  };
-  
+};

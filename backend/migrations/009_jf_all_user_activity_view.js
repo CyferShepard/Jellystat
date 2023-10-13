@@ -1,5 +1,7 @@
-exports.up = async function(knex) {
-    await knex.raw(`
+exports.up = async function (knex) {
+  await knex
+    .raw(
+      `
       CREATE OR REPLACE VIEW jf_all_user_activity
       AS
       SELECT u."Id" AS "UserId",
@@ -51,12 +53,13 @@ exports.up = async function(knex) {
         WHERE jf_playback_activity."UserId" = u."Id"
       ) plays ON true
       ORDER BY (now() - j."ActivityDateInserted");
-    `).catch(function(error) {
-        console.error(error);
-      });
-  };
-  
-  exports.down = async function(knex) {
-    await knex.raw(`DROP VIEW jf_all_user_activity;`);
-  };
-  
+    `,
+    )
+    .catch(function (error) {
+      console.error(error);
+    });
+};
+
+exports.down = async function (knex) {
+  await knex.raw(`DROP VIEW jf_all_user_activity;`);
+};

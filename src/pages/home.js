@@ -1,27 +1,24 @@
-import React from 'react'
+import React from "react";
 
-import './css/home.css'
+import "./css/home.css";
 
-import Sessions from './components/sessions/sessions'
-import HomeStatisticCards from './components/HomeStatisticCards'
-import LibraryOverView from './components/libraryOverview'
-import RecentlyAdded from './components/library/recently-added'
-import ErrorBoundary from './components/general/ErrorBoundary'
+import Sessions from "./components/sessions/sessions";
+import HomeStatisticCards from "./components/HomeStatisticCards";
+import LibraryOverView from "./components/libraryOverview";
+import RecentlyAdded from "./components/library/recently-added";
+import ErrorBoundary from "./components/general/ErrorBoundary";
 
 export default function Home() {
   return (
-    <div className='Home'>
-
-      
+    <div className="Home">
       <ErrorBoundary>
-        <Sessions/>
+        <Sessions />
       </ErrorBoundary>
       <ErrorBoundary>
-        <RecentlyAdded/>
+        <RecentlyAdded />
       </ErrorBoundary>
-      <HomeStatisticCards/>
-      <LibraryOverView/>
-
+      <HomeStatisticCards />
+      <LibraryOverView />
     </div>
-  )
+  );
 }

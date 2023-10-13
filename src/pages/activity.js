@@ -12,11 +12,7 @@ function Activity() {
   const [data, setData] = useState();
   const [config, setConfig] = useState(null);
 
-  const [itemCount,setItemCount] = useState(10);
-  
-
-
-
+  const [itemCount, setItemCount] = useState(10);
 
   useEffect(() => {
     const fetchConfig = async () => {
@@ -47,9 +43,6 @@ function Activity() {
         });
     };
 
-
-
-
     if (!data && config) {
       fetchLibraries();
     }
@@ -62,43 +55,45 @@ function Activity() {
     return () => clearInterval(intervalId);
   }, [data, config]);
 
-
   if (!data) {
     return <Loading />;
   }
 
-
   if (data.length === 0) {
-    return (<div>
-      <div className="Heading">
-      <h1>Activity</h1>
+    return (
+      <div>
+        <div className="Heading">
+          <h1>Activity</h1>
+        </div>
+        <div className="Activity">
+          <h1>No Activity to display</h1>
+        </div>
       </div>
-      <div className="Activity">
-      <h1>No Activity to display</h1>
-      </div>
-    </div>
     );
   }
 
   return (
     <div className="Activity">
       <div className="Heading">
-      <h1>Activity</h1>
-      <div className="pagination-range">
+        <h1>Activity</h1>
+        <div className="pagination-range">
           <div className="header">Items</div>
-          <select value={itemCount} onChange={(event) => {setItemCount(event.target.value);}}>
-                <option value="10">10</option>
-                <option value="25">25</option>
-                <option value="50">50</option>
-                <option value="100">100</option>
-              </select>
+          <select
+            value={itemCount}
+            onChange={(event) => {
+              setItemCount(event.target.value);
+            }}
+          >
+            <option value="10">10</option>
+            <option value="25">25</option>
+            <option value="50">50</option>
+            <option value="100">100</option>
+          </select>
         </div>
       </div>
       <div className="Activity">
-        <ActivityTable data={data} itemCount={itemCount}/>
-
-
-    </div>
+        <ActivityTable data={data} itemCount={itemCount} />
+      </div>
     </div>
   );
 }

@@ -1,5 +1,7 @@
-exports.up = function(knex) {
-    return knex.schema.raw(`
+exports.up = function (knex) {
+  return knex.schema
+    .raw(
+      `
     CREATE OR REPLACE PROCEDURE jd_remove_orphaned_data() AS $$
     BEGIN
         DELETE FROM public.jf_library_episodes
@@ -30,14 +32,15 @@ exports.up = function(knex) {
     END;
     $$ LANGUAGE plpgsql;
     
-    `).catch(function(error) {
-        console.error(error);
-      });
-  };
-  
-  exports.down = function(knex) {
-    return knex.schema.raw(`
+    `,
+    )
+    .catch(function (error) {
+      console.error(error);
+    });
+};
+
+exports.down = function (knex) {
+  return knex.schema.raw(`
       DROP PROCEDURE jd_remove_orphaned_data;
     `);
-  };
-  
+};

@@ -1,4 +1,4 @@
-exports.up = function(knex) {
+exports.up = function (knex) {
   const query = `
     CREATE VIEW js_library_stats_overview AS
     SELECT DISTINCT ON (l."Id") l."Id",
@@ -54,15 +54,12 @@ exports.up = function(knex) {
        LEFT JOIN jf_library_episodes e ON e."EpisodeId" = latest_activity."EpisodeId"
     ORDER BY l."Id", latest_activity."ActivityDateInserted" DESC;
   `;
-  
-  return knex.schema.raw(query).catch(function(error) {
+
+  return knex.schema.raw(query).catch(function (error) {
     console.error(error);
   });
 };
 
-
-
-  exports.down = function(knex) {
-    return knex.schema.raw('DROP VIEW js_library_stats_overview');
-  };
-  
+exports.down = function (knex) {
+  return knex.schema.raw("DROP VIEW js_library_stats_overview");
+};

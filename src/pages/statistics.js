@@ -9,7 +9,7 @@ import PlayStatsByHour from "./components/statistics/play-stats-by-hour";
 
 function Statistics() {
   const [days, setDays] = useState(20);
-  const [input, setInput] = useState(20); 
+  const [input, setInput] = useState(20);
 
   const handleKeyDown = (event) => {
     if (event.key === "Enter") {

@@ -1,4 +1,4 @@
-exports.up = function(knex) {
+exports.up = function (knex) {
   const query = `
     CREATE OR REPLACE VIEW jf_library_items_with_playcount_playtime AS
     SELECT 
@@ -28,15 +28,14 @@ exports.up = function(knex) {
     group by i."Id"
     order by times_played desc
   `;
-  
-  return knex.schema.raw(query).catch(function(error) {
+
+  return knex.schema.raw(query).catch(function (error) {
     console.error(error);
   });
 };
 
-
-
-  exports.down = function(knex) {
-    return knex.schema.raw(`DROP VIEW public.jf_library_items_with_playcount_playtime;`);
-  };
-  
+exports.down = function (knex) {
+  return knex.schema.raw(
+    `DROP VIEW public.jf_library_items_with_playcount_playtime;`,
+  );
+};

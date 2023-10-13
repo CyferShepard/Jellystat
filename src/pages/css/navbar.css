@@ -1,4 +1,4 @@
-@import './variables.module.css';
+@import "./variables.module.css";
 .navbar {
   background-color: var(--secondary-background-color);
   border-right: 1px solid #414141 !important;
@@ -7,29 +7,25 @@
 @media (min-width: 768px) {
   .navbar {
     min-height: 100vh;
-    border-bottom: 1px solid  #414141  !important;
-
+    border-bottom: 1px solid #414141 !important;
   }
 }
 
-.navbar .navbar-brand{
+.navbar .navbar-brand {
   margin-top: 20px;
   font-size: 32px;
   font-weight: 500;
 }
 
-.navbar .navbar-nav{
+.navbar .navbar-nav {
   width: 100%;
   margin-top: 20px;
 }
 
-.logout
-{
-
+.logout {
   color: var(--secondary-color) !important;
 }
-.navbar-toggler > .collapsed
-{
+.navbar-toggler > .collapsed {
   right: 0;
 }
 /* .navbar-toggler-icon
@@ -37,10 +33,7 @@
   width: 100% !important;
 } */
 
-
-
 .navitem {
-
   color: white;
   font-size: 18px !important;
   text-decoration: none;
@@ -62,24 +55,15 @@
   background-color: var(--primary-color);
 }
 
-.active
-{
+.active {
   background-color: var(--primary-color);
   transition: background-color 0.2s ease-in-out;
 }
 
-
-.nav-link
-{
+.nav-link {
   display: flex !important;
 }
-
 
 .nav-text {
   margin-left: 10px;
 }
-
-
-
-
-

@@ -1,5 +1,7 @@
-exports.up = function(knex) {
-    return knex.raw(`
+exports.up = function (knex) {
+  return knex
+    .raw(
+      `
     DROP FUNCTION IF EXISTS fs_last_user_activity(text);
     CREATE OR REPLACE FUNCTION public.fs_last_user_activity(
       userid text)
@@ -38,13 +40,15 @@ exports.up = function(knex) {
 
       ALTER FUNCTION fs_last_user_activity(text)
         OWNER TO ${process.env.POSTGRES_USER};
-    `).catch(function(error) {
-        console.error(error);
-      });
-  };
-  
-  exports.down = function(knex) {
-    return knex.raw(`
+    `,
+    )
+    .catch(function (error) {
+      console.error(error);
+    });
+};
+
+exports.down = function (knex) {
+  return knex.raw(`
       DROP FUNCTION IF EXISTS fs_last_user_activity(text);
       CREATE OR REPLACE FUNCTION fs_last_user_activity(
         userid text
@@ -92,5 +96,4 @@ exports.up = function(knex) {
       ALTER FUNCTION fs_last_user_activity(text)
         OWNER TO ${process.env.POSTGRES_USER};
     `);
-  };
-  
+};

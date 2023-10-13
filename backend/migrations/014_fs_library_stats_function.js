@@ -1,5 +1,7 @@
-exports.up = async function(knex) {
-    await knex.raw(`
+exports.up = async function (knex) {
+  await knex
+    .raw(
+      `
       CREATE OR REPLACE FUNCTION fs_library_stats(
         hours integer,
         libraryid text)
@@ -29,14 +31,15 @@ exports.up = async function(knex) {
   
       ALTER FUNCTION fs_library_stats(integer, text)
           OWNER TO ${process.env.POSTGRES_USER};
-    `).catch(function(error) {
-        console.error(error);
-      });
-  };
-  
-  exports.down = async function(knex) {
-    await knex.raw(`
+    `,
+    )
+    .catch(function (error) {
+      console.error(error);
+    });
+};
+
+exports.down = async function (knex) {
+  await knex.raw(`
       DROP FUNCTION IF EXISTS fs_library_stats(integer, text);
     `);
-  };
-  
+};

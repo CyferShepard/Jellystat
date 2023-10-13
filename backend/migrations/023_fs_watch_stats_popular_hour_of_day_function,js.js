@@ -1,5 +1,7 @@
-exports.up =async function(knex) {
-    return knex.raw(`
+exports.up = async function (knex) {
+  return knex
+    .raw(
+      `
     CREATE OR REPLACE FUNCTION fs_watch_stats_popular_hour_of_day(
       days integer
     ) RETURNS TABLE("Hour" integer, "Count" integer, "Library" text)
@@ -43,12 +45,15 @@ exports.up =async function(knex) {
     $BODY$;
     ALTER FUNCTION fs_watch_stats_popular_hour_of_day(integer)
     OWNER TO ${process.env.POSTGRES_USER};
-    `).catch(function(error) {
-        console.error(error);
-      });
-  };
-  
-  exports.down = function(knex) {
-    return knex.raw('DROP FUNCTION IF EXISTS fs_watch_stats_popular_hour_of_day(integer)');
-  };
-  
+    `,
+    )
+    .catch(function (error) {
+      console.error(error);
+    });
+};
+
+exports.down = function (knex) {
+  return knex.raw(
+    "DROP FUNCTION IF EXISTS fs_watch_stats_popular_hour_of_day(integer)",
+  );
+};

@@ -7,7 +7,6 @@ import Loading from "./components/general/loading";
 import LibraryCard from "./components/library/library-card";
 import ErrorBoundary from "./components/general/ErrorBoundary";
 
-
 function Libraries() {
   const [data, setData] = useState();
   const [metadata, setMetaData] = useState();
@@ -26,8 +25,7 @@ function Libraries() {
     };
 
     const fetchLibraries = () => {
-      if(config)
-      {
+      if (config) {
         const url = `/stats/getLibraryCardStats`;
         axios
           .get(url, {
@@ -43,9 +41,9 @@ function Libraries() {
             console.log(error);
           });
 
-          const metadataurl = `/stats/getLibraryMetadata`;
+        const metadataurl = `/stats/getLibraryMetadata`;
 
-          axios
+        axios
           .get(metadataurl, {
             headers: {
               Authorization: `Bearer ${config.token}`,
@@ -61,7 +59,6 @@ function Libraries() {
       }
     };
 
-
     if (!config) {
       fetchConfig();
     }
@@ -69,7 +66,7 @@ function Libraries() {
     fetchLibraries();
     const intervalId = setInterval(fetchLibraries, 60000 * 60);
     return () => clearInterval(intervalId);
-  }, [ config]);
+  }, [config]);
 
   if (!data || !metadata) {
     return <Loading />;
@@ -80,15 +77,19 @@ function Libraries() {
       <h1 className="py-4">Libraries</h1>
 
       <div xs={1} md={2} lg={4} className="g-0 libraries-container">
-      {data &&
-          data.sort((a,b) => a.Name-b.Name).map((item) => (
-                <ErrorBoundary key={item.Id} >
-                  <LibraryCard data={item} metadata={metadata.find(data => data.Id === item.Id)} base_url={config.hostUrl}/>
-                </ErrorBoundary>
-
+        {data &&
+          data
+            .sort((a, b) => a.Name - b.Name)
+            .map((item) => (
+              <ErrorBoundary key={item.Id}>
+                <LibraryCard
+                  data={item}
+                  metadata={metadata.find((data) => data.Id === item.Id)}
+                  base_url={config.hostUrl}
+                />
+              </ErrorBoundary>
             ))}
       </div>
-      
     </div>
   );
 }

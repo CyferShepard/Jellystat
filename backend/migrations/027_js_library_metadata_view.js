@@ -1,5 +1,7 @@
-exports.up = async function(knex) {
-    await knex.raw(`
+exports.up = async function (knex) {
+  await knex
+    .raw(
+      `
       CREATE OR REPLACE VIEW public.js_library_metadata AS
       select 
       l."Id",
@@ -14,12 +16,13 @@ exports.up = async function(knex) {
       left join jf_item_info ii
       on (ii."Id"=i."Id" or ii."Id"=e."EpisodeId")
       group by l."Id",l."Name"
-    `).catch(function(error) {
-        console.error(error);
-      });
-  };
-  
-  exports.down = async function(knex) {
-    await knex.raw(`DROP VIEW js_library_metadata;`);
-  };
-  
+    `,
+    )
+    .catch(function (error) {
+      console.error(error);
+    });
+};
+
+exports.down = async function (knex) {
+  await knex.raw(`DROP VIEW js_library_metadata;`);
+};

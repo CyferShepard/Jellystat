@@ -1,8 +1,5 @@
 import React, { useState } from "react";
 
-
-
-
 import MVLibraries from "./statCards/mv_libraries";
 import MVMovies from "./statCards/mv_movies";
 import MVSeries from "./statCards/mv_series";
@@ -48,22 +45,18 @@ function HomeStatisticCards() {
           </div>
           <div className="trailer">Days</div>
         </div>
-
-        
       </div>
       <div className="grid-stat-cards">
         <MVMovies days={days} />
         <MPMovies days={days} />
         <MVSeries days={days} />
         <MPSeries days={days} />
-        <MVMusic days={days}/>
-        <MPMusic days={days}/>
+        <MVMusic days={days} />
+        <MPMusic days={days} />
         <MVLibraries days={days} />
         <MostUsedClient days={days} />
         <MostActiveUsers days={days} />
-
-
-    </div>
+      </div>
     </div>
   );
 }

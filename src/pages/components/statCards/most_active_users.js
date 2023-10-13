@@ -3,15 +3,13 @@ import axios from "axios";
 import Config from "../../../lib/config";
 import ItemStatComponent from "./ItemStatComponent";
 
-
 import AccountCircleFillIcon from "remixicon-react/AccountCircleFillIcon";
 
 function MostActiveUsers(props) {
   const [data, setData] = useState();
-  const [days, setDays] = useState(30); 
+  const [days, setDays] = useState(30);
   const [config, setConfig] = useState(null);
-  const [loaded, setLoaded]= useState(true);
-
+  const [loaded, setLoaded] = useState(true);
 
   useEffect(() => {
     const fetchConfig = async () => {
@@ -30,12 +28,16 @@ function MostActiveUsers(props) {
         const url = `/stats/getMostActiveUsers`;
 
         axios
-        .post(url, {days:props.days}, {
-          headers: {
-            Authorization: `Bearer ${config.token}`,
-            "Content-Type": "application/json",
-          },
-        })
+          .post(
+            url,
+            { days: props.days },
+            {
+              headers: {
+                Authorization: `Bearer ${config.token}`,
+                "Content-Type": "application/json",
+              },
+            },
+          )
           .then((data) => {
             setData(data.data);
           })
@@ -44,7 +46,6 @@ function MostActiveUsers(props) {
           });
       }
     };
- 
 
     if (!config) {
       fetchConfig();
@@ -59,29 +60,33 @@ function MostActiveUsers(props) {
       fetchLibraries();
     }
 
-
     const intervalId = setInterval(fetchLibraries, 60000 * 5);
     return () => clearInterval(intervalId);
-  }, [data, config, days,props.days]);
-
+  }, [data, config, days, props.days]);
 
   if (!data || data.length === 0) {
-    return  <></>;
+    return <></>;
   }
 
   const UserImage = () => {
     return (
-      <img src={`Proxy/Users/Images/Primary?id=${data[0].UserId}&fillWidth=100&quality=50`} 
-      width="100%" 
-      style={{borderRadius:'50%'}}
-      alt=""
-      onError={()=>setLoaded(false)}
+      <img
+        src={`Proxy/Users/Images/Primary?id=${data[0].UserId}&fillWidth=100&quality=50`}
+        width="100%"
+        style={{ borderRadius: "50%" }}
+        alt=""
+        onError={() => setLoaded(false)}
       />
     );
   };
 
   return (
-    <ItemStatComponent icon={loaded ? <UserImage/> : <AccountCircleFillIcon size="100%" />}  data={data} heading={"MOST ACTIVE USERS"} units={"Plays"}/>
+    <ItemStatComponent
+      icon={loaded ? <UserImage /> : <AccountCircleFillIcon size="100%" />}
+      data={data}
+      heading={"MOST ACTIVE USERS"}
+      units={"Plays"}
+    />
   );
 }
 

@@ -1,5 +1,7 @@
-exports.up =async function(knex) {
-    return knex.raw(`
+exports.up = async function (knex) {
+  return knex
+    .raw(
+      `
       CREATE OR REPLACE FUNCTION fs_watch_stats_popular_days_of_week(
         days integer
       )
@@ -57,12 +59,15 @@ exports.up =async function(knex) {
       $BODY$;
       ALTER FUNCTION fs_watch_stats_popular_days_of_week(integer)
       OWNER TO ${process.env.POSTGRES_USER};
-    `).catch(function(error) {
-        console.error(error);
-      });
-  };
-  
-  exports.down = function(knex) {
-    return knex.raw('DROP FUNCTION IF EXISTS fs_watch_stats_popular_days_of_week(integer)');
-  };
-  
+    `,
+    )
+    .catch(function (error) {
+      console.error(error);
+    });
+};
+
+exports.down = function (knex) {
+  return knex.raw(
+    "DROP FUNCTION IF EXISTS fs_watch_stats_popular_days_of_week(integer)",
+  );
+};

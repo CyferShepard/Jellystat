@@ -1,5 +1,7 @@
-exports.up = function(knex) {
-    return knex.raw(`
+exports.up = function (knex) {
+  return knex
+    .raw(
+      `
       CREATE OR REPLACE VIEW jf_library_count_view
        AS
        SELECT l."Id",
@@ -14,14 +16,15 @@ exports.up = function(knex) {
            LEFT JOIN jf_library_episodes e ON e."SeasonId" = s."Id"
         GROUP BY l."Id", l."Name"
         ORDER BY (count(DISTINCT i."Id")) DESC;
-    `).catch(function(error) {
-        console.error(error);
-      });
-  };
-  
-  exports.down = function(knex) {
-    return knex.raw(`
+    `,
+    )
+    .catch(function (error) {
+      console.error(error);
+    });
+};
+
+exports.down = function (knex) {
+  return knex.raw(`
       DROP VIEW jf_library_count_view;
     `);
-  };
-  
+};

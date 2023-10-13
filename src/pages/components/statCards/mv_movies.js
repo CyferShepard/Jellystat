@@ -3,17 +3,13 @@ import axios from "axios";
 
 import Config from "../../../lib/config";
 
-
 import ItemStatComponent from "./ItemStatComponent";
 
-
 function MVMusic(props) {
-
   const [data, setData] = useState();
   const [days, setDays] = useState(30);
 
   const [config, setConfig] = useState(null);
-
 
   useEffect(() => {
     const fetchConfig = async () => {
@@ -32,12 +28,16 @@ function MVMusic(props) {
         const url = `/stats/getMostViewedByType`;
 
         axios
-        .post(url, {days:props.days, type:'Movie'}, {
-          headers: {
-            Authorization: `Bearer ${config.token}`,
-            "Content-Type": "application/json",
-          },
-        })
+          .post(
+            url,
+            { days: props.days, type: "Movie" },
+            {
+              headers: {
+                Authorization: `Bearer ${config.token}`,
+                "Content-Type": "application/json",
+              },
+            },
+          )
           .then((data) => {
             setData(data.data);
           })
@@ -46,7 +46,6 @@ function MVMusic(props) {
           });
       }
     };
-
 
     if (!config) {
       fetchConfig();
@@ -60,20 +59,21 @@ function MVMusic(props) {
       fetchLibraries();
     }
 
-
     const intervalId = setInterval(fetchLibraries, 60000 * 5);
     return () => clearInterval(intervalId);
-  }, [data, config, days,props.days]);
+  }, [data, config, days, props.days]);
 
   if (!data || data.length === 0) {
-    return  <></>;
+    return <></>;
   }
 
-
-
-
   return (
-    <ItemStatComponent base_url={config.hostUrl} data={data} heading={"MOST VIEWED MOVIES"} units={"Plays"}/>
+    <ItemStatComponent
+      base_url={config.hostUrl}
+      data={data}
+      heading={"MOST VIEWED MOVIES"}
+      units={"Plays"}
+    />
   );
 }
 

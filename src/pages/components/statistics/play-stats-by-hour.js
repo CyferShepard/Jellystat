@@ -22,7 +22,7 @@ function PlayStatsByHour(props) {
               Authorization: `Bearer ${token}`,
               "Content-Type": "application/json",
             },
-          }
+          },
         )
         .then((data) => {
           setStats(data.data.stats);
@@ -59,12 +59,11 @@ function PlayStatsByHour(props) {
     );
   }
 
-
   return (
     <div className="statistics-widget">
       <h2 className="text-start my-2">Play Count By Hour - Last {days} Days</h2>
       <div className="graph small">
-      <Chart libraries={libraries} stats={stats} />
+        <Chart libraries={libraries} stats={stats} />
       </div>
     </div>
   );

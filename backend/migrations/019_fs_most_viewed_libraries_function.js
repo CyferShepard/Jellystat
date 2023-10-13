@@ -1,5 +1,7 @@
-exports.up = function(knex) {
-    return knex.raw(`
+exports.up = function (knex) {
+  return knex
+    .raw(
+      `
       CREATE OR REPLACE FUNCTION fs_most_viewed_libraries(
         days integer
       ) RETURNS TABLE(
@@ -52,14 +54,15 @@ exports.up = function(knex) {
   
       ALTER FUNCTION fs_most_viewed_libraries(integer)
         OWNER TO ${process.env.POSTGRES_USER};
-    `).catch(function(error) {
-        console.error(error);
-      });
-  };
-  
-  exports.down = function(knex) {
-    return knex.raw(`
+    `,
+    )
+    .catch(function (error) {
+      console.error(error);
+    });
+};
+
+exports.down = function (knex) {
+  return knex.raw(`
       DROP FUNCTION IF EXISTS fs_most_viewed_libraries(integer);
     `);
-  };
-  
+};

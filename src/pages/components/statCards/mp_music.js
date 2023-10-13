@@ -5,11 +5,9 @@ import Config from "../../../lib/config";
 
 import ItemStatComponent from "./ItemStatComponent";
 
-
-
 function MPMusic(props) {
   const [data, setData] = useState();
-  const [days, setDays] = useState(30); 
+  const [days, setDays] = useState(30);
   const [config, setConfig] = useState(null);
 
   useEffect(() => {
@@ -23,18 +21,22 @@ function MPMusic(props) {
         }
       }
     };
-  
+
     const fetchLibraries = () => {
       if (config) {
         const url = `/stats/getMostPopularByType`;
-       
+
         axios
-          .post(url, { days: props.days, type:'Audio' }, {
-            headers: {
-              Authorization: `Bearer ${config.token}`,
-              "Content-Type": "application/json",
+          .post(
+            url,
+            { days: props.days, type: "Audio" },
+            {
+              headers: {
+                Authorization: `Bearer ${config.token}`,
+                "Content-Type": "application/json",
+              },
             },
-          })
+          )
           .then((data) => {
             setData(data.data);
           })
@@ -43,11 +45,11 @@ function MPMusic(props) {
           });
       }
     };
-  
+
     if (!config) {
       fetchConfig();
     }
-  
+
     if (!data) {
       fetchLibraries();
     }
@@ -56,20 +58,22 @@ function MPMusic(props) {
       setDays(props.days);
       fetchLibraries();
     }
-  
+
     const intervalId = setInterval(fetchLibraries, 60000 * 5);
     return () => clearInterval(intervalId);
-  }, [data, config, days,props.days]);
-  
+  }, [data, config, days, props.days]);
+
   if (!data || data.length === 0) {
-    return  <></>;
+    return <></>;
   }
 
-
-
-
   return (
-    <ItemStatComponent  base_url={config.hostUrl} data={data} heading={"MOST POPULAR MUSIC"} units={"Users"}/>
+    <ItemStatComponent
+      base_url={config.hostUrl}
+      data={data}
+      heading={"MOST POPULAR MUSIC"}
+      units={"Users"}
+    />
   );
 }
 

@@ -20,8 +20,6 @@
   overflow-x: hidden;
 }
 
-
-
 .console-container::-webkit-scrollbar {
   width: 10px; /* set scrollbar width */
 }

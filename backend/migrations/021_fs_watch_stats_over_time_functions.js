@@ -1,5 +1,7 @@
 exports.up = async function (knex) {
-    await knex.raw(`
+  await knex
+    .raw(
+      `
       CREATE OR REPLACE FUNCTION fs_watch_stats_over_time(
         days integer
       )
@@ -49,14 +51,15 @@ exports.up = async function (knex) {
   
       ALTER FUNCTION fs_watch_stats_over_time(integer)
         OWNER TO ${process.env.POSTGRES_USER};
-    `).catch(function(error) {
-        console.error(error);
-      });
-  };
-  
-  exports.down = async function (knex) {
-    await knex.raw(`
+    `,
+    )
+    .catch(function (error) {
+      console.error(error);
+    });
+};
+
+exports.down = async function (knex) {
+  await knex.raw(`
       DROP FUNCTION IF EXISTS fs_watch_stats_over_time(integer);
     `);
-  };
-  
+};

@@ -1,92 +1,90 @@
-import React, { useState,useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import axios from "axios";
-import {Form, Row, Col,ButtonGroup, Button } from 'react-bootstrap';
+import { Form, Row, Col, ButtonGroup, Button } from "react-bootstrap";
 
-import Table from '@mui/material/Table';
-import TableBody from '@mui/material/TableBody';
-import TableCell from '@mui/material/TableCell';
-import TableContainer from '@mui/material/TableContainer';
-import TableHead from '@mui/material/TableHead';
-import TableRow from '@mui/material/TableRow';
+import Table from "@mui/material/Table";
+import TableBody from "@mui/material/TableBody";
+import TableCell from "@mui/material/TableCell";
+import TableContainer from "@mui/material/TableContainer";
+import TableHead from "@mui/material/TableHead";
+import TableRow from "@mui/material/TableRow";
 
-
-
-import  Alert  from "react-bootstrap/Alert";
-
-
+import Alert from "react-bootstrap/Alert";
 
 import "../../css/settings/backups.css";
 
-const token = localStorage.getItem('token');
-
+const token = localStorage.getItem("token");
 
 function CustomRow(key) {
   const { data } = key;
 
-  
-
   async function deleteKey(keyvalue) {
-    const url=`/api/keys`;
+    const url = `/api/keys`;
     axios
-    .delete(url, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-        "Content-Type": "application/json",
-      },
-      data: {
-        key: keyvalue,
-      },
-    })
-    .then((response) => {
-      const alert={visible:true,title:'Success',type:'success',message:response.data};
-      key.handleRowActionMessage(alert);
-    })
-    .catch((error) => {
-      const alert={visible:true,title:'Error',type:'danger',message:error.response.data};
-      key.handleRowActionMessage(alert);
-    });
-
-
+      .delete(url, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+        data: {
+          key: keyvalue,
+        },
+      })
+      .then((response) => {
+        const alert = {
+          visible: true,
+          title: "Success",
+          type: "success",
+          message: response.data,
+        };
+        key.handleRowActionMessage(alert);
+      })
+      .catch((error) => {
+        const alert = {
+          visible: true,
+          title: "Error",
+          type: "danger",
+          message: error.response.data,
+        };
+        key.handleRowActionMessage(alert);
+      });
   }
-
-
 
   return (
     <React.Fragment>
-      <TableRow sx={{ '& > *': { borderBottom: 'unset' } }}>
+      <TableRow sx={{ "& > *": { borderBottom: "unset" } }}>
         <TableCell>{data.name}</TableCell>
         <TableCell>{data.key}</TableCell>
-  
+
         <TableCell className="">
           <div className="d-flex justify-content-center">
-          <Button variant="primary" onClick={()=>deleteKey(data.key)}>Delete</Button>
-        </div>
-
+            <Button variant="primary" onClick={() => deleteKey(data.key)}>
+              Delete
+            </Button>
+          </div>
         </TableCell>
-
       </TableRow>
     </React.Fragment>
   );
 }
 
-
 export default function ApiKeys() {
-    const [keys, setKeys] = useState([]);
-    const [showAlert, setshowAlert] = useState({visible:false,type:'danger',title:'Error',message:''});
-    const [rowsPerPage] = React.useState(10);
-    const [page, setPage] = React.useState(0);
-    const [formValues, setFormValues] = useState({});
+  const [keys, setKeys] = useState([]);
+  const [showAlert, setshowAlert] = useState({
+    visible: false,
+    type: "danger",
+    title: "Error",
+    message: "",
+  });
+  const [rowsPerPage] = React.useState(10);
+  const [page, setPage] = React.useState(0);
+  const [formValues, setFormValues] = useState({});
 
+  function handleCloseAlert() {
+    setshowAlert({ visible: false });
+  }
 
-
-
-    
-function handleCloseAlert() {
-  setshowAlert({visible:false});
-}
-
-
-useEffect(() => {
+  useEffect(() => {
     const fetchData = async () => {
       try {
         const apiKeyData = await axios.get(`/api/keys`, {
@@ -107,121 +105,161 @@ useEffect(() => {
     return () => clearInterval(intervalId);
   }, []);
 
+  const handleNextPageClick = () => {
+    setPage((prevPage) => prevPage + 1);
+  };
 
-const handleNextPageClick = () => {
-  setPage((prevPage) => prevPage + 1);
-};
+  const handlePreviousPageClick = () => {
+    setPage((prevPage) => prevPage - 1);
+  };
 
-const handlePreviousPageClick = () => {
-  setPage((prevPage) => prevPage - 1);
-};
-
-const handleRowActionMessage= (alertState) => {
-  console.log(alertState);
-  setshowAlert({visible:alertState.visible,title:alertState.title,type:alertState.type,message:alertState.message});
-};
-
-function handleFormChange(event) {
-  setFormValues({ ...formValues, [event.target.name]: event.target.value });
-}
-
-async function handleFormSubmit(event) {
-  event.preventDefault();
-  axios
-    .post("/api/keys/", formValues, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-        "Content-Type": "application/json",
-      },
-    })
-    .then((response) => {
-      console.log("API key added successfully:", response.data);
-    })
-    .catch((error) => {
-      console.log("Error adding key:", error);
+  const handleRowActionMessage = (alertState) => {
+    console.log(alertState);
+    setshowAlert({
+      visible: alertState.visible,
+      title: alertState.title,
+      type: alertState.type,
+      message: alertState.message,
     });
-}
+  };
 
-      
+  function handleFormChange(event) {
+    setFormValues({ ...formValues, [event.target.name]: event.target.value });
+  }
 
-    
-      return (
-        <div>
-          <h1 className="my-2">API Keys</h1>
-            {showAlert && showAlert.visible && (
-                <Alert variant={showAlert.type} onClose={handleCloseAlert} dismissible>
-                  <Alert.Heading>{showAlert.title}</Alert.Heading>
-                  <p>
-                  {showAlert.message}
-                  </p>
-                </Alert>
+  async function handleFormSubmit(event) {
+    event.preventDefault();
+    axios
+      .post("/api/keys/", formValues, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+      })
+      .then((response) => {
+        console.log("API key added successfully:", response.data);
+      })
+      .catch((error) => {
+        console.log("Error adding key:", error);
+      });
+  }
+
+  return (
+    <div>
+      <h1 className="my-2">API Keys</h1>
+      {showAlert && showAlert.visible && (
+        <Alert variant={showAlert.type} onClose={handleCloseAlert} dismissible>
+          <Alert.Heading>{showAlert.title}</Alert.Heading>
+          <p>{showAlert.message}</p>
+        </Alert>
+      )}
+
+      <Form onSubmit={handleFormSubmit} className="settings-form">
+        <Form.Group as={Row} className="mb-3">
+          <Form.Label column>KEY NAME</Form.Label>
+          <Col sm="6" md="8">
+            <Form.Control
+              className="w-100"
+              id="name"
+              name="name"
+              value={formValues.name || ""}
+              onChange={handleFormChange}
+              placeholder="API Name"
+            />
+          </Col>
+          <Col sm="4" md="2" className="mt-2 mt-sm-0">
+            <Button variant="outline-primary" type="submit" className="w-100">
+              {" "}
+              Add Key{" "}
+            </Button>
+          </Col>
+        </Form.Group>
+      </Form>
+
+      <TableContainer className="rounded-2">
+        <Table aria-label="collapsible table">
+          <TableHead>
+            <TableRow>
+              <TableCell>Name</TableCell>
+              <TableCell>Key</TableCell>
+              <TableCell></TableCell>
+            </TableRow>
+          </TableHead>
+          <TableBody>
+            {keys &&
+              keys
+                .sort((a, b) => a.name - b.name)
+                .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
+                .map((apikey, index) => (
+                  <CustomRow
+                    key={index}
+                    data={apikey}
+                    handleRowActionMessage={handleRowActionMessage}
+                  />
+                ))}
+            {keys.length === 0 ? (
+              <tr>
+                <td
+                  colSpan="3"
+                  style={{
+                    textAlign: "center",
+                    fontStyle: "italic",
+                    color: "grey",
+                  }}
+                  className="py-2"
+                >
+                  No Keys Found
+                </td>
+              </tr>
+            ) : (
+              ""
             )}
+          </TableBody>
+        </Table>
+      </TableContainer>
 
+      <div className="d-flex justify-content-end my-2">
+        <ButtonGroup className="pagination-buttons">
+          <Button
+            className="page-btn"
+            onClick={() => setPage(0)}
+            disabled={page === 0}
+          >
+            First
+          </Button>
 
-        <Form onSubmit={handleFormSubmit} className="settings-form">
-          
-          <Form.Group as={Row} className="mb-3" >
-            <Form.Label column>
-              KEY NAME
-            </Form.Label>
-            <Col sm="6" md="8">
-              <Form.Control className="w-100"  id="name"  name="name" value={formValues.name || ""} onChange={handleFormChange}  placeholder="API Name" />
-            </Col>
-            <Col sm="4" md="2" className="mt-2 mt-sm-0">
-            <Button variant="outline-primary" type="submit" className="w-100"> Add Key </Button>
-            </Col>
+          <Button
+            className="page-btn"
+            onClick={handlePreviousPageClick}
+            disabled={page === 0}
+          >
+            Previous
+          </Button>
 
-          </Form.Group>
+          <div className="page-number d-flex align-items-center justify-content-center">{`${
+            page * rowsPerPage + 1
+          }-${Math.min(
+            page * rowsPerPage + 1 + (rowsPerPage - 1),
+            keys.length,
+          )} of ${keys.length}`}</div>
 
+          <Button
+            className="page-btn"
+            onClick={handleNextPageClick}
+            disabled={page >= Math.ceil(keys.length / rowsPerPage) - 1}
+          >
+            Next
+          </Button>
 
-        </Form>
-
-            <TableContainer className='rounded-2'>
-                    <Table aria-label="collapsible table" >
-                      <TableHead>
-                        <TableRow>
-                          <TableCell>Name</TableCell>
-                          <TableCell>Key</TableCell>
-                          <TableCell></TableCell>
-                        </TableRow>
-                      </TableHead>
-                      <TableBody>
-                        {keys && keys.sort((a, b) => a.name-b.name).slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
-                          .map((apikey,index) => (
-                            <CustomRow key={index} data={apikey} handleRowActionMessage={handleRowActionMessage}/>
-                          ))}
-                          {keys.length===0 ? <tr><td colSpan="3" style={{ textAlign: "center", fontStyle: "italic" ,color:"grey"}}  className='py-2'>No Keys Found</td></tr> :''}
-
-                      </TableBody>
-                    </Table>
-            </TableContainer>
-
-            <div className='d-flex justify-content-end my-2'>
-              
-
-
-                <ButtonGroup className="pagination-buttons">
-                    <Button className="page-btn" onClick={()=>setPage(0)} disabled={page === 0}>
-                      First
-                    </Button>
-
-                    <Button className="page-btn" onClick={handlePreviousPageClick}  disabled={page === 0}>
-                      Previous
-                    </Button>
-
-                    <div className="page-number d-flex align-items-center justify-content-center">{`${page *rowsPerPage + 1}-${Math.min((page * rowsPerPage+ 1 ) +  (rowsPerPage - 1),keys.length)} of ${keys.length}`}</div>
-
-                    <Button className="page-btn" onClick={handleNextPageClick}  disabled={page >= Math.ceil(keys.length / rowsPerPage) - 1}>
-                      Next
-                    </Button>
-
-                    <Button className="page-btn" onClick={()=>setPage(Math.ceil(keys.length / rowsPerPage) - 1)} disabled={page >= Math.ceil(keys.length / rowsPerPage) - 1}>
-                      Last
-                    </Button>
-                </ButtonGroup>
-            </div>       
-        </div>
-      );
-
-
+          <Button
+            className="page-btn"
+            onClick={() => setPage(Math.ceil(keys.length / rowsPerPage) - 1)}
+            disabled={page >= Math.ceil(keys.length / rowsPerPage) - 1}
+          >
+            Last
+          </Button>
+        </ButtonGroup>
+      </div>
+    </div>
+  );
 }

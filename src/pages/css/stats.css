@@ -1,65 +1,52 @@
-@import './variables.module.css';
-.watch-stats
-{
+@import "./variables.module.css";
+.watch-stats {
   margin-top: 10px;
 }
 
-.graph
-{
-
-    height: 700px;
-    color:black !important;
-    background-color: var(--secondary-background-color);
-    padding:10px;
-    border-radius:8px;
+.graph {
+  height: 700px;
+  color: black !important;
+  background-color: var(--secondary-background-color);
+  padding: 10px;
+  border-radius: 8px;
 }
 
-
-
-.small
-{
-    height: 500px;
-
+.small {
+  height: 500px;
 }
 
-.statistics-graphs
-{
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-    grid-gap: 20px;
-    margin-bottom: 20px;
-
-
+.statistics-graphs {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  grid-gap: 20px;
+  margin-bottom: 20px;
 }
 
-.main-widget
-{
-    flex: 1;
+.main-widget {
+  flex: 1;
 }
 
-.main-widget h1
-{
+.main-widget h1 {
   margin-bottom: 10px !important;
 }
 
-
-.statistics-widget h1{
+.statistics-widget h1 {
   margin-bottom: 10px !important;
 }
 
 .chart-canvas {
-    width: 100%;
-    height: 400px;
-  }
+  width: 100%;
+  height: 400px;
+}
 
-  @media (min-width: 768px) {
-    .chart-canvas {
-      height: 500px;
-    }
+@media (min-width: 768px) {
+  .chart-canvas {
+    height: 500px;
   }
+}
 
-  @media (min-width: 992px) {
-    .chart-canvas {
-      height: 600px;
-    }
+@media (min-width: 992px) {
+  .chart-canvas {
+    height: 600px;
   }
+}

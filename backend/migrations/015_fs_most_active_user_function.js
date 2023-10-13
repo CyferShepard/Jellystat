@@ -1,5 +1,7 @@
-exports.up = function(knex) {
-    return knex.raw(`
+exports.up = function (knex) {
+  return knex
+    .raw(
+      `
       CREATE OR REPLACE FUNCTION fs_most_active_user(
         days integer)
         RETURNS TABLE("Plays" bigint, "UserId" text, "Name" text) 
@@ -21,12 +23,13 @@ exports.up = function(knex) {
       $BODY$;
       ALTER FUNCTION fs_most_active_user(integer)
       OWNER TO ${process.env.POSTGRES_USER};
-    `).catch(function(error) {
+    `,
+    )
+    .catch(function (error) {
       console.error(error);
     });
-  };
-  
-  exports.down = function(knex) {
-    return knex.raw('DROP FUNCTION IF EXISTS fs_most_active_user(integer)');
-  };
-  
+};
+
+exports.down = function (knex) {
+  return knex.raw("DROP FUNCTION IF EXISTS fs_most_active_user(integer)");
+};

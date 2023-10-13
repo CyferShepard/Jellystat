@@ -1,5 +1,7 @@
-exports.up = async function(knex) {
-    await knex.raw(`
+exports.up = async function (knex) {
+  await knex
+    .raw(
+      `
       CREATE OR REPLACE FUNCTION fs_most_played_items(
         days integer,
         itemtype text
@@ -48,12 +50,13 @@ exports.up = async function(knex) {
   
       ALTER FUNCTION fs_most_played_items(integer, text)
         OWNER TO ${process.env.POSTGRES_USER};
-    `).catch(function(error) {
-        console.error(error);
-      });
-  };
-  
-  exports.down = async function(knex) {
-    await knex.raw('DROP FUNCTION IF EXISTS fs_most_played_items(integer, text)');
-  };
-  
+    `,
+    )
+    .catch(function (error) {
+      console.error(error);
+    });
+};
+
+exports.down = async function (knex) {
+  await knex.raw("DROP FUNCTION IF EXISTS fs_most_played_items(integer, text)");
+};

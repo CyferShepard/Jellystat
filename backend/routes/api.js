@@ -3,7 +3,7 @@ const express = require("express");
 const axios = require("axios");
 const db = require("../db");
 const https = require("https");
-const { randomUUID }  = require('crypto');
+const { randomUUID } = require("crypto");
 
 const agent = new https.Agent({
   rejectUnauthorized:
@@ -22,12 +22,11 @@ router.get("/test", async (req, res) => {
   res.send("Backend Responded Succesfully");
 });
 
-
 //Settings and config endpoints
 router.get("/getconfig", async (req, res) => {
   try {
     const { rows } = await db.query(
-      'SELECT "JF_HOST","APP_USER","REQUIRE_LOGIN", settings FROM app_config where "ID"=1'
+      'SELECT "JF_HOST","APP_USER","REQUIRE_LOGIN", settings FROM app_config where "ID"=1',
     );
     res.send(rows);
   } catch (error) {
@@ -40,7 +39,7 @@ router.post("/setconfig", async (req, res) => {
     const { JF_HOST, JF_API_KEY } = req.body;
 
     const { rows: getConfig } = await db.query(
-      'SELECT * FROM app_config where "ID"=1'
+      'SELECT * FROM app_config where "ID"=1',
     );
 
     let query =
@@ -62,38 +61,33 @@ router.post("/setPreferredAdmin", async (req, res) => {
   try {
     const { userid, username } = req.body;
     const { rows: config } = await db.query(
-      'SELECT * FROM app_config where "ID"=1'
+      'SELECT * FROM app_config where "ID"=1',
     );
-  
-    if (
-      config[0].JF_HOST === null ||
-      config[0].JF_API_KEY === null 
-    ) {
+
+    if (config[0].JF_HOST === null || config[0].JF_API_KEY === null) {
       res.status(404);
       res.send({ error: "Config Details Not Found" });
       return;
     }
-  
+
     const settingsjson = await db
       .query('SELECT settings FROM app_config where "ID"=1')
       .then((res) => res.rows);
-      
+
     if (settingsjson.length > 0) {
       const settings = settingsjson[0].settings || {};
 
-      settings.preferred_admin = {userid:userid,username:username};
-  
+      settings.preferred_admin = { userid: userid, username: username };
+
       let query = 'UPDATE app_config SET settings=$1 where "ID"=1';
-  
+
       const { rows } = await db.query(query, [settings]);
-  
+
       res.send("Settings updated succesfully");
-    }else
-    {
-      res.status(404)
+    } else {
+      res.status(404);
       res.send("Settings not found");
     }
-
   } catch (error) {
     console.log(error);
   }
@@ -128,7 +122,7 @@ router.post("/updatePassword", async (req, res) => {
 
   try {
     const { rows } = await db.query(
-      `SELECT "JF_HOST","JF_API_KEY","APP_USER" FROM app_config where "ID"=1 AND "APP_PASSWORD"='${current_password}' `
+      `SELECT "JF_HOST","JF_API_KEY","APP_USER" FROM app_config where "ID"=1 AND "APP_PASSWORD"='${current_password}' `,
     );
 
     if (rows && rows.length > 0) {
@@ -137,7 +131,7 @@ router.post("/updatePassword", async (req, res) => {
         result.errorMessage = "New Password cannot be the same as Old Password";
       } else {
         await db.query(
-          `UPDATE app_config SET "APP_PASSWORD"='${new_password}' where "ID"=1 AND "APP_PASSWORD"='${current_password}' `
+          `UPDATE app_config SET "APP_PASSWORD"='${new_password}' where "ID"=1 AND "APP_PASSWORD"='${current_password}' `,
         );
       }
     } else {
@@ -154,7 +148,7 @@ router.post("/updatePassword", async (req, res) => {
 
 router.get("/TrackedLibraries", async (req, res) => {
   const { rows: config } = await db.query(
-    'SELECT * FROM app_config where "ID"=1'
+    'SELECT * FROM app_config where "ID"=1',
   );
 
   if (config[0].JF_HOST === null || config[0].JF_API_KEY === null) {
@@ -163,25 +157,23 @@ router.get("/TrackedLibraries", async (req, res) => {
   }
 
   let url = `${config[0].JF_HOST}/Library/MediaFolders`;
-  try
-  {
-
+  try {
     const response_data = await axios_instance.get(url, {
       headers: {
         "X-MediaBrowser-Token": config[0].JF_API_KEY,
       },
     });
-  
+
     const filtered_items = response_data.data.Items.filter(
-      (type) => !["boxsets", "playlists"].includes(type.CollectionType)
+      (type) => !["boxsets", "playlists"].includes(type.CollectionType),
     );
-  
+
     const excluded_libraries = await db
       .query('SELECT settings FROM app_config where "ID"=1')
       .then((res) => res.rows);
     if (excluded_libraries.length > 0) {
       const libraries = excluded_libraries[0].settings?.ExcludedLibraries || [];
-  
+
       const librariesWithTrackedStatus = filtered_items.map((items) => ({
         ...items,
         ...{ Tracked: !libraries.includes(items.Id) },
@@ -191,19 +183,17 @@ router.get("/TrackedLibraries", async (req, res) => {
       res.status(404);
       res.send({ error: "Settings Not Found" });
     }
-  }catch(error)
-  {
-      res.status(503);
-      res.send({ error: "Error: "+error });
+  } catch (error) {
+    res.status(503);
+    res.send({ error: "Error: " + error });
   }
-
 });
 
 router.post("/setExcludedLibraries", async (req, res) => {
   const { libraryID } = req.body;
 
   const { rows: config } = await db.query(
-    'SELECT * FROM app_config where "ID"=1'
+    'SELECT * FROM app_config where "ID"=1',
   );
 
   if (
@@ -219,7 +209,7 @@ router.post("/setExcludedLibraries", async (req, res) => {
   const settingsjson = await db
     .query('SELECT settings FROM app_config where "ID"=1')
     .then((res) => res.rows);
-    
+
   if (settingsjson.length > 0) {
     const settings = settingsjson[0].settings || {};
 
@@ -236,23 +226,18 @@ router.post("/setExcludedLibraries", async (req, res) => {
     const { rows } = await db.query(query, [settings]);
 
     res.send("Settings updated succesfully");
-  }else
-  {
-    res.status(404)
+  } else {
+    res.status(404);
     res.send("Settings not found");
   }
-
 });
 
-router.get("/keys", async (req,res) => {
+router.get("/keys", async (req, res) => {
   const { rows: config } = await db.query(
-    'SELECT * FROM app_config where "ID"=1'
+    'SELECT * FROM app_config where "ID"=1',
   );
 
-  if (
-    config[0]?.JF_HOST === null ||
-    config[0]?.JF_API_KEY === null
-  ) {
+  if (config[0]?.JF_HOST === null || config[0]?.JF_API_KEY === null) {
     res.status(404);
     res.send({ error: "Config Details Not Found" });
     return;
@@ -265,30 +250,27 @@ router.get("/keys", async (req,res) => {
   if (keysjson) {
     const keys = keysjson || [];
     res.send(keys);
-  }else
-  {
-    res.status(404)
+  } else {
+    res.status(404);
     res.send("Settings not found");
   }
-
 });
 
-router.delete("/keys", async (req,res) => {
-   const { key } = req.body;
-  
-  if(!key)
-  {
+router.delete("/keys", async (req, res) => {
+  const { key } = req.body;
+
+  if (!key) {
     res.status(400);
     res.send({ error: "No API key provided to remove" });
     return;
   }
 
   const { rows: config } = await db.query(
-    'SELECT * FROM app_config where "ID"=1'
+    'SELECT * FROM app_config where "ID"=1',
   );
 
   if (
-    config.length===0 ||
+    config.length === 0 ||
     config[0].JF_HOST === null ||
     config[0].JF_API_KEY === null
   ) {
@@ -301,51 +283,39 @@ router.delete("/keys", async (req,res) => {
     .query('SELECT api_keys FROM app_config where "ID"=1')
     .then((res) => res.rows[0].api_keys);
 
-    
   if (keysjson) {
     const keys = keysjson || [];
-    const keyExists = keys.some(obj => obj.key === key);
-    if(keyExists)
-    {
-      const new_keys_array=keys.filter(obj => obj.key !== key);
+    const keyExists = keys.some((obj) => obj.key === key);
+    if (keyExists) {
+      const new_keys_array = keys.filter((obj) => obj.key !== key);
       let query = 'UPDATE app_config SET api_keys=$1 where "ID"=1';
-  
+
       await db.query(query, [JSON.stringify(new_keys_array)]);
-      return res.send('Key removed: '+key);
-
-    }else
-    {
+      return res.send("Key removed: " + key);
+    } else {
       res.status(404);
-      return res.send('API key does not exist');
+      return res.send("API key does not exist");
     }
-    
-
-  }else
-  {
-    res.status(404)
+  } else {
+    res.status(404);
     return res.send("No API keys found");
   }
-
 });
 
 router.post("/keys", async (req, res) => {
   const { name } = req.body;
 
-  if(!name)
-  {
+  if (!name) {
     res.status(400);
     res.send({ error: "A Name is required to generate a key" });
     return;
   }
 
   const { rows: config } = await db.query(
-    'SELECT * FROM app_config where "ID"=1'
+    'SELECT * FROM app_config where "ID"=1',
   );
 
-  if (
-    config[0].JF_HOST === null ||
-    config[0].JF_API_KEY === null
-  ) {
+  if (config[0].JF_HOST === null || config[0].JF_API_KEY === null) {
     res.status(404);
     res.send({ error: "Config Details Not Found" });
     return;
@@ -355,15 +325,14 @@ router.post("/keys", async (req, res) => {
     .query('SELECT api_keys FROM app_config where "ID"=1')
     .then((res) => res.rows[0].api_keys);
 
-  let keys=[];
-  const uuid = randomUUID()
-  const new_key={name:name, key:uuid};
-    
+  let keys = [];
+  const uuid = randomUUID();
+  const new_key = { name: name, key: uuid };
+
   if (keysjson) {
-    keys =  keysjson || [];
+    keys = keysjson || [];
     keys.push(new_key);
-  }else
-  {
+  } else {
     keys.push(new_key);
   }
 
@@ -371,90 +340,70 @@ router.post("/keys", async (req, res) => {
 
   await db.query(query, [JSON.stringify(keys)]);
   res.send(keys);
-
 });
 
 router.get("/getTaskSettings", async (req, res) => {
-
-
-  try
-  {
+  try {
     const settingsjson = await db
-    .query('SELECT settings FROM app_config where "ID"=1')
-    .then((res) => res.rows);
+      .query('SELECT settings FROM app_config where "ID"=1')
+      .then((res) => res.rows);
 
     if (settingsjson.length > 0) {
       const settings = settingsjson[0].settings || {};
-  
+
       let tasksettings = settings.Tasks || {};
       res.send(tasksettings);
-      
-    }else {
+    } else {
       res.status(404);
       res.send({ error: "Task Settings Not Found" });
     }
-    
-    
-  }catch(error)
-  {
-      res.status(503);
-      res.send({ error: "Error: "+error });
+  } catch (error) {
+    res.status(503);
+    res.send({ error: "Error: " + error });
   }
-
 });
 
 router.post("/setTaskSettings", async (req, res) => {
-  const { taskname,Interval } = req.body;
+  const { taskname, Interval } = req.body;
 
-  try
-  {
+  try {
     const settingsjson = await db
-    .query('SELECT settings FROM app_config where "ID"=1')
-    .then((res) => res.rows);
+      .query('SELECT settings FROM app_config where "ID"=1')
+      .then((res) => res.rows);
 
     if (settingsjson.length > 0) {
       const settings = settingsjson[0].settings || {};
-      if(!settings.Tasks)
-      {
+      if (!settings.Tasks) {
         settings.Tasks = {};
       }
-  
-      let tasksettings = settings.Tasks;
-      if(!tasksettings[taskname])
-      {
-        tasksettings[taskname]={};
-      }
-      tasksettings[taskname].Interval=Interval;
 
-      settings.Tasks=tasksettings;
+      let tasksettings = settings.Tasks;
+      if (!tasksettings[taskname]) {
+        tasksettings[taskname] = {};
+      }
+      tasksettings[taskname].Interval = Interval;
+
+      settings.Tasks = tasksettings;
 
       let query = 'UPDATE app_config SET settings=$1 where "ID"=1';
 
       await db.query(query, [settings]);
       res.status(200);
       res.send(tasksettings);
-      
-    }else {
+    } else {
       res.status(404);
       res.send({ error: "Task Settings Not Found" });
     }
-    
-    
-  }catch(error)
-  {
-      res.status(503);
-      res.send({ error: "Error: "+error });
+  } catch (error) {
+    res.status(503);
+    res.send({ error: "Error: " + error });
   }
-
-
-
 });
-
 
 router.get("/dataValidator", async (req, res) => {
   try {
     const { rows: config } = await db.query(
-      'SELECT * FROM app_config where "ID"=1'
+      'SELECT * FROM app_config where "ID"=1',
     );
 
     let payload = {
@@ -493,18 +442,14 @@ router.get("/dataValidator", async (req, res) => {
     });
 
     const admins = await response.data.filter(
-      (user) => user.Policy.IsAdministrator === true
+      (user) => user.Policy.IsAdministrator === true,
     );
 
-    let userid=config[0].settings?.preferred_admin?.userid;
+    let userid = config[0].settings?.preferred_admin?.userid;
 
-    if(!userid)
-    {
+    if (!userid) {
       userid = admins[0].Id;
     }
-
-
-
 
     ////////////////////////
     const db_libraries = await db
@@ -571,16 +516,16 @@ router.get("/dataValidator", async (req, res) => {
         (items) => ({
           ...items,
           ...{ ParentId: library.Id },
-        })
+        }),
       );
       movie_data.push(
-        ...libraryItemsWithParent.filter((item) => item.Type === "Movie")
+        ...libraryItemsWithParent.filter((item) => item.Type === "Movie"),
       );
       show_data.push(
-        ...libraryItemsWithParent.filter((item) => item.Type === "Series")
+        ...libraryItemsWithParent.filter((item) => item.Type === "Series"),
       );
       music_data.push(
-        ...libraryItemsWithParent.filter((item) => item.Type === "Audio")
+        ...libraryItemsWithParent.filter((item) => item.Type === "Audio"),
       );
       raw_item_data.push(response_data_item.data);
     }
@@ -607,7 +552,7 @@ router.get("/dataValidator", async (req, res) => {
     let raw_allEpisodes = [];
 
     const { rows: shows } = await db.query(
-      `SELECT "Id"	FROM public.jf_library_items where "Type"='Series'`
+      `SELECT "Id"	FROM public.jf_library_items where "Type"='Series'`,
     );
     //loop for each show
 
@@ -651,24 +596,24 @@ router.get("/dataValidator", async (req, res) => {
 
     //missing data section
     let missing_libraries = libraries.filter(
-      (library) => !db_libraries.includes(library.Id)
+      (library) => !db_libraries.includes(library.Id),
     );
 
     let missing_movies = movie_data.filter(
-      (item) => !db_movies.includes(item.Id) && item.Type === "Movie"
+      (item) => !db_movies.includes(item.Id) && item.Type === "Movie",
     );
     let missing_shows = show_data.filter(
-      (item) => !db_shows.includes(item.Id) && item.Type === "Series"
+      (item) => !db_shows.includes(item.Id) && item.Type === "Series",
     );
     let missing_music = music_data.filter(
-      (item) => !db_music.includes(item.Id) && item.Type === "Audio"
+      (item) => !db_music.includes(item.Id) && item.Type === "Audio",
     );
 
     let missing_seasons = allSeasons.filter(
-      (season) => !db_seasons.includes(season.Id)
+      (season) => !db_seasons.includes(season.Id),
     );
     let missing_episodes = allEpisodes.filter(
-      (episode) => !db_episodes.includes(episode.Id)
+      (episode) => !db_episodes.includes(episode.Id),
     );
 
     payload.missing_api_library_data = missing_libraries;
@@ -688,12 +633,12 @@ router.get("/dataValidator", async (req, res) => {
   }
 });
 
-//DB Queries 
+//DB Queries
 router.post("/getUserDetails", async (req, res) => {
   try {
     const { userid } = req.body;
     const { rows } = await db.query(
-      `select * from jf_users where "Id"='${userid}'`
+      `select * from jf_users where "Id"='${userid}'`,
     );
     res.send(rows[0]);
   } catch (error) {
@@ -716,7 +661,7 @@ router.post("/getLibrary", async (req, res) => {
   try {
     const { libraryid } = req.body;
     const { rows } = await db.query(
-      `select * from jf_libraries where "Id"='${libraryid}'`
+      `select * from jf_libraries where "Id"='${libraryid}'`,
     );
     res.send(rows[0]);
   } catch (error) {
@@ -726,13 +671,13 @@ router.post("/getLibrary", async (req, res) => {
   }
 });
 
-
 router.post("/getLibraryItems", async (req, res) => {
   try {
     const { libraryid } = req.body;
     console.log(`ENDPOINT CALLED: /getLibraryItems: ` + libraryid);
     const { rows } = await db.query(
-      `SELECT * FROM jf_library_items where "ParentId"=$1`, [libraryid]
+      `SELECT * FROM jf_library_items where "ParentId"=$1`,
+      [libraryid],
     );
     res.send(rows);
   } catch (error) {
@@ -745,7 +690,8 @@ router.post("/getSeasons", async (req, res) => {
     const { Id } = req.body;
 
     const { rows } = await db.query(
-      `SELECT * FROM jf_library_seasons where "SeriesId"=$1`, [Id]
+      `SELECT * FROM jf_library_seasons where "SeriesId"=$1`,
+      [Id],
     );
     console.log({ Id: Id });
     res.send(rows);
@@ -760,7 +706,8 @@ router.post("/getEpisodes", async (req, res) => {
   try {
     const { Id } = req.body;
     const { rows } = await db.query(
-      `SELECT * FROM jf_library_episodes where "SeasonId"=$1`, [Id]
+      `SELECT * FROM jf_library_episodes where "SeasonId"=$1`,
+      [Id],
     );
     console.log({ Id: Id });
     res.send(rows);
@@ -808,7 +755,7 @@ router.post("/getItemDetails", async (req, res) => {
 router.get("/getHistory", async (req, res) => {
   try {
     const { rows } = await db.query(
-      `SELECT * FROM jf_playback_activity order by "ActivityDateInserted" desc`
+      `SELECT * FROM jf_playback_activity order by "ActivityDateInserted" desc`,
     );
 
     const groupedResults = {};
@@ -829,7 +776,7 @@ router.get("/getHistory", async (req, res) => {
       if (row.results && row.results.length > 0) {
         row.PlaybackDuration = row.results.reduce(
           (acc, item) => acc + parseInt(item.PlaybackDuration),
-          0
+          0,
         );
       }
     });
@@ -844,7 +791,8 @@ router.post("/getLibraryHistory", async (req, res) => {
   try {
     const { libraryid } = req.body;
     const { rows } = await db.query(
-      `select a.* from jf_playback_activity a join jf_library_items i on i."Id"=a."NowPlayingItemId"  where i."ParentId"=$1 order by "ActivityDateInserted" desc`, [libraryid]
+      `select a.* from jf_playback_activity a join jf_library_items i on i."Id"=a."NowPlayingItemId"  where i."ParentId"=$1 order by "ActivityDateInserted" desc`,
+      [libraryid],
     );
     const groupedResults = {};
     rows.forEach((row) => {
@@ -875,7 +823,8 @@ router.post("/getItemHistory", async (req, res) => {
       `select jf_playback_activity.*
       from jf_playback_activity jf_playback_activity
       where 
-      ("EpisodeId"=$1 OR "SeasonId"=$1 OR "NowPlayingItemId"=$1);`, [idemid]
+      ("EpisodeId"=$1 OR "SeasonId"=$1 OR "NowPlayingItemId"=$1);`,
+      [idemid],
     );
 
     const groupedResults = rows.map((item) => ({
@@ -898,7 +847,8 @@ router.post("/getUserHistory", async (req, res) => {
     const { rows } = await db.query(
       `select jf_playback_activity.*
       from jf_playback_activity jf_playback_activity
-      where "UserId"=$1;`, [userid]
+      where "UserId"=$1;`,
+      [userid],
     );
 
     const groupedResults = {};
@@ -921,7 +871,6 @@ router.post("/getUserHistory", async (req, res) => {
     res.send(error);
   }
 });
-
 
 //Jellyfin related functions
 
@@ -967,8 +916,5 @@ router.post("/validateSettings", async (req, res) => {
 
   res.send({ isValid: isValid, errorMessage: errorMessage });
 });
-
-
-
 
 module.exports = router;

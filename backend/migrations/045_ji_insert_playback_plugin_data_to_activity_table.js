@@ -1,5 +1,7 @@
-exports.up = function(knex) {
-    return knex.schema.raw(`
+exports.up = function (knex) {
+  return knex.schema
+    .raw(
+      `
     CREATE OR REPLACE PROCEDURE ji_insert_playback_plugin_data_to_activity_table() AS $$
     BEGIN
         insert into jf_playback_activity
@@ -46,14 +48,15 @@ exports.up = function(knex) {
           	);
               END;
               $$ LANGUAGE plpgsql;
-    `).catch(function(error) {
-        console.error(error);
-      });
-  };
-  
-  exports.down = function(knex) {
-    return knex.schema.raw(`
+    `,
+    )
+    .catch(function (error) {
+      console.error(error);
+    });
+};
+
+exports.down = function (knex) {
+  return knex.schema.raw(`
       DROP PROCEDURE ji_insert_playback_plugin_data_to_activity_table;
     `);
-  };
-  
+};

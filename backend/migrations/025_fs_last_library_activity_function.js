@@ -1,5 +1,7 @@
-exports.up = function(knex) {
-    return knex.schema.raw(`
+exports.up = function (knex) {
+  return knex.schema
+    .raw(
+      `
     DROP FUNCTION IF EXISTS fs_last_library_activity(text);
     CREATE OR REPLACE FUNCTION public.fs_last_library_activity(
       libraryid text)
@@ -39,13 +41,15 @@ exports.up = function(knex) {
           
     $BODY$;
     
-    `).catch(function(error) {
-        console.error(error);
-      });
-  };
-  
-  exports.down = function(knex) {
-    return knex.schema.raw(`
+    `,
+    )
+    .catch(function (error) {
+      console.error(error);
+    });
+};
+
+exports.down = function (knex) {
+  return knex.schema.raw(`
       DROP FUNCTION IF EXISTS fs_last_library_activity(text);
       CREATE OR REPLACE FUNCTION fs_last_library_activity(
         libraryid text)
@@ -83,5 +87,4 @@ exports.up = function(knex) {
       END;
       $BODY$;
     `);
-  };
-  
+};

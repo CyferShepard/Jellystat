@@ -1,5 +1,7 @@
-exports.up = async function(knex) {
-    await knex.raw(`
+exports.up = async function (knex) {
+  await knex
+    .raw(
+      `
       CREATE OR REPLACE FUNCTION fs_most_used_clients(
         days integer
       )
@@ -23,12 +25,13 @@ exports.up = async function(knex) {
   
       ALTER FUNCTION fs_most_used_clients(integer)
           OWNER TO ${process.env.POSTGRES_USER};
-    `).catch(function(error) {
+    `,
+    )
+    .catch(function (error) {
       console.error(error);
     });
-  };
-  
-  exports.down = async function(knex) {
-    await knex.raw(`DROP FUNCTION fs_most_used_clients(integer);`);
-  };
-  
+};
+
+exports.down = async function (knex) {
+  await knex.raw(`DROP FUNCTION fs_most_used_clients(integer);`);
+};

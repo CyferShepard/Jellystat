@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 
-
 import ItemStatComponent from "./ItemStatComponent";
 
 import TvLineIcon from "remixicon-react/TvLineIcon";
@@ -11,31 +10,32 @@ import CheckboxMultipleBlankLineIcon from "remixicon-react/CheckboxMultipleBlank
 
 function MVLibraries(props) {
   const [data, setData] = useState();
-  const [days, setDays] = useState(30); 
+  const [days, setDays] = useState(30);
 
-  const token = localStorage.getItem('token');
+  const token = localStorage.getItem("token");
 
   useEffect(() => {
-
     const fetchLibraries = () => {
-        const url = `/stats/getMostViewedLibraries`;
+      const url = `/stats/getMostViewedLibraries`;
 
-        axios
-        .post(url, {days:props.days}, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json",
+      axios
+        .post(
+          url,
+          { days: props.days },
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+              "Content-Type": "application/json",
+            },
           },
+        )
+        .then((data) => {
+          setData(data.data);
         })
-          .then((data) => {
-            setData(data.data);
-          })
-          .catch((error) => {
-            console.log(error);
-          });
+        .catch((error) => {
+          console.log(error);
+        });
     };
- 
-
 
     if (!data) {
       fetchLibraries();
@@ -47,20 +47,32 @@ function MVLibraries(props) {
 
     const intervalId = setInterval(fetchLibraries, 60000 * 5);
     return () => clearInterval(intervalId);
-  }, [data, days,props.days,token]);
+  }, [data, days, props.days, token]);
 
   if (!data || data.length === 0) {
-    return  <></>;
+    return <></>;
   }
 
-  const SeriesIcon=<TvLineIcon size={"100%"} /> ;
-  const MovieIcon=<FilmLineIcon size={"100%"} /> ;
-  const MusicIcon=<FileMusicLineIcon size={"100%"} /> ;
-  const MixedIcon=<CheckboxMultipleBlankLineIcon size={"100%"} /> ;
-
+  const SeriesIcon = <TvLineIcon size={"100%"} />;
+  const MovieIcon = <FilmLineIcon size={"100%"} />;
+  const MusicIcon = <FileMusicLineIcon size={"100%"} />;
+  const MixedIcon = <CheckboxMultipleBlankLineIcon size={"100%"} />;
 
   return (
-    <ItemStatComponent icon={data[0].CollectionType==="tvshows"? SeriesIcon: data[0].CollectionType==="movies"? MovieIcon : data[0].CollectionType==="music"? MusicIcon :MixedIcon} data={data} heading={"MOST VIEWED LIBRARIES"} units={"Plays"}/>
+    <ItemStatComponent
+      icon={
+        data[0].CollectionType === "tvshows"
+          ? SeriesIcon
+          : data[0].CollectionType === "movies"
+          ? MovieIcon
+          : data[0].CollectionType === "music"
+          ? MusicIcon
+          : MixedIcon
+      }
+      data={data}
+      heading={"MOST VIEWED LIBRARIES"}
+      units={"Plays"}
+    />
   );
 }
 

@@ -9,53 +9,69 @@ function LibraryGlobalStats(props) {
   const [weekStats, setWeekStats] = useState({});
   const [monthStats, setMonthStats] = useState({});
   const [allStats, setAllStats] = useState({});
-  const token = localStorage.getItem('token');
+  const token = localStorage.getItem("token");
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const dayData = await axios.post(`/stats/getGlobalLibraryStats`, {
-          hours: (24*1),
-          libraryid: props.LibraryId,
-        }, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json",
+        const dayData = await axios.post(
+          `/stats/getGlobalLibraryStats`,
+          {
+            hours: 24 * 1,
+            libraryid: props.LibraryId,
           },
-        });
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+              "Content-Type": "application/json",
+            },
+          },
+        );
         setDayStats(dayData.data);
 
-        const weekData = await axios.post(`/stats/getGlobalLibraryStats`, {
-          hours: (24*7),
-          libraryid: props.LibraryId,
-        }, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json",
+        const weekData = await axios.post(
+          `/stats/getGlobalLibraryStats`,
+          {
+            hours: 24 * 7,
+            libraryid: props.LibraryId,
           },
-        });
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+              "Content-Type": "application/json",
+            },
+          },
+        );
         setWeekStats(weekData.data);
 
-        const monthData = await axios.post(`/stats/getGlobalLibraryStats`, {
-          hours: (24*30),
-          libraryid: props.LibraryId,
-        }, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json",
+        const monthData = await axios.post(
+          `/stats/getGlobalLibraryStats`,
+          {
+            hours: 24 * 30,
+            libraryid: props.LibraryId,
           },
-        });
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+              "Content-Type": "application/json",
+            },
+          },
+        );
         setMonthStats(monthData.data);
 
-        const allData = await axios.post(`/stats/getGlobalLibraryStats`, {
-          hours: (24*999),
-          libraryid: props.LibraryId,
-        }, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json",
+        const allData = await axios.post(
+          `/stats/getGlobalLibraryStats`,
+          {
+            hours: 24 * 999,
+            libraryid: props.LibraryId,
           },
-        });
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+              "Content-Type": "application/json",
+            },
+          },
+        );
         setAllStats(allData.data);
       } catch (error) {
         console.log(error);
@@ -65,12 +81,12 @@ function LibraryGlobalStats(props) {
     fetchData();
     const intervalId = setInterval(fetchData, 60000 * 5);
     return () => clearInterval(intervalId);
-  }, [props.LibraryId,token]);
+  }, [props.LibraryId, token]);
 
   return (
     <div>
       <h1 className="my-3">Library Stats</h1>
-      <div  className="global-stats-container">
+      <div className="global-stats-container">
         <WatchTimeStats data={dayStats} heading={"Last 24 Hours"} />
         <WatchTimeStats data={weekStats} heading={"Last 7 Days"} />
         <WatchTimeStats data={monthStats} heading={"Last 30 Days"} />

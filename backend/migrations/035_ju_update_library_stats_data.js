@@ -1,5 +1,7 @@
-exports.up = function(knex) {
-    return knex.schema.raw(`
+exports.up = function (knex) {
+  return knex.schema
+    .raw(
+      `
     CREATE OR REPLACE PROCEDURE ju_update_library_stats_data()
     LANGUAGE plpgsql
     AS $$
@@ -24,14 +26,15 @@ exports.up = function(knex) {
     END;
     $$;
     
-    `).catch(function(error) {
-        console.error(error);
-      });
-  };
-  
-  exports.down = function(knex) {
-    return knex.schema.raw(`
+    `,
+    )
+    .catch(function (error) {
+      console.error(error);
+    });
+};
+
+exports.down = function (knex) {
+  return knex.schema.raw(`
       DROP PROCEDURE ju_update_library_stats_data;
     `);
-  };
-  
+};
