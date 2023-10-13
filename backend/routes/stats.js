@@ -35,7 +35,7 @@ router.post("/getMostViewedByType", async (req, res) => {
   
 
     const { rows } = await db.query(
-      `select * from fs_most_played_items(${_days-1},'${type}') limit 5`
+      `select * from fs_most_played_items($1,'${type}') limit 5`, [_days-1]
     );
     res.send(rows);
   } catch (error) {
@@ -62,7 +62,7 @@ router.post("/getMostPopularByType", async (req, res) => {
     }
 
     const { rows } = await db.query(
-      `select * from fs_most_popular_items(${_days-1},'${type}') limit 5`
+      `select * from fs_most_popular_items($1,$2) limit 5`, [_days-1, type]
     );
     res.send(rows);
   } catch (error) {
@@ -81,7 +81,7 @@ router.post("/getMostViewedLibraries", async (req, res) => {
       _days = 30;
     }
     const { rows } = await db.query(
-      `select * from fs_most_viewed_libraries(${_days-1})`
+      `select * from fs_most_viewed_libraries($1)`, [_days-1]
     );
     res.send(rows);
   } catch (error) {
@@ -98,7 +98,7 @@ router.post("/getMostUsedClient", async (req, res) => {
       _days = 30;
     }
     const { rows } = await db.query(
-      `select * from fs_most_used_clients(${_days-1}) limit 5`
+      `select * from fs_most_used_clients($1) limit 5`, [_days-1]
     );
     res.send(rows);
   } catch (error) {
@@ -115,9 +115,9 @@ router.post("/getMostActiveUsers", async (req, res) => {
       _days = 30;
     }
     const { rows } = await db.query(
-      `select * from fs_most_active_user(${_days-1}) limit 5`
+      `select * from fs_most_active_user($1) limit 5`, [_days-1]
     );
-    res.send(rows);
+   res.send(rows);
   } catch (error) {
     res.status(503);
     res.send(error);
@@ -149,7 +149,7 @@ router.post("/getUserLastPlayed", async (req, res) => {
   try {
     const { userid } = req.body;
     const { rows } = await db.query(
-      `select * from fs_last_user_activity('${userid}') limit 15`
+      `select * from fs_last_user_activity($1) limit 15`, [userId]
     );
     res.send(rows);
   } catch (error) {
@@ -168,7 +168,7 @@ router.post("/getGlobalUserStats", async (req, res) => {
       _hours = 24;
     }
     const { rows } = await db.query(
-      `select * from fs_user_stats(${_hours},'${userid}')`
+      `select * from fs_user_stats($1,$2)`, [_hours, userid]
     );
     res.send(rows[0]);
   } catch (error) {
@@ -190,8 +190,8 @@ router.post("/getGlobalItemStats", async (req, res) => {
       sum("PlaybackDuration") total_playback_duration
       from jf_playback_activity jf_playback_activity
       where 
-      ("EpisodeId"='${itemid}' OR "SeasonId"='${itemid}' OR "NowPlayingItemId"='${itemid}')
-      AND jf_playback_activity."ActivityDateInserted" BETWEEN CURRENT_DATE - INTERVAL '1 hour' * ${_hours} AND NOW();`
+      ("EpisodeId"=$1 OR "SeasonId"=$1 OR "NowPlayingItemId"=$1)
+      AND jf_playback_activity."ActivityDateInserted" BETWEEN CURRENT_DATE - INTERVAL '1 hour' * $2 AND NOW();`, [itemid, _hours]
     );
     res.send(rows[0]);
   } catch (error) {
@@ -209,7 +209,7 @@ router.post("/getGlobalLibraryStats", async (req, res) => {
       _hours = 24;
     }
     const { rows } = await db.query(
-      `select * from fs_library_stats(${_hours},'${libraryid}')`
+      `select * from fs_library_stats($1,$2)`, [_hours, libraryid]
     );
     res.send(rows[0]);
   } catch (error) {
@@ -247,7 +247,7 @@ router.post("/getLibraryItemsWithStats", async (req, res) => {
     const  {libraryid}  = req.body;
     console.log(`ENDPOINT CALLED: /getLibraryItems: `+libraryid);
     const { rows } = await db.query(
-      `SELECT * FROM jf_library_items_with_playcount_playtime where "ParentId"='${libraryid}'`
+      `SELECT * FROM jf_library_items_with_playcount_playtime where "ParentId"=$1`, [libraryid]
     );
     res.send(rows);
   
@@ -265,7 +265,7 @@ router.post("/getLibraryLastPlayed", async (req, res) => {
   try {
     const { libraryid } = req.body;
     const { rows } = await db.query(
-      `select * from fs_last_library_activity('${libraryid}') limit 15`
+      `select * from fs_last_library_activity($1) limit 15`, [libraryid]
     );
     res.send(rows);
   } catch (error) {
@@ -284,7 +284,7 @@ router.post("/getViewsOverTime", async (req, res) => {
       _days = 30;
     }
     const { rows:stats } = await db.query(
-      `select * from fs_watch_stats_over_time('${_days}')`
+      `select * from fs_watch_stats_over_time($1)`, [_days]
     );
 
     const { rows:libraries } = await db.query(
@@ -329,7 +329,7 @@ router.post("/getViewsByDays", async (req, res) => {
       _days = 30;
     }
     const { rows:stats } = await db.query(
-      `select * from fs_watch_stats_popular_days_of_week('${_days}')`
+      `select * from fs_watch_stats_popular_days_of_week($1)`, [_days]
     );
 
     const { rows:libraries } = await db.query(
@@ -370,7 +370,7 @@ router.post("/getViewsByHour", async (req, res) => {
       _days = 30;
     }
     const { rows:stats } = await db.query(
-      `select * from fs_watch_stats_popular_hour_of_day('${_days}')`
+      `select * from fs_watch_stats_popular_hour_of_day($1)`, [_days]
     );
 
     const { rows:libraries } = await db.query(
