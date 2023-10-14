@@ -745,7 +745,7 @@ router.post("/getLibraryItems", async (req, res) => {
     const { libraryid } = req.body;
     console.log(`ENDPOINT CALLED: /getLibraryItems: ` + libraryid);
     const { rows } = await db.query(
-      `SELECT * FROM jf_library_items where "ParentId"='${libraryid}'`
+      `SELECT * FROM jf_library_items where "ParentId"=$1`, [libraryid]
     );
     res.send(rows);
   } catch (error) {
@@ -758,7 +758,7 @@ router.post("/getSeasons", async (req, res) => {
     const { Id } = req.body;
 
     const { rows } = await db.query(
-      `SELECT * FROM jf_library_seasons where "SeriesId"='${Id}'`
+      `SELECT * FROM jf_library_seasons where "SeriesId"=$1`, [Id]
     );
     console.log({ Id: Id });
     res.send(rows);
@@ -773,7 +773,7 @@ router.post("/getEpisodes", async (req, res) => {
   try {
     const { Id } = req.body;
     const { rows } = await db.query(
-      `SELECT * FROM jf_library_episodes where "SeasonId"='${Id}'`
+      `SELECT * FROM jf_library_episodes where "SeasonId"=$1`, [Id]
     );
     console.log({ Id: Id });
     res.send(rows);
@@ -787,17 +787,17 @@ router.post("/getEpisodes", async (req, res) => {
 router.post("/getItemDetails", async (req, res) => {
   try {
     const { Id } = req.body;
-    let query = `SELECT im."Name" "FileName",im.*,i.* FROM jf_library_items i left join jf_item_info im on i."Id" = im."Id" where i."Id"='${Id}'`;
+    let query = `SELECT im."Name" "FileName",im.*,i.* FROM jf_library_items i left join jf_item_info im on i."Id" = im."Id" where i."Id"=$1`;
 
-    const { rows: items } = await db.query(query);
+    const { rows: items } = await db.query(query, [Id]);
 
     if (items.length === 0) {
-      query = `SELECT im."Name" "FileName",im.*,s.*  FROM jf_library_seasons s left join jf_item_info im on s."Id" = im."Id" where s."Id"='${Id}'`;
-      const { rows: seasons } = await db.query(query);
+      query = `SELECT im."Name" "FileName",im.*,s.*  FROM jf_library_seasons s left join jf_item_info im on s."Id" = im."Id" where s."Id"=$1`;
+      const { rows: seasons } = await db.query(query, [Id]);
 
       if (seasons.length === 0) {
-        query = `SELECT im."Name" "FileName",im.*,e.*  FROM jf_library_episodes e join jf_item_info im on e."EpisodeId" = im."Id" where e."EpisodeId"='${Id}'`;
-        const { rows: episodes } = await db.query(query);
+        query = `SELECT im."Name" "FileName",im.*,e.*  FROM jf_library_episodes e join jf_item_info im on e."EpisodeId" = im."Id" where e."EpisodeId"=$1`;
+        const { rows: episodes } = await db.query(query, [Id]);
 
         if (episodes.length !== 0) {
           res.send(episodes);
@@ -857,7 +857,7 @@ router.post("/getLibraryHistory", async (req, res) => {
   try {
     const { libraryid } = req.body;
     const { rows } = await db.query(
-      `select a.* from jf_playback_activity a join jf_library_items i on i."Id"=a."NowPlayingItemId"  where i."ParentId"='${libraryid}' order by "ActivityDateInserted" desc`
+      `select a.* from jf_playback_activity a join jf_library_items i on i."Id"=a."NowPlayingItemId"  where i."ParentId"=$1 order by "ActivityDateInserted" desc`, [libraryid]
     );
     const groupedResults = {};
     rows.forEach((row) => {
@@ -888,7 +888,7 @@ router.post("/getItemHistory", async (req, res) => {
       `select jf_playback_activity.*
       from jf_playback_activity jf_playback_activity
       where 
-      ("EpisodeId"='${itemid}' OR "SeasonId"='${itemid}' OR "NowPlayingItemId"='${itemid}');`
+      ("EpisodeId"=$1 OR "SeasonId"=$1 OR "NowPlayingItemId"=$1);`, [idemid]
     );
 
     const groupedResults = rows.map((item) => ({
@@ -911,7 +911,7 @@ router.post("/getUserHistory", async (req, res) => {
     const { rows } = await db.query(
       `select jf_playback_activity.*
       from jf_playback_activity jf_playback_activity
-      where "UserId"='${userid}';`
+      where "UserId"=$1;`, [userid]
     );
 
     const groupedResults = {};
