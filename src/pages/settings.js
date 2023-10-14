@@ -2,7 +2,6 @@ import React from "react";
 import { Tabs, Tab } from "react-bootstrap";
 
 import SettingsConfig from "./components/settings/settingsConfig";
-import BackupFiles from "./components/settings/backupfiles";
 import SecuritySettings from "./components/settings/security";
 import ApiKeys from "./components/settings/apiKeys";
 import LibrarySelector from "./library_selector";
@@ -41,15 +40,6 @@ export default function Settings() {
           style={{ minHeight: "500px" }}
         >
           <ApiKeys />
-        </Tab>
-
-        <Tab
-          eventKey="tabBackup"
-          className="bg-transparent  my-2"
-          title="Backup"
-          style={{ minHeight: "500px" }}
-        >
-          <BackupFiles />
         </Tab>
 
         <Tab

@@ -2,7 +2,6 @@ const express = require("express");
 const cors = require("cors");
 const jwt = require("jsonwebtoken");
 const knex = require("knex");
-const createdb = require("./create_database");
 const knexConfig = require("./migrations");
 
 const authRouter = require("./routes/auth");
@@ -10,19 +9,17 @@ const apiRouter = require("./routes/api");
 const proxyRouter = require("./routes/proxy");
 const { router: syncRouter } = require("./routes/sync");
 const statsRouter = require("./routes/stats");
-const { router: backupRouter } = require("./routes/backup");
 const ActivityMonitor = require("./tasks/ActivityMonitor");
 const SyncTask = require("./tasks/SyncTask");
-const BackupTask = require("./tasks/BackupTask");
 const { router: logRouter } = require("./routes/logging");
 
-const dbInstance = require("./db");
+const db = require("./db");
 const path = require("path");
 
 const http = require("http");
+const {initDatabase} = require("./db");
 
 const app = express();
-const db = knex(knexConfig.development);
 
 const PORT = process.env.PORT || 3003;
 const LISTEN_IP = "127.0.0.1";
@@ -92,25 +89,14 @@ app.use("/proxy", proxyRouter); // mount the API router at /proxy
 app.use("/api", authenticate, apiRouter); // mount the API router at /api, with JWT middleware
 app.use("/sync", authenticate, syncRouter); // mount the API router at /sync, with JWT middleware
 app.use("/stats", authenticate, statsRouter); // mount the API router at /stats, with JWT middleware
-app.use("/backup", authenticate, backupRouter); // mount the API router at /backup, with JWT middleware
 app.use("/logs", authenticate, logRouter); // mount the API router at /logs, with JWT middleware
 
-try {
-  createdb.createDatabase().then((result) => {
-    if (result) {
-      console.log("Database created");
-    }
+initDatabase().then(() => {
+  server.listen(PORT, async () => {
+    console.log(`Server listening on http://${LISTEN_IP}:${PORT}`);
 
-    db.migrate.latest().then(() => {
-      server.listen(PORT, async () => {
-        console.log(`Server listening on http://${LISTEN_IP}:${PORT}`);
-
-        ActivityMonitor.ActivityMonitor(1000);
-        SyncTask.SyncTask();
-        BackupTask.BackupTask();
-      });
-    });
+    ActivityMonitor.ActivityMonitor(1000);
+    SyncTask.SyncTask();
   });
-} catch (error) {
-  console.log("An error has occured on startup: " + error);
-}
+
+})

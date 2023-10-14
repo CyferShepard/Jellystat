@@ -22,8 +22,6 @@ services:
       - jellystat-db
     ports:
       - "3000:3000"
-    volumes:
-      - ./backup-data:/app/backend/backup-data
 
   jellystat-db:
     container_name: jellystat-db

@@ -37,13 +37,6 @@ function App() {
   const [errorFlag, seterrorFlag] = useState(false);
   const token = localStorage.getItem("token");
 
-  const wsListeners = [
-    { task: "PlaybackSyncTask", ref: React.useRef(null) },
-    { task: "SyncTask", ref: React.useRef(null) },
-    { task: "BackupTask", ref: React.useRef(null) },
-    { task: "TaskError", ref: React.useRef(null) },
-  ];
-
   useEffect(() => {
     const fetchConfig = async () => {
       try {

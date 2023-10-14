@@ -13,11 +13,4 @@ export const taskList = [
     type: "Import",
     link: "/sync/syncPlaybackPluginData",
   },
-  {
-    id: 2,
-    name: "Backup",
-    description: "Backup Jellystat",
-    type: "Job",
-    link: "/backup/beginBackup",
-  },
 ];

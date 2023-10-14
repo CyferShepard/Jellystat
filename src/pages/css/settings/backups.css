@@ -12,20 +12,6 @@ th {
   cursor: default !important;
 }
 
-.backup-file-download {
-  cursor: pointer;
-}
-
 td {
   border-bottom: none !important;
-}
-
-.upload-file {
-  background-color: var(--secondary-background-color) !important;
-  border-color: var(--secondary-background-color) !important;
-  color: white !important;
-}
-
-.upload-file:focus {
-  box-shadow: none !important;
 }

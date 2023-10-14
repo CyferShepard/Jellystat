@@ -17,11 +17,6 @@ const axios_instance = axios.create({
 
 const router = express.Router();
 
-router.get("/test", async (req, res) => {
-  console.log(`ENDPOINT CALLED: /test`);
-  res.send("Backend Responded Succesfully");
-});
-
 //Settings and config endpoints
 router.get("/getconfig", async (req, res) => {
   try {

@@ -37,13 +37,6 @@ module.exports = function (app) {
     }),
   );
   app.use(
-    `/backup`,
-    createProxyMiddleware({
-      target: `http://127.0.0.1:${process.env.PORT || 3003}`,
-      changeOrigin: true,
-    }),
-  );
-  app.use(
     `/logs`,
     createProxyMiddleware({
       target: `http://127.0.0.1:${process.env.PORT || 3003}`,
