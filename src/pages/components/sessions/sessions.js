@@ -24,6 +24,26 @@ function Sessions() {
       }
     };
 
+    const getSubtitleStream = (row) => {
+      let result = 'No subtitles';
+
+      if(!row.PlayState) {
+        return result;
+      }
+
+      let subStreamIndex = row.PlayState.SubtitleStreamIndex;
+
+      if(subStreamIndex == undefined || subStreamIndex === -1) {
+        return result;
+      }
+
+      if(row.NowPlayingItem.MediaStreams && row.NowPlayingItem.MediaStreams.length) {
+        result = `Subtitles: ${row.NowPlayingItem.MediaStreams[subStreamIndex].DisplayTitle}`;
+      }
+
+      return result;
+  }
+
     const fetchData = () => {
 
       if (config) {
@@ -39,7 +59,9 @@ function Sessions() {
           .then((data) => {
             if(data && typeof data.data === 'object' && Array.isArray(data.data))
             {
-              setData(data.data.filter(row => row.NowPlayingItem !== undefined));
+              let toSet = data.data.filter(row => row.NowPlayingItem !== undefined);
+              toSet.forEach(s => s.NowPlayingItem.SubtitleStream = getSubtitleStream(s));
+              setData(toSet);
             }
 
           })
