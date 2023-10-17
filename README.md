@@ -29,6 +29,7 @@
 - Run `npm run start` to only run the frontend React UI
 - Run `npm run start-app` to run both backend and frontend at the same time
 
+When contributing please ensure to log a pull request on the `unstable` branch
 
 ### Launching Jellystat using Docker
 
