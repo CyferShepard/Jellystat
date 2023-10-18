@@ -801,7 +801,7 @@ router.post("/getItemHistory", async (req, res) => {
       `select jf_playback_activity.*
       from jf_playback_activity jf_playback_activity
       where 
-      ("EpisodeId"=$1 OR "SeasonId"=$1 OR "NowPlayingItemId"=$1);`, [idemid]
+      ("EpisodeId"=$1 OR "SeasonId"=$1 OR "NowPlayingItemId"=$1);`, [itemid]
     );
 
     const groupedResults = rows.map((item) => ({

@@ -149,7 +149,7 @@ router.post("/getUserLastPlayed", async (req, res) => {
   try {
     const { userid } = req.body;
     const { rows } = await db.query(
-      `select * from fs_last_user_activity($1) limit 15`, [userId]
+      `select * from fs_last_user_activity($1) limit 15`, [userid]
     );
     res.send(rows);
   } catch (error) {
