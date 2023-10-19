@@ -81,11 +81,10 @@ function sessionCard(props) {
                     <Row className="d-flex flex-column flex-md-row">    
                       <Col className="px-0 col-auto">{props.data.session.PlayState.PlayMethod}</Col> 
                       <Col className="px-0 px-md-2 col-auto ellipse">{(props.data.session.NowPlayingItem.MediaStreams ? '( '+props.data.session.NowPlayingItem.MediaStreams.find(stream => stream.Type==='Video')?.Codec.toUpperCase()+(props.data.session.TranscodingInfo? ' - '+props.data.session.TranscodingInfo.VideoCodec.toUpperCase() : '')+' - '+convertBitrate(props.data.session.TranscodingInfo ? props.data.session.TranscodingInfo.Bitrate :props.data.session.NowPlayingItem.MediaStreams.find(stream => stream.Type==='Video')?.BitRate)+' )':'')}</Col>
-                      <Row className="ellipse">
+                    </Row>
+                    <Row className="ellipse">
                         <Col className="px-0 col-auto">{props.data.session.NowPlayingItem.SubtitleStream}</Col>
-                    </Row>
-                    </Row>
-                    
+                    </Row>  
                   </Col>
 
 
