@@ -38,7 +38,7 @@ function getETAFromTicks(ticks) {
   const eta = new Date(etaMillis);
 
   // Return formated string in user locale
-  return eta.toLocaleTimeString();
+  return eta.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
 }
 
 function convertBitrate(bitrate) {
