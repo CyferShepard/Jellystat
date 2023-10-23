@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import axios from 'axios';
+import axios from '../../../lib/axios_instance';
 import Config from "../../../lib/config";
 // import API from "../../../classes/jellyfin-api";
 
@@ -33,7 +33,7 @@ function Sessions() {
 
       let subStreamIndex = row.PlayState.SubtitleStreamIndex;
 
-      if(subStreamIndex == undefined || subStreamIndex === -1) {
+      if(subStreamIndex === undefined || subStreamIndex === -1) {
         return result;
       }
 
@@ -55,6 +55,7 @@ function Sessions() {
             Authorization: `Bearer ${config.token}`,
             "Content-Type": "application/json",
           },
+          cache: false,
         })
           .then((data) => {
             if(data && typeof data.data === 'object' && Array.isArray(data.data))
