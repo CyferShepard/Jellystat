@@ -27,6 +27,19 @@ function ticksToTimeString(ticks) {
 
   return timeString;
 }
+
+function getETAFromTicks(ticks) {
+
+  // Get current date
+  const currentDate = Date.now();
+
+  // Calculate ETA
+  const etaMillis = currentDate + ticks/10000;
+  const eta = new Date(etaMillis);
+
+  // Return formated string in user locale
+  return eta.toLocaleTimeString();
+}
 function convertBitrate(bitrate) {
   if(!bitrate)
   {
@@ -178,8 +191,10 @@ function sessionCard(props) {
                 <Col>
                 <Card.Text className="text-end">
                     {ticksToTimeString(props.data.session.PlayState.PositionTicks)} /
-                    {ticksToTimeString(props.data.session.NowPlayingItem.RunTimeTicks)}
-                   </Card.Text>
+                    {ticksToTimeString(props.data.session.NowPlayingItem.RunTimeTicks)} ETA : 
+                    {getETAFromTicks(props.data.session.NowPlayingItem.RunTimeTicks 
+                        - props.data.session.PlayState.PositionTicks)}
+                </Card.Text>
                 </Col>
               </Row>
               </Container>
