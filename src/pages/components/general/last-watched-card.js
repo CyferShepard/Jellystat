@@ -61,8 +61,11 @@ function LastWatchedCard(props) {
           </Link>
         </div>
 
-        <div className="last-item-name"> {props.data.Name}</div>
-        <div className="last-item-episode"> {props.data.EpisodeName}</div>
+        <div className="last-item-name">
+          <Link to={`/libraries/item/${props.data.Id}`}>{props.data.Name}</Link>
+        </div>
+        <div className="last-item-episode">
+          <Link to={`/libraries/item/${props.data.EpisodeId}`}>{props.data.EpisodeName}</Link></div>
       </div>
       {props.data.SeasonNumber ?
          <div className="last-item-episode number"> S{props.data.SeasonNumber} -  E{props.data.EpisodeNumber}</div>:
