@@ -1,4 +1,4 @@
-import React from "react";
+import React, {useState} from "react";
 import { Link } from 'react-router-dom';
 import Card from 'react-bootstrap/Card';
 import Row from 'react-bootstrap/Row';
@@ -11,7 +11,9 @@ import PauseFillIcon from "remixicon-react/PauseFillIcon";
 
 import { clientData } from "../../../lib/devices";
 import  Tooltip  from "@mui/material/Tooltip";
+import IpInfoModal from '../ip-info';
 
+import axios from 'axios';
 
 function ticksToTimeString(ticks) {
   // Convert ticks to seconds
@@ -56,7 +58,7 @@ function convertBitrate(bitrate) {
   }
 }
 
-function sessionCard(props) {
+function SessionCard(props) {
   const cardStyle = {
     backgroundImage: `url(Proxy/Items/Images/Backdrop?id=${(props.data.session.NowPlayingItem.SeriesId ? props.data.session.NowPlayingItem.SeriesId : props.data.session.NowPlayingItem.Id)}&fillHeight=320&fillWidth=213&quality=80), linear-gradient(to right, #00A4DC, #AA5CC3)`,
     height:'100%',
@@ -69,9 +71,42 @@ function sessionCard(props) {
     height:'100%',
   };
 
+  const token = localStorage.getItem('token');
+
+  const [modalVisible, setModalVisible] = useState(false);
+  const [modalData, setModalData] = useState();
+
+  function showModal() {
+    const fetchData = async () => {
+      const result = await axios.post(`/utils/geolocateIp`, {
+          ipAddress: props.data.session.RemoteEndPoint
+      }, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          }
+      });
+      setModalData(result.data);
+    };
+
+    if(!modalData) {
+      fetchData();
+    }
+
+    setModalVisible(true);
+  }
+
+  function hideModal() {
+    setModalVisible(false);
+  }
   
   return (
     <Card className="stat-card" style={cardStyle}>
+      <IpInfoModal
+        show={modalVisible}
+        onHide={hideModal}
+        ipAddress={props.data.session.RemoteEndPoint}
+        geodata={modalData}/>
     <div style={cardBgStyle} className="rounded-top">
       <Row className="h-100">
         <Col className="d-none d-lg-block stat-card-banner">
@@ -99,6 +134,13 @@ function sessionCard(props) {
                     <Row className="ellipse">
                         <Col className="px-0 col-auto">{props.data.session.NowPlayingItem.SubtitleStream}</Col>
                     </Row>  
+                    <Row className="ellipse">
+                        <Col className="px-0 col-auto">
+                          <Card.Text>
+                            IP Address: <Link onClick={showModal}>{props.data.session.RemoteEndPoint}</Link>
+                          </Card.Text>
+                        </Col>
+                    </Row>
                   </Col>
 
 
@@ -223,4 +265,4 @@ function sessionCard(props) {
   );
 }
 
-export default sessionCard;
+export default SessionCard;

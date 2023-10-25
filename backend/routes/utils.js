@@ -21,7 +21,7 @@ const axios_instance = axios.create({
     httpsAgent: agent
 });
 
-router.get("/geolocateIp", async (req, res) => {
+router.post("/geolocateIp", async (req, res) => {
   try {
     if(!(geoliteAccountId && geoliteLicenseKey)) {
         return res.status(501).send('GeoLite information missing!');
