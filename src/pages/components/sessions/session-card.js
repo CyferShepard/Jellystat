@@ -1,4 +1,4 @@
-import React, {useState} from "react";
+import React, {useState,useEffect} from "react";
 import { Link } from 'react-router-dom';
 import Card from 'react-bootstrap/Card';
 import Row from 'react-bootstrap/Row';
@@ -73,10 +73,24 @@ function SessionCard(props) {
 
   const token = localStorage.getItem('token');
 
+  const ipv4Regex = new RegExp(/\b(?!(10\.|172\.(1[6-9]|2[0-9]|3[0-1])\.|192\.168))(?:(?:2(?:[0-4][0-9]|5[0-5])|[0-1]?[0-9]?[0-9])\.){3}(?:(?:2([0-4][0-9]|5[0-5])|[0-1]?[0-9]?[0-9]))\b/);
+
   const [modalVisible, setModalVisible] = useState(false);
   const [modalData, setModalData] = useState();
+  const [isRemoteSession, setIsRemoteSession] = useState();
+
+  useEffect(() => {
+    ipv4Regex.lastIndex = 0;
+    if(ipv4Regex.test(props.data.session.RemoteEndPoint)) {
+      setIsRemoteSession(true)
+    }    
+  }, []);
 
   function showModal() {
+    if(!isRemoteSession) {
+        return
+    }
+
     const fetchData = async () => {
       const result = await axios.post(`/utils/geolocateIp`, {
           ipAddress: props.data.session.RemoteEndPoint
@@ -140,7 +154,17 @@ function SessionCard(props) {
                     </Row>
                     <Row>
                       <Col className="px-0 col-auto ellipse">
-                        <Card.Text>IP Address: <Link onClick={showModal}>{props.data.session.RemoteEndPoint}</Link></Card.Text>
+                        <Tooltip title={isRemoteSession ? 'Remote' : 'Local'}>
+                        {isRemoteSession ? 
+                          <Card.Text>                            
+                            IP Address: <Link onClick={showModal}>{props.data.session.RemoteEndPoint}</Link>
+                          </Card.Text>
+                          :
+                          <span>
+                            IP Address: {props.data.session.RemoteEndPoint}
+                          </span>
+                        }
+                        </Tooltip>
                       </Col>
                     </Row>
                   </Col>
