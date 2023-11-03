@@ -92,8 +92,7 @@
     border-radius: 50%;
     max-width: 30px;
     max-height: 30px;
-
-
+    margin-right: 5px;
 }
 
 .card-user-image-default

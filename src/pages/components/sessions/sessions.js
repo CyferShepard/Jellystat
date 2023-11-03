@@ -25,7 +25,7 @@ function Sessions() {
     };
 
     const getSubtitleStream = (row) => {
-      let result = 'No subtitles';
+      let result = '';
 
       if(!row.PlayState) {
         return result;

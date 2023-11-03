@@ -72,7 +72,6 @@ export default function Tasks() {
           },
         }).then((response) =>{
           setTaskIntervals(response.data);
-          getTaskSettings();
         })
         .catch((error) => {
            console.log(error);
@@ -122,10 +121,10 @@ export default function Tasks() {
                               {task.type==='Job' ?
                                 <Dropdown className="w-100">
                                 <Dropdown.Toggle variant="outline-primary" id="dropdown-basic" className="w-100">
-                                  {intervals.find((interval) => interval.value === (taskIntervals[task.name]?.Interval || 15)).display}
+                                  {taskIntervals && intervals.find((interval) => interval.value === (taskIntervals[task.name]?.Interval || 15)).display}
                                 </Dropdown.Toggle>
                                     <Dropdown.Menu className="w-100" >
-                                    {intervals.map((interval) => (
+                                    {taskIntervals && intervals.map((interval) => (
 
                                                 <Dropdown.Item onClick={()=>updateTaskSettings(task.name,interval.value)} value={interval.value} key={interval.value}>{interval.display}</Dropdown.Item>
                                               ))}
