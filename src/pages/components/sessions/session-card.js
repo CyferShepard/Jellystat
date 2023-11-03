@@ -137,7 +137,9 @@ function SessionCard(props) {
                           </span>
                         </Tooltip>
                       </Col>
-                      <Col className="px-0 col-auto ellipse">IP Address: <Link onClick={showModal}>{props.data.session.RemoteEndPoint}</Link></Col>                      
+                      <Col className="px-0 col-auto ellipse">
+                        <Card.Text>IP Address: <Link onClick={showModal}>{props.data.session.RemoteEndPoint}</Link></Card.Text>
+                      </Col>
                     </Row>
                   </Col>
 
