@@ -129,14 +129,16 @@ function SessionCard(props) {
                     <Row className="ellipse card-client-version"> {props.data.session.Client + " " + props.data.session.ApplicationVersion}</Row>
                     <Row className="d-flex flex-column flex-md-row">    
                       <Col className="px-0 col-auto ellipse">{props.data.session.PlayState.PlayMethod}</Col> 
-                      <Col className="px-0 px-md-2 col-auto ellipse">{(props.data.session.NowPlayingItem.MediaStreams ? '( '+props.data.session.NowPlayingItem.MediaStreams.find(stream => stream.Type==='Video')?.Codec.toUpperCase()+(props.data.session.TranscodingInfo? ' - '+props.data.session.TranscodingInfo.VideoCodec.toUpperCase() : '')+' - '+convertBitrate(props.data.session.TranscodingInfo ? props.data.session.TranscodingInfo.Bitrate :props.data.session.NowPlayingItem.MediaStreams.find(stream => stream.Type==='Video')?.BitRate)+' )':'')}</Col>
+                      <Col className="px-0 px-md-2 col-auto ellipse">{(props.data.session.NowPlayingItem.MediaStreams ? '( '+props.data.session.NowPlayingItem.MediaStreams.find(stream => stream.Type==='Video')?.Codec.toUpperCase()+(props.data.session.TranscodingInfo? ' - '+props.data.session.TranscodingInfo.VideoCodec.toUpperCase() : '')+' - '+convertBitrate(props.data.session.TranscodingInfo ? props.data.session.TranscodingInfo.Bitrate :props.data.session.NowPlayingItem.MediaStreams.find(stream => stream.Type==='Video')?.BitRate)+' )':'')}</Col>                      
                       <Col className="px-0 col-auto ellipse">
                         <Tooltip title={props.data.session.NowPlayingItem.SubtitleStream}>
                           <span>
                             {props.data.session.NowPlayingItem.SubtitleStream}
                           </span>
                         </Tooltip>
-                      </Col>
+                      </Col>                      
+                    </Row>
+                    <Row>
                       <Col className="px-0 col-auto ellipse">
                         <Card.Text>IP Address: <Link onClick={showModal}>{props.data.session.RemoteEndPoint}</Link></Card.Text>
                       </Col>
