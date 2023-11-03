@@ -14,12 +14,12 @@
   background-color: var(--background-color)!important;
   color: white;
   max-width: 500px;
-  max-height: 180px;
+  max-height: 190px;
 }
 
 .stat-card-banner
 {
-  max-width: 120px !important;
+  max-width: 127px !important;
 }
 
 
@@ -27,8 +27,9 @@
 
 
 .stat-card-image {
-  width: 120px !important;
-  height: 180px;
+  width: 127px !important;
+  height: 190px;
+  padding: 5px;
 }
 
 .stat-card-icon
