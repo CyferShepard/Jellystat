@@ -154,8 +154,8 @@ function SessionCard(props) {
                     </Row>
                     <Row>
                       <Col className="px-0 col-auto ellipse">
-                        <Tooltip title={isRemoteSession ? 'Remote' : 'Local'}>
-                        {isRemoteSession ? 
+
+                        {isRemoteSession && (process.env.GEOLITE_ACCOUNT_ID && process.env.GEOLITE_LICENSE_KEY) ? 
                           <Card.Text>                            
                             IP Address: <Link onClick={showModal}>{props.data.session.RemoteEndPoint}</Link>
                           </Card.Text>
@@ -164,7 +164,7 @@ function SessionCard(props) {
                             IP Address: {props.data.session.RemoteEndPoint}
                           </span>
                         }
-                        </Tooltip>
+
                       </Col>
                     </Row>
                   </Col>
