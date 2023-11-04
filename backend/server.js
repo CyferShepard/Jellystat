@@ -15,6 +15,7 @@ const ActivityMonitor = require('./tasks/ActivityMonitor');
 const SyncTask = require('./tasks/SyncTask');
 const BackupTask = require('./tasks/BackupTask');
 const logRouter = require('./routes/logging');
+const utilsRouter = require('./routes/utils');
 
 const dbInstance = require("./db");
 
@@ -109,6 +110,7 @@ app.use('/sync', authenticate , syncRouter.router,()=>{/*  #swagger.tags = ['Syn
 app.use('/stats', authenticate , statsRouter,()=>{/*  #swagger.tags = ['Stats']*/}); // mount the API router at /stats, with JWT middleware
 app.use('/backup', authenticate , backupRouter.router,()=>{/*  #swagger.tags = ['Backup']*/}); // mount the API router at /backup, with JWT middleware
 app.use('/logs', authenticate , logRouter.router,()=>{/*  #swagger.tags = ['Logs']*/}); // mount the API router at /logs, with JWT middleware
+app.use('/utils', authenticate, utilsRouter, ()=>{/*  #swagger.tags = ['Utils']*/}); // mount the API router at /utils, with JWT middleware
 
 const swaggerUi = require('swagger-ui-express');
 const swaggerDocument = require('./swagger.json');

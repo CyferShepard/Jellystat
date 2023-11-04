@@ -1,4 +1,4 @@
-import React from "react";
+import React, {useState,useEffect} from "react";
 import { Link } from 'react-router-dom';
 import Card from 'react-bootstrap/Card';
 import Row from 'react-bootstrap/Row';
@@ -11,7 +11,9 @@ import PauseFillIcon from "remixicon-react/PauseFillIcon";
 
 import { clientData } from "../../../lib/devices";
 import  Tooltip  from "@mui/material/Tooltip";
+import IpInfoModal from '../ip-info';
 
+import axios from 'axios';
 
 function ticksToTimeString(ticks) {
   // Convert ticks to seconds
@@ -56,7 +58,7 @@ function convertBitrate(bitrate) {
   }
 }
 
-function sessionCard(props) {
+function SessionCard(props) {
   const cardStyle = {
     backgroundImage: `url(Proxy/Items/Images/Backdrop?id=${(props.data.session.NowPlayingItem.SeriesId ? props.data.session.NowPlayingItem.SeriesId : props.data.session.NowPlayingItem.Id)}&fillHeight=320&fillWidth=213&quality=80), linear-gradient(to right, #00A4DC, #AA5CC3)`,
     height:'100%',
@@ -69,9 +71,56 @@ function sessionCard(props) {
     height:'100%',
   };
 
+  const token = localStorage.getItem('token');
+
+  const ipv4Regex = new RegExp(/\b(?!(10\.|172\.(1[6-9]|2[0-9]|3[0-1])\.|192\.168))(?:(?:2(?:[0-4][0-9]|5[0-5])|[0-1]?[0-9]?[0-9])\.){3}(?:(?:2([0-4][0-9]|5[0-5])|[0-1]?[0-9]?[0-9]))\b/);
+
+  const [modalVisible, setModalVisible] = useState(false);
+  const [modalData, setModalData] = useState();
+  const [isRemoteSession, setIsRemoteSession] = useState();
+
+  useEffect(() => {
+    ipv4Regex.lastIndex = 0;
+    if(ipv4Regex.test(props.data.session.RemoteEndPoint)) {
+      setIsRemoteSession(true)
+    }    
+  }, []);
+
+  function showModal() {
+    if(!isRemoteSession) {
+        return
+    }
+
+    const fetchData = async () => {
+      const result = await axios.post(`/utils/geolocateIp`, {
+          ipAddress: props.data.session.RemoteEndPoint
+      }, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          }
+      });
+      setModalData(result.data);
+    };
+
+    if(!modalData) {
+      fetchData();
+    }
+
+    setModalVisible(true);
+  }
+
+  function hideModal() {
+    setModalVisible(false);
+  }
   
   return (
     <Card className="stat-card" style={cardStyle}>
+      <IpInfoModal
+        show={modalVisible}
+        onHide={hideModal}
+        ipAddress={props.data.session.RemoteEndPoint}
+        geodata={modalData}/>
     <div style={cardBgStyle} className="rounded-top">
       <Row className="h-100">
         <Col className="d-none d-lg-block stat-card-banner">
@@ -94,13 +143,27 @@ function sessionCard(props) {
                     <Row className="ellipse card-client-version"> {props.data.session.Client + " " + props.data.session.ApplicationVersion}</Row>
                     <Row className="d-flex flex-column flex-md-row">    
                       <Col className="px-0 col-auto ellipse">{props.data.session.PlayState.PlayMethod}</Col> 
-                      <Col className="px-0 px-md-2 col-auto ellipse">{(props.data.session.NowPlayingItem.MediaStreams ? '( '+props.data.session.NowPlayingItem.MediaStreams.find(stream => stream.Type==='Video')?.Codec.toUpperCase()+(props.data.session.TranscodingInfo? ' - '+props.data.session.TranscodingInfo.VideoCodec.toUpperCase() : '')+' - '+convertBitrate(props.data.session.TranscodingInfo ? props.data.session.TranscodingInfo.Bitrate :props.data.session.NowPlayingItem.MediaStreams.find(stream => stream.Type==='Video')?.BitRate)+' )':'')}</Col>
+                      <Col className="px-0 px-md-2 col-auto ellipse">{(props.data.session.NowPlayingItem.MediaStreams ? '( '+props.data.session.NowPlayingItem.MediaStreams.find(stream => stream.Type==='Video')?.Codec.toUpperCase()+(props.data.session.TranscodingInfo? ' - '+props.data.session.TranscodingInfo.VideoCodec.toUpperCase() : '')+' - '+convertBitrate(props.data.session.TranscodingInfo ? props.data.session.TranscodingInfo.Bitrate :props.data.session.NowPlayingItem.MediaStreams.find(stream => stream.Type==='Video')?.BitRate)+' )':'')}</Col>                      
                       <Col className="px-0 col-auto ellipse">
                         <Tooltip title={props.data.session.NowPlayingItem.SubtitleStream}>
                           <span>
                             {props.data.session.NowPlayingItem.SubtitleStream}
                           </span>
                         </Tooltip>
+                      </Col>                      
+                    </Row>
+                    <Row>
+                      <Col className="px-0 col-auto ellipse">
+
+                        {isRemoteSession && (process.env.GEOLITE_ACCOUNT_ID && process.env.GEOLITE_LICENSE_KEY) ? 
+                          <Card.Text>                            
+                            IP Address: <Link onClick={showModal}>{props.data.session.RemoteEndPoint}</Link>
+                          </Card.Text>
+                          :
+                          <span>
+                            IP Address: {props.data.session.RemoteEndPoint}
+                          </span>
+                        }
 
                       </Col>
                     </Row>
@@ -232,4 +295,4 @@ function sessionCard(props) {
   );
 }
 
-export default sessionCard;
+export default SessionCard;
