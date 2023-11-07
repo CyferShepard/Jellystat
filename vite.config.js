@@ -4,7 +4,9 @@ import react from '@vitejs/plugin-react-swc';
 // https://vitejs.dev/config/
 export default defineConfig({
   server: {
+    // port for exposing frontend
     port: 3000,
+    // port for exposing APIs
     proxy: {
       '/api': 'http://localhost:3003',
       '/proxy': 'http://localhost:3003',
