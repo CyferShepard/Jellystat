@@ -1,21 +1,26 @@
-# Stage 1: Build the application
-FROM node:slim AS builder
+# pull the Node.js Docker image
+FROM node:lts-alpine
 
-WORKDIR /app
+# update the package index
+RUN apk update && apk add --no-cache tzdata
 
-COPY package*.json ./
-RUN npm cache clean --force
-RUN npm install
+# set timezone data
+ENV TZ=Asia/Kuala_Lumpur
 
-COPY ./ ./
+# create app directory
+WORKDIR /usr/src/app
 
-# Stage 2: Create the production image
-FROM node:slim
+# bundle app source
+COPY . .
 
-WORKDIR /app
+# install node_modules, build client React JS, delete node_modules server side, prune image for production, clear npm cache, delete unnecessary folder client side
+RUN npm install && \
+    npm run build && \
+    npm cache clean --force && \
+    rm -rf src
 
-COPY --from=builder /app .
-
+# app run on port 3000
 EXPOSE 3000
 
-CMD ["npm", "run", "start-app"]
+# run the server
+CMD ["npm", "start"]
