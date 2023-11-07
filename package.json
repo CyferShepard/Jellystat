@@ -2,6 +2,16 @@
   "name": "jfstat",
   "version": "1.0.8",
   "private": true,
+  "scripts": {
+    "start-client": "vite --host",
+    "start-server": "cd backend && nodemon server.js",
+    "start-app": "concurrently \"npm run start-server\" \"npm run start-client\"",
+    "deploy-local": "npm run build && npm run start-server",
+    "lint": "eslint . --ext js,jsx --report-unused-disable-directives --max-warnings 0",
+    "preview": "vite preview",
+    "build": "vite build",
+    "start": "cd backend && node server.js"
+  },
   "dependencies": {
     "@emotion/react": "^11.10.6",
     "@emotion/styled": "^11.10.6",
@@ -25,6 +35,7 @@
     "cors": "^2.8.5",
     "crypto-js": "^4.1.1",
     "dns-cache": "^2.0.0",
+    "dotenv": "^16.3.1",
     "dottie": "^2.0.6",
     "express": "^4.18.2",
     "express-swagger-generator": "^1.1.17",
@@ -34,6 +45,7 @@
     "knex": "^2.4.2",
     "moment": "^2.29.4",
     "multer": "^1.4.5-lts.1",
+    "nodemon": "^3.0.1",
     "passport": "^0.6.0",
     "passport-jwt": "^4.0.1",
     "pg": "^8.9.0",
@@ -59,13 +71,15 @@
     "web-vitals": "^2.1.4",
     "ws": "^8.13.0"
   },
-  "scripts": {
-    "start": "react-scripts start",
-    "start-server": "cd backend && node server.js",
-    "start-app": "concurrently \"npm run start-server\" \"npm start\"",
-    "build": "react-scripts build",
-    "test": "react-scripts test",
-    "eject": "react-scripts eject"
+  "devDependencies": {
+    "@types/react": "^18.2.15",
+    "@types/react-dom": "^18.2.7",
+    "@vitejs/plugin-react-swc": "^3.3.2",
+    "eslint": "^8.45.0",
+    "eslint-plugin-react": "^7.32.2",
+    "eslint-plugin-react-hooks": "^4.6.0",
+    "eslint-plugin-react-refresh": "^0.4.3",
+    "vite": "^4.4.5"
   },
   "eslintConfig": {
     "extends": [
