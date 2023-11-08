@@ -3,6 +3,20 @@ import react from '@vitejs/plugin-react-swc';
 
 // https://vitejs.dev/config/
 export default defineConfig({
+  optimizeDeps: {
+    include: [
+      'react',
+      'react-dom',
+      'react-router-dom',
+      'axios',
+      'react-toastify',
+    ],
+    esbuildOptions: {
+      loader: {
+        '.js': 'jsx',
+      },
+    },
+  },
   server: {
     // port for exposing frontend
     port: 3000,
@@ -25,8 +39,9 @@ export default defineConfig({
     output: {
       manualChunks: {
         react: ['react'],
-        axios: ['axios'],
+        'react-dom': ['react-dom'],
         'react-router-dom': ['react-router-dom'],
+        axios: ['axios'],
         'react-toastify': ['react-toastify'],
       },
     },
