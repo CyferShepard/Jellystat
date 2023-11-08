@@ -1,31 +1,35 @@
+// core
 require('dotenv').config();
-
+const http = require('http');
 const path = require('path');
 const express = require('express');
 const cors = require('cors');
 const jwt = require('jsonwebtoken');
 const knex = require('knex');
+const swaggerUi = require('swagger-ui-express');
+const swaggerDocument = require('./swagger.json');
+
+// db
+const dbInstance = require('./db');
 const createdb = require('./create_database');
 const knexConfig = require('./migrations');
 
+// routes
 const authRouter = require('./routes/auth');
 const apiRouter = require('./routes/api');
 const proxyRouter = require('./routes/proxy');
 const syncRouter = require('./routes/sync');
 const statsRouter = require('./routes/stats');
 const backupRouter = require('./routes/backup');
-const ActivityMonitor = require('./tasks/ActivityMonitor');
-const SyncTask = require('./tasks/SyncTask');
-const BackupTask = require('./tasks/BackupTask');
 const logRouter = require('./routes/logging');
 const utilsRouter = require('./routes/utils');
 
-const dbInstance = require('./db');
+// tasks
+const ActivityMonitor = require('./tasks/ActivityMonitor');
+const SyncTask = require('./tasks/SyncTask');
+const BackupTask = require('./tasks/BackupTask');
 
-// set up public folder for static files
-const root = path.join(__dirname, '..', 'dist');
-
-const http = require('http');
+// websocket
 const { setupWebSocketServer } = require('./ws');
 
 const app = express();
@@ -42,15 +46,49 @@ if (JWT_SECRET === undefined) {
 
 // middlewares
 app.use(express.json()); // middleware to parse JSON request bodies
+app.use(cors());
 app.set('trust proxy', 1);
 app.disable('x-powered-by');
 
-// for deployment
+// initiate routes
+app.use('/auth', authRouter, () => {
+  /*  #swagger.tags = ['Auth'] */
+}); // mount the API router at /auth
+app.use('/proxy', proxyRouter, () => {
+  /*  #swagger.tags = ['Proxy']*/
+}); // mount the API router at /proxy
+app.use('/api', authenticate, apiRouter, () => {
+  /*  #swagger.tags = ['API']*/
+}); // mount the API router at /api, with JWT middleware
+app.use('/sync', authenticate, syncRouter.router, () => {
+  /*  #swagger.tags = ['Sync']*/
+}); // mount the API router at /sync, with JWT middleware
+app.use('/stats', authenticate, statsRouter, () => {
+  /*  #swagger.tags = ['Stats']*/
+}); // mount the API router at /stats, with JWT middleware
+app.use('/backup', authenticate, backupRouter.router, () => {
+  /*  #swagger.tags = ['Backup']*/
+}); // mount the API router at /backup, with JWT middleware
+app.use('/logs', authenticate, logRouter.router, () => {
+  /*  #swagger.tags = ['Logs']*/
+}); // mount the API router at /logs, with JWT middleware
+app.use('/utils', authenticate, utilsRouter, () => {
+  /*  #swagger.tags = ['Utils']*/
+}); // mount the API router at /utils, with JWT middleware
+
+// Swagger
+app.use('/swagger', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
+
+// for deployment of static page
+const root = path.join(__dirname, '..', 'dist');
 app.use(express.static(root));
+app.get('*', (req, res) => {
+  res.sendFile(path.join(__dirname, '..', 'dist', 'index.html'));
+});
 
 const server = http.createServer(app);
+
 setupWebSocketServer(server);
-app.use(cors());
 
 // JWT middleware
 async function authenticate(req, res, next) {
@@ -99,53 +137,20 @@ async function authenticate(req, res, next) {
   }
 }
 
-app.use('/auth', authRouter, () => {
-  /*  #swagger.tags = ['Auth'] */
-}); // mount the API router at /auth
-app.use('/proxy', proxyRouter, () => {
-  /*  #swagger.tags = ['Proxy']*/
-}); // mount the API router at /proxy
-app.use('/api', authenticate, apiRouter, () => {
-  /*  #swagger.tags = ['API']*/
-}); // mount the API router at /api, with JWT middleware
-app.use('/sync', authenticate, syncRouter.router, () => {
-  /*  #swagger.tags = ['Sync']*/
-}); // mount the API router at /sync, with JWT middleware
-app.use('/stats', authenticate, statsRouter, () => {
-  /*  #swagger.tags = ['Stats']*/
-}); // mount the API router at /stats, with JWT middleware
-app.use('/backup', authenticate, backupRouter.router, () => {
-  /*  #swagger.tags = ['Backup']*/
-}); // mount the API router at /backup, with JWT middleware
-app.use('/logs', authenticate, logRouter.router, () => {
-  /*  #swagger.tags = ['Logs']*/
-}); // mount the API router at /logs, with JWT middleware
-app.use('/utils', authenticate, utilsRouter, () => {
-  /*  #swagger.tags = ['Utils']*/
-}); // mount the API router at /utils, with JWT middleware
-
-// Swagger
-const swaggerUi = require('swagger-ui-express');
-const swaggerDocument = require('./swagger.json');
-
-app.use('/swagger', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
-
-// for use in deployment
-app.get('*', (req, res) => {
-  res.sendFile(path.join(__dirname, '..', 'dist', 'index.html'));
-});
-
+// start server
 try {
   createdb.createDatabase().then((result) => {
     if (result) {
-      console.log(result);
-      console.log('Database created');
+      console.log('[JELLYSTAT] Database created');
+    } else {
+      console.log('[JELLYSTAT] Database exists. Skipping creation');
     }
 
     db.migrate.latest().then(() => {
       server.listen(PORT, async () => {
-        console.log(`Server listening on http://${LISTEN_IP}:${PORT}`);
-
+        console.log(
+          `[JELLYSTAT] Server listening on http://${LISTEN_IP}:${PORT}`
+        );
         ActivityMonitor.ActivityMonitor(1000);
         SyncTask.SyncTask();
         BackupTask.BackupTask();
@@ -153,5 +158,5 @@ try {
     });
   });
 } catch (error) {
-  console.log('An error has occured on startup: ' + error);
+  console.log('[JELLYSTAT] An error has occured on startup: ' + error);
 }
