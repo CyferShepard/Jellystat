@@ -39,7 +39,7 @@ function LastWatchedCard(props) {
         <img
           src={
             `${
-                "/Proxy/Items/Images/Primary?id=" +
+                "/proxy/Items/Images/Primary?id=" +
                 props.data.Id +
                 "&fillHeight=320&fillWidth=213&quality=50"}`
           }
