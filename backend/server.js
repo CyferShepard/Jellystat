@@ -3,6 +3,7 @@ require('dotenv').config();
 const http = require('http');
 const path = require('path');
 const express = require('express');
+const compression = require('compression');
 const cors = require('cors');
 const jwt = require('jsonwebtoken');
 const knex = require('knex');
@@ -35,7 +36,7 @@ const { setupWebSocketServer } = require('./ws');
 const app = express();
 const db = knex(knexConfig.development);
 
-const PORT = process.env.PORT || 3003;
+const PORT = 3000;
 const LISTEN_IP = '127.0.0.1';
 const JWT_SECRET = process.env.JWT_SECRET;
 
@@ -49,6 +50,8 @@ app.use(express.json()); // middleware to parse JSON request bodies
 app.use(cors());
 app.set('trust proxy', 1);
 app.disable('x-powered-by');
+app.use(compression());
+
 
 // initiate routes
 app.use('/auth', authRouter, () => {
