@@ -11,7 +11,7 @@
     "lint": "eslint . --ext js,jsx --report-unused-disable-directives --max-warnings 0",
     "preview": "vite preview",
     "build": "vite build",
-    "start": "cd backend && node server.js"
+    "start": "npm run build && cd backend && node server.js"
   },
   "dependencies": {
     "@emotion/react": "^11.10.6",
