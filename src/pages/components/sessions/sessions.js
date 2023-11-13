@@ -25,7 +25,6 @@ function Sessions() {
     };
 
     const handleLiveTV = row => {
-      //Handle live events
       let nowPlaying = row.NowPlayingItem;
       if(!nowPlaying.RunTimeTicks && nowPlaying?.CurrentProgram) {
         nowPlaying.RunTimeTicks = 0;
