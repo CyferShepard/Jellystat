@@ -24,7 +24,16 @@ function Sessions() {
       }
     };
 
-    const getSubtitleStream = (row) => {
+    const handleLiveTV = row => {
+      //Handle live events
+      let nowPlaying = row.NowPlayingItem;
+      if(!nowPlaying.RunTimeTicks && nowPlaying?.CurrentProgram) {
+        nowPlaying.RunTimeTicks = 0;
+        nowPlaying.Name = `${nowPlaying.Name}: ${nowPlaying.CurrentProgram.Name}`;
+      }
+    };
+
+    const getSubtitleStream = row => {
       let result = '';
 
       if(!row.PlayState) {
@@ -42,7 +51,7 @@ function Sessions() {
       }
 
       return result;
-  }
+    };
 
     const fetchData = () => {
 
@@ -61,7 +70,10 @@ function Sessions() {
             if(data && typeof data.data === 'object' && Array.isArray(data.data))
             {
               let toSet = data.data.filter(row => row.NowPlayingItem !== undefined);
-              toSet.forEach(s => s.NowPlayingItem.SubtitleStream = getSubtitleStream(s));
+              toSet.forEach(s => {
+                handleLiveTV(s);
+                s.NowPlayingItem.SubtitleStream = getSubtitleStream(s);                
+              });
               setData(toSet);
             }
 
