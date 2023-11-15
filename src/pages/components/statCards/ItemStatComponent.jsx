@@ -51,7 +51,7 @@ function ItemStatComponent(props) {
                 )}
                 <Card.Img
                   className="stat-card-image"
-                  src={"Proxy/Items/Images/Primary?id=" + props.data[0].Id + "&fillWidth=400&quality=90"}
+                  src={"proxy/Items/Images/Primary?id=" + props.data[0].Id + "&fillWidth=400&quality=90"}
                   style={{ display: loaded ? 'block' : 'none' }}
                   onLoad={handleImageLoad}
                   onError={() => setLoaded(false)}

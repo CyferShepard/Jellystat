@@ -149,7 +149,7 @@ function Row(row) {
                   <img
                     className="card-user-image"
                     src={
-                      "Proxy/Users/Images/Primary?id=" +
+                      "proxy/Users/Images/Primary?id=" +
                       data.UserId +
                       "&quality=10"
                     }

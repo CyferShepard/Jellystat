@@ -80,7 +80,7 @@ function UserInfo() {
           <img
             className="user-image"
             src={
-              "/Proxy/Users/Images/Primary?id=" +
+              "/proxy/Users/Images/Primary?id=" +
               UserId+
               "&quality=100"
             }

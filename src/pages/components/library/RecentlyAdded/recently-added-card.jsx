@@ -15,7 +15,7 @@ function RecentlyAddedCard(props) {
         {loaded ? null : <Blurhash hash={props.data.ImageBlurHashes.Primary[props.data.ImageTags.Primary]} width={'100%'}   height={'100%'} className="rounded-3 overflow-hidden"/>}
         <img
           src={
-            `${"/Proxy/Items/Images/Primary?id=" +
+            `${"/proxy/Items/Images/Primary?id=" +
             (props.data.Type==="Episode"? props.data.SeriesId :props.data.Id) +
                 "&fillHeight=320&fillWidth=213&quality=50"}`
           }

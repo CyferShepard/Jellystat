@@ -121,7 +121,7 @@ if(data && data.notfound)
 }
 
 const cardStyle = {
-  backgroundImage: `url(/Proxy/Items/Images/Backdrop?id=${(["Episode","Season"].includes(data.Type)? data.SeriesId : data.Id)}&fillWidth=800&quality=90)`,
+  backgroundImage: `url(/proxy/Items/Images/Backdrop?id=${(["Episode","Season"].includes(data.Type)? data.SeriesId : data.Id)}&fillWidth=800&quality=90)`,
   height:'100%',
   backgroundSize: 'cover',
 };
@@ -142,7 +142,7 @@ const cardBgStyle = {
         <img
             className="item-image"
             src={
-              "/Proxy/Items/Images/Primary?id=" +
+              "/proxy/Items/Images/Primary?id=" +
              (["Episode","Season"].includes(data.Type)? data.SeriesId : data.Id) +
               "&fillWidth=200&quality=90"
             }

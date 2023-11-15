@@ -25,3 +25,9 @@ yarn-debug.log*
 yarn-error.log*
 .vscode/launch.json
 .vscode/launch.json
+
+# env
+/backend/.env
+
+# local deployment
+/dist
