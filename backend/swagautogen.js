@@ -33,7 +33,7 @@ const config = {
             description: 'Jellystat Log Endpoints',
         },
     ],
-    host: 'localhost:3000',
+    host: '/',
     schemes: ['http', 'https'],
     securityDefinitions: {
         apiKey: {

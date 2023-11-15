@@ -250,11 +250,13 @@ export default function ActivityTable(props) {
 
 
   const handleNextPageClick = () => {
-    setPage((prevPage) => prevPage + 1);
+    setPage((prevPage) => Number(prevPage) + 1);
+
   };
 
   const handlePreviousPageClick = () => {
-    setPage((prevPage) => prevPage - 1);
+    setPage((prevPage) => Number(prevPage) - 1);
+
   };
 
 
@@ -295,8 +297,8 @@ export default function ActivityTable(props) {
     const visibleRows = React.useMemo(
       () =>
         stableSort(props.data, getComparator(order, orderBy)).slice(
-          page * rowsPerPage,
-          page * rowsPerPage + rowsPerPage,
+          page * Number(rowsPerPage),
+          page * Number(rowsPerPage) + Number(rowsPerPage),
         ),
       [order, orderBy, page, rowsPerPage, getComparator, props.data],
     );
@@ -340,7 +342,7 @@ export default function ActivityTable(props) {
                       Previous
                     </Button>
 
-                    <div className="page-number d-flex align-items-center justify-content-center">{`${page *rowsPerPage + 1}-${Math.min((page * rowsPerPage+ 1 ) +  (rowsPerPage - 1),props.data.length)} of ${props.data.length}`}</div>
+                    <div className="page-number d-flex align-items-center justify-content-center">{`${(page *rowsPerPage) + 1}-${Math.min(((page * rowsPerPage)+ 1 ) +  (rowsPerPage - 1),props.data.length)} of ${props.data.length}`}</div>
 
                     <Button className="page-btn" onClick={handleNextPageClick}  disabled={page >= Math.ceil(props.data.length / rowsPerPage) - 1}>
                       Next
