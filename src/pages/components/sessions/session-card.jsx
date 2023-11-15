@@ -72,7 +72,7 @@ function SessionCard(props) {
   };
 
   const pushNextToBottom = {
-    'margin-bottom': 'auto'
+    marginBottom: 'auto'
   }
 
   const token = localStorage.getItem('token');
@@ -159,7 +159,7 @@ function SessionCard(props) {
                     <Row>
                       <Col className="px-0 col-auto ellipse">
 
-                        {isRemoteSession && (process.env.GEOLITE_ACCOUNT_ID && process.env.GEOLITE_LICENSE_KEY) ? 
+                        {isRemoteSession && (import.meta.env.VITE_GEOLITE_ACCOUNT_ID && import.meta.env.VITE_GEOLITE_LICENSE_KEY) ? 
                           <Card.Text>                            
                             IP Address: <Link onClick={showModal}>{props.data.session.RemoteEndPoint}</Link>
                           </Card.Text>
