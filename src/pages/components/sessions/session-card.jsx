@@ -71,6 +71,10 @@ function SessionCard(props) {
     height:'100%',
   };
 
+  const pushNextToBottom = {
+    'margin-bottom': 'auto'
+  }
+
   const token = localStorage.getItem('token');
 
   const ipv4Regex = new RegExp(/\b(?!(10\.|172\.(1[6-9]|2[0-9]|3[0-1])\.|192\.168))(?:(?:2(?:[0-4][0-9]|5[0-5])|[0-1]?[0-9]?[0-9])\.){3}(?:(?:2([0-4][0-9]|5[0-5])|[0-1]?[0-9]?[0-9]))\b/);
@@ -203,7 +207,7 @@ function SessionCard(props) {
 
              
                 
-                <Row className="d-flex flex-row justify-content-between">
+                <Row className="d-flex flex-row justify-content-between" style={pushNextToBottom}>
                     {props.data.session.NowPlayingItem.Type==='Episode' ? 
                       <Col className="col-auto p-0">
                                <Card.Text >
@@ -262,7 +266,7 @@ function SessionCard(props) {
                 <Card.Text className="text-end">
                   <Tooltip title={`Ends at ${getETAFromTicks(props.data.session.NowPlayingItem.RunTimeTicks - props.data.session.PlayState.PositionTicks)}`}>
                     <span> 
-                      {ticksToTimeString(props.data.session.PlayState.PositionTicks)} /
+                      {ticksToTimeString(props.data.session.PlayState.PositionTicks)}/
                       {ticksToTimeString(props.data.session.NowPlayingItem.RunTimeTicks)} 
                     </span>
                   </Tooltip>
