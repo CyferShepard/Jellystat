@@ -71,6 +71,10 @@ function SessionCard(props) {
     height:'100%',
   };
 
+  const pushNextToBottom = {
+    marginBottom: 'auto'
+  }
+
   const token = localStorage.getItem('token');
 
   const ipv4Regex = new RegExp(/\b(?!(10\.|172\.(1[6-9]|2[0-9]|3[0-1])\.|192\.168))(?:(?:2(?:[0-4][0-9]|5[0-5])|[0-1]?[0-9]?[0-9])\.){3}(?:(?:2([0-4][0-9]|5[0-5])|[0-1]?[0-9]?[0-9]))\b/);
@@ -155,7 +159,7 @@ function SessionCard(props) {
                     <Row>
                       <Col className="px-0 col-auto ellipse">
 
-                        {isRemoteSession && (process.env.GEOLITE_ACCOUNT_ID && process.env.GEOLITE_LICENSE_KEY) ? 
+                        {isRemoteSession && (import.meta.env.VITE_GEOLITE_ACCOUNT_ID && import.meta.env.VITE_GEOLITE_LICENSE_KEY) ? 
                           <Card.Text>                            
                             IP Address: <Link onClick={showModal}>{props.data.session.RemoteEndPoint}</Link>
                           </Card.Text>
