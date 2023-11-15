@@ -22,7 +22,7 @@ function MoreItemCards(props) {
         <img
         src={
           `${
-              "/Proxy/Items/Images/Primary?id=" +
+              "/proxy/Items/Images/Primary?id=" +
               Id +
               "&fillHeight=320&fillWidth=213&quality=50"}`
         }
@@ -34,7 +34,7 @@ function MoreItemCards(props) {
         <img
         src={
           `${
-              "/Proxy/Items/Images/Primary?id=" +
+              "/proxy/Items/Images/Primary?id=" +
               (props.data.Type==="Episode" ? props.data.EpisodeId :  props.data.Id) +
               "&fillHeight=320&fillWidth=213&quality=50"}`
         }

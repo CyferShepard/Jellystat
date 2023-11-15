@@ -13,6 +13,7 @@ services:
       POSTGRES_IP: jellystat-db
       POSTGRES_PORT: 5432
       JWT_SECRET: 'my-secret-jwt-key'
+      TZ: Africa/Johannesburg  
     ports:
       - "3000:3000"
     depends_on:

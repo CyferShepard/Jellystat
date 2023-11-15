@@ -60,7 +60,7 @@ function convertBitrate(bitrate) {
 
 function SessionCard(props) {
   const cardStyle = {
-    backgroundImage: `url(Proxy/Items/Images/Backdrop?id=${(props.data.session.NowPlayingItem.SeriesId ? props.data.session.NowPlayingItem.SeriesId : props.data.session.NowPlayingItem.Id)}&fillHeight=320&fillWidth=213&quality=80), linear-gradient(to right, #00A4DC, #AA5CC3)`,
+    backgroundImage: `url(proxy/Items/Images/Backdrop?id=${(props.data.session.NowPlayingItem.SeriesId ? props.data.session.NowPlayingItem.SeriesId : props.data.session.NowPlayingItem.Id)}&fillHeight=320&fillWidth=213&quality=80), linear-gradient(to right, #00A4DC, #AA5CC3)`,
     height:'100%',
     backgroundSize: 'cover',
   };
@@ -131,7 +131,7 @@ function SessionCard(props) {
               <Card.Img
                 variant="top"
                 className="stat-card-image rounded-0 rounded-start"
-                src={"/Proxy/Items/Images/Primary?id=" + (props.data.session.NowPlayingItem.SeriesId ? props.data.session.NowPlayingItem.SeriesId : props.data.session.NowPlayingItem.Id) + "&fillHeight=320&fillWidth=213&quality=50"}
+                src={"/proxy/Items/Images/Primary?id=" + (props.data.session.NowPlayingItem.SeriesId ? props.data.session.NowPlayingItem.SeriesId : props.data.session.NowPlayingItem.Id) + "&fillHeight=320&fillWidth=213&quality=50"}
               />
 
 
@@ -207,7 +207,7 @@ function SessionCard(props) {
 
              
                 
-                <Row className="d-flex flex-row justify-content-between">
+                <Row className="d-flex flex-row justify-content-between" style={pushNextToBottom}>
                     {props.data.session.NowPlayingItem.Type==='Episode' ? 
                       <Col className="col-auto p-0">
                                <Card.Text >
@@ -231,7 +231,7 @@ function SessionCard(props) {
                     <img
                       className="session-card-user-image"
                       src={
-                        "/Proxy/Users/Images/Primary?id=" +
+                        "/proxy/Users/Images/Primary?id=" +
                         props.data.session.UserId +
                         "&quality=50"
                       }
@@ -266,7 +266,7 @@ function SessionCard(props) {
                 <Card.Text className="text-end">
                   <Tooltip title={`Ends at ${getETAFromTicks(props.data.session.NowPlayingItem.RunTimeTicks - props.data.session.PlayState.PositionTicks)}`}>
                     <span> 
-                      {ticksToTimeString(props.data.session.PlayState.PositionTicks)} /
+                      {ticksToTimeString(props.data.session.PlayState.PositionTicks)}/
                       {ticksToTimeString(props.data.session.NowPlayingItem.RunTimeTicks)} 
                     </span>
                   </Tooltip>

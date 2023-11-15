@@ -1,15 +1,13 @@
 @import 'pages/css/variables.module.css';
 @import 'pages/css/variables.module.css';
-main{
-  margin-inline: 20px; 
+main {
+  margin-inline: 20px;
   /* width: 100%; */
   overflow: auto;
-  margin-inline: 20px; 
+  margin-inline: 20px;
   /* width: 100%; */
   overflow: auto;
 }
-
-
 
 .App-logo {
   height: 40vmin;
@@ -22,49 +20,47 @@ main{
   }
 }
 
-body
-{
+body {
   background-color: var(--background-color) !important;
   background-color: var(--background-color) !important;
   /* background-color: #17151a; */
   color: white;
 }
 
-h1{
+h1 {
   color: white;
   font-weight: lighter !important;
   margin: 0 !important;
-    margin-top: 0.5em;
-    margin-bottom: 0.5em;
+  margin-top: 0.5em;
+  margin-bottom: 0.5em;
 }
 
-h2{
+h2 {
   color: white;
   font-weight: lighter !important;
   margin: 0 !important;
-    margin-top: 0.5em;
-    margin-bottom: 0.5em;
+  margin-top: 0.5em;
+  margin-bottom: 0.5em;
 }
-
-
-
-
-
-
 
 @keyframes fade-in {
-  from { opacity: 0; }
-  to { opacity: 1; }
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
 }
 @keyframes fade-out {
-  from { opacity: 1; }
-  to { opacity: 0; }
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
 }
 
-
-
 .App-header {
- 
   /* min-height: 100vh; */
   padding-bottom: 10px;
   display: flex;
@@ -79,7 +75,6 @@ h2{
   color: #61dafb;
 }
 
-
 @keyframes App-logo-spin {
   from {
     transform: rotate(0deg);
@@ -89,64 +84,49 @@ h2{
   }
 }
 
-
-.btn-outline-primary
-{
-  color: white!important;
+.btn-outline-primary {
+  color: white !important;
   border-color: var(--primary-color) !important;
   background-color: var(--background-color) !important;
 }
 
-.btn-outline-primary:hover
-{
+.btn-outline-primary:hover {
   background-color: var(--primary-color) !important;
 }
 
-.btn-outline-primary.active
-{
+.btn-outline-primary.active {
   background-color: var(--primary-color) !important;
-
 }
 
-.btn-outline-primary:focus
-{
+.btn-outline-primary:focus {
   background-color: var(--primary-color) !important;
-
 }
 
-.btn-primary
-{
-  color: white!important;
+.btn-primary {
+  color: white !important;
   border-color: var(--primary-color) !important;
   background-color: var(--primary-color) !important;
 }
 
-.btn-primary:hover
-{
+.btn-primary:hover {
   background-color: var(--primary-dark-color) !important;
 }
 
-.btn-primary.active
-{
+.btn-primary.active {
   background-color: var(--primary-color) !important;
-
 }
 
-.btn-primary:focus
-{
+.btn-primary:focus {
   background-color: var(--primary-color) !important;
-
 }
 
-.form-select
-{
-  background-color:var(--secondary-background-color) !important;
-  border-color:var(--secondary-background-color) !important ;
+.form-select {
+  background-color: var(--secondary-background-color) !important;
+  border-color: var(--secondary-background-color) !important ;
   color: white !important;
 }
 
-.form-select:focus
-{
+.form-select:focus {
   box-shadow: none !important;
   border-color: var(--primary-color) !important;
   color: white !important;
@@ -159,12 +139,7 @@ h2{
   border-color: var(--primary-color) !important;
 }
 
-
 .form-select option:hover {
   background-color: var(--primary-color) !important;
   color: white !important;
 }
-
-
-
-
