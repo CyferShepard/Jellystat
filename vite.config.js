@@ -47,4 +47,5 @@ export default defineConfig({
     },
   },
   plugins: [react(), splitVendorChunkPlugin()],
+  envDir: "backend"
 });
