@@ -4,7 +4,6 @@ import { navData } from "../../../lib/navdata";
 import LogoutBoxLineIcon from "remixicon-react/LogoutBoxLineIcon";
 import logo_dark from '../../images/icon-b-512.png';
 import "../../css/navbar.css";
-import React from "react";
 import VersionCard from "./version-card";
 
 export default function Navbar() {
