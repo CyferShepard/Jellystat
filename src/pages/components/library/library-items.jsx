@@ -54,8 +54,8 @@ function LibraryItems(props) {
     }else{
         fetchData();
     }
-    
-   
+
+
     const intervalId = setInterval(fetchData, 60000 * 5);
     return () => clearInterval(intervalId);
   }, [config, props.LibraryId]);
@@ -110,14 +110,14 @@ function LibraryItems(props) {
 
             </Button>
             </div>
-            <FormControl type="text" placeholder="Search" value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} className="ms-md-3 my-3 w-sm-100 w-md-75" />
-      
-        </div>
+            <FormControl type="text" placeholder="Search"  value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} className="ms-md-3 my-3 w-sm-100 w-md-75" />
 
         </div>
 
+        </div>
 
-        
+
+
         <div className="media-items-container">
         {filteredData.sort((a, b) =>
              {
@@ -147,8 +147,8 @@ function LibraryItems(props) {
                 }
                 return b.total_play_time-a.total_play_time;
               }
-          
-              
+
+
              }
             ).map((item) => (
                     <MoreItemCards data={item} base_url={config.hostUrl} key={item.Id+item.SeasonNumber+item.EpisodeNumber}/>

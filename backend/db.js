@@ -59,6 +59,33 @@ async function deleteBulk(table_name, data) {
   return { Result: result, message: '' + message };
 }
 
+async function updateSingleFieldBulk(table_name, data,field_name, new_value) {
+  const client = await pool.connect();
+  let result = 'SUCCESS';
+  let message = '';
+  try {
+    await client.query('BEGIN');
+
+    if (data && data.length !== 0) {
+      const updateQuery = {
+        text: `UPDATE ${table_name} SET "${field_name}"='${new_value}' WHERE "Id" IN (${pgp.as.csv(data)})`,
+      };
+      //  console.log(deleteQuery);
+      await client.query(updateQuery);
+    }
+
+    await client.query('COMMIT');
+    message = data.length + ' Rows updated.';
+  } catch (error) {
+    await client.query('ROLLBACK');
+    message = 'Bulk update error: ' + error;
+    result = 'ERROR';
+  } finally {
+    client.release();
+  }
+  return { Result: result, message: '' + message };
+}
+
 async function insertBulk(table_name, data, columns) {
   //dedupe data
 
@@ -136,5 +163,6 @@ module.exports = {
   query: query,
   deleteBulk: deleteBulk,
   insertBulk: insertBulk,
+  updateSingleFieldBulk:updateSingleFieldBulk,
   // initDB: initDB,
 };

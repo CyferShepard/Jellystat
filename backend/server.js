@@ -27,8 +27,7 @@ const utilsRouter = require('./routes/utils');
 
 // tasks
 const ActivityMonitor = require('./tasks/ActivityMonitor');
-const SyncTask = require('./tasks/SyncTask');
-const BackupTask = require('./tasks/BackupTask');
+const tasks = require('./tasks/tasks');
 
 // websocket
 const { setupWebSocketServer } = require('./ws');
@@ -155,8 +154,9 @@ try {
           `[JELLYSTAT] Server listening on http://${LISTEN_IP}:${PORT}`
         );
         ActivityMonitor.ActivityMonitor(1000);
-        SyncTask.SyncTask();
-        BackupTask.BackupTask();
+        tasks.FullSyncTask();
+        tasks.RecentlyAddedItemsSyncTask();
+        tasks.BackupTask();
       });
     });
   });

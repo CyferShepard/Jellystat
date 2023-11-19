@@ -1,10 +1,12 @@
-import React, {useState} from "react";
+/* eslint-disable react/prop-types */
+import {useState} from "react";
 import { Blurhash } from 'react-blurhash';
 import { Link } from "react-router-dom";
 import Card from 'react-bootstrap/Card';
 import Row from 'react-bootstrap/Row';
 import Col from 'react-bootstrap/Col';
 import  Tooltip  from "@mui/material/Tooltip";
+import ArchiveDrawerFillIcon from 'remixicon-react/ArchiveDrawerFillIcon';
 
 function ItemStatComponent(props) {
   const [loaded, setLoaded] = useState(false);
@@ -40,15 +42,16 @@ function ItemStatComponent(props) {
           <Col className="d-none d-lg-block stat-card-banner">
           {props.icon ?
             <div className="stat-card-icon">
-                {props.icon} 
+                {props.icon}
             </div>
               :
               <>
-                {props.data && props.data[0] && props.data[0].PrimaryImageHash && props.data[0].PrimaryImageHash!=null && !loaded && (
+                {!props.data[0].archived && props.data && props.data[0] && props.data[0].PrimaryImageHash && props.data[0].PrimaryImageHash!=null && !loaded && (
                   <div className="position-absolute w-100 h-100">
                     <Blurhash hash={props.data[0].PrimaryImageHash}  height={'100%'} className="rounded-3 overflow-hidden"/>
                   </div>
                 )}
+                {!props.data[0].archived ?
                 <Card.Img
                   className="stat-card-image"
                   src={"proxy/Items/Images/Primary?id=" + props.data[0].Id + "&fillWidth=400&quality=90"}
@@ -56,6 +59,21 @@ function ItemStatComponent(props) {
                   onLoad={handleImageLoad}
                   onError={() => setLoaded(false)}
                 />
+                :
+
+                <div>
+                  {props.data && props.data[0] && props.data[0].PrimaryImageHash && props.data[0].PrimaryImageHash!=null  && (
+
+                    <Blurhash hash={props.data[0].PrimaryImageHash}   height={'180px'} className="rounded-3 overflow-hidden position-absolute"/>
+
+                )}
+                  <div className="d-flex flex-column justify-content-center align-items-center  stat-card-image position-absolute">
+                    <ArchiveDrawerFillIcon className="w-100 h-100"/>
+                    <span>Archived</span>
+                  </div>
+                </div>
+
+                }
               </>
             }
 
@@ -73,26 +91,26 @@ function ItemStatComponent(props) {
               {props.data &&
               props.data.map((item, index) => (
                 <div className="d-flex justify-content-between  stat-items" key={item.Id || index}>
-                
+
                   <div className="d-flex justify-content-between" key={item.Id || index}>
                     <Card.Text className="stat-item-index m-0">{index + 1}</Card.Text>
-                    {item.UserId ? 
+                    {item.UserId ?
                     <Link to={`/users/${item.UserId}`}  className="item-name">
                       <Tooltip title={item.Name} >
                          <Card.Text>{item.Name}</Card.Text>
                       </Tooltip>
-                    
+
                     </Link>
                     :
-                      !item.Client && !props.icon ? 
+                      (!item.Client && !props.icon) ?
                       <Link to={`/libraries/item/${item.Id}`}  className="item-name">
- 
+
                         <Tooltip title={item.Name} >
                           <Card.Text>{item.Name}</Card.Text>
                         </Tooltip>
                       </Link>
                       :
-                        !item.Client && props.icon ? 
+                        (!item.Client && props.icon) ?
                         <Link to={`/libraries/${item.Id}`}  className="item-name">
                           <Tooltip title={item.Name} >
                            <Card.Text>{item.Name}</Card.Text>
@@ -104,11 +122,11 @@ function ItemStatComponent(props) {
                        </Tooltip>
                     }
                   </div>
-                  
+
                   <Card.Text className="stat-item-count">
                   {item.Plays || item.unique_viewers}
                   </Card.Text>
-                  
+
                 </div>
               ))}
             </Card.Body>

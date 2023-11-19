@@ -41,16 +41,27 @@ function App() {
 
   const wsListeners = [
     { task: 'PlaybackSyncTask', ref: React.useRef(null) },
-    { task: 'SyncTask', ref: React.useRef(null) },
+    { task: 'PartialSyncTask', ref: React.useRef(null) },
+    { task: 'FullSyncTask', ref: React.useRef(null) },
     { task: 'BackupTask', ref: React.useRef(null) },
     { task: 'TaskError', ref: React.useRef(null) },
+    { task: 'GeneralAlert', ref: React.useRef(null) },
   ];
 
   useEffect(() => {
     wsListeners.forEach((listener) => {
       socket.on(listener.task, (message) => {
-        if (message && (message.type === 'Start' || !listener.ref.current)) {
+        if (message && (message.type === 'Start')) {
           listener.ref.current = toast.info(message?.message || message, {
+            autoClose: 15000,
+          });
+        } else
+        if (message && (message.type === 'Success' &&  !listener.ref.current)) {
+          listener.ref.current = toast.success(message?.message || message, {
+            autoClose: 15000,
+          });
+        } else if (message && (message.type === 'Error' &&  !listener.ref.current)) {
+          listener.ref.current = toast.error(message?.message || message, {
             autoClose: 15000,
           });
         } else if (message && message.type === 'Update') {
