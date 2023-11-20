@@ -451,11 +451,6 @@ async function syncShowItems(data,library_items)
 
   const { rows: shows } = await db.query(`SELECT *	FROM public.jf_library_items where "Type"='Series'`);
 
-  //reduce list to only loop for shows that are in the library which match the shows in the data
-  //this should exist in the db as syncShowItems is usually called after syncLibraryItems
-  const _shows=shows.filter((item) => item.Id !== undefined && library_items.some((row) => row.Id === item.Id));
-
-
 
   let insertSeasonsCount = 0;
   let insertEpisodeCount = 0;
@@ -464,12 +459,14 @@ async function syncShowItems(data,library_items)
 
 
   //loop for each show
-  for (const show of _shows) {
+  for (const show of shows) {
 
     //get all seasons and episodes for this show from the data
     const allSeasons =  data.filter((item) => item.Type==='Season' && item.SeriesId===show.Id);
     const allEpisodes =data.filter((item) => item.Type==='Episode' && item.SeriesId===show.Id);
 
+    if(allSeasons.length>0 || allEpisodes.length>0)
+    {
 
     const existingIdsSeasons = await db.query(`SELECT *	FROM public.jf_library_seasons where "SeriesId" = '${show.Id}'`).then((res) => res.rows.map((row) => row.Id));
     let existingIdsEpisodes = [];
@@ -492,12 +489,15 @@ async function syncShowItems(data,library_items)
     seasonsToInsert = await allSeasons.map(jf_library_seasons_mapping);
     episodesToInsert = await allEpisodes.map(jf_library_episodes_mapping);
 
+
     //for partial sync, dont overwrite existing data
     if(syncTask.taskName===taskName.partialsync)
     {
       seasonsToInsert=seasonsToInsert.filter((season) => !existingIdsSeasons.some((id) => id === season.Id));
       episodesToInsert=episodesToInsert.filter((episode) => !existingIdsEpisodes.some((id) => id === episode.EpisodeId ));
     }
+
+    // console.log(episodesToInsert);
 
 
     //Bulkinsert new data not on db
@@ -531,13 +531,15 @@ async function syncShowItems(data,library_items)
       }
     }
 
+  }
+
 
 
 
   }
 
   syncTask.loggedData.push({color: "dodgerblue",Message: `Seasons: ${insertSeasonsCount} Rows Inserted. ${updateSeasonsCount} Rows Updated.`});
- syncTask.loggedData.push({color: "dodgerblue",Message: `Episodes: ${insertEpisodeCount} Rows Inserted. ${updateEpisodeCount} Rows Updated.`});
+  syncTask.loggedData.push({color: "dodgerblue",Message: `Episodes: ${insertEpisodeCount} Rows Inserted. ${updateEpisodeCount} Rows Updated.`});
   syncTask.loggedData.push({ color: "yellow", Message: "Sync Complete" });
 }
 
@@ -550,8 +552,11 @@ async function syncItemInfo(seasons_and_episodes,library_items)
   const { rows: config } = await db.query('SELECT * FROM app_config where "ID"=1');
 
   const _sync = new sync(config[0].JF_HOST, config[0].JF_API_KEY);
-  let Items=library_items.filter((item) => item.Type !== 'Series' && item.Type !== 'Folder' && item.id !== undefined).map(jf_library_items_mapping);
-  let Episodes=seasons_and_episodes.filter((item) => item.Type === 'Episode' && item.LocationType !== 'Virtual' && item.id !== undefined).map(jf_library_episodes_mapping);
+  let Items=library_items.filter((item) => item.Type !== 'Series' && item.Type !== 'Folder' && item.Id !== undefined).map(jf_library_items_mapping);
+  let Episodes=seasons_and_episodes.filter((item) => item.Type === 'Episode' && item.LocationType !== 'Virtual' && item.Id !== undefined).map(jf_library_episodes_mapping);
+  
+
+
   if(syncTask.taskName===taskName.fullsync)
   {
     const { rows: _Items } = await db.query(`SELECT *	FROM public.jf_library_items where "Type" not in ('Series','Folder')`);
@@ -559,6 +564,7 @@ async function syncItemInfo(seasons_and_episodes,library_items)
     Items=_Items;
     Episodes=_Episodes;
   }
+
 
 
   let insertItemInfoCount = 0;
@@ -594,12 +600,11 @@ async function syncItemInfo(seasons_and_episodes,library_items)
     current_item++;
     sendUpdate(syncTask.wsKey,{type:"Update",message:`Syncing Item Info ${((current_item/all_items)*100).toFixed(2)}%`});
     const existingItemInfo = await db.query(`SELECT *	FROM public.jf_item_info where "Id" = '${Item.Id}'`).then((res) => res.rows.map((row) => row.Id));
-    if(existingItemInfo.length>0 && syncTask.taskName===taskName.partialsync)
+
+    if((existingItemInfo.length==0 && syncTask.taskName===taskName.partialsync) || syncTask.taskName===taskName.fullsync)
     {
       //dont update item info if it already exists and running a partial sync
-      return;
-    }
-    const data = await _sync.getItemInfo(Item.Id,userid);
+      const data = await _sync.getItemInfo(Item.Id,userid);
 
     
     let ItemInfoToInsert = await data.map(item => jf_item_info_mapping(item, 'Item'));
@@ -619,6 +624,8 @@ async function syncItemInfo(seasons_and_episodes,library_items)
         logging.updateLog(syncTask.uuid,syncTask.loggedData,taskstate.FAILED);
       }
     }
+    }
+    
 
   }
 
@@ -630,32 +637,34 @@ async function syncItemInfo(seasons_and_episodes,library_items)
     sendUpdate(syncTask.wsKey,{type:"Update",message:`Syncing Episode Info ${((current_episode/all_episodes)*100).toFixed(2)}%`});
     
     const existingEpisodeItemInfo = await db.query(`SELECT *	FROM public.jf_item_info where "Id" = '${Episode.EpisodeId}'`).then((res) => res.rows.map((row) => row.Id));
-    if(existingEpisodeItemInfo.length>0 && syncTask.taskName===taskName.partialsync)
+
+    if((existingEpisodeItemInfo.length==0 && syncTask.taskName===taskName.partialsync) ||syncTask.taskName===taskName.fullsync )
     {
+
       //dont update item info if it already exists and running a partial sync
-      return;
-    }
-    const data = await _sync.getItemInfo(Episode.EpisodeId,userid);
+      const episodedata = await _sync.getItemInfo(Episode.EpisodeId,userid);
+
+      let EpisodeInfoToInsert =  await episodedata.map(item => jf_item_info_mapping(item, 'Episode'));
+     
+      //filter fix if jf_libraries is empty
 
 
-    let EpisodeInfoToInsert =  await data.map(item => jf_item_info_mapping(item, 'Episode'));
-
-    //filter fix if jf_libraries is empty
-
-
-    if (EpisodeInfoToInsert.length !== 0) {
-      let result = await db.insertBulk("jf_item_info",EpisodeInfoToInsert,jf_item_info_columns);
-      if (result.Result === "SUCCESS") {
-        insertEpisodeInfoCount += EpisodeInfoToInsert.length-existingEpisodeItemInfo.length;
-        updateEpisodeInfoCount+= existingEpisodeItemInfo.length;
-      } else {
-        syncTask.loggedData.push({
-          color: "red",
-          Message: "Error performing bulk insert:" + result.message,
-        });
-        logging.updateLog(syncTask.uuid,syncTask.loggedData,taskstate.FAILED);
+      if (EpisodeInfoToInsert.length !== 0) {
+        console.log("Inserting" + EpisodeInfoToInsert.length);
+        let result = await db.insertBulk("jf_item_info",EpisodeInfoToInsert,jf_item_info_columns);
+        if (result.Result === "SUCCESS") {
+          insertEpisodeInfoCount += EpisodeInfoToInsert.length-existingEpisodeItemInfo.length;
+          updateEpisodeInfoCount+= existingEpisodeItemInfo.length;
+        } else {
+          syncTask.loggedData.push({
+            color: "red",
+            Message: "Error performing bulk insert:" + result.message,
+          });
+          logging.updateLog(syncTask.uuid,syncTask.loggedData,taskstate.FAILED);
+        }
       }
     }
+    
 
   }
 
@@ -866,6 +875,7 @@ async function fullSync(triggertype)
     const library_items=data.filter((item) => ['Movie','Audio','Series'].includes(item.Type));
     const seasons_and_episodes=data.filter((item) => ['Season','Episode'].includes(item.Type));
 
+
     //syncUserData
     await syncUserData();
 
@@ -981,8 +991,6 @@ async function partialSync(triggertype)
 
 
     const seasons_and_episodes=data.filter((item) => ['Season','Episode'].includes(item.Type));
-
-
 
   //   //syncUserData
     await syncUserData();
