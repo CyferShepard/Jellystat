@@ -19,7 +19,7 @@ async function RecentlyAddedItemsSyncTask() {
 
 let interval=10000; 
 
-let taskDelay=15; //in minutes
+let taskDelay=60; //in minutes
 
 
 

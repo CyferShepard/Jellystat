@@ -55,6 +55,12 @@ export default function Tasks() {
             Authorization: `Bearer ${token}`,
             "Content-Type": "application/json",
           },
+        }).then(()=>{
+           
+          let taskstate=taskIntervals;
+          taskstate[taskName]={Interval:Interval};
+          console.log(taskstate);
+          setTaskIntervals(taskstate);
         }).catch((error) => {
            console.log(error);
         });
