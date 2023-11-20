@@ -442,7 +442,7 @@ async function syncLibraryItems(data)
   syncTask.loggedData.push({ color: "yellow", Message: "Item Sync Complete" });
 }
 
-async function syncShowItems(data,library_items)
+async function syncShowItems(data)
 {
 
   syncTask.loggedData.push({ color: "lawngreen", Message: "Syncing... 2/4" });
@@ -496,8 +496,6 @@ async function syncShowItems(data,library_items)
       seasonsToInsert=seasonsToInsert.filter((season) => !existingIdsSeasons.some((id) => id === season.Id));
       episodesToInsert=episodesToInsert.filter((episode) => !existingIdsEpisodes.some((id) => id === episode.EpisodeId ));
     }
-
-    // console.log(episodesToInsert);
 
 
     //Bulkinsert new data not on db
@@ -650,7 +648,6 @@ async function syncItemInfo(seasons_and_episodes,library_items)
 
 
       if (EpisodeInfoToInsert.length !== 0) {
-        console.log("Inserting" + EpisodeInfoToInsert.length);
         let result = await db.insertBulk("jf_item_info",EpisodeInfoToInsert,jf_item_info_columns);
         if (result.Result === "SUCCESS") {
           insertEpisodeInfoCount += EpisodeInfoToInsert.length-existingEpisodeItemInfo.length;
@@ -886,7 +883,7 @@ async function fullSync(triggertype)
     await syncLibraryItems(library_items);
 
     //syncShowItems
-    await syncShowItems(seasons_and_episodes,library_items);
+    await syncShowItems(seasons_and_episodes);
 
     //syncItemInfo
     await syncItemInfo(seasons_and_episodes,library_items);
@@ -1002,7 +999,7 @@ async function partialSync(triggertype)
     await syncLibraryItems(library_items);
 
     //syncShowItems
-    await syncShowItems(seasons_and_episodes,library_items);
+    await syncShowItems(seasons_and_episodes);
 
     //syncItemInfo
     await syncItemInfo(seasons_and_episodes,library_items);
