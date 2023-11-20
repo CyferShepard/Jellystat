@@ -359,7 +359,7 @@ async function syncUserData()
 
 }
 
-async function syncLibraryFolders(data)
+async function syncLibraryFolders(data,existing_excluded_libraries)
 {
   sendUpdate(syncTask.wsKey,{type:"Update",message:"Syncing Library Folders"});
     const _sync = new sync();
@@ -378,10 +378,16 @@ async function syncLibraryFolders(data)
     if (toArchiveLibraryIds.length > 0) {
       sendUpdate(syncTask.wsKey,{type:"Update",message:"Archiving old Library Data"});
 
-      const ItemsToArchive=await db.query(`SELECT "Id" FROM jf_library_items where "ParentId" in (${toArchiveLibraryIds.map(id => `'${id}'`).join(',')})`).then((res) => res.rows.map((row) => row.Id));
-      if (ItemsToArchive.length > 0) {
-        await _sync.updateSingleFieldOnDB("jf_library_items",ItemsToArchive,"archived",true);
+      //dont archive items that exist on jellyfin but where marked as excluded in the config
+      if(toArchiveLibraryIds.filter((id) => !existing_excluded_libraries.some((row) => row.Id === id )).length>0)
+      {
+        const ItemsToArchive=await db.query(`SELECT "Id" FROM jf_library_items where "ParentId" in (${toArchiveLibraryIds.filter((id) => !existing_excluded_libraries.some((row) => row.Id === id )).map(id => `'${id}'`).join(',')})`).then((res) => res.rows.map((row) => row.Id));
+        if (ItemsToArchive.length > 0) {
+          await _sync.updateSingleFieldOnDB("jf_library_items",ItemsToArchive,"archived",true);
+        }
+
       }
+
       await _sync.updateSingleFieldOnDB("jf_libraries",toArchiveLibraryIds,"archived",true);
 
     }
@@ -845,6 +851,7 @@ async function fullSync(triggertype)
     const excluded_libraries= rows[0].settings.ExcludedLibraries||[];
 
     const filtered_libraries=libraries.filter((library)=> !excluded_libraries.includes(library.Id));
+    const existing_excluded_libraries=libraries.filter((library)=> excluded_libraries.includes(library.Id));
 
     const data=[];
 
@@ -869,7 +876,7 @@ async function fullSync(triggertype)
     await syncUserData();
 
     //syncLibraryFolders
-    await syncLibraryFolders(filtered_libraries);
+    await syncLibraryFolders(filtered_libraries,existing_excluded_libraries);
 
     //syncLibraryItems
     await syncLibraryItems(library_items);
@@ -947,6 +954,7 @@ async function partialSync(triggertype)
     const excluded_libraries= config[0].settings.ExcludedLibraries||[];
 
     const filtered_libraries=libraries.filter((library)=> !excluded_libraries.includes(library.Id));
+    const existing_excluded_libraries=libraries.filter((library)=> excluded_libraries.includes(library.Id));
 
     const data=[];
 
@@ -986,7 +994,7 @@ async function partialSync(triggertype)
     await syncUserData();
 
   //   //syncLibraryFolders
-    await syncLibraryFolders(filtered_libraries);
+    await syncLibraryFolders(filtered_libraries,existing_excluded_libraries);
 
     //syncLibraryItems
     await syncLibraryItems(library_items);
