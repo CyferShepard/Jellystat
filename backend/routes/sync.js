@@ -423,17 +423,11 @@ async function syncLibraryItems(data)
     await _sync.insertData("jf_library_items",dataToInsert,jf_library_items_columns);
   }
 
-  syncTask.loggedData.push({color: "dodgerblue",Message: `${dataToInsert.length-existingIds.length >0 ? dataToInsert.length-existingIds.length : 0} Rows Inserted. ${existingIds.length} Rows Updated.`,});
+  syncTask.loggedData.push({color: "dodgerblue",Message: `${syncTask.taskName===taskName.partialsync ? dataToInsert.length : Math.max((dataToInsert.length-existingIds.length),0)} Rows Inserted. ${syncTask.taskName===taskName.partialsync ? 0 : existingIds.length} Rows Updated.`,});
   
   if(syncTask.taskName===taskName.fullsync)
   {
     let toArchiveIds = existingIds.filter((id) =>!data.some((row) => row.Id === id ));
-
-    if(syncTask.taskName===taskName.partialsync)
-    {
-      toArchiveIds=toArchiveIds.filter((id)=>!existingIds.includes(id));
-    }
-  
   
     if (toArchiveIds.length > 0) {
       await _sync.updateSingleFieldOnDB("jf_library_items",toArchiveIds,"archived",true);
@@ -510,8 +504,8 @@ async function syncShowItems(data,library_items)
     if (seasonsToInsert.length !== 0) {
       let result = await db.insertBulk("jf_library_seasons",seasonsToInsert,jf_library_seasons_columns);
       if (result.Result === "SUCCESS") {
-        insertSeasonsCount+=seasonsToInsert.length-existingIdsSeasons.length;
-        updateSeasonsCount+=existingIdsSeasons.length;
+        insertSeasonsCount+= syncTask.taskName===taskName.partialsync ? seasonsToInsert.length : Math.max((seasonsToInsert.length-existingIdsSeasons.length),0);
+        updateSeasonsCount+= syncTask.taskName===taskName.partialsync ? 0: existingIdsSeasons.length;
         } else {
         syncTask.loggedData.push({
           color: "red",
@@ -526,8 +520,8 @@ async function syncShowItems(data,library_items)
     if (episodesToInsert.length !== 0) {
       let result = await db.insertBulk("jf_library_episodes",episodesToInsert,jf_library_episodes_columns);
       if (result.Result === "SUCCESS") {
-        insertEpisodeCount+=episodesToInsert.length-existingIdsEpisodes.length;
-        updateEpisodeCount+=existingIdsEpisodes.length;
+        insertEpisodeCount+=syncTask.taskName===taskName.partialsync ? episodesToInsert.length : Math.max((episodesToInsert.length-existingIdsEpisodes.length),0);
+        updateEpisodeCount+=syncTask.taskName===taskName.partialsync ? 0 :existingIdsEpisodes.length;
       } else {
         syncTask.loggedData.push({
           color: "red",
@@ -542,8 +536,8 @@ async function syncShowItems(data,library_items)
 
   }
 
-  syncTask.loggedData.push({color: "dodgerblue",Message: `Seasons: ${insertSeasonsCount > 0 ? insertSeasonsCount : 0} Rows Inserted. ${updateSeasonsCount} Rows Updated.`});
- syncTask.loggedData.push({color: "dodgerblue",Message: `Episodes: ${insertEpisodeCount > 0 ? insertEpisodeCount : 0} Rows Inserted. ${updateEpisodeCount} Rows Updated.`});
+  syncTask.loggedData.push({color: "dodgerblue",Message: `Seasons: ${insertSeasonsCount} Rows Inserted. ${updateSeasonsCount} Rows Updated.`});
+ syncTask.loggedData.push({color: "dodgerblue",Message: `Episodes: ${insertEpisodeCount} Rows Inserted. ${updateEpisodeCount} Rows Updated.`});
   syncTask.loggedData.push({ color: "yellow", Message: "Sync Complete" });
 }
 
