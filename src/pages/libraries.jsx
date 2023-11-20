@@ -81,17 +81,17 @@ function Libraries() {
 
   return (
     <div className="libraries">
-      <div className="d-flex flex-row justify-content-between">
+      <div className="d-flex flex-row justify-content-between align-items-center">
       <h1 className="py-4">Libraries</h1>
       {
         showArchived ?
-        <Tooltip title={"Hide Archived Libraries"}>
+        <Tooltip title={"Hide Archived Libraries"} className="tooltip-icon-button">
           <button className="btn" onClick={()=> setShowArchived(!showArchived)}>
             <EyeFillIcon/>
           </button>
         </Tooltip>
         :
-        <Tooltip title={"Show Archived Libraries"}>
+        <Tooltip title={"Show Archived Libraries"} className="tooltip-icon-button">
           <button className="btn" onClick={()=> setShowArchived(!showArchived)}>
             <EyeOffFillIcon/>
           </button>
