@@ -28,7 +28,7 @@ function Setup() {
 
       setProcessing(true);
       await axios
-      .get("/sync/beingSync", {
+      .get("/sync/beginSync", {
         headers: {
           Authorization: `Bearer ${config.token}`,
           "Content-Type": "application/json",
@@ -58,7 +58,7 @@ function Setup() {
         },
       })
       .catch((error) => {
-     
+
       });
 
     let data=result.data;
@@ -143,10 +143,10 @@ function Setup() {
 
         <Form onSubmit={handleFormSubmit} className="mt-5">
           <Form.Group as={Row} className="inputbox" >
- 
-            
+
+
               <Form.Control  id="JF_HOST"  name="JF_HOST" value={formValues.JF_HOST || ""} onChange={handleFormChange} placeholder=" "/>
-            
+
             <Form.Label column>
               URL
             </Form.Label>
@@ -161,7 +161,7 @@ function Setup() {
               API Key
             </Form.Label>
             </InputGroup>
-  
+
           </Form.Group>
 
 

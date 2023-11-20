@@ -40,7 +40,14 @@
     border-color: var(--secondary-background-color) !important;
   }
 
-  
+  .library-items > div>div> .form-control::placeholder
+  {
+    color: white !important;
+
+  }
+
+
+
   .library-items > div> div>.form-control:focus
   {
     box-shadow: none !important;

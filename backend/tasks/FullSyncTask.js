@@ -5,11 +5,11 @@ const taskName=require('../logging/taskName');
 const taskstate = require("../logging/taskstate");
 const triggertype = require("../logging/triggertype");
 
-async function SyncTask() {
+async function FullSyncTask() {
   try{
 
     await db.query(
-           `UPDATE jf_logging SET "Result"='${taskstate.FAILED}' WHERE "Name"='${taskName.sync}' AND "Result"='${taskstate.RUNNING}'`
+           `UPDATE jf_logging SET "Result"='${taskstate.FAILED}' WHERE "Name"='${taskName.fullsync}' AND "Result"='${taskstate.RUNNING}'`
          );
     }
     catch(error)
@@ -19,7 +19,7 @@ async function SyncTask() {
 
 let interval=10000; 
 
-let taskDelay=15; //in minutes
+let taskDelay=1440; //in minutes
 
 
 
@@ -86,7 +86,7 @@ async function intervalCallback() {
   
     const last_execution=await db.query( `SELECT "TimeRun","Result"
                                           FROM public.jf_logging
-                                          WHERE "Name"='${taskName.sync}'
+                                          WHERE "Name"='${taskName.fullsync}'
                                           ORDER BY "TimeRun" DESC
                                           LIMIT 1`).then((res) => res.rows);
     if(last_execution.length!==0)
@@ -121,5 +121,5 @@ let intervalTask = setInterval(intervalCallback, interval);
 }
 
 module.exports = {
-  SyncTask,
+  FullSyncTask,
 };

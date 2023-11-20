@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from "react";
+/* eslint-disable react/prop-types */
+import { useState, useEffect } from "react";
 import axios from "axios";
 import { useParams } from 'react-router-dom';
 import { Link } from "react-router-dom";
@@ -6,6 +7,8 @@ import { Blurhash } from 'react-blurhash';
 import {Row, Col, Tabs, Tab, Button, ButtonGroup } from 'react-bootstrap';
 
 import ExternalLinkFillIcon from "remixicon-react/ExternalLinkFillIcon";
+import ArchiveDrawerFillIcon from 'remixicon-react/ArchiveDrawerFillIcon';
+
 
 import GlobalStats from './item-info/globalStats';
 import "../css/items/item-details.css";
@@ -17,6 +20,7 @@ import ItemNotFound from "./item-info/item-not-found";
 
 import Config from "../../lib/config";
 import Loading from "./general/loading";
+import ItemOptions from "./item-info/item-options";
 
 
 
@@ -26,7 +30,7 @@ function ItemInfo() {
   const [config, setConfig] = useState();
   const [refresh, setRefresh] = useState(true);
   const [activeTab, setActiveTab] = useState('tabOverview');
-  
+
   const [loaded, setLoaded] = useState(false);
 
 
@@ -48,7 +52,7 @@ function ItemInfo() {
     const timeString = `${hours.toString().padStart(2, "0")}:${minutes
       .toString()
       .padStart(2, "0")}:${remainingSeconds.toString().padStart(2, "0")}`;
-  
+
     return timeString;
   }
 
@@ -64,8 +68,7 @@ function ItemInfo() {
           "Content-Type": "application/json",
         },
       });
-
-
+      console.log(itemData.data[0]);
       setData(itemData.data[0]);
 
     } catch (error) {
@@ -78,7 +81,7 @@ function ItemInfo() {
   };
 
 
-  
+
 useEffect(() => {
 
 
@@ -101,7 +104,7 @@ useEffect(() => {
 
   const intervalId = setInterval(fetchData, 60000 * 5);
   return () => clearInterval(intervalId);
-  // eslint-disable-next-line 
+  // eslint-disable-next-line
 }, [config, Id]);
 
 
@@ -128,17 +131,18 @@ const cardStyle = {
 
 const cardBgStyle = {
   backgroundColor: 'rgb(0, 0, 0, 0.8)',
- 
+
 };
 
 
   return (
     <div>
-       
+
        <div className="item-detail-container rounded-3" style={cardStyle}>
       <Row className="justify-content-center justify-content-md-start rounded-3 g-0 p-4" style={cardBgStyle}>
         <Col className="col-auto my-4 my-md-0 item-banner-image" >
-        {data.PrimaryImageHash && data.PrimaryImageHash!=null && !loaded ? <Blurhash hash={data.PrimaryImageHash} width={'200px'}   height={'300px'} className="rounded-3 overflow-hidden" style={{display:'block'}}/> : null}
+        {!data.archived && data.PrimaryImageHash && data.PrimaryImageHash!=null && !loaded ? <Blurhash hash={data.PrimaryImageHash} width={'200px'}   height={'300px'} className="rounded-3 overflow-hidden" style={{display:'block'}}/> : null}
+        {!data.archived ?
         <img
             className="item-image"
             src={
@@ -152,6 +156,19 @@ const cardBgStyle = {
             }}
             onLoad={() => setLoaded(true)}
          />
+         :
+         <div className="d-flex flex-column justify-content-center align-items-center position-relative" style={{height: '300px', width:'200px'}}>
+            {((data.PrimaryImageHash && data.PrimaryImageHash!=null) )?
+                    <Blurhash hash={data.PrimaryImageHash } width={'200px'}   height={'300px'} className="rounded-3 overflow-hidden position-absolute" style={{display:'block'}}/>
+                    :
+                    null
+            }
+            <div className="d-flex flex-column justify-content-center align-items-center position-absolute">
+              <ArchiveDrawerFillIcon className="w-100 h-100 mb-2"/>
+              <span>Archived</span>
+            </div>
+          </div>
+          }
         </Col>
 
         <Col >
@@ -171,7 +188,7 @@ const cardBgStyle = {
         <div className="my-3">
             {data.Type==="Episode"? <p><Link to={`/libraries/item/${data.SeasonId}`} className="fw-bold">{data.SeasonName}</Link> Episode {data.IndexNumber} - {data.Name}</p> : <></> }
             {data.Type==="Season"? <p>{data.Name}</p> : <></> }
-            {data.FileName ?  <p style={{color:"lightgrey"}} className="fst-italic fs-6">File Name: {data.FileName}</p> :<></>}      
+            {data.FileName ?  <p style={{color:"lightgrey"}} className="fst-italic fs-6">File Name: {data.FileName}</p> :<></>}
             {data.Path ? <p style={{color:"lightgrey"}} className="fst-italic fs-6">File Path: {data.Path}</p> :<></>}
             {data.RunTimeTicks ?  <p style={{color:"lightgrey"}} className="fst-italic fs-6">{data.Type==="Series"?"Average Runtime" : "Runtime"}: {ticksToTimeString(data.RunTimeTicks)}</p> :<></>}
             {data.Size ? <p style={{color:"lightgrey"}} className="fst-italic fs-6">File Size: {formatFileSize(data.Size)}</p> :<></>}
@@ -180,18 +197,20 @@ const cardBgStyle = {
         <ButtonGroup>
               <Button onClick={() => setActiveTab('tabOverview')} active={activeTab==='tabOverview'} variant='outline-primary' type='button'>Overview</Button>
               <Button onClick={() => setActiveTab('tabActivity')} active={activeTab==='tabActivity'} variant='outline-primary' type='button'>Activity</Button>
-          </ButtonGroup>
+
+              {data.archived && (<Button onClick={() => setActiveTab('tabOptions')} active={activeTab==='tabOptions'} variant='outline-primary' type='button'>Options</Button>)}
+        </ButtonGroup>
 
 
       </div>
-      
+
         </Col>
       </Row>
 
 
     </div>
 
-      
+
         <Tabs defaultActiveKey="tabOverview" activeKey={activeTab} variant='pills' className="hide-tab-titles">
           <Tab eventKey="tabOverview" title='' className='bg-transparent'>
             <GlobalStats ItemId={Id}/>
@@ -203,6 +222,9 @@ const cardBgStyle = {
           </Tab>
           <Tab eventKey="tabActivity" title='' className='bg-transparent'>
             <ItemActivity itemid={Id}/>
+          </Tab>
+          <Tab eventKey="tabOptions" title='' className='bg-transparent'>
+            <ItemOptions itemid={Id}/>
           </Tab>
         </Tabs>
     </div>

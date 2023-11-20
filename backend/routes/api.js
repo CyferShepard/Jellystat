@@ -5,6 +5,9 @@ const db = require("../db");
 const https = require("https");
 const { checkForUpdates } = require("../version-control");
 const { randomUUID }  = require('crypto');
+const { sendUpdate } = require("../ws");
+const pgp = require('pg-promise')();
+
 
 const agent = new https.Agent({
   rejectUnauthorized:
@@ -67,29 +70,29 @@ router.post("/setPreferredAdmin", async (req, res) => {
     const { rows: config } = await db.query(
       'SELECT * FROM app_config where "ID"=1'
     );
-  
+
     if (
       config[0].JF_HOST === null ||
-      config[0].JF_API_KEY === null 
+      config[0].JF_API_KEY === null
     ) {
       res.status(404);
       res.send({ error: "Config Details Not Found" });
       return;
     }
-  
+
     const settingsjson = await db
       .query('SELECT settings FROM app_config where "ID"=1')
       .then((res) => res.rows);
-      
+
     if (settingsjson.length > 0) {
       const settings = settingsjson[0].settings || {};
 
       settings.preferred_admin = {userid:userid,username:username};
-  
+
       let query = 'UPDATE app_config SET settings=$1 where "ID"=1';
-  
+
       const { rows } = await db.query(query, [settings]);
-  
+
       res.send("Settings updated succesfully");
     }else
     {
@@ -174,17 +177,17 @@ router.get("/TrackedLibraries", async (req, res) => {
         "X-MediaBrowser-Token": config[0].JF_API_KEY,
       },
     });
-  
+
     const filtered_items = response_data.data.Items.filter(
       (type) => !["boxsets", "playlists"].includes(type.CollectionType)
     );
-  
+
     const excluded_libraries = await db
       .query('SELECT settings FROM app_config where "ID"=1')
       .then((res) => res.rows);
     if (excluded_libraries.length > 0) {
       const libraries = excluded_libraries[0].settings?.ExcludedLibraries || [];
-  
+
       const librariesWithTrackedStatus = filtered_items.map((items) => ({
         ...items,
         ...{ Tracked: !libraries.includes(items.Id) },
@@ -222,7 +225,7 @@ router.post("/setExcludedLibraries", async (req, res) => {
   const settingsjson = await db
     .query('SELECT settings FROM app_config where "ID"=1')
     .then((res) => res.rows);
-    
+
   if (settingsjson.length > 0) {
     const settings = settingsjson[0].settings || {};
 
@@ -278,7 +281,7 @@ router.get("/keys", async (req,res) => {
 
 router.delete("/keys", async (req,res) => {
    const { key } = req.body;
-  
+
   if(!key)
   {
     res.status(400);
@@ -304,7 +307,7 @@ router.delete("/keys", async (req,res) => {
     .query('SELECT api_keys FROM app_config where "ID"=1')
     .then((res) => res.rows[0].api_keys);
 
-    
+
   if (keysjson) {
     const keys = keysjson || [];
     const keyExists = keys.some(obj => obj.key === key);
@@ -312,7 +315,7 @@ router.delete("/keys", async (req,res) => {
     {
       const new_keys_array=keys.filter(obj => obj.key !== key);
       let query = 'UPDATE app_config SET api_keys=$1 where "ID"=1';
-  
+
       await db.query(query, [JSON.stringify(new_keys_array)]);
       return res.send('Key removed: '+key);
 
@@ -321,7 +324,7 @@ router.delete("/keys", async (req,res) => {
       res.status(404);
       return res.send('API key does not exist');
     }
-    
+
 
   }else
   {
@@ -361,7 +364,7 @@ router.post("/keys", async (req, res) => {
   let keys=[];
   const uuid = randomUUID()
   const new_key={name:name, key:uuid};
-    
+
   if (keysjson) {
     keys =  keysjson || [];
     keys.push(new_key);
@@ -388,16 +391,16 @@ router.get("/getTaskSettings", async (req, res) => {
 
     if (settingsjson.length > 0) {
       const settings = settingsjson[0].settings || {};
-  
+
       let tasksettings = settings.Tasks || {};
       res.send(tasksettings);
-      
+
     }else {
       res.status(404);
       res.send({ error: "Task Settings Not Found" });
     }
-    
-    
+
+
   }catch(error)
   {
       res.status(503);
@@ -421,7 +424,7 @@ router.post("/setTaskSettings", async (req, res) => {
       {
         settings.Tasks = {};
       }
-  
+
       let tasksettings = settings.Tasks;
       if(!tasksettings[taskname])
       {
@@ -436,13 +439,13 @@ router.post("/setTaskSettings", async (req, res) => {
       await db.query(query, [settings]);
       res.status(200);
       res.send(tasksettings);
-      
+
     }else {
       res.status(404);
       res.send({ error: "Task Settings Not Found" });
     }
-    
-    
+
+
   }catch(error)
   {
       res.status(503);
@@ -701,7 +704,7 @@ router.get("/dataValidator", async (req, res) => {
   }
 });
 
-//DB Queries 
+//DB Queries
 router.post("/getUserDetails", async (req, res) => {
   try {
     const { userid } = req.body;
@@ -743,7 +746,6 @@ router.post("/getLibrary", async (req, res) => {
 router.post("/getLibraryItems", async (req, res) => {
   try {
     const { libraryid } = req.body;
-    console.log(`ENDPOINT CALLED: /getLibraryItems: ` + libraryid);
     const { rows } = await db.query(
       `SELECT * FROM jf_library_items where "ParentId"=$1`, [libraryid]
     );
@@ -758,30 +760,25 @@ router.post("/getSeasons", async (req, res) => {
     const { Id } = req.body;
 
     const { rows } = await db.query(
-      `SELECT * FROM jf_library_seasons where "SeriesId"=$1`, [Id]
+      `SELECT s.*,i.archived, i."PrimaryImageHash" FROM jf_library_seasons s left join jf_library_items i on i."Id"=s."SeriesId" where "SeriesId"=$1`, [Id]
     );
-    console.log({ Id: Id });
     res.send(rows);
   } catch (error) {
     console.log(error);
   }
 
-  console.log(`ENDPOINT CALLED: /getSeasons: `);
 });
 
 router.post("/getEpisodes", async (req, res) => {
   try {
     const { Id } = req.body;
     const { rows } = await db.query(
-      `SELECT * FROM jf_library_episodes where "SeasonId"=$1`, [Id]
+      `SELECT e.*,i.archived, i."PrimaryImageHash" FROM jf_library_episodes e left join jf_library_items i on i."Id"=e."SeriesId" where "SeasonId"=$1`, [Id]
     );
-    console.log({ Id: Id });
     res.send(rows);
   } catch (error) {
     console.log(error);
   }
-
-  console.log(`ENDPOINT CALLED: /getEpisodes: `);
 });
 
 router.post("/getItemDetails", async (req, res) => {
@@ -792,11 +789,11 @@ router.post("/getItemDetails", async (req, res) => {
     const { rows: items } = await db.query(query, [Id]);
 
     if (items.length === 0) {
-      query = `SELECT im."Name" "FileName",im.*,s.*  FROM jf_library_seasons s left join jf_item_info im on s."Id" = im."Id" where s."Id"=$1`;
+      query = `SELECT im."Name" "FileName",im.*,s.*, i.archived, i."PrimaryImageHash"  FROM jf_library_seasons s left join jf_item_info im on s."Id" = im."Id" left join jf_library_items i on i."Id"=s."SeriesId"  where s."Id"=$1`;
       const { rows: seasons } = await db.query(query, [Id]);
 
       if (seasons.length === 0) {
-        query = `SELECT im."Name" "FileName",im.*,e.*  FROM jf_library_episodes e join jf_item_info im on e."EpisodeId" = im."Id" where e."EpisodeId"=$1`;
+        query = `SELECT im."Name" "FileName",im.*,e.*, i.archived , i."PrimaryImageHash"  FROM jf_library_episodes e join jf_item_info im on e."EpisodeId" = im."Id" left join jf_library_items i on i."Id"=e."SeriesId" where e."EpisodeId"=$1`;
         const { rows: episodes } = await db.query(query, [Id]);
 
         if (episodes.length !== 0) {
@@ -814,7 +811,50 @@ router.post("/getItemDetails", async (req, res) => {
     console.log(error);
   }
 
-  console.log(`ENDPOINT CALLED: /getLibraryItems: `);
+
+});
+
+router.delete("/item/purge", async (req, res) => {
+  try {
+    const { id, withActivity } = req.body;
+
+    const { rows: episodes } = await db.query(`select * from jf_library_episodes where "SeriesId"=$1`, [id]);
+    if(episodes.length>0)
+    {
+      await db.query(`delete from jf_library_episodes where "SeriesId"=$1`, [id]);
+    }
+
+    const { rows: seasons } = await db.query(`select * from jf_library_seasons where "SeriesId"=$1`, [id]);
+    if(seasons.length>0)
+    {
+      await db.query(`delete from jf_library_seasons where "SeriesId"=$1`, [id]);
+    }
+
+    await db.query(`delete from jf_library_items where "Id"=$1`, [id]);
+
+    if(withActivity)
+    {
+
+      const deleteQuery = {
+        text: `DELETE FROM jf_playback_activity WHERE${episodes.length>0 ? `" EpisodeId" IN (${pgp.as.csv(episodes.map((item)=>item.EpisodeId))})  OR`:"" }${seasons.length>0 ? `" SeasonId" IN (${pgp.as.csv(seasons.map((item)=>item.SeasonId))}) OR` :""} "NowPlayingItemId"='${id}'`,
+      };
+      await db.query(deleteQuery);
+    }
+
+    sendUpdate("GeneralAlert",{type:"Success",message:`Item ${withActivity ? "with Playback Activity":""} has been Purged`});
+    res.send("Item purged succesfully");
+
+
+
+  } catch (error) {
+    console.log(error);
+    sendUpdate("GeneralAlert",{type:"Error",message:`There was an error Purging the Data`});
+
+    res.status(503);
+    res.send(error);
+  }
+
+
 });
 
 //DB Queries - History
@@ -887,7 +927,7 @@ router.post("/getItemHistory", async (req, res) => {
     const { rows } = await db.query(
       `select jf_playback_activity.*
       from jf_playback_activity jf_playback_activity
-      where 
+      where
       ("EpisodeId"=$1 OR "SeasonId"=$1 OR "NowPlayingItemId"=$1);`, [itemid]
     );
 
@@ -976,7 +1016,7 @@ router.post("/validateSettings", async (req, res) => {
   } catch (error) {
     isValid = false;
     errorMessage = `Error: ${error}`;
-    
+
   }
 
   console.log({ isValid: isValid, errorMessage: errorMessage });

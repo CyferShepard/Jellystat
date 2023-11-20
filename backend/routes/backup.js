@@ -13,6 +13,7 @@ const taskstate = require('../logging/taskstate');
 const taskName = require('../logging/taskName');
 
 const { sendUpdate } = require('../ws');
+const db = require("../db");
 
 const router = express.Router();
 
@@ -49,8 +50,8 @@ async function backup(refLog) {
   });
 
   // Get data from each table and append it to the backup file
- 
- 
+
+
   try{
 
   let now = moment();
@@ -69,11 +70,11 @@ async function backup(refLog) {
     return;
 
   }
-  
+
 
   // const backupPath = `../backup-data/backup_${now.format('yyyy-MM-DD HH-mm-ss')}.json`;
   const directoryPath = path.join(__dirname, '..', backupfolder,`backup_${now.format('yyyy-MM-DD HH-mm-ss')}.json`);
-  
+
   const stream = fs.createWriteStream(directoryPath, { flags: 'a' });
   stream.on('error', (error) => {
     refLog.logData.push({ color: "red", Message: "Backup Failed: "+error });
@@ -81,7 +82,7 @@ async function backup(refLog) {
     return;
   });
   const backup_data=[];
-  
+
   refLog.logData.push({ color: "yellow", Message: "Begin Backup "+directoryPath });
   for (let table of tables) {
     const query = `SELECT * FROM ${table}`;
@@ -90,7 +91,7 @@ async function backup(refLog) {
     refLog.logData.push({color: "dodgerblue",Message: `Saving ${rows.length} rows for table ${table}`});
 
     backup_data.push({[table]:rows});
-    
+
   }
 
 
@@ -102,7 +103,7 @@ async function backup(refLog) {
      //Cleanup excess backups
   let deleteCount=0;
   const directoryPathDelete = path.join(__dirname, '..', backupfolder);
-  
+
   const files = await new Promise((resolve, reject) => {
     fs.readdir(directoryPathDelete, (err, files) => {
       if (err) {
@@ -151,11 +152,11 @@ async function backup(refLog) {
     refLog.logData.push({ color: "red", Message: "Backup Failed: "+error });
     logging.updateLog(refLog.uuid,refLog.loggedData,taskstate.FAILED);
   }
- 
+
 
   await pool.end();
 
- 
+
 }
 
 // Restore function
@@ -230,14 +231,14 @@ async function restore(file,refLog) {
         });
 
         const valueString = valuesWithQuotes.join(", ");
-       
-        
+
+
         const query=`INSERT INTO ${tableName} (${keyString}) VALUES(${valueString})  ON CONFLICT DO NOTHING`;
         const { rows } = await pool.query( query );
 
 
       }
-  
+
 
     }
     await pool.end();
@@ -255,8 +256,8 @@ router.get('/beginBackup', async (req, res) => {
     LIMIT 1`).then((res) => res.rows);
 
     if(last_execution.length!==0)
-    { 
-    
+    {
+
       if(last_execution[0].Result ===taskstate.RUNNING)
       {
       sendUpdate("TaskError","Error: Backup is already running");
@@ -264,7 +265,7 @@ router.get('/beginBackup', async (req, res) => {
       return;
       }
     }
-  
+
 
     const uuid = randomUUID();
     let refLog={logData:[],uuid:uuid};
@@ -280,14 +281,14 @@ router.get('/beginBackup', async (req, res) => {
 });
 
 router.get('/restore/:filename', async (req, res) => {
-  
+
     try {
       const uuid = randomUUID();
       let refLog={logData:[],uuid:uuid};
       Logging.insertLog(uuid,triggertype.Manual,taskName.restore);
 
       const filePath = path.join(__dirname, '..', backupfolder, req.params.filename);
-   
+
       await restore(filePath,refLog);
       Logging.updateLog(uuid,refLog.logData,taskstate.SUCCESS);
 
@@ -302,10 +303,10 @@ router.get('/restore/:filename', async (req, res) => {
 
 
 
-  
+
   router.get('/files', (req, res) => {
     try
-    {  
+    {
     const directoryPath = path.join(__dirname, '..', backupfolder);
     fs.readdir(directoryPath, (err, files) => {
       if (err) {
@@ -329,7 +330,7 @@ router.get('/restore/:filename', async (req, res) => {
     {
         console.log(error);
     }
-  
+
   });
 
 
@@ -344,14 +345,14 @@ router.get('/restore/:filename', async (req, res) => {
 
     try{
     const filePath = path.join(__dirname, '..', backupfolder, req.params.filename);
-  
+
       fs.unlink(filePath, (err) => {
         if (err) {
           console.error(err);
           res.status(500).send('An error occurred while deleting the file.');
           return;
         }
-    
+
         console.log(`${filePath} has been deleted.`);
         res.status(200).send(`${filePath} has been deleted.`);
       });
@@ -363,7 +364,7 @@ router.get('/restore/:filename', async (req, res) => {
 
   });
 
-  
+
   const storage = multer.diskStorage({
     destination: function (req, file, cb) {
       cb(null, path.join(__dirname, '..', backupfolder)); // Set the destination folder for uploaded files
@@ -372,10 +373,10 @@ router.get('/restore/:filename', async (req, res) => {
       cb(null, file.originalname); // Set the file name
     },
   });
-  
+
   const upload = multer({ storage: storage });
-  
-  
+
+
   router.post("/upload", upload.single("file"), (req, res) => {
     // Handle the uploaded file here
     res.json({
@@ -383,13 +384,13 @@ router.get('/restore/:filename', async (req, res) => {
       filePath: req.file.path,
     });
   });
-  
-  
-  
 
 
 
-module.exports = 
+
+
+
+module.exports =
 {
   router,
   backup
