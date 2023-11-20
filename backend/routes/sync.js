@@ -372,23 +372,21 @@ async function syncLibraryFolders(data)
       await _sync.insertData("jf_libraries",dataToInsert,jf_libraries_columns);
     }
 
-//----------------------DELETE FUNCTION
-    //GET EPISODES IN SEASONS
-    //GET SEASONS IN SHOWS
-    //GET SHOWS IN LIBRARY
-    //FINALY DELETE LIBRARY
-    const toDeleteIds = existingIds.filter((id) =>!data.some((row) => row.Id === id ));
-    if (toDeleteIds.length > 0) {
-      sendUpdate(syncTask.wsKey,{type:"Update",message:"Cleaning Up Old Library Data"});
+    //archive libraries and items instead of deleting them
 
-      const ItemsToDelete=await db.query(`SELECT "Id" FROM jf_library_items where "ParentId" in (${toDeleteIds.map(id => `'${id}'`).join(',')})`).then((res) => res.rows.map((row) => row.Id));
-      if (ItemsToDelete.length > 0) {
-        await _sync.removeData("jf_library_items",ItemsToDelete);
+    const toArchiveLibraryIds = existingIds.filter((id) =>!data.some((row) => row.Id === id ));
+    if (toArchiveLibraryIds.length > 0) {
+      sendUpdate(syncTask.wsKey,{type:"Update",message:"Archiving old Library Data"});
+
+      const ItemsToArchive=await db.query(`SELECT "Id" FROM jf_library_items where "ParentId" in (${toArchiveLibraryIds.map(id => `'${id}'`).join(',')})`).then((res) => res.rows.map((row) => row.Id));
+      if (ItemsToArchive.length > 0) {
+        await _sync.updateSingleFieldOnDB("jf_library_items",ItemsToArchive,"archived",true);
       }
-
-      await _sync.removeData("jf_libraries",toDeleteIds);
+      await _sync.updateSingleFieldOnDB("jf_libraries",toArchiveLibraryIds,"archived",true);
 
     }
+
+
 
 }
 async function syncLibraryItems(data)

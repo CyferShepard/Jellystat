@@ -32,7 +32,7 @@ function ItemOptions(props) {
       }).then((response) => {
         console.log(response);
         setShow(false);
-        // navigate(-1);
+        navigate(-1);
       }).catch((error) => {
         console.log({error:error,token:token});
       });
