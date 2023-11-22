@@ -223,7 +223,7 @@ class sync {
       const results = response.data.MediaSources;
       return results;
     } catch (error) {
-      console.log(error);
+      console.log(error.message);
       return [];
     }
   }
@@ -593,6 +593,7 @@ async function syncItemInfo(seasons_and_episodes,library_items)
 
   let current_item=0;
   let all_items=Items.length;
+  let data_to_insert=[];
   //loop for each Movie
   for (const Item of Items) {
     current_item++;
@@ -603,29 +604,20 @@ async function syncItemInfo(seasons_and_episodes,library_items)
     {
       //dont update item info if it already exists and running a partial sync
       const data = await _sync.getItemInfo(Item.Id,userid);
+      const mapped_data= await data.map(item => jf_item_info_mapping(item, 'Item'));
+      data_to_insert.push(...mapped_data);
 
-    
-    let ItemInfoToInsert = await data.map(item => jf_item_info_mapping(item, 'Item'));
 
 
-    if (ItemInfoToInsert.length !== 0) {
-      let result = await db.insertBulk("jf_item_info",ItemInfoToInsert,jf_item_info_columns);
-      if (result.Result === "SUCCESS") {
-        insertItemInfoCount +=ItemInfoToInsert.length- existingItemInfo.length;
-        updateItemInfoCount+=existingItemInfo.length;
 
-      } else {
-        syncTask.loggedData.push({
-          color: "red",
-          Message: "Error performing bulk insert:" + result.message,
-        });
-        logging.updateLog(syncTask.uuid,syncTask.loggedData,taskstate.FAILED);
-      }
-    }
+    if (mapped_data.length !== 0) {
+      insertItemInfoCount +=mapped_data.length- existingItemInfo.length;
+      updateItemInfoCount+=existingItemInfo.length;
+   
     }
     
 
-  }
+  }}
 
   let current_episode=0;
   let all_episodes=Episodes.length;
@@ -641,28 +633,30 @@ async function syncItemInfo(seasons_and_episodes,library_items)
 
       //dont update item info if it already exists and running a partial sync
       const episodedata = await _sync.getItemInfo(Episode.EpisodeId,userid);
-
-      let EpisodeInfoToInsert =  await episodedata.map(item => jf_item_info_mapping(item, 'Episode'));
+      const mapped_data= await episodedata.map(item => jf_item_info_mapping(item, 'Episode'));
+      data_to_insert.push(...mapped_data);
      
       //filter fix if jf_libraries is empty
-
-
-      if (EpisodeInfoToInsert.length !== 0) {
-        let result = await db.insertBulk("jf_item_info",EpisodeInfoToInsert,jf_item_info_columns);
-        if (result.Result === "SUCCESS") {
-          insertEpisodeInfoCount += EpisodeInfoToInsert.length-existingEpisodeItemInfo.length;
-          updateEpisodeInfoCount+= existingEpisodeItemInfo.length;
-        } else {
-          syncTask.loggedData.push({
-            color: "red",
-            Message: "Error performing bulk insert:" + result.message,
-          });
-          logging.updateLog(syncTask.uuid,syncTask.loggedData,taskstate.FAILED);
-        }
+      if (mapped_data.length !== 0) {
+        insertEpisodeInfoCount += mapped_data.length-existingEpisodeItemInfo.length;
+        updateEpisodeInfoCount+= existingEpisodeItemInfo.length;
       }
+
+
     }
     
 
+  }
+
+  if (data_to_insert.length !== 0) {
+    let result = await db.insertBulk("jf_item_info",data_to_insert,jf_item_info_columns);
+    if (result.Result !== "SUCCESS") {
+      syncTask.loggedData.push({
+        color: "red",
+        Message: "Error performing bulk insert:" + result.message,
+      });
+      logging.updateLog(syncTask.uuid,syncTask.loggedData,taskstate.FAILED);
+    }
   }
 
   syncTask.loggedData.push({color: "dodgerblue",Message: (insertItemInfoCount >0 ? insertItemInfoCount : 0) + " Item Info inserted. "+updateItemInfoCount +" Item Info Updated"});
