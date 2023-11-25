@@ -245,7 +245,6 @@ router.get("/getLibraryMetadata", async (req, res) => {
 router.post("/getLibraryItemsWithStats", async (req, res) => {
   try{
     const  {libraryid}  = req.body;
-    console.log(`ENDPOINT CALLED: /getLibraryItems: `+libraryid);
     const { rows } = await db.query(
       `SELECT * FROM jf_library_items_with_playcount_playtime where "ParentId"=$1`, [libraryid]
     );

@@ -94,7 +94,7 @@ router.post('/login', async (req, res) => {
         let query='INSERT INTO app_config ("JF_HOST","JF_API_KEY","APP_USER","APP_PASSWORD") VALUES (null,null,$1,$2)';
         console.log(query);
       
-        const { rows } = await db.query(
+        await db.query(
           query,
           [username, password]
         );

@@ -146,8 +146,7 @@ function SessionCard(props) {
                     <Col className="col-auto ellipse">{props.data.session.DeviceName +" - "+props.data.session.Client + " " + props.data.session.ApplicationVersion}</Col>
                     </Row>
                     <Row className="d-flex flex-column flex-md-row">    
-                      <Col className="col-auto ellipse">{props.data.session.PlayState.PlayMethod}</Col> 
-                      <Col className="px-md-2 col-auto ellipse">{(props.data.session.NowPlayingItem.MediaStreams ? '( '+props.data.session.NowPlayingItem.MediaStreams.find(stream => stream.Type==='Video')?.Codec.toUpperCase()+(props.data.session.TranscodingInfo? ' - '+props.data.session.TranscodingInfo.VideoCodec.toUpperCase() : '')+' - '+convertBitrate(props.data.session.TranscodingInfo ? props.data.session.TranscodingInfo.Bitrate :props.data.session.NowPlayingItem.MediaStreams.find(stream => stream.Type==='Video')?.BitRate)+' )':'')}</Col>                      
+                      <Col className="col-auto ellipse">{props.data.session.PlayState.PlayMethod +(props.data.session.NowPlayingItem.MediaStreams ? ' ( '+props.data.session.NowPlayingItem.MediaStreams.find(stream => stream.Type==='Video')?.Codec.toUpperCase()+(props.data.session.TranscodingInfo? ' - '+props.data.session.TranscodingInfo.VideoCodec.toUpperCase() : '')+' - '+convertBitrate(props.data.session.TranscodingInfo ? props.data.session.TranscodingInfo.Bitrate :props.data.session.NowPlayingItem.MediaStreams.find(stream => stream.Type==='Video')?.BitRate)+' )':'')}</Col>                    
                       <Col className="col-auto ellipse">
                         <Tooltip title={props.data.session.NowPlayingItem.SubtitleStream}>
                           <span>

@@ -36,9 +36,8 @@ async function insertLog(uuid,triggertype,taskType)
   
     };
    
-    let result=await db.insertBulk("jf_logging",log,jf_logging_columns);
-      // console.log(result); 
-  
+     await db.insertBulk("jf_logging",log,jf_logging_columns);
+
      } catch (error) {
       console.log(error);
      return [];
@@ -56,29 +55,29 @@ async function updateLog(uuid,data,taskstate)
 
     if (task.length === 0) {
       console.log("Unable to find task to update");
-      return [];
+    }else{
+
+      let endtime = moment();
+      let startTime = moment(task[0].TimeRun);
+      let duration = endtime.diff(startTime, 'seconds');
+      const log=
+      {
+        "Id":uuid,
+        "Name":"NULL Placeholder",
+        "Type":"Task",
+        "ExecutionType":"NULL Placeholder",
+        "Duration":duration,
+        "TimeRun":startTime,
+        "Log":JSON.stringify(data),
+        "Result":taskstate
+      
+      };
+    
+       await db.insertBulk("jf_logging",log,jf_logging_columns);
     }
 
-    let endtime = moment();
-    let startTime = moment(task[0].TimeRun);
-    let duration = endtime.diff(startTime, 'seconds');
-    const log=
-    {
-      "Id":uuid,
-      "Name":"NULL Placeholder",
-      "Type":"Task",
-      "ExecutionType":"NULL Placeholder",
-      "Duration":duration,
-      "TimeRun":startTime,
-      "Log":JSON.stringify(data),
-      "Result":taskstate
   
-    };
-   
-    let result=await db.insertBulk("jf_logging",log,jf_logging_columns);
-    //  console.log(result); 
-  
-     } catch (error) {
+    } catch (error) {
       console.log(error);
      return [];
    }
