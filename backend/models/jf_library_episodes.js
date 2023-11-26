@@ -19,6 +19,7 @@
         "SeasonId",
         "SeasonName",
         "SeriesName",
+        "archived",
       ];
       
     const jf_library_episodes_mapping = (item) => ({
@@ -44,6 +45,7 @@
         SeasonId: item.SeasonId,
         SeasonName: item.SeasonName,
         SeriesName: item.SeriesName,
+        archived: false,
       });
 
   module.exports = {

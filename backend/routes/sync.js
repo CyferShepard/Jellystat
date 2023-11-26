@@ -78,9 +78,9 @@ class sync {
     }
   }
 
-  async updateSingleFieldOnDB(tablename,dataToUpdate,field_name,field_value)
+  async updateSingleFieldOnDB(tablename,dataToUpdate,field_name,field_value,where_field)
   {
-    let result = await db.updateSingleFieldBulk(tablename,dataToUpdate,field_name,field_value);
+    let result = await db.updateSingleFieldBulk(tablename,dataToUpdate,field_name,field_value,where_field);
     if (result.Result === "SUCCESS") {
       syncTask.loggedData.push(dataToUpdate.length + " Rows updated.");
     } else {
@@ -201,7 +201,7 @@ async function syncLibraryItems(data)
 
 async function syncShowItems(data)
 {
-
+  const _sync = new sync();
   syncTask.loggedData.push({ color: "lawngreen", Message: "Syncing... 2/4" });
   sendUpdate(syncTask.wsKey,{type:"Update",message:"Beginning Show Item Sync (2/4)"});
   syncTask.loggedData.push({color: "yellow", Message: "Beginning Seasons and Episode sync",});
@@ -286,10 +286,25 @@ async function syncShowItems(data)
       }
     }
 
+
+    if(syncTask.taskName===taskName.fullsync)
+    {
+      let toArchiveSeasons = existingIdsSeasons.filter((id) =>!seasonsToInsert.some((row) => row.Id === id ));
+      let toArchiveEpisodes = existingIdsEpisodes.filter((EpisodeId) =>!episodesToInsert.some((row) => row.EpisodeId === EpisodeId ));
+    
+      if (toArchiveSeasons.length > 0) {
+        await _sync.updateSingleFieldOnDB("jf_library_seasons",toArchiveSeasons,"archived",true);
+        syncTask.loggedData.push({color: "orange",Message: toArchiveSeasons.length + " Seasons Archived.",});
+      }
+      if (toArchiveEpisodes.length > 0) {
+        await _sync.updateSingleFieldOnDB("jf_library_episodes",toArchiveEpisodes,"archived",true);
+        
+      syncTask.loggedData.push({color: "orange",Message: toArchiveEpisodes.length + " Episodes Archived.",});
+      }
+    
+    }
+
   }
-
-
-
 
   }
 
@@ -405,11 +420,19 @@ async function syncItemInfo(seasons_and_episodes,library_items)
 
 async function removeOrphanedData()
 {
+  const _sync = new sync();
   syncTask.loggedData.push({ color: "lawngreen", Message: "Syncing... 4/4" });
   sendUpdate(syncTask.wsKey,{type:"Update",message:"Cleaning up FileInfo/Episode/Season Records (4/4)"});
   syncTask.loggedData.push({color: "yellow", Message: "Removing Orphaned FileInfo/Episode/Season Records",});
 
   await db.query('CALL jd_remove_orphaned_data()');
+  const archived_items=await db.query(`select "Id" from jf_library_items where archived=true and "Type"='Series'`).then((res) => res.rows.map((row) => row.Id));
+  const archived_seasons=await db.query(`select "Id" from jf_library_seasons where archived=true`).then((res) => res.rows.map((row) => row.Id));
+  await _sync.updateSingleFieldOnDB("jf_library_seasons",archived_items,"archived",true,"SeriesId");
+  await _sync.updateSingleFieldOnDB("jf_library_episodes",archived_items,"archived",true,"SeriesId");
+  await _sync.updateSingleFieldOnDB("jf_library_episodes",archived_seasons,"archived",true,"SeasonId");
+
+
 
   syncTask.loggedData.push({color: "dodgerblue",Message: "Orphaned FileInfo/Episode/Season Removed.",});
 

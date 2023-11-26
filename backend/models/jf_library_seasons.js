@@ -11,6 +11,7 @@
         "SeriesName",
         "SeriesId",
         "SeriesPrimaryImageTag",
+        "archived",
       ];
       
     const jf_library_seasons_mapping = (item) => ({
@@ -28,6 +29,7 @@
         SeriesName: item.SeriesName,
         SeriesId: item.SeriesId,
         SeriesPrimaryImageTag: item.SeriesPrimaryImageTag ? item.SeriesPrimaryImageTag : null,
+        archived: false,
       });
 
   module.exports = {

@@ -59,16 +59,19 @@ async function deleteBulk(table_name, data) {
   return { Result: result, message: '' + message };
 }
 
-async function updateSingleFieldBulk(table_name, data,field_name, new_value) {
+async function updateSingleFieldBulk(table_name, data,field_name, new_value, where_field) {
   const client = await pool.connect();
   let result = 'SUCCESS';
   let message = '';
+  if(where_field===undefined || where_field===null || where_field===''){
+    where_field='Id'
+  }
   try {
     await client.query('BEGIN');
 
     if (data && data.length !== 0) {
       const updateQuery = {
-        text: `UPDATE ${table_name} SET "${field_name}"='${new_value}' WHERE "Id" IN (${pgp.as.csv(data)})`,
+        text: `UPDATE ${table_name} SET "${field_name}"='${new_value}' WHERE "${where_field}" IN (${pgp.as.csv(data)})`,
       };
       //  console.log(deleteQuery);
       await client.query(updateQuery);
