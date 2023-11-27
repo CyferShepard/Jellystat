@@ -5,7 +5,7 @@ const db = require("../db");
 const pgp = require('pg-promise')();
 const { randomUUID }  = require('crypto');
 
-const axios = require("../classes/axios");
+const {axios} = require("../classes/axios");
 const configClass = require("../classes/config");
 const { checkForUpdates } = require("../version-control");
 const JellyfinAPI = require('../classes/jellyfin-api');
