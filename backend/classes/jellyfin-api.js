@@ -7,8 +7,12 @@ class JellyfinAPI {
         this.config = null;
         this.configReady = new Promise(resolve => {
           new configClass().getConfig().then(config => {
-            this.config = config;
-            resolve();
+            if(!config.error)
+            {
+              this.config = config;
+              resolve();
+            }
+
           });
         });
       }

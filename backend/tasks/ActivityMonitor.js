@@ -8,12 +8,10 @@ const { randomUUID }  = require('crypto');
 const configClass = require("../classes/config");
 const JellyfinAPI = require("../classes/jellyfin-api");
 
-const Jellyfin = new JellyfinAPI();
-
-
-
 
 async function ActivityMonitor(interval) {
+  
+  const Jellyfin = new JellyfinAPI();
   console.log("Activity Interval: " + interval);
 
  

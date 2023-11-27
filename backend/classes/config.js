@@ -28,7 +28,6 @@ class Config{
             });
           
       } catch (error) {
-          console.error(error);
           return { error: "Config Details Not Found" };
       }
   }
