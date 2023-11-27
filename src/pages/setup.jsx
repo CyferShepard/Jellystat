@@ -25,8 +25,6 @@ function Setup() {
   }
   async function beginSync() {
 
-
-      setProcessing(true);
       await axios
       .get("/sync/beginSync", {
         headers: {
@@ -34,15 +32,10 @@ function Setup() {
           "Content-Type": "application/json",
         },
       })
-      .then((response) => {
-        if (response.status === 200) {
-          // isValid = true;
-        }
-      })
       .catch((error) => {
          console.log(error);
       });
-      setProcessing(false);
+      
   }
 
   async function validateSettings(_url, _apikey) {
@@ -56,9 +49,6 @@ function Setup() {
         Authorization: `Bearer ${token}`,
         "Content-Type": "application/json",
         },
-      })
-      .catch((error) => {
-
       });
 
     let data=result.data;
@@ -88,14 +78,20 @@ function Setup() {
           "Content-Type": "application/json",
         },
       })
-      .then(async (response) => {
+      .then(async () => {
         setsubmitButtonText("Settings Saved");
         setProcessing(false);
-        setTimeout(() => {
-          window.location.href = "/";
-        }, 1000);
-        await beginSync();
+        setTimeout(async () => {
 
+          setTimeout(async () => {
+            beginSync();
+            window.location.href = "/";
+           
+          }, 1000);
+         
+        }, 1000);
+       
+        
         return;
       })
       .catch((error) => {

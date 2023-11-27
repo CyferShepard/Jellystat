@@ -88,9 +88,7 @@ app.get('*', (req, res) => {
   res.sendFile(path.join(__dirname, '..', 'dist', 'index.html'));
 });
 
-const server = http.createServer(app);
 
-setupWebSocketServer(server);
 
 // JWT middleware
 async function authenticate(req, res, next) {
@@ -149,6 +147,9 @@ try {
     }
 
     db.migrate.latest().then(() => {
+      const server = http.createServer(app);
+
+      setupWebSocketServer(server);
       server.listen(PORT, async () => {
         console.log(
           `[JELLYSTAT] Server listening on http://${LISTEN_IP}:${PORT}`

@@ -1,5 +1,6 @@
 const db = require("../db");
 const Logging = require("../routes/logging");
+const configClass =require("../classes/config");
 
 const backup = require("../routes/backup");
 const moment = require('moment');
@@ -67,11 +68,9 @@ async function intervalCallback() {
     clearInterval(intervalTask); 
     try{
        let current_time = moment();
-       const { rows: config } = await db.query(
-             'SELECT * FROM app_config where "ID"=1'
-            );
+       const config = await new configClass().getConfig();
    
-       if (config.length===0 || config[0].JF_HOST === null || config[0].JF_API_KEY === null) 
+       if (config.error) 
        {
            return;
        }

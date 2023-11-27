@@ -159,6 +159,7 @@ async function query(text, params) {
       {
         console.error('Error occurred while executing query:', error.message);
       }
+      console.error('Error occurred while executing query:', error.message);
      
     }
     return [];

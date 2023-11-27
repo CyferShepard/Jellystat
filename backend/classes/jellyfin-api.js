@@ -5,33 +5,36 @@ const {axios} = require("./axios");
 class JellyfinAPI {
     constructor() {
         this.config = null;
-        this.configReady = new Promise(resolve => {
-          new configClass().getConfig().then(config => {
-            if(!config.error)
-            {
-              this.config = config;
-              resolve();
-            }
-
-          });
-        });
+        this.configReady = false;
+        this.#checkReadyStatus();
       }
     //Helper classes
+    #checkReadyStatus() {
+      let checkConfigError = setInterval(async () => {
+        const _config=await new configClass().getConfig();
+        if (!_config.error) {
+          clearInterval(checkConfigError);
+          this.config = _config;
+          this.configReady = true;
+        }
+      }, 5000); // Check every 5 seconds
+    }
+
     #errorHandler(error)
     {
         if (error.response) {
             switch (error.response.status) {
                 case 400:
-                  console.log('[JELLYFIN-API]: Bad Request');
+                  console.log('[JELLYFIN-API]: 400 Bad Request');
                   break;
                 case 401:
-                  console.log('[JELLYFIN-API]: Unauthorized');
+                  console.log('[JELLYFIN-API]: 401 Unauthorized');
                   break;
                 case 403:
-                  console.log('[JELLYFIN-API]: Forbidden');
+                  console.log('[JELLYFIN-API]: 403 Access Forbidden');
                   break;
                 case 404:
-                  console.log('[JELLYFIN-API]: Not Found');
+                  console.log(`[JELLYFIN-API]: 404 URL Not Found : ${error.request.path}`);
                   break;
                 default:
                   console.log(`[JELLYFIN-API]: Unexpected status code: ${error.response.status}`);
@@ -55,7 +58,10 @@ class JellyfinAPI {
     //Functions
 
     async getUsers() {
-        await this.configReady;
+        if (!this.configReady)
+        {
+          return [];
+        }
         try {
           const url = `${this.config.JF_HOST}/Users`;
 
@@ -83,7 +89,10 @@ class JellyfinAPI {
     }
 
     async getItemsByID(ids,params) {
-      await this.configReady;
+      if (!this.configReady)
+        {
+          return [];
+        }
       try {
         let url = `${this.config.JF_HOST}/Items?ids=${ids}`;
         let startIndex=params && params.startIndex ? params.startIndex :0;
@@ -121,7 +130,10 @@ class JellyfinAPI {
     }
 
     async getItemsFromParentId(id,params) {
-        await this.configReady;
+        if (!this.configReady)
+        {
+          return [];
+        }
         try {   
           let url = `${this.config.JF_HOST}/Items?ParentId=${id}`;
           let startIndex=params && params.startIndex ? params.startIndex :0;
@@ -159,7 +171,10 @@ class JellyfinAPI {
     }
 
     async getItemInfo(itemID,userid) {
-        await this.configReady;
+        if (!this.configReady)
+        {
+          return [];
+        }
         try {
 
           if(!userid || userid==null)
@@ -192,7 +207,10 @@ class JellyfinAPI {
     }
       
     async getLibraries() {
-        await this.configReady;
+        if (!this.configReady)
+        {
+          return [];
+        }
         try {
           let url = `${this.config.JF_HOST}/Library/MediaFolders`;
     
@@ -215,7 +233,10 @@ class JellyfinAPI {
     }
 
     async getSeasons(SeriesId) {
-        await this.configReady;
+        if (!this.configReady)
+        {
+          return [];
+        }
         try {
           let url = `${this.config.JF_HOST}/Shows/${SeriesId}/Seasons`;
     
@@ -233,7 +254,10 @@ class JellyfinAPI {
     }
 
     async getEpisodes(SeriesId,SeasonId) {
-      await this.configReady;
+      if (!this.configReady)
+        {
+          return [];
+        }
       try {
 
         let url = `${this.config.JF_HOST}/Shows/${SeriesId}/Episodes?seasonId=${SeasonId}`;
@@ -252,7 +276,10 @@ class JellyfinAPI {
     }
     
     async getRecentlyAdded(libraryid,limit = 20,userid ) {
-      await this.configReady;
+      if (!this.configReady)
+        {
+          return [];
+        }
       try {
         if(!userid || userid==null)
         {
@@ -290,7 +317,10 @@ class JellyfinAPI {
 
     async getSessions()
     {
-        await this.configReady;
+        if (!this.configReady)
+        {
+          return [];
+        }
         try {     
             let url = `${this.config.JF_HOST}/sessions`;
         
@@ -308,7 +338,10 @@ class JellyfinAPI {
 
     async getInstalledPlugins()
     {
-        await this.configReady;
+        if (!this.configReady)
+        {
+          return [];
+        }
         try {     
             let url = `${this.config.JF_HOST}/plugins`;
         
@@ -326,7 +359,10 @@ class JellyfinAPI {
 
     async StatsSubmitCustomQuery(query)
     {
-        await this.configReady;
+        if (!this.configReady)
+        {
+          return [];
+        }
         try {     
             let url = `${this.config.JF_HOST}/user_usage_stats/submit_custom_query`;
         
