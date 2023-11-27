@@ -63,6 +63,10 @@ function App() {
           listener.ref.current = toast.error(message?.message || message, {
             autoClose: 15000,
           });
+        }else if (message && (message.type === 'Update' &&  !listener.ref.current)) {
+          listener.ref.current = toast.info(message?.message || message, {
+            autoClose: 15000,
+          });
         } else if (message && message.type === 'Update') {
           toast.update(listener.ref.current, {
             render: message?.message || message,
