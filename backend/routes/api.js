@@ -26,6 +26,7 @@ router.get("/getconfig", async (req, res) => {
       JF_HOST:config.JF_HOST , 
       APP_USER:config.APP_USER , 
       settings:config.settings ,
+      REQUIRE_LOGIN:config.REQUIRE_LOGIN,
     };
 
 

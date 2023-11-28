@@ -5,9 +5,12 @@ WORKDIR /app
 
 COPY package*.json ./
 RUN npm cache clean --force
-RUN npm install
+RUN npm ci
 
 COPY ./ ./
+
+# Build the application
+RUN npm run build
 
 # Stage 2: Create the production image
 FROM node:slim
