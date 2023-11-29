@@ -485,7 +485,7 @@ router.delete("/item/purge", async (req, res) => {
     {
 
       const deleteQuery = {
-        text: `DELETE FROM jf_playback_activity WHERE${episodes.length>0 ? `" EpisodeId" IN (${pgp.as.csv(episodes.map((item)=>item.EpisodeId))})  OR`:"" }${seasons.length>0 ? `" SeasonId" IN (${pgp.as.csv(seasons.map((item)=>item.SeasonId))}) OR` :""} "NowPlayingItemId"='${id}'`,
+        text: `DELETE FROM jf_playback_activity WHERE${episodes.length>0 ? ` "EpisodeId" IN (${pgp.as.csv(episodes.map((item)=>item.EpisodeId))})  OR`:"" }${seasons.length>0 ? ` "SeasonId" IN (${pgp.as.csv(seasons.map((item)=>item.SeasonId))}) OR` :""} "NowPlayingItemId"='${id}'`,
       };
       await db.query(deleteQuery);
     }
