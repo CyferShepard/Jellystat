@@ -155,11 +155,12 @@ async function query(text, params) {
           error.port
       );
     } else {
-      if(!error.message.contains('database "jfstat" does not exist'))
+
+      if(error.message && !error.message.contains('database "jfstat" does not exist'))
       {
         console.error('Error occurred while executing query:', error.message);
       }
-      console.error('Error occurred while executing query:', error.message);
+     
      
     }
     return [];

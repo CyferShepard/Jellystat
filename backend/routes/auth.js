@@ -2,7 +2,7 @@ const express = require("express");
 const CryptoJS  = require('crypto-js');
 const db = require("../db");
 const jwt = require('jsonwebtoken');
-
+const configClass = require("../classes/config");
 
 const JWT_SECRET = process.env.JWT_SECRET;
 const JS_USER=process.env.JS_USER;
@@ -13,6 +13,46 @@ if (JWT_SECRET === undefined) {
 }
 
 const router = express.Router();
+
+async function getConfigState()
+{
+  let state=0;
+  try{
+    const { rows : Configured } = await db.query(`SELECT * FROM app_config`);
+
+    //state 0 = not configured
+    //state 1 = configured and user set
+    //state 2 = configured and user and api key set
+
+    if(Configured.length>0)
+    {
+      if(Configured[0].APP_USER===null)//safety check if user is null still return state 0
+      {
+        return state;
+      }
+
+      if(Configured[0].APP_USER!==null && Configured[0].JF_API_KEY===null) //check if user is configured but API is not configured then return state 1
+      {
+        state=1;
+        return state; 
+      }
+      
+
+      if(Configured[0].APP_USER!==null && Configured[0].JF_API_KEY!==null) //check if user is configured and API is configured then return state 2
+      {
+
+        state=2
+        return state;
+      }
+    }else{
+      return state;
+    }
+ 
+  }catch(error)
+  {
+    return state;
+  }
+}
 
 
 router.post('/login', async (req, res) => {
@@ -47,37 +87,11 @@ router.post('/login', async (req, res) => {
   });
   
   router.get('/isConfigured', async (req, res) => {
+
+    const state=await getConfigState();
+    res.json({ state:state }); 
     
-    try{
-      const { rows : Configured } = await db.query(`SELECT * FROM app_config`);
-  
-      if(Configured.length>0)
-      {
-      if(Configured[0].JF_API_KEY && Configured[0].APP_USER && Configured[0].JF_API_KEY!==null  && Configured[0].APP_USER!==null)
-      {
-        
-        res.status(200);
-        res.send({state:2});
-      }else
-      if(Configured[0].APP_USER && Configured[0].APP_USER!==null)
-      {
-        
-        res.status(200);
-        res.send({state:1});
-      }else
-      {
-        res.status(200);
-        res.send({state:0});
-      }
-      }else{
-        res.status(200);
-        res.send({state:0});
-      }
-   
-    }catch(error)
-    {
-      console.log(error);
-    }
+    
   });
 
   router.post('/createuser', async (req, res) => {
@@ -85,13 +99,20 @@ router.post('/login', async (req, res) => {
   
     try{
       const { username, password } = req.body;
-      const { rows : Configured } = await db.query(`SELECT * FROM app_config where "ID"=1`);
+      const configState=await getConfigState();
   
-      if(Configured.length===0)
+      if(configState<2)
       {
         const user = { id: 1, username: username };
-  
-        let query='INSERT INTO app_config ("JF_HOST","JF_API_KEY","APP_USER","APP_PASSWORD") VALUES (null,null,$1,$2)';
+
+        const hasConfig=await new configClass().getConfig();
+        
+        let query='INSERT INTO app_config ("APP_USER","APP_PASSWORD") VALUES ($1,$2)';
+        if(!hasConfig.error)
+        {
+            query='UPDATE app_config SET  "APP_USER"=$1, "APP_PASSWORD"=$2';
+        }
+
         console.log(query);
       
         await db.query(

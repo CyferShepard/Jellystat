@@ -266,7 +266,7 @@ async function syncShowItems(data)
           color: "red",
           Message: "Error performing bulk insert:" + result.message,
         });
-        logging.updateLog(syncTask.uuid,syncTask.loggedData,taskstate.FAILED);
+        await logging.updateLog(syncTask.uuid,syncTask.loggedData,taskstate.FAILED);
       }
     }
 
@@ -282,7 +282,7 @@ async function syncShowItems(data)
           color: "red",
           Message: "Error performing bulk insert:" + result.message,
         });
-        logging.updateLog(syncTask.uuid,syncTask.loggedData,taskstate.FAILED);
+        await logging.updateLog(syncTask.uuid,syncTask.loggedData,taskstate.FAILED);
       }
     }
 
@@ -408,7 +408,7 @@ async function syncItemInfo(seasons_and_episodes,library_items)
         color: "red",
         Message: "Error performing bulk insert:" + result.message,
       });
-      logging.updateLog(syncTask.uuid,syncTask.loggedData,taskstate.FAILED);
+      await logging.updateLog(syncTask.uuid,syncTask.loggedData,taskstate.FAILED);
     }
   }
 
@@ -517,7 +517,7 @@ async function syncPlaybackPluginData()
     } else {
 
       PlaybacksyncTask.loggedData.push({color: "red",Message:  "Error: "+result.message,});
-      logging.updateLog(PlaybacksyncTask.uuid,PlaybacksyncTask.loggedData,taskstate.FAILED);
+      await logging.updateLog(PlaybacksyncTask.uuid,PlaybacksyncTask.loggedData,taskstate.FAILED);
     }
 
 
@@ -552,11 +552,11 @@ async function fullSync(triggertype)
   try
   {
     sendUpdate(syncTask.wsKey,{type:"Start",message:triggertype+" "+taskName.fullsync+" Started"});
-    logging.insertLog(uuid,triggertype,taskName.fullsync);
+    await logging.insertLog(uuid,triggertype,taskName.fullsync);
 
     if (config.error) {
       syncTask.loggedData.push({ Message: config.error });
-      logging.updateLog(syncTask.uuid,syncTask.loggedData,taskstate.FAILED);
+      await logging.updateLog(syncTask.uuid,syncTask.loggedData,taskstate.FAILED);
       return;
     }
 
@@ -564,7 +564,7 @@ async function fullSync(triggertype)
     if(libraries.length===0)
     {
       syncTask.loggedData.push({ Message: "Error: No Libararies found to sync." });
-      logging.updateLog(syncTask.uuid,syncTask.loggedData,taskstate.FAILED);
+      await logging.updateLog(syncTask.uuid,syncTask.loggedData,taskstate.FAILED);
       sendUpdate(syncTask.wsKey,{type:"Success",message:triggertype+" "+taskName.fullsync+" Completed"});
       return;
     }
@@ -631,7 +631,7 @@ async function fullSync(triggertype)
 
     await updateLibraryStatsData();
 
-    logging.updateLog(syncTask.uuid,syncTask.loggedData,taskstate.SUCCESS);
+    await logging.updateLog(syncTask.uuid,syncTask.loggedData,taskstate.SUCCESS);
 
     sendUpdate(syncTask.wsKey,{type:"Success",message:triggertype+" Sync Completed"});
 
@@ -639,7 +639,7 @@ async function fullSync(triggertype)
   }catch(error)
   {
     syncTask.loggedData.push({color: "red",Message: getErrorLineNumber(error)+ ": Error: "+error,});
-    logging.updateLog(syncTask.uuid,syncTask.loggedData,taskstate.FAILED);
+    await logging.updateLog(syncTask.uuid,syncTask.loggedData,taskstate.FAILED);
     sendUpdate(syncTask.wsKey,{type:"Error",message:triggertype+" Sync Halted with Errors"});
   }
 
@@ -656,11 +656,11 @@ async function partialSync(triggertype)
   try
   {
     sendUpdate(syncTask.wsKey,{type:"Start",message:triggertype+" "+taskName.partialsync+" Started"});
-    logging.insertLog(uuid,triggertype,taskName.partialsync);
+    await logging.insertLog(uuid,triggertype,taskName.partialsync);
 
     if (config.error) {
       syncTask.loggedData.push({ Message: config.error });
-      logging.updateLog(syncTask.uuid,syncTask.loggedData,taskstate.FAILED);
+      await logging.updateLog(syncTask.uuid,syncTask.loggedData,taskstate.FAILED);
       return;
     }
 
@@ -670,7 +670,7 @@ async function partialSync(triggertype)
     if(libraries.length===0)
     {
       syncTask.loggedData.push({ Message: "Error: No Libararies found to sync." });
-      logging.updateLog(syncTask.uuid,syncTask.loggedData,taskstate.FAILED);
+      await logging.updateLog(syncTask.uuid,syncTask.loggedData,taskstate.FAILED);
       sendUpdate(syncTask.wsKey,{type:"Success",message:triggertype+" "+taskName.fullsync+" Completed"});
       return;
     }
@@ -735,7 +735,7 @@ async function partialSync(triggertype)
 
     await updateLibraryStatsData();
 
-    logging.updateLog(syncTask.uuid,syncTask.loggedData,taskstate.SUCCESS);
+    await logging.updateLog(syncTask.uuid,syncTask.loggedData,taskstate.SUCCESS);
 
     sendUpdate(syncTask.wsKey,{type:"Success",message:triggertype+" Sync Completed"});
 
@@ -743,7 +743,7 @@ async function partialSync(triggertype)
   }catch(error)
   {
     syncTask.loggedData.push({color: "red",Message: getErrorLineNumber(error)+ ": Error: "+error,});
-    logging.updateLog(syncTask.uuid,syncTask.loggedData,taskstate.FAILED);
+    await logging.updateLog(syncTask.uuid,syncTask.loggedData,taskstate.FAILED);
     sendUpdate(syncTask.wsKey,{type:"Error",message:triggertype+" Sync Halted with Errors"});
   }
 
@@ -902,27 +902,27 @@ router.get("/syncPlaybackPluginData", async (req, res) => {
   PlaybacksyncTask={loggedData:[],uuid:uuid};
   try
   {
-    logging.insertLog(uuid,triggertype.Manual,taskName.import);
+    await logging.insertLog(uuid,triggertype.Manual,taskName.import);
     sendUpdate("PlaybackSyncTask",{type:"Start",message:"Playback Plugin Sync Started"});
 
 
     if (config.error) {
       res.send({ error: config.error });
       PlaybacksyncTask.loggedData.push({ Message: config.error });
-      logging.updateLog(uuid,PlaybacksyncTask.loggedData,taskstate.FAILED);
+      await logging.updateLog(uuid,PlaybacksyncTask.loggedData,taskstate.FAILED);
       return;
     }
 
     await sleep(5000);
     await syncPlaybackPluginData();
 
-    logging.updateLog(PlaybacksyncTask.uuid,PlaybacksyncTask.loggedData,taskstate.SUCCESS);
+    await logging.updateLog(PlaybacksyncTask.uuid,PlaybacksyncTask.loggedData,taskstate.SUCCESS);
     sendUpdate("PlaybackSyncTask",{type:"Success",message:"Playback Plugin Sync Completed"});
     res.send("syncPlaybackPluginData Complete");
   }catch(error)
   {
     PlaybacksyncTask.loggedData.push({color: "red",Message: getErrorLineNumber(error)+ ": Error: "+error,});
-    logging.updateLog(PlaybacksyncTask.uuid,PlaybacksyncTask.loggedData,taskstate.FAILED);
+    await logging.updateLog(PlaybacksyncTask.uuid,PlaybacksyncTask.loggedData,taskstate.FAILED);
     res.send("syncPlaybackPluginData Halted with Errors");
   }
 
