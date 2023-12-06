@@ -57,7 +57,7 @@ class sync {
   {
     let result = await db.insertBulk(tablename,dataToInsert,column_mappings);
     if (result.Result === "SUCCESS") {
-      syncTask.loggedData.push(dataToInsert.length + " Rows Inserted.");
+      syncTask.loggedData.push({color: "dodgerblue",Message:dataToInsert.length + " Rows Inserted."});
     } else {
       syncTask.loggedData.push({
         color: "red",
@@ -82,7 +82,7 @@ class sync {
   {
     let result = await db.updateSingleFieldBulk(tablename,dataToUpdate,field_name,field_value,where_field);
     if (result.Result === "SUCCESS") {
-      syncTask.loggedData.push(dataToUpdate.length + " Rows updated.");
+      syncTask.loggedData.push({color: "dodgerblue",Message:dataToUpdate.length + " Rows updated."});
     } else {
       syncTask.loggedData.push({color: "red",Message: "Error: "+result.message,});
       throw new Error("Error :" + result.message);
@@ -94,6 +94,8 @@ class sync {
 async function syncUserData()
 {
   sendUpdate(syncTask.wsKey,{type:"Update",message:"Syncing User Data"});
+  syncTask.loggedData.push({ color: "lawngreen", Message: "Syncing... 1/6" });
+  syncTask.loggedData.push({color: "yellow",Message: "Beginning User Sync",});
   
   const _sync = new sync();
 
@@ -115,16 +117,16 @@ async function syncUserData()
 
   //update usernames on log table where username does not match the user table
   await db.query('UPDATE jf_playback_activity a SET "UserName" = u."Name" FROM jf_users u WHERE u."Id" = a."UserId" AND u."Name" <> a."UserName"');
-
+  syncTask.loggedData.push({color: "yellow",Message: "User Sync Complete",});
 }
 
 async function syncLibraryFolders(data,existing_excluded_libraries)
 {
   sendUpdate(syncTask.wsKey,{type:"Update",message:"Syncing Library Folders"});
+  syncTask.loggedData.push({ color: "lawngreen", Message: "Syncing... 2/6" });
+  syncTask.loggedData.push({color: "yellow",Message: "Beginning Library Sync",});
     const _sync = new sync();
-    const existingIds = await _sync.getExistingIDsforTable('jf_libraries');// get existing library Ids from the db
-
-
+    const existingIds = await db.query(`SELECT "Id" FROM jf_libraries where "archived" = false `).then((res) => res.rows.map((row) => row.Id)); 
     let dataToInsert = await data.map(jf_libraries_mapping);
 
     if (dataToInsert.length !== 0) {
@@ -140,7 +142,7 @@ async function syncLibraryFolders(data,existing_excluded_libraries)
       //dont archive items that exist on jellyfin but where marked as excluded in the config
       if(toArchiveLibraryIds.filter((id) => !existing_excluded_libraries.some((row) => row.Id === id )).length>0)
       {
-        const ItemsToArchive=await db.query(`SELECT "Id" FROM jf_library_items where "ParentId" in (${toArchiveLibraryIds.filter((id) => !existing_excluded_libraries.some((row) => row.Id === id )).map(id => `'${id}'`).join(',')})`).then((res) => res.rows.map((row) => row.Id));
+        const ItemsToArchive=await db.query(`SELECT "Id" FROM jf_library_items where "archived" = false and "ParentId" in (${toArchiveLibraryIds.filter((id) => !existing_excluded_libraries.some((row) => row.Id === id )).map(id => `'${id}'`).join(',')})`).then((res) => res.rows.map((row) => row.Id));
         if (ItemsToArchive.length > 0) {
           await _sync.updateSingleFieldOnDB("jf_library_items",ItemsToArchive,"archived",true);
         }
@@ -149,6 +151,7 @@ async function syncLibraryFolders(data,existing_excluded_libraries)
 
       await _sync.updateSingleFieldOnDB("jf_libraries",toArchiveLibraryIds,"archived",true);
 
+      syncTask.loggedData.push({color: "yellow",Message: "Library Sync Complete",});
     }
 
 
@@ -159,8 +162,8 @@ async function syncLibraryItems(data)
   const _sync = new sync();
   const existingLibraryIds = await _sync.getExistingIDsforTable('jf_libraries');// get existing library Ids from the db
 
-  syncTask.loggedData.push({ color: "lawngreen", Message: "Syncing... 1/4" });
-  sendUpdate(syncTask.wsKey,{type:"Update",message:"Beginning Library Item Sync (1/4)"});
+  syncTask.loggedData.push({ color: "lawngreen", Message: "Syncing... 3/6" });
+  sendUpdate(syncTask.wsKey,{type:"Update",message:"Beginning Library Item Sync (3/6)"});
   syncTask.loggedData.push({color: "yellow",Message: "Beginning Library Item Sync",});
 
   data=data.filter((row) => existingLibraryIds.includes(row.ParentId));
@@ -202,8 +205,8 @@ async function syncLibraryItems(data)
 async function syncShowItems(data)
 {
   const _sync = new sync();
-  syncTask.loggedData.push({ color: "lawngreen", Message: "Syncing... 2/4" });
-  sendUpdate(syncTask.wsKey,{type:"Update",message:"Beginning Show Item Sync (2/4)"});
+  syncTask.loggedData.push({ color: "lawngreen", Message: "Syncing... 4/6" });
+  sendUpdate(syncTask.wsKey,{type:"Update",message:"Beginning Show Item Sync (4/6)"});
   syncTask.loggedData.push({color: "yellow", Message: "Beginning Seasons and Episode sync",});
 
   const { rows: shows } = await db.query(`SELECT *	FROM public.jf_library_items where "Type"='Series'`);
@@ -315,8 +318,8 @@ async function syncShowItems(data)
 
 async function syncItemInfo(seasons_and_episodes,library_items)
 {
-  syncTask.loggedData.push({ color: "lawngreen", Message: "Syncing... 3/4" });
-  sendUpdate(syncTask.wsKey,{type:"Update",message:"Beginning Item Info Sync (3/4)"});
+  syncTask.loggedData.push({ color: "lawngreen", Message: "Syncing... 5/6" });
+  sendUpdate(syncTask.wsKey,{type:"Update",message:"Beginning Item Info Sync (5/6)"});
   syncTask.loggedData.push({color: "yellow", Message: "Beginning File Info Sync",});
 
 
@@ -421,8 +424,8 @@ async function syncItemInfo(seasons_and_episodes,library_items)
 async function removeOrphanedData()
 {
   const _sync = new sync();
-  syncTask.loggedData.push({ color: "lawngreen", Message: "Syncing... 4/4" });
-  sendUpdate(syncTask.wsKey,{type:"Update",message:"Cleaning up FileInfo/Episode/Season Records (4/4)"});
+  syncTask.loggedData.push({ color: "lawngreen", Message: "Syncing... 6/6" });
+  sendUpdate(syncTask.wsKey,{type:"Update",message:"Cleaning up FileInfo/Episode/Season Records (6/6)"});
   syncTask.loggedData.push({color: "yellow", Message: "Removing Orphaned FileInfo/Episode/Season Records",});
 
   await db.query('CALL jd_remove_orphaned_data()');
