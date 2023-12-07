@@ -3,6 +3,7 @@ const CryptoJS  = require('crypto-js');
 const db = require("../db");
 const jwt = require('jsonwebtoken');
 const configClass = require("../classes/config");
+const packageJson = require('../../package.json');
 
 const JWT_SECRET = process.env.JWT_SECRET;
 const JS_USER=process.env.JS_USER;
@@ -89,7 +90,7 @@ router.post('/login', async (req, res) => {
   router.get('/isConfigured', async (req, res) => {
 
     const state=await getConfigState();
-    res.json({ state:state }); 
+    res.json({ state:state , version:packageJson.version}); 
     
     
   });
