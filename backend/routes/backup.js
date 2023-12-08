@@ -1,4 +1,4 @@
-const { Router } = require('express');
+const express = require("express");
 const { Pool } = require('pg');
 const fs = require('fs');
 const path = require('path');
@@ -6,10 +6,16 @@ const moment = require('moment');
 const { randomUUID }  = require('crypto');
 const multer = require('multer');
 
-// const wss = require("./WebsocketHandler");
-const Logging =require('./logging');
 
-const router = Router();
+const Logging =require('./logging');
+const triggertype = require('../logging/triggertype');
+const taskstate = require('../logging/taskstate');
+const taskName = require('../logging/taskName');
+
+const { sendUpdate } = require('../ws');
+const db = require("../db");
+
+const router = express.Router();
 
 // Database connection parameters
 const postgresUser = process.env.POSTGRES_USER;
@@ -44,8 +50,8 @@ async function backup(refLog) {
   });
 
   // Get data from each table and append it to the backup file
- 
- 
+
+
   try{
 
   let now = moment();
@@ -59,24 +65,24 @@ async function backup(refLog) {
     console.error('No write permissions for the folder:', backuppath);
     refLog.logData.push({ color: "red", Message: "Backup Failed: No write permissions for the folder: "+backuppath });
     refLog.logData.push({ color: "red", Message: "Backup Failed with errors"});
-    refLog.result='Failed';
+    logging.updateLog(refLog.uuid,refLog.loggedData,taskstate.FAILED);
     await pool.end();
     return;
 
   }
-  
+
 
   // const backupPath = `../backup-data/backup_${now.format('yyyy-MM-DD HH-mm-ss')}.json`;
   const directoryPath = path.join(__dirname, '..', backupfolder,`backup_${now.format('yyyy-MM-DD HH-mm-ss')}.json`);
-  
+
   const stream = fs.createWriteStream(directoryPath, { flags: 'a' });
   stream.on('error', (error) => {
     refLog.logData.push({ color: "red", Message: "Backup Failed: "+error });
-    refLog.result='Failed';
+    logging.updateLog(refLog.uuid,refLog.loggedData,taskstate.FAILED);
     return;
   });
   const backup_data=[];
-  
+
   refLog.logData.push({ color: "yellow", Message: "Begin Backup "+directoryPath });
   for (let table of tables) {
     const query = `SELECT * FROM ${table}`;
@@ -85,7 +91,7 @@ async function backup(refLog) {
     refLog.logData.push({color: "dodgerblue",Message: `Saving ${rows.length} rows for table ${table}`});
 
     backup_data.push({[table]:rows});
-    
+
   }
 
 
@@ -97,7 +103,7 @@ async function backup(refLog) {
      //Cleanup excess backups
   let deleteCount=0;
   const directoryPathDelete = path.join(__dirname, '..', backupfolder);
-  
+
   const files = await new Promise((resolve, reject) => {
     fs.readdir(directoryPathDelete, (err, files) => {
       if (err) {
@@ -144,13 +150,13 @@ async function backup(refLog) {
   {
     console.log(error);
     refLog.logData.push({ color: "red", Message: "Backup Failed: "+error });
-    refLog.result='Failed';
+    logging.updateLog(refLog.uuid,refLog.loggedData,taskstate.FAILED);
   }
- 
+
 
   await pool.end();
 
- 
+
 }
 
 // Restore function
@@ -169,10 +175,10 @@ function readFile(path) {
   });
 }
 
-async function restore(file,logData,result) {
+async function restore(file,refLog) {
 
-  logData.push({ color: "lawngreen", Message: "Starting Restore" });
-  logData.push({ color: "yellow", Message: "Restoring from Backup: "+file });
+  refLog.logData.push({ color: "lawngreen", Message: "Starting Restore" });
+  refLog.logData.push({ color: "yellow", Message: "Restoring from Backup: "+file });
   const pool = new Pool({
     user: postgresUser,
     password: postgresPassword,
@@ -190,9 +196,8 @@ async function restore(file,logData,result) {
       jsonData = await readFile(backupPath);
 
     } catch (err) {
-      logData.push({ color: "red",key:tableName ,Message: `Failed to read backup file`});
-        
-      result='Failed';
+      refLog.logData.push({ color: "red",key:tableName ,Message: `Failed to read backup file`});
+      Logging.updateLog(refLog.uuid,refLog.logData,taskstate.FAILED);
       console.error(err);
     }
 
@@ -207,7 +212,7 @@ async function restore(file,logData,result) {
     {
       const data = Object.values(table)[0];
       const tableName=Object.keys(table)[0];
-      logData.push({ color: "dodgerblue",key:tableName ,Message: `Restoring ${tableName}`});
+      refLog.logData.push({ color: "dodgerblue",key:tableName ,Message: `Restoring ${tableName}`});
       for(let index in data)
       {
         const keysWithQuotes = Object.keys(data[index]).map(key => `"${key}"`);
@@ -226,46 +231,49 @@ async function restore(file,logData,result) {
         });
 
         const valueString = valuesWithQuotes.join(", ");
-       
-        
+
+
         const query=`INSERT INTO ${tableName} (${keyString}) VALUES(${valueString})  ON CONFLICT DO NOTHING`;
         const { rows } = await pool.query( query );
 
 
       }
-  
+
 
     }
     await pool.end();
-    logData.push({ color: "lawngreen", Message: "Restore Complete" });
+    refLog.logData.push({ color: "lawngreen", Message: "Restore Complete" });
 
   }
 
 // Route handler for backup endpoint
 router.get('/beginBackup', async (req, res) => {
   try {
-    let startTime = moment();
-    let refLog={logData:[],result:'Success'};
-    await backup(refLog);
+    const last_execution=await db.query( `SELECT "Result"
+    FROM public.jf_logging
+    WHERE "Name"='${taskName.backup}'
+    ORDER BY "TimeRun" DESC
+    LIMIT 1`).then((res) => res.rows);
 
-    let endTime = moment();
-    let diffInSeconds = endTime.diff(startTime, 'seconds');
-    const uuid = randomUUID();
-    const log=
+    if(last_execution.length!==0)
     {
-      "Id":uuid,
-      "Name":"Backup",
-      "Type":"Task",
-      "ExecutionType":"Manual",
-      "Duration":diffInSeconds || 0,
-      "TimeRun":startTime,
-      "Log":JSON.stringify(refLog.logData),
-      "Result": refLog.result
-  
-    };
-  
-    Logging.insertLog(log);
+
+      if(last_execution[0].Result ===taskstate.RUNNING)
+      {
+      sendUpdate("TaskError","Error: Backup is already running");
+      res.send();
+      return;
+      }
+    }
+
+
+    const uuid = randomUUID();
+    let refLog={logData:[],uuid:uuid};
+    Logging.insertLog(uuid,triggertype.Manual,taskName.backup);
+    await backup(refLog);
+    Logging.updateLog(uuid,refLog.logData,taskstate.SUCCESS);
     res.send('Backup completed successfully');
+    sendUpdate("TaskComplete",{message:triggertype+" Backup Completed"});
   } catch (error) {
     console.error(error);
     res.status(500).send('Backup failed');
@@ -273,47 +281,32 @@ router.get('/beginBackup', async (req, res) => {
 });
 
 router.get('/restore/:filename', async (req, res) => {
-  let startTime = moment();
-  let logData=[];
-  let result='Success';
+
     try {
+      const uuid = randomUUID();
+      let refLog={logData:[],uuid:uuid};
+      Logging.insertLog(uuid,triggertype.Manual,taskName.restore);
+
       const filePath = path.join(__dirname, '..', backupfolder, req.params.filename);
-   
-      await restore(filePath,logData,result);
+
+      await restore(filePath,refLog);
+      Logging.updateLog(uuid,refLog.logData,taskstate.SUCCESS);
 
       res.send('Restore completed successfully');
+      sendUpdate("TaskComplete",{message:"Restore completed successfully"});
     } catch (error) {
       console.error(error);
       res.status(500).send('Restore failed');
     }
 
-    let endTime = moment();
-      let diffInSeconds = endTime.diff(startTime, 'seconds');
-      const uuid = randomUUID();
-
-      const log=
-      {
-        "Id":uuid,
-        "Name":"Restore",
-        "Type":"Task",
-        "ExecutionType":"Manual",
-        "Duration":diffInSeconds,
-        "TimeRun":startTime,
-        "Log":JSON.stringify(logData),
-        "Result": result
-    
-      };
-    
-      
-      Logging.insertLog(log);
   });
 
 
 
-  
+
   router.get('/files', (req, res) => {
     try
-    {  
+    {
     const directoryPath = path.join(__dirname, '..', backupfolder);
     fs.readdir(directoryPath, (err, files) => {
       if (err) {
@@ -337,7 +330,7 @@ router.get('/restore/:filename', async (req, res) => {
     {
         console.log(error);
     }
-  
+
   });
 
 
@@ -352,14 +345,14 @@ router.get('/restore/:filename', async (req, res) => {
 
     try{
     const filePath = path.join(__dirname, '..', backupfolder, req.params.filename);
-  
+
       fs.unlink(filePath, (err) => {
         if (err) {
           console.error(err);
           res.status(500).send('An error occurred while deleting the file.');
           return;
         }
-    
+
         console.log(`${filePath} has been deleted.`);
         res.status(200).send(`${filePath} has been deleted.`);
       });
@@ -371,7 +364,7 @@ router.get('/restore/:filename', async (req, res) => {
 
   });
 
-  
+
   const storage = multer.diskStorage({
     destination: function (req, file, cb) {
       cb(null, path.join(__dirname, '..', backupfolder)); // Set the destination folder for uploaded files
@@ -380,10 +373,10 @@ router.get('/restore/:filename', async (req, res) => {
       cb(null, file.originalname); // Set the file name
     },
   });
-  
+
   const upload = multer({ storage: storage });
-  
-  
+
+
   router.post("/upload", upload.single("file"), (req, res) => {
     // Handle the uploaded file here
     res.json({
@@ -391,13 +384,13 @@ router.get('/restore/:filename', async (req, res) => {
       filePath: req.file.path,
     });
   });
-  
-  
-  
 
 
 
-module.exports = 
+
+
+
+module.exports =
 {
   router,
   backup

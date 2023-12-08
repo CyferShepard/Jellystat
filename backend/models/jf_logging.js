@@ -13,11 +13,11 @@
         Id: item.Id,
         Name: item.Name,
         Type: item.Type,
-        ExecutionType: item.ExecutionType,
+        ExecutionType: item.ExecutionType || '',
         Duration: item.Duration,
-        TimeRun: item.TimeRun,
+        TimeRun: item.TimeRun || '',
         Log: item.Log,
-        Result: item.Result,
+        Result: item.Result || '',
       });
 
   module.exports = {

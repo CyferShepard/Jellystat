@@ -1,26 +1,21 @@
 const express = require("express");
 const pgp = require("pg-promise")();
 const db = require("../db");
-const axios = require("axios");
-const https = require('https');
+
 const moment = require('moment');
 const { randomUUID }  = require('crypto');
 
+const { sendUpdate } = require('../ws');
+
 const logging=require("./logging");
-
-const agent = new https.Agent({
-  rejectUnauthorized: (process.env.REJECT_SELF_SIGNED_CERTIFICATES || 'true').toLowerCase() ==='true'
-});
+const taskName=require("../logging/taskName");
+const triggertype=require("../logging/triggertype");
 
 
 
-const axios_instance = axios.create({
-  httpsAgent: agent
-});
-
-// const wss = require("./WebsocketHandler");
-// const socket=wss;
-
+const configClass = require("../classes/config");
+const JellyfinAPI = require("../classes/jellyfin-api");
+const Jellyfin = new JellyfinAPI();
 
 const router = express.Router();
 
@@ -32,6 +27,10 @@ const {jf_item_info_columns,jf_item_info_mapping,} = require("../models/jf_item_
 const {columnsPlaybackReporting,mappingPlaybackReporting}= require("../models/jf_playback_reporting_plugin_data");
 
 const {jf_users_columns,jf_users_mapping,} = require("../models/jf_users");
+const taskstate = require("../logging/taskstate");
+
+let syncTask;
+let PlaybacksyncTask;
 
 /////////////////////////////////////////Functions
 
@@ -46,371 +45,172 @@ function getErrorLineNumber(error) {
 }
 
 class sync {
-  constructor(hostUrl, apiKey) {
-    this.hostUrl = hostUrl;
-    this.apiKey = apiKey;
+
+  async getExistingIDsforTable(tablename)
+  {
+    return  await db
+      .query(`SELECT "Id" FROM ${tablename}`)
+      .then((res) => res.rows.map((row) => row.Id));
   }
 
-  async getUsers() {
-    try {
-      const url = `${this.hostUrl}/Users`;
-      const response = await axios_instance.get(url, {
-        headers: {
-          "X-MediaBrowser-Token": this.apiKey,
-        },
+  async insertData(tablename,dataToInsert,column_mappings)
+  {
+    let result = await db.insertBulk(tablename,dataToInsert,column_mappings);
+    if (result.Result === "SUCCESS") {
+      syncTask.loggedData.push({color: "dodgerblue",Message:dataToInsert.length + " Rows Inserted."});
+    } else {
+      syncTask.loggedData.push({
+        color: "red",
+        Message: "Error performing bulk insert:" + result.message,
       });
-      return response.data;
-    } catch (error) {
-      console.log(error);
-      return [];
+      throw new Error("Error performing bulk insert:" + result.message);
     }
   }
 
-  async getAdminUser(refLog) {
-    try {
-      const url = `${this.hostUrl}/Users`;
-      const response = await axios_instance.get(url, {
-        headers: {
-          "X-MediaBrowser-Token": this.apiKey,
-        },
-      });
-
-      if(!response || typeof response.data !== 'object' || !Array.isArray(response.data))
-      {
-        res.status(503);
-        res.send({ error: "Invalid Response from Users API Call.", user_response:response });
-        return;
-      }
-  
-      const adminUser = response.data.filter(
-        (user) => user.Policy.IsAdministrator === true
-      );
-      return adminUser || null;
-    } catch (error) {
-      console.log(error);
-      refLog.loggedData.push({ Message: "Error Getting AdminId: "+error});
-      refLog.result='Failed';
-      return [];
+  async removeData(tablename,dataToRemove)
+  {
+    let result = await db.deleteBulk(tablename,dataToRemove);
+    if (result.Result === "SUCCESS") {
+      syncTask.loggedData.push(dataToRemove.length + " Rows Removed.");
+    } else {
+      syncTask.loggedData.push({color: "red",Message: "Error: "+result.message,});
+      throw new Error("Error :" + result.message);
     }
   }
 
-  async getItem(ids,params) {
-    try {
-
-
-      let url = `${this.hostUrl}/Items?ids=${ids}`;
-      let startIndex=params && params.startIndex ? params.startIndex :0;
-      let increment=params && params.increment ? params.startIndex :200;
-      let recursive=params && params.recursive!==undefined  ? params.recursive :true;
-      let total=200;
-
-      let final_response=[];
-      while(startIndex<total && total !== undefined)
-      {
-        const response = await axios_instance.get(url, {
-          headers: {
-            "X-MediaBrowser-Token": this.apiKey,
-          },        
-          params:{
-            startIndex:startIndex,
-            recursive:recursive,
-            limit:increment
-          },
-        });
-
-        total=response.data.TotalRecordCount;
-        startIndex+=increment;
-
-         final_response=[...final_response, ...response.data.Items];
-
-      }
-
-
-      return final_response;
-    } catch (error) {
-      console.log(error);
-      return [];
-    }
-  }
-
-  async getLibrariesFromApi() {
-    try {
-
-
-      let url = `${this.hostUrl}/Library/MediaFolders`;
-
-
-      const response_data = await axios_instance.get(url, {
-        headers: {
-          "X-MediaBrowser-Token": this.apiKey,
-        },
-      });
-    
-      const filtered_libraries = response_data.data.Items.filter(
-        (type) => !["boxsets", "playlists"].includes(type.CollectionType)
-      );
-    
-
-
-      return filtered_libraries;
-    } catch (error) {
-      console.log(error);
-      return [];
-    }
-  }
-
-  async getItems(key,id,params) {
-    try {
-
-
-      let url = `${this.hostUrl}/Items?${key}=${id}`;
-      let startIndex=params && params.startIndex ? params.startIndex :0;
-      let increment=params && params.increment ? params.startIndex :200;
-      let recursive=params && params.recursive!==undefined  ? params.recursive :true;
-      let total=200;
-
-      let final_response=[];
-      while(startIndex<total && total !== undefined)
-      {
-        const response = await axios_instance.get(url, {
-          headers: {
-            "X-MediaBrowser-Token": this.apiKey,
-          },        
-          params:{
-            startIndex:startIndex,
-            recursive:recursive,
-            limit:increment
-          },
-        });
-
-        total=response.data.TotalRecordCount;
-        startIndex+=increment;
-
-         final_response=[...final_response, ...response.data.Items];
-
-      }
-
-
-      // const results = response.data.Items;
-      if (key === 'userid') {
-        return final_response.filter((type) => !["boxsets","playlists"].includes(type.CollectionType));
-      } else {
-        // return final_response.filter((item) => item.ImageTags.Primary);
-        return final_response;
-      }
-    } catch (error) {
-      console.log(error);
-      return [];
-    }
-  }
-
-
-  async getItemInfo(itemID,userid) {
-    try {
-
-      let url = `${this.hostUrl}/Items/${itemID}/playbackinfo?userId=${userid}`;
-
-      const response = await axios_instance.get(url, {
-        headers: {
-          "X-MediaBrowser-Token": this.apiKey,
-        },
-      });
-
-      const results = response.data.MediaSources;
-      return results;
-    } catch (error) {
-      console.log(error);
-      return [];
+  async updateSingleFieldOnDB(tablename,dataToUpdate,field_name,field_value,where_field)
+  {
+    let result = await db.updateSingleFieldBulk(tablename,dataToUpdate,field_name,field_value,where_field);
+    if (result.Result === "SUCCESS") {
+      syncTask.loggedData.push({color: "dodgerblue",Message:dataToUpdate.length + " Rows updated."});
+    } else {
+      syncTask.loggedData.push({color: "red",Message: "Error: "+result.message,});
+      throw new Error("Error :" + result.message);
     }
   }
 }
 ////////////////////////////////////////API Methods
 
-async function syncUserData(refLog)
+async function syncUserData()
 {
-  try
-  {
-    const { rows } = await db.query('SELECT * FROM app_config where "ID"=1');
-
-    const _sync = new sync(rows[0].JF_HOST, rows[0].JF_API_KEY);
+  sendUpdate(syncTask.wsKey,{type:"Update",message:"Syncing User Data"});
+  syncTask.loggedData.push({ color: "lawngreen", Message: "Syncing... 1/6" });
+  syncTask.loggedData.push({color: "yellow",Message: "Beginning User Sync",});
   
-    const data = await _sync.getUsers();
-  
-    const existingIds = await db
-      .query('SELECT "Id" FROM jf_users')
-      .then((res) => res.rows.map((row) => row.Id)); // get existing library Ids from the db
-  
-    let dataToInsert = await data.map(jf_users_mapping);
+  const _sync = new sync();
 
-  
-    if (dataToInsert.length !== 0) {
-      let result = await db.insertBulk("jf_users",dataToInsert,jf_users_columns);
-      if (result.Result === "SUCCESS") {
-        refLog.loggedData.push(dataToInsert.length + " Rows Inserted.");
-      } else {
-        refLog.loggedData.push({
-          color: "red",
-          Message: "Error performing bulk insert:" + result.message,
-        });
-        refLog.result='Failed';
-      }
-    }
-    
-    const toDeleteIds = existingIds.filter((id) =>!data.some((row) => row.Id === id ));
-    if (toDeleteIds.length > 0) {
-      let result = await db.deleteBulk("jf_users",toDeleteIds);
-      if (result.Result === "SUCCESS") {
-        refLog.loggedData.push(toDeleteIds.length + " Rows Removed.");
-      } else {
-        refLog.loggedData.push({color: "red",Message: "Error: "+result.message,});
-        refLog.result='Failed';
-      }
-    
-    }
+  const data = await Jellyfin.getUsers();
 
-    //update usernames on log table where username does not match the user table
-    await db.query('UPDATE jf_playback_activity a SET "UserName" = u."Name" FROM jf_users u WHERE u."Id" = a."UserId" AND u."Name" <> a."UserName"');
+  const existingIds = await _sync.getExistingIDsforTable('jf_users');// get existing user Ids from the db
+
+  let dataToInsert = await data.map(jf_users_mapping);
 
 
-  }catch(error)
-  {
-  refLog.loggedData.push({color: "red",Message: getErrorLineNumber(error)+ ": Error: "+error,});
-  refLog.result='Failed';
+  if (dataToInsert.length > 0) {
+    await _sync.insertData("jf_users",dataToInsert,jf_users_columns);
   }
- 
 
-}
-
-async function syncLibraryFolders(refLog,data)
-{
-  try
-  {
-
-    const existingIds = await db
-      .query('SELECT "Id" FROM jf_libraries')
-      .then((res) => res.rows.map((row) => row.Id));
-
-
-    let dataToInsert = [];
-
-    if (existingIds.length === 0) {
-      dataToInsert = await data.map(jf_libraries_mapping);
-    } else {
-      dataToInsert = await data.filter((row) => !existingIds.includes(row.Id)).map(jf_libraries_mapping);
-    }
-
-    if (dataToInsert.length !== 0) {
-      let result = await db.insertBulk("jf_libraries",dataToInsert,jf_libraries_columns);
-      if (result.Result === "SUCCESS") {
-        refLog.loggedData.push(dataToInsert.length + " Rows Inserted.");
-      } else {
-        refLog.loggedData.push({
-          color: "red",
-          Message: "Error performing bulk insert:" + result.message,
-        });
-        refLog.result='Failed';
-      }
-    }
-  
-//----------------------DELETE FUNCTION
-    //GET EPISODES IN SEASONS
-    //GET SEASONS IN SHOWS
-    //GET SHOWS IN LIBRARY
-    //FINALY DELETE LIBRARY
-    const toDeleteIds = existingIds.filter((id) =>!data.some((row) => row.Id === id ));
-    if (toDeleteIds.length > 0) {
-      const ItemsToDelete=await db.query(`SELECT "Id" FROM jf_library_items where "ParentId" in (${toDeleteIds.map(id => `'${id}'`).join(',')})`).then((res) => res.rows.map((row) => row.Id));
-      let resultItem=await db.deleteBulk("jf_library_items",ItemsToDelete);
-
-      let result = await db.deleteBulk("jf_libraries",toDeleteIds);
-      if (result.Result === "SUCCESS") {
-        refLog.loggedData.push(toDeleteIds.length + " Rows Removed.");
-      } else {
-      
-        refLog.loggedData.push({color: "red",Message:  "Error: "+result.message,});
-        refLog.result='Failed';
-      }
-    
-    } 
-  }
-  catch(error)
-  {
-    refLog.loggedData.push({color: "red",Message: getErrorLineNumber(error)+ ": Error: "+error,});
-    refLog.result='Failed';
-  }
-  
-}
-async function syncLibraryItems(refLog,data)
-{
-  try{
-
-    let existingLibraryIds = await db
-    .query('SELECT "Id" FROM jf_libraries')
-    .then((res) => res.rows.map((row) => row.Id));
-
-  refLog.loggedData.push({ color: "lawngreen", Message: "Syncing... 1/4" });
-  refLog.loggedData.push({color: "yellow",Message: "Beginning Library Item Sync",});
-
-  data=data.filter((row) => existingLibraryIds.includes(row.ParentId));
-  let insertMessage='';
-  let deleteCounter = 0;
-
-
-  const existingIds = await db
-    .query('SELECT "Id" FROM jf_library_items')
-    .then((res) => res.rows.map((row) => row.Id));
-
-  let dataToInsert = [];
-  //filter fix if jf_libraries is empty
-
-  dataToInsert = await data.map(jf_library_items_mapping);
-  dataToInsert=dataToInsert.filter((item)=>item.Id !== undefined);
-
-  if (dataToInsert.length !== 0) {
-    let result = await db.insertBulk("jf_library_items",dataToInsert,jf_library_items_columns);
-    if (result.Result === "SUCCESS") {
-      insertMessage = `${dataToInsert.length-existingIds.length >0 ? dataToInsert.length-existingIds.length : 0} Rows Inserted. ${existingIds.length} Rows Updated.`;
-    } else {
-      refLog.loggedData.push({
-        color: "red",
-        Message: "Error performing bulk insert:" + result.message,
-      });
-      refLog.result='Failed';
-    }
-  }
-  
   const toDeleteIds = existingIds.filter((id) =>!data.some((row) => row.Id === id ));
   if (toDeleteIds.length > 0) {
-    let result = await db.deleteBulk("jf_library_items",toDeleteIds);
-    if (result.Result === "SUCCESS") {
-      deleteCounter +=toDeleteIds.length;
-    } else {
-      refLog.loggedData.push({color: "red",Message:  "Error: "+result.message,});
-      refLog.result='Failed';
-    }
-  } 
-  
-  refLog.loggedData.push({color: "dodgerblue",Message: insertMessage,});
-  refLog.loggedData.push({color: "orange",Message: deleteCounter + " Library Items Removed.",});
-  refLog.loggedData.push({ color: "yellow", Message: "Item Sync Complete" });
-
-  }catch(error)
-  {
-    refLog.loggedData.push({color: "red",Message:  getErrorLineNumber(error)+ ": Error: "+error,});
-    refLog.result='Failed';
+    await _sync.removeData("jf_users",toDeleteIds);
   }
-  
+
+  //update usernames on log table where username does not match the user table
+  await db.query('UPDATE jf_playback_activity a SET "UserName" = u."Name" FROM jf_users u WHERE u."Id" = a."UserId" AND u."Name" <> a."UserName"');
+  syncTask.loggedData.push({color: "yellow",Message: "User Sync Complete",});
+}
+
+async function syncLibraryFolders(data,existing_excluded_libraries)
+{
+  sendUpdate(syncTask.wsKey,{type:"Update",message:"Syncing Library Folders"});
+  syncTask.loggedData.push({ color: "lawngreen", Message: "Syncing... 2/6" });
+  syncTask.loggedData.push({color: "yellow",Message: "Beginning Library Sync",});
+    const _sync = new sync();
+    const existingIds = await db.query(`SELECT "Id" FROM jf_libraries where "archived" = false `).then((res) => res.rows.map((row) => row.Id)); 
+    let dataToInsert = await data.map(jf_libraries_mapping);
+
+    if (dataToInsert.length !== 0) {
+      await _sync.insertData("jf_libraries",dataToInsert,jf_libraries_columns);
+    }
+
+    //archive libraries and items instead of deleting them
+
+    const toArchiveLibraryIds = existingIds.filter((id) =>!data.some((row) => row.Id === id ));
+    if (toArchiveLibraryIds.length > 0) {
+      sendUpdate(syncTask.wsKey,{type:"Update",message:"Archiving old Library Data"});
+
+      //dont archive items that exist on jellyfin but where marked as excluded in the config
+      if(toArchiveLibraryIds.filter((id) => !existing_excluded_libraries.some((row) => row.Id === id )).length>0)
+      {
+        const ItemsToArchive=await db.query(`SELECT "Id" FROM jf_library_items where "archived" = false and "ParentId" in (${toArchiveLibraryIds.filter((id) => !existing_excluded_libraries.some((row) => row.Id === id )).map(id => `'${id}'`).join(',')})`).then((res) => res.rows.map((row) => row.Id));
+        if (ItemsToArchive.length > 0) {
+          await _sync.updateSingleFieldOnDB("jf_library_items",ItemsToArchive,"archived",true);
+        }
+
+      }
+
+      await _sync.updateSingleFieldOnDB("jf_libraries",toArchiveLibraryIds,"archived",true);
+
+      syncTask.loggedData.push({color: "yellow",Message: "Library Sync Complete",});
+    }
+
 
 
 }
-
-async function syncShowItems(refLog,data)
+async function syncLibraryItems(data)
 {
- try{
-  refLog.loggedData.push({ color: "lawngreen", Message: "Syncing... 2/4" });
-  refLog.loggedData.push({color: "yellow", Message: "Beginning Seasons and Episode sync",});
+  const _sync = new sync();
+  const existingLibraryIds = await _sync.getExistingIDsforTable('jf_libraries');// get existing library Ids from the db
+
+  syncTask.loggedData.push({ color: "lawngreen", Message: "Syncing... 3/6" });
+  sendUpdate(syncTask.wsKey,{type:"Update",message:"Beginning Library Item Sync (3/6)"});
+  syncTask.loggedData.push({color: "yellow",Message: "Beginning Library Item Sync",});
+
+  data=data.filter((row) => existingLibraryIds.includes(row.ParentId));
+
+  const existingIds = await _sync.getExistingIDsforTable('jf_library_items where archived=false');
+
+  let dataToInsert = await data.map(jf_library_items_mapping);
+  dataToInsert=dataToInsert.filter((item)=>item.Id !== undefined);
+
+  if(syncTask.taskName===taskName.partialsync)
+  {
+    dataToInsert=dataToInsert.filter((item)=>!existingIds.includes(item.Id));
+  }
+
+
+  if (dataToInsert.length > 0) {
+    await _sync.insertData("jf_library_items",dataToInsert,jf_library_items_columns);
+  }
+
+  syncTask.loggedData.push({color: "dodgerblue",Message: `${syncTask.taskName===taskName.partialsync ? dataToInsert.length : Math.max((dataToInsert.length-existingIds.length),0)} Rows Inserted. ${syncTask.taskName===taskName.partialsync ? 0 : existingIds.length} Rows Updated.`,});
+  
+  if(syncTask.taskName===taskName.fullsync)
+  {
+    let toArchiveIds = existingIds.filter((id) =>!data.some((row) => row.Id === id ));
+  
+    if (toArchiveIds.length > 0) {
+      await _sync.updateSingleFieldOnDB("jf_library_items",toArchiveIds,"archived",true);
+    }
+
+    syncTask.loggedData.push({color: "orange",Message: toArchiveIds.length + " Library Items Archived.",});
+  
+  }
+
+
+
+  syncTask.loggedData.push({ color: "yellow", Message: "Item Sync Complete" });
+}
+
+async function syncShowItems(data)
+{
+  const _sync = new sync();
+  syncTask.loggedData.push({ color: "lawngreen", Message: "Syncing... 4/6" });
+  sendUpdate(syncTask.wsKey,{type:"Update",message:"Beginning Show Item Sync (4/6)"});
+  syncTask.loggedData.push({color: "yellow", Message: "Beginning Seasons and Episode sync",});
 
   const { rows: shows } = await db.query(`SELECT *	FROM public.jf_library_items where "Type"='Series'`);
+
 
   let insertSeasonsCount = 0;
   let insertEpisodeCount = 0;
@@ -418,13 +218,15 @@ async function syncShowItems(refLog,data)
   let updateEpisodeCount = 0;
 
 
-  let deleteSeasonsCount = 0;
-  let deleteEpisodeCount = 0;
-
   //loop for each show
   for (const show of shows) {
+
+    //get all seasons and episodes for this show from the data
     const allSeasons =  data.filter((item) => item.Type==='Season' && item.SeriesId===show.Id);
     const allEpisodes =data.filter((item) => item.Type==='Episode' && item.SeriesId===show.Id);
+
+    if(allSeasons.length>0 || allEpisodes.length>0)
+    {
 
     const existingIdsSeasons = await db.query(`SELECT *	FROM public.jf_library_seasons where "SeriesId" = '${show.Id}'`).then((res) => res.rows.map((row) => row.Id));
     let existingIdsEpisodes = [];
@@ -447,442 +249,506 @@ async function syncShowItems(refLog,data)
     seasonsToInsert = await allSeasons.map(jf_library_seasons_mapping);
     episodesToInsert = await allEpisodes.map(jf_library_episodes_mapping);
 
+
+    //for partial sync, dont overwrite existing data
+    if(syncTask.taskName===taskName.partialsync)
+    {
+      seasonsToInsert=seasonsToInsert.filter((season) => !existingIdsSeasons.some((id) => id === season.Id));
+      episodesToInsert=episodesToInsert.filter((episode) => !existingIdsEpisodes.some((id) => id === episode.EpisodeId ));
+    }
+
+
     //Bulkinsert new data not on db
     if (seasonsToInsert.length !== 0) {
       let result = await db.insertBulk("jf_library_seasons",seasonsToInsert,jf_library_seasons_columns);
       if (result.Result === "SUCCESS") {
-        insertSeasonsCount+=seasonsToInsert.length-existingIdsSeasons.length;
-        updateSeasonsCount+=existingIdsSeasons.length;
+        insertSeasonsCount+= syncTask.taskName===taskName.partialsync ? seasonsToInsert.length : Math.max((seasonsToInsert.length-existingIdsSeasons.length),0);
+        updateSeasonsCount+= syncTask.taskName===taskName.partialsync ? 0: existingIdsSeasons.length;
         } else {
-        refLog.loggedData.push({
+        syncTask.loggedData.push({
           color: "red",
           Message: "Error performing bulk insert:" + result.message,
         });
-        refLog.result='Failed';
+        await logging.updateLog(syncTask.uuid,syncTask.loggedData,taskstate.FAILED);
       }
-    } 
-    const toDeleteIds = existingIdsSeasons.filter((id) =>!allSeasons.some((row) => row.Id === id ));
-    //Bulk delete from db thats no longer on api
-    if (toDeleteIds.length > 0) {
-      let result = await db.deleteBulk("jf_library_seasons",toDeleteIds);
-      if (result.Result === "SUCCESS") {
-        deleteSeasonsCount +=toDeleteIds.length;
-      } else {
-        refLog.loggedData.push({color: "red",Message:  "Error: "+result.message,});
-        refLog.result='Failed';
-      }
-    
-    } 
-    //insert delete episodes
+    }
+
+
     //Bulkinsert new data not on db
     if (episodesToInsert.length !== 0) {
       let result = await db.insertBulk("jf_library_episodes",episodesToInsert,jf_library_episodes_columns);
       if (result.Result === "SUCCESS") {
-        insertEpisodeCount+=episodesToInsert.length-existingIdsEpisodes.length;
-        updateEpisodeCount+=existingIdsEpisodes.length;
+        insertEpisodeCount+=syncTask.taskName===taskName.partialsync ? episodesToInsert.length : Math.max((episodesToInsert.length-existingIdsEpisodes.length),0);
+        updateEpisodeCount+=syncTask.taskName===taskName.partialsync ? 0 :existingIdsEpisodes.length;
       } else {
-        refLog.loggedData.push({
+        syncTask.loggedData.push({
           color: "red",
           Message: "Error performing bulk insert:" + result.message,
         });
-        refLog.result='Failed';
+        await logging.updateLog(syncTask.uuid,syncTask.loggedData,taskstate.FAILED);
       }
-    } 
+    }
 
-    const toDeleteEpisodeIds = existingIdsEpisodes.filter((id) =>!allEpisodes.some((row) => row.Id=== id ));
-    //Bulk delete from db thats no longer on api
-    if (toDeleteEpisodeIds.length > 0) {
-      let result = await db.deleteBulk("jf_library_episodes",toDeleteEpisodeIds);
-      if (result.Result === "SUCCESS") {
-        deleteEpisodeCount +=toDeleteEpisodeIds.length;
-      } else {
-        refLog.loggedData.push({color: "red",Message:  "Error: "+result.message,});
-        refLog.result='Failed';
+
+    if(syncTask.taskName===taskName.fullsync)
+    {
+      let toArchiveSeasons = existingIdsSeasons.filter((id) =>!seasonsToInsert.some((row) => row.Id === id ));
+      let toArchiveEpisodes = existingIdsEpisodes.filter((EpisodeId) =>!episodesToInsert.some((row) => row.EpisodeId === EpisodeId ));
+    
+      if (toArchiveSeasons.length > 0) {
+        await _sync.updateSingleFieldOnDB("jf_library_seasons",toArchiveSeasons,"archived",true);
+        syncTask.loggedData.push({color: "orange",Message: toArchiveSeasons.length + " Seasons Archived.",});
+      }
+      if (toArchiveEpisodes.length > 0) {
+        await _sync.updateSingleFieldOnDB("jf_library_episodes",toArchiveEpisodes,"archived",true);
+        
+      syncTask.loggedData.push({color: "orange",Message: toArchiveEpisodes.length + " Episodes Archived.",});
       }
     
-    } 
+    }
 
- 
   }
 
-  refLog.loggedData.push({color: "dodgerblue",Message: `Seasons: ${insertSeasonsCount > 0 ? insertSeasonsCount : 0} Rows Inserted. ${updateSeasonsCount} Rows Updated.`});
-  refLog.loggedData.push({color: "orange",Message: deleteSeasonsCount + " Seasons Removed.",});
-  refLog.loggedData.push({color: "dodgerblue",Message: `Episodes: ${insertEpisodeCount > 0 ? insertEpisodeCount : 0} Rows Inserted. ${updateEpisodeCount} Rows Updated.`});
-  refLog.loggedData.push({color: "orange",Message: deleteEpisodeCount + " Episodes Removed.",});
-  refLog.loggedData.push({ color: "yellow", Message: "Sync Complete" });
- }catch(error)
- {
-  refLog.loggedData.push({color: "red",Message:  getErrorLineNumber(error)+ ": Error: "+error,});
-  refLog.result='Failed';
- }
+  }
+
+  syncTask.loggedData.push({color: "dodgerblue",Message: `Seasons: ${insertSeasonsCount} Rows Inserted. ${updateSeasonsCount} Rows Updated.`});
+  syncTask.loggedData.push({color: "dodgerblue",Message: `Episodes: ${insertEpisodeCount} Rows Inserted. ${updateEpisodeCount} Rows Updated.`});
+  syncTask.loggedData.push({ color: "yellow", Message: "Sync Complete" });
 }
 
-async function syncItemInfo(refLog)
+async function syncItemInfo(seasons_and_episodes,library_items)
 {
- try{
-  refLog.loggedData.push({ color: "lawngreen", Message: "Syncing... 3/4" });
-  refLog.loggedData.push({color: "yellow", Message: "Beginning File Info Sync",});
+  syncTask.loggedData.push({ color: "lawngreen", Message: "Syncing... 5/6" });
+  sendUpdate(syncTask.wsKey,{type:"Update",message:"Beginning Item Info Sync (5/6)"});
+  syncTask.loggedData.push({color: "yellow", Message: "Beginning File Info Sync",});
 
-  const { rows: config } = await db.query('SELECT * FROM app_config where "ID"=1');
 
-  const _sync = new sync(config[0].JF_HOST, config[0].JF_API_KEY);
-  const { rows: Items } = await db.query(`SELECT *	FROM public.jf_library_items where "Type" not in ('Series','Folder')`);
-  const { rows: Episodes } = await db.query(`SELECT *	FROM public.jf_library_episodes`);
+  let Items=library_items.filter((item) => item.Type !== 'Series' && item.Type !== 'Folder' && item.Id !== undefined).map(jf_library_items_mapping);
+  let Episodes=seasons_and_episodes.filter((item) => item.Type === 'Episode' && item.LocationType !== 'Virtual' && item.Id !== undefined).map(jf_library_episodes_mapping);
+  
+
+
+  if(syncTask.taskName===taskName.fullsync)
+  {
+    const { rows: _Items } = await db.query(`SELECT *	FROM public.jf_library_items where "Type" not in ('Series','Folder')`);
+    const { rows: _Episodes } = await db.query(`SELECT *	FROM public.jf_library_episodes e join jf_library_items i on i."Id"=e."SeriesId" where i.archived=false`);
+    Items=_Items;
+    Episodes=_Episodes;
+  }
+
+
 
   let insertItemInfoCount = 0;
   let insertEpisodeInfoCount = 0;
   let updateItemInfoCount = 0;
   let updateEpisodeInfoCount = 0;
 
-  let deleteItemInfoCount  = 0;
-  let deleteEpisodeInfoCount = 0;
 
-  const admins = await _sync.getAdminUser(refLog);
-  const userid = admins[0].Id;
+
+
+
+  let current_item=0;
+  let all_items=Items.length;
+  let data_to_insert=[];
   //loop for each Movie
   for (const Item of Items) {
-    const data = await _sync.getItemInfo(Item.Id,userid);
-
+    current_item++;
+    sendUpdate(syncTask.wsKey,{type:"Update",message:`Syncing Item Info ${((current_item/all_items)*100).toFixed(2)}%`});
     const existingItemInfo = await db.query(`SELECT *	FROM public.jf_item_info where "Id" = '${Item.Id}'`).then((res) => res.rows.map((row) => row.Id));
+
+    if((existingItemInfo.length==0 && syncTask.taskName===taskName.partialsync) || syncTask.taskName===taskName.fullsync)
+    {
+      //dont update item info if it already exists and running a partial sync
+      const data = await Jellyfin.getItemInfo(Item.Id);
+      const mapped_data= await data.map(item => jf_item_info_mapping(item, 'Item'));
+      data_to_insert.push(...mapped_data);
+
+
+
+
+    if (mapped_data.length !== 0) {
+      insertItemInfoCount +=mapped_data.length- existingItemInfo.length;
+      updateItemInfoCount+=existingItemInfo.length;
+   
+    }
     
-    let ItemInfoToInsert = await data.map(item => jf_item_info_mapping(item, 'Item'));
 
+  }}
 
-    if (ItemInfoToInsert.length !== 0) {
-      let result = await db.insertBulk("jf_item_info",ItemInfoToInsert,jf_item_info_columns);
-      if (result.Result === "SUCCESS") {
-        insertItemInfoCount +=ItemInfoToInsert.length- existingItemInfo.length;
-        updateItemInfoCount+=existingItemInfo.length;
-
-      } else {
-        refLog.loggedData.push({
-          color: "red",
-          Message: "Error performing bulk insert:" + result.message,
-        });
-        refLog.result='Failed';
-      }
-    } 
-    const toDeleteItemInfoIds = existingItemInfo.filter((id) =>!data.some((row) => row.Id  === id ));
-    //Bulk delete from db thats no longer on api
-    if (toDeleteItemInfoIds.length > 0) {
-      let result = await db.deleteBulk("jf_item_info",toDeleteItemInfoIds);
-      if (result.Result === "SUCCESS") {
-        deleteItemInfoCount +=toDeleteItemInfoIds.length;
-      } else {
-        refLog.loggedData.push({color: "red",Message:  "Error: "+result.message,});
-        refLog.result='Failed';
-      }
-    
-    } 
-  }
-
+  let current_episode=0;
+  let all_episodes=Episodes.length;
    //loop for each Episode
    for (const Episode of Episodes) {
-    const data = await _sync.getItemInfo(Episode.EpisodeId,userid);
-
-
+    current_episode++;
+    sendUpdate(syncTask.wsKey,{type:"Update",message:`Syncing Episode Info ${((current_episode/all_episodes)*100).toFixed(2)}%`});
+    
     const existingEpisodeItemInfo = await db.query(`SELECT *	FROM public.jf_item_info where "Id" = '${Episode.EpisodeId}'`).then((res) => res.rows.map((row) => row.Id));
 
+    if((existingEpisodeItemInfo.length==0 && syncTask.taskName===taskName.partialsync) ||syncTask.taskName===taskName.fullsync )
+    {
 
-    let EpisodeInfoToInsert =  await data.map(item => jf_item_info_mapping(item, 'Episode'));
-    //filter fix if jf_libraries is empty
-
-
-    if (EpisodeInfoToInsert.length !== 0) {
-      let result = await db.insertBulk("jf_item_info",EpisodeInfoToInsert,jf_item_info_columns);
-      if (result.Result === "SUCCESS") {
-        insertEpisodeInfoCount += EpisodeInfoToInsert.length-existingEpisodeItemInfo.length;
+      //dont update item info if it already exists and running a partial sync
+      const episodedata = await Jellyfin.getItemInfo(Episode.EpisodeId);
+      const mapped_data= await episodedata.map(item => jf_item_info_mapping(item, 'Episode'));
+      data_to_insert.push(...mapped_data);
+     
+      //filter fix if jf_libraries is empty
+      if (mapped_data.length !== 0) {
+        insertEpisodeInfoCount += mapped_data.length-existingEpisodeItemInfo.length;
         updateEpisodeInfoCount+= existingEpisodeItemInfo.length;
-      } else {
-        refLog.loggedData.push({
-          color: "red",
-          Message: "Error performing bulk insert:" + result.message,
-        });
-        refLog.result='Failed';
       }
-    } 
-    const toDeleteEpisodeInfoIds = existingEpisodeItemInfo.filter((id) =>!data.some((row) => row.Id  === id ));
-    //Bulk delete from db thats no longer on api
-    if (toDeleteEpisodeInfoIds.length > 0) {
-      let result = await db.deleteBulk("jf_item_info",toDeleteEpisodeInfoIds);
-      if (result.Result === "SUCCESS") {
-        deleteEpisodeInfoCount +=toDeleteEpisodeInfoIds.length;
-      } else {
-        refLog.loggedData.push({color: "red",Message:  "Error: "+result.message,});
-        refLog.result='Failed';
-      }
-    
+
+
     }
-    // console.log(Episode.Name) 
+    
+
   }
 
-  refLog.loggedData.push({color: "dodgerblue",Message: (insertItemInfoCount >0 ? insertItemInfoCount : 0) + " Item Info inserted. "+updateItemInfoCount +" Item Info Updated"});
-  refLog.loggedData.push({color: "orange",Message: deleteItemInfoCount + " Item Info Removed.",});
-  refLog.loggedData.push({color: "dodgerblue",Message: (insertEpisodeInfoCount > 0 ? insertEpisodeInfoCount:0) + " Episodes Info inserted. "+updateEpisodeInfoCount +" Episodes Info Updated"});
-  refLog.loggedData.push({color: "orange",Message: deleteEpisodeInfoCount + " Episodes Info Removed.",});
-  refLog.loggedData.push({ color: "yellow", Message: "Info Sync Complete" });
- }catch(error)
- {
-  refLog.loggedData.push({color: "red",Message:  getErrorLineNumber(error)+ ": Error: "+error,});
-  refLog.result='Failed';
- }
+  if (data_to_insert.length !== 0) {
+    let result = await db.insertBulk("jf_item_info",data_to_insert,jf_item_info_columns);
+    if (result.Result !== "SUCCESS") {
+      syncTask.loggedData.push({
+        color: "red",
+        Message: "Error performing bulk insert:" + result.message,
+      });
+      await logging.updateLog(syncTask.uuid,syncTask.loggedData,taskstate.FAILED);
+    }
+  }
+
+  syncTask.loggedData.push({color: "dodgerblue",Message: (insertItemInfoCount >0 ? insertItemInfoCount : 0) + " Item Info inserted. "+updateItemInfoCount +" Item Info Updated"});
+  syncTask.loggedData.push({color: "dodgerblue",Message: (insertEpisodeInfoCount > 0 ? insertEpisodeInfoCount:0) + " Episodes Info inserted. "+updateEpisodeInfoCount +" Episodes Info Updated"});
+  syncTask.loggedData.push({ color: "yellow", Message: "Info Sync Complete" });
+  sendUpdate(syncTask.wsKey,{type:"Update",message:"Info Sync Complete"});
 }
 
-async function removeOrphanedData(refLog)
+async function removeOrphanedData()
 {
- try{
-  refLog.loggedData.push({ color: "lawngreen", Message: "Syncing... 4/4" });
-  refLog.loggedData.push({color: "yellow", Message: "Removing Orphaned FileInfo/Episode/Season Records",});
+  const _sync = new sync();
+  syncTask.loggedData.push({ color: "lawngreen", Message: "Syncing... 6/6" });
+  sendUpdate(syncTask.wsKey,{type:"Update",message:"Cleaning up FileInfo/Episode/Season Records (6/6)"});
+  syncTask.loggedData.push({color: "yellow", Message: "Removing Orphaned FileInfo/Episode/Season Records",});
 
   await db.query('CALL jd_remove_orphaned_data()');
-
-  refLog.loggedData.push({color: "dodgerblue",Message: "Orphaned FileInfo/Episode/Season Removed.",});
-
-  refLog.loggedData.push({ color: "Yellow", Message: "Sync Complete" });
- }catch(error)
- {
-  refLog.loggedData.push({color: "red",Message: getErrorLineNumber(error)+ ': Error:'+error,});
-  refLog.loggedData.push({ color: "red", Message: getErrorLineNumber(error)+ ": Cleanup Failed with errors" });
-  refLog.result='Failed';
- }
-
-}
-
-async function syncPlaybackPluginData(refLog)
-{
-  refLog.loggedData.push({ color: "lawngreen", Message: "Syncing..." });
+  const archived_items=await db.query(`select "Id" from jf_library_items where archived=true and "Type"='Series'`).then((res) => res.rows.map((row) => row.Id));
+  const archived_seasons=await db.query(`select "Id" from jf_library_seasons where archived=true`).then((res) => res.rows.map((row) => row.Id));
+  await _sync.updateSingleFieldOnDB("jf_library_seasons",archived_items,"archived",true,"SeriesId");
+  await _sync.updateSingleFieldOnDB("jf_library_episodes",archived_items,"archived",true,"SeriesId");
+  await _sync.updateSingleFieldOnDB("jf_library_episodes",archived_seasons,"archived",true,"SeasonId");
 
 
-  try {
-    const { rows: config } = await db.query(
-      'SELECT * FROM app_config where "ID"=1'
-    );
-  
-    
-    if(config.length===0)
-    {
-      return;
-    }
 
-    const base_url = config[0]?.JF_HOST;
-    const apiKey = config[0]?.JF_API_KEY;
-  
-    if (base_url === null || apiKey === null) {
-      return;
-    }
+  syncTask.loggedData.push({color: "dodgerblue",Message: "Orphaned FileInfo/Episode/Season Removed.",});
 
-    //Playback Reporting Plugin Check
-    const pluginURL = `${base_url}/plugins`;
-
-    const pluginResponse = await axios_instance.get(pluginURL,
-    {
-      headers: {
-        "X-MediaBrowser-Token": apiKey,
-      },
-    });
-
-    
-    const hasPlaybackReportingPlugin=pluginResponse.data?.filter((plugins) => plugins?.ConfigurationFileName==='Jellyfin.Plugin.PlaybackReporting.xml');
-
-    if(!hasPlaybackReportingPlugin || hasPlaybackReportingPlugin.length===0)
-    {
-      refLog.loggedData.push({color: "lawngreen", Message: "Playback Reporting Plugin not detected. Skipping step.",});
-      return;
-    }
-
-    //
-
-    refLog.loggedData.push({color: "dodgerblue", Message: "Determining query constraints.",});
-    const OldestPlaybackActivity = await db
-    .query('SELECT  MIN("ActivityDateInserted") "OldestPlaybackActivity" FROM public.jf_playback_activity')
-    .then((res) => res.rows[0]?.OldestPlaybackActivity);
-
-    const MaxPlaybackReportingPluginID = await db
-    .query('SELECT MAX(rowid) "MaxRowId" FROM jf_playback_reporting_plugin_data')
-    .then((res) => res.rows[0]?.MaxRowId);
-
-
-    //Query Builder
-    let query=`SELECT rowid, * FROM PlaybackActivity`;
-
-    if(OldestPlaybackActivity)
-    {
-      const formattedDateTime = moment(OldestPlaybackActivity).format('YYYY-MM-DD HH:mm:ss');
-
-      query=query+` WHERE DateCreated < '${formattedDateTime}'`;
-
-      if(MaxPlaybackReportingPluginID)
-      {
-  
-        query=query+` AND rowid > ${MaxPlaybackReportingPluginID}`;
-  
-      }
-
-    }else if(MaxPlaybackReportingPluginID)
-    {
-      query=query+` WHERE rowid > ${MaxPlaybackReportingPluginID}`;
-    }
-
-    query+=' order by rowid';
-
-    refLog.loggedData.push({color: "dodgerblue", Message: "Query built. Executing.",});
-
-    //
-
-    const url = `${base_url}/user_usage_stats/submit_custom_query`;
-
-    const response = await axios_instance.post(url, {
-      CustomQueryString: query,
-    }, {
-      headers: {
-        "X-MediaBrowser-Token": apiKey,
-      },
-    });
-
-    const PlaybackData=response.data.results;
-
-    let DataToInsert = await PlaybackData.map(mappingPlaybackReporting);
-
-
-    if (DataToInsert.length !== 0) {
-      refLog.loggedData.push({color: "dodgerblue", Message: `Inserting ${DataToInsert.length} Rows.`,});
-      let result=await db.insertBulk("jf_playback_reporting_plugin_data",DataToInsert,columnsPlaybackReporting);
-
-      if (result.Result === "SUCCESS") {
-        refLog.loggedData.push({color: "dodgerblue", Message: `${DataToInsert.length} Rows have been inserted.`,});
-
-      } else {
-      
-        refLog.loggedData.push({color: "red",Message:  "Error: "+result.message,});
-        refLog.result='Failed';
-      }
-      
-
-    }else
-    {
-      refLog.loggedData.push({color: "dodgerblue", Message: `No new data to insert.`,});
-    }    
-    await importPlaybackDatatoActivityTable(refLog);
-  
-     } catch (error) {
-      refLog.loggedData.push({color: "red",Message:  "Error: "+error,});
-      refLog.result='Failed';
-   }
-   
-   
-}
-async function importPlaybackDatatoActivityTable(refLog)
-{
- try{
-  refLog.loggedData.push({ color: "yellow", Message: "Running process to format data to be inserted into the Activity Table" });
-
-  await db.query('CALL ji_insert_playback_plugin_data_to_activity_table()');
-
-  refLog.loggedData.push({color: "dodgerblue",Message: "Process complete. Data has been inserted.",});
-
- }catch(error)
- {
-  refLog.loggedData.push({color: "red",Message: getErrorLineNumber(error)+ ': Error:'+error,});
-  refLog.loggedData.push({ color: "red", Message: getErrorLineNumber(error)+ ": Cleanup Failed with errors" });
-  refLog.result='Failed';
- }
- refLog.loggedData.push({color: "lawngreen", Message: `Playback Reporting Plugin Sync Complete`,});
+  syncTask.loggedData.push({ color: "Yellow", Message: "Sync Complete" });
 
 }
 
-async function updateLibraryStatsData(refLog)
+async function syncPlaybackPluginData()
 {
- try{
-  refLog.loggedData.push({color: "yellow", Message: "Updating Library Stats",});
+
+  PlaybacksyncTask.loggedData.push({ color: "lawngreen", Message: "Syncing..." });
+
+
+  //Playback Reporting Plugin Check
+  const installed_plugins=await Jellyfin.getInstalledPlugins();
+
+
+  const hasPlaybackReportingPlugin=installed_plugins.filter((plugins) => plugins?.ConfigurationFileName==='Jellyfin.Plugin.PlaybackReporting.xml');
+
+  if(!hasPlaybackReportingPlugin || hasPlaybackReportingPlugin.length===0)
+  {
+    PlaybacksyncTask.loggedData.push({color: "lawngreen", Message: "Playback Reporting Plugin not detected. Skipping step.",});
+    logging.updateLog(PlaybacksyncTask.uuid,PlaybacksyncTask.loggedData,taskstate.FAILED);
+    return;
+  }
+
+  //
+
+  PlaybacksyncTask.loggedData.push({color: "dodgerblue", Message: "Determining query constraints.",});
+  const OldestPlaybackActivity = await db
+  .query('SELECT  MIN("ActivityDateInserted") "OldestPlaybackActivity" FROM public.jf_playback_activity')
+  .then((res) => res.rows[0]?.OldestPlaybackActivity);
+
+  const MaxPlaybackReportingPluginID = await db
+  .query('SELECT MAX(rowid) "MaxRowId" FROM jf_playback_reporting_plugin_data')
+  .then((res) => res.rows[0]?.MaxRowId);
+
+
+  //Query Builder
+  let query=`SELECT rowid, * FROM PlaybackActivity`;
+
+  if(OldestPlaybackActivity)
+  {
+    const formattedDateTime = moment(OldestPlaybackActivity).format('YYYY-MM-DD HH:mm:ss');
+
+    query=query+` WHERE DateCreated < '${formattedDateTime}'`;
+
+    if(MaxPlaybackReportingPluginID)
+    {
+
+      query=query+` AND rowid > ${MaxPlaybackReportingPluginID}`;
+
+    }
+
+  }else if(MaxPlaybackReportingPluginID)
+  {
+    query=query+` WHERE rowid > ${MaxPlaybackReportingPluginID}`;
+  }
+
+  query+=' order by rowid';
+
+  PlaybacksyncTask.loggedData.push({color: "dodgerblue", Message: "Query built. Executing.",});
+  //
+
+
+  const PlaybackData = await Jellyfin.StatsSubmitCustomQuery(query);
+
+
+  let DataToInsert = await PlaybackData.map(mappingPlaybackReporting);
+
+
+  if (DataToInsert.length > 0) {
+    PlaybacksyncTask.loggedData.push({color: "dodgerblue", Message: `Inserting ${DataToInsert.length} Rows.`,});
+    let result=await db.insertBulk("jf_playback_reporting_plugin_data",DataToInsert,columnsPlaybackReporting);
+
+    if (result.Result === "SUCCESS") {
+      PlaybacksyncTask.loggedData.push({color: "dodgerblue", Message: `${DataToInsert.length} Rows have been inserted.`,});
+      PlaybacksyncTask.loggedData.push({ color: "yellow", Message: "Running process to format data to be inserted into the Activity Table" });
+      await db.query('CALL ji_insert_playback_plugin_data_to_activity_table()');
+      PlaybacksyncTask.loggedData.push({color: "dodgerblue",Message: "Process complete. Data has been inserted.",});
+
+    } else {
+
+      PlaybacksyncTask.loggedData.push({color: "red",Message:  "Error: "+result.message,});
+      await logging.updateLog(PlaybacksyncTask.uuid,PlaybacksyncTask.loggedData,taskstate.FAILED);
+    }
+
+
+  }else
+  {
+    PlaybacksyncTask.loggedData.push({color: "dodgerblue", Message: `No new data to insert.`,});
+  }
+
+
+    PlaybacksyncTask.loggedData.push({color: "lawngreen", Message: `Playback Reporting Plugin Sync Complete`,});
+
+
+}
+
+async function updateLibraryStatsData()
+{
+  syncTask.loggedData.push({color: "yellow", Message: "Updating Library Stats",});
 
   await db.query('CALL ju_update_library_stats_data()');
 
-  refLog.loggedData.push({color: "dodgerblue",Message: "Library Stats Updated.",});
-
- }catch(error)
- {
-  refLog.loggedData.push({color: "red",Message: getErrorLineNumber(error)+ ': Error:'+error,});
-  refLog.loggedData.push({ color: "red", Message: getErrorLineNumber(error)+ ": Stats update Failed with errors" });
-  refLog.result='Failed';
- }
+  syncTask.loggedData.push({color: "dodgerblue",Message: "Library Stats Updated.",});
 
 }
 
 
-async function fullSync(taskType)
+async function fullSync(triggertype)
 {
+  const config = await new configClass().getConfig();
+
+  const uuid = randomUUID();
+  syncTask={loggedData:[],uuid:uuid, wsKey:"FullSyncTask", taskName:taskName.fullsync};
   try
   {
-    let startTime = moment();
-    let refLog={loggedData:[],result:'Success'};
-  
-    const { rows } = await db.query('SELECT * FROM app_config where "ID"=1');
-    if (rows[0]?.JF_HOST === null || rows[0]?.JF_API_KEY === null) {
-      res.send({ error: "Config Details Not Found" });
-      refLog.loggedData.push({ Message: "Error: Config details not found!" });
-      refLog.result='Failed';
+    sendUpdate(syncTask.wsKey,{type:"Start",message:triggertype+" "+taskName.fullsync+" Started"});
+    await logging.insertLog(uuid,triggertype,taskName.fullsync);
+
+    if (config.error) {
+      syncTask.loggedData.push({ Message: config.error });
+      await logging.updateLog(syncTask.uuid,syncTask.loggedData,taskstate.FAILED);
       return;
     }
-  
-    const _sync = new sync(rows[0].JF_HOST, rows[0].JF_API_KEY);
 
-    const libraries = await _sync.getLibrariesFromApi(); 
+    let libraries = await Jellyfin.getLibraries();
+    if(libraries.length===0)
+    {
+      syncTask.loggedData.push({ Message: "Error: No Libararies found to sync." });
+      await logging.updateLog(syncTask.uuid,syncTask.loggedData,taskstate.FAILED);
+      sendUpdate(syncTask.wsKey,{type:"Success",message:triggertype+" "+taskName.fullsync+" Completed"});
+      return;
+    }
 
-    const excluded_libraries= rows[0].settings.ExcludedLibraries||[];
+    const excluded_libraries= config.settings.ExcludedLibraries||[];
 
-    const filtered_libraries=libraries.filter((library)=> !excluded_libraries.includes(library.Id));
+    let filtered_libraries=libraries.filter((library)=> !excluded_libraries.includes(library.Id));
+    let existing_excluded_libraries=libraries.filter((library)=> excluded_libraries.includes(library.Id));
 
-    const data=[];
+    //clear data from memory as its no longer needed
+    libraries=null;
+
+    let data=[];
 
     //for each item in library run get item using that id as the ParentId (This gets the children of the parent id)
   for (let i = 0; i < filtered_libraries.length; i++) {
     const item = filtered_libraries[i];
-    let libraryItems = await _sync.getItems('parentId',item.Id);
+    sendUpdate(syncTask.wsKey,{type:"Update",message:"Fetching Data for Library : "+item.Name + ` (${(i+1)}/${filtered_libraries.length})`});
+
+    let libraryItems=await Jellyfin.getItemsFromParentId(item.Id);
+
+    sendUpdate(syncTask.wsKey,{type:"Update",message:"Mapping Data for Library : "+item.Name});
+
     const libraryItemsWithParent = libraryItems.map((items) => ({
       ...items,
       ...{ ParentId: item.Id },
     }));
     data.push(...libraryItemsWithParent);
+    sendUpdate(syncTask.wsKey,{type:"Update",message:"Data Fetched for Library : "+item.Name});
+
   }
-    const library_items=data.filter((item) => ['Movie','Audio','Series'].includes(item.Type));
-    const seasons_and_episodes=data.filter((item) => ['Season','Episode'].includes(item.Type));
+    let library_items=data.filter((item) => ['Movie','Audio','Series'].includes(item.Type));
+    let seasons_and_episodes=data.filter((item) => ['Season','Episode'].includes(item.Type));
 
-    await syncUserData(refLog);
-  
-    await syncLibraryFolders(refLog,filtered_libraries);
-    await syncLibraryItems(refLog,library_items);
-    await syncShowItems(refLog,seasons_and_episodes);
-    await syncItemInfo(refLog);
-    await removeOrphanedData(refLog);
+    //clear data from memory as its no longer needed
+    data=null;
 
-    await updateLibraryStatsData(refLog);
 
-    const uuid = randomUUID();
-  
-    let endTime = moment();
-   
-    let diffInSeconds = endTime.diff(startTime, 'seconds');
-  
-    const log=
-    {
-      "Id":uuid,
-      "Name":"Jellyfin Sync",
-      "Type":"Task",
-      "ExecutionType":taskType,
-      "Duration":diffInSeconds,
-      "TimeRun":startTime,
-      "Log":JSON.stringify(refLog.loggedData),
-      "Result":refLog.result
-  
-    };
-     logging.insertLog(log);
-  
-    
+    //syncUserData
+    await syncUserData();
+
+    //syncLibraryFolders
+    await syncLibraryFolders(filtered_libraries,existing_excluded_libraries);
+
+    //clear data from memory as its no longer needed
+    filtered_libraries=null;
+    existing_excluded_libraries=null;
+
+    //syncLibraryItems
+    await syncLibraryItems(library_items);
+
+    //syncShowItems
+    await syncShowItems(seasons_and_episodes);
+
+    //syncItemInfo
+    await syncItemInfo(seasons_and_episodes,library_items);
+
+    //clear data from memory as its no longer needed
+    library_items=null;
+    seasons_and_episodes=null;
+
+    //removeOrphanedData
+    await removeOrphanedData();
+
+    await updateLibraryStatsData();
+
+    await logging.updateLog(syncTask.uuid,syncTask.loggedData,taskstate.SUCCESS);
+
+    sendUpdate(syncTask.wsKey,{type:"Success",message:triggertype+" Sync Completed"});
+
+
   }catch(error)
   {
-    console.log(error);
+    syncTask.loggedData.push({color: "red",Message: getErrorLineNumber(error)+ ": Error: "+error,});
+    await logging.updateLog(syncTask.uuid,syncTask.loggedData,taskstate.FAILED);
+    sendUpdate(syncTask.wsKey,{type:"Error",message:triggertype+" Sync Halted with Errors"});
   }
+
+
+}
+
+async function partialSync(triggertype)
+{
+  const config = await new configClass().getConfig();
+
+  const uuid = randomUUID();
   
+  syncTask={loggedData:[],uuid:uuid, wsKey:"PartialSyncTask", taskName:taskName.partialsync};
+  try
+  {
+    sendUpdate(syncTask.wsKey,{type:"Start",message:triggertype+" "+taskName.partialsync+" Started"});
+    await logging.insertLog(uuid,triggertype,taskName.partialsync);
+
+    if (config.error) {
+      syncTask.loggedData.push({ Message: config.error });
+      await logging.updateLog(syncTask.uuid,syncTask.loggedData,taskstate.FAILED);
+      return;
+    }
+
+
+    const libraries = await Jellyfin.getLibraries();
+    
+    if(libraries.length===0)
+    {
+      syncTask.loggedData.push({ Message: "Error: No Libararies found to sync." });
+      await logging.updateLog(syncTask.uuid,syncTask.loggedData,taskstate.FAILED);
+      sendUpdate(syncTask.wsKey,{type:"Success",message:triggertype+" "+taskName.fullsync+" Completed"});
+      return;
+    }
+
+    const excluded_libraries= config.settings.ExcludedLibraries||[];
+
+    const filtered_libraries=libraries.filter((library)=> !excluded_libraries.includes(library.Id));
+    const existing_excluded_libraries=libraries.filter((library)=> excluded_libraries.includes(library.Id));
+
+    let data=[];
+
+    //for each item in library run get item using that id as the ParentId (This gets the children of the parent id)
+    for (let i = 0; i < filtered_libraries.length; i++) {
+      const library = filtered_libraries[i];
+      sendUpdate(syncTask.wsKey,{type:"Update",message:"Fetching Data for Library : "+library.Name + ` (${(i+1)}/${filtered_libraries.length})`});
+      let recentlyAddedForLibrary = await Jellyfin.getRecentlyAdded(library.Id,10);
+
+      sendUpdate(syncTask.wsKey,{type:"Update",message:"Mapping Data for Library : "+library.Name});
+      const libraryItemsWithParent = recentlyAddedForLibrary.map((items) => ({
+        ...items,
+        ...{ ParentId: library.Id },
+      }));
+      data.push(...libraryItemsWithParent);
+      sendUpdate(syncTask.wsKey,{type:"Update",message:"Data Fetched for Library : "+library.Name});
+
+    }
+
+
+    const library_items=data.filter((item) => ['Movie','Audio','Series'].includes(item.Type));
+
+    for(const item of library_items.filter((item) => item.Type==='Series'))
+    {
+      let dataForShow = await Jellyfin.getItemsFromParentId(item.Id);
+      const seasons_and_episodes_for_show = dataForShow.filter((item) => ['Season','Episode'].includes(item.Type));
+      data.push(...seasons_and_episodes_for_show);
+
+    }
+
+
+    const seasons_and_episodes=data.filter((item) => ['Season','Episode'].includes(item.Type));
+
+     //clear data from memory as its no longer needed
+     data=null;
+
+  //   //syncUserData
+    await syncUserData();
+
+  //   //syncLibraryFolders
+    await syncLibraryFolders(filtered_libraries,existing_excluded_libraries);
+
+    //syncLibraryItems
+    await syncLibraryItems(library_items);
+
+    //syncShowItems
+    await syncShowItems(seasons_and_episodes);
+
+    //syncItemInfo
+    await syncItemInfo(seasons_and_episodes,library_items);
+
+    //removeOrphanedData
+    await removeOrphanedData();
+
+    await updateLibraryStatsData();
+
+    await logging.updateLog(syncTask.uuid,syncTask.loggedData,taskstate.SUCCESS);
+
+    sendUpdate(syncTask.wsKey,{type:"Success",message:triggertype+" Sync Completed"});
+
+
+  }catch(error)
+  {
+    syncTask.loggedData.push({color: "red",Message: getErrorLineNumber(error)+ ": Error: "+error,});
+    await logging.updateLog(syncTask.uuid,syncTask.loggedData,taskstate.FAILED);
+    sendUpdate(syncTask.wsKey,{type:"Error",message:triggertype+" Sync Halted with Errors"});
+  }
 
 }
 
@@ -890,22 +756,75 @@ async function fullSync(taskType)
 ////////////////////////////////////////API Calls
 
 ///////////////////////////////////////Sync All
-router.get("/beingSync", async (req, res) => {
+router.get("/beginSync", async (req, res) => {
 
-  const { rows } = await db.query('SELECT * FROM app_config where "ID"=1');
-  if (rows[0].JF_HOST === null || rows[0].JF_API_KEY === null) {
+  const config = await new configClass().getConfig();
+
+  if (config.error) {
     res.send({ error: "Config Details Not Found" });
     return;
   }
 
-  await fullSync('Manual');
+  const last_execution=await db.query( `SELECT "Result"
+  FROM public.jf_logging
+  WHERE "Name"='${taskName.fullsync}'
+  ORDER BY "TimeRun" DESC
+  LIMIT 1`).then((res) => res.rows);
+
+  if(last_execution.length!==0)
+  {
+
+    if(last_execution[0].Result ===taskstate.RUNNING)
+    {
+    sendUpdate("TaskError","Error: Sync is already running");
+    res.send();
+    return;
+    }
+  }
+
+
+  await fullSync(triggertype.Manual);
   res.send();
 
 });
 
+router.get("/beginPartialSync", async (req, res) => {
+  const config = await new configClass().getConfig();
+
+  if (config.error) {
+    res.send({ error: config.error});
+    return;
+  }
+
+  const last_execution=await db.query( `SELECT "Result"
+  FROM public.jf_logging
+  WHERE "Name"='${taskName.partialsync}'
+  ORDER BY "TimeRun" DESC
+  LIMIT 1`).then((res) => res.rows);
+
+  if(last_execution.length!==0)
+  {
+
+    if(last_execution[0].Result ===taskstate.RUNNING)
+    {
+    sendUpdate("TaskError","Error: Sync is already running");
+    res.send();
+    return;
+    }
+  }
+
+
+  await partialSync(triggertype.Manual);
+  res.send();
+
+});
+
+
 ///////////////////////////////////////Write Users
 router.post("/fetchItem", async (req, res) => {
   try{
+    const config = await new configClass().getConfig();
+
     const { itemId } = req.body;
     if(itemId===undefined)
     {
@@ -913,18 +832,18 @@ router.post("/fetchItem", async (req, res) => {
       res.send('The itemId field is required.');
     }
 
-    const { rows:config } = await db.query('SELECT * FROM app_config where "ID"=1');
+
     const { rows:temp_lib_id } = await db.query('SELECT "Id" FROM jf_libraries limit 1');
 
-    if (config[0].JF_HOST === null || config[0].JF_API_KEY === null) {
+    if (config.error) {
       res.status(503);
-      res.send({ error: "Config Details Not Found" });
+      res.send({ error: config.error });
       return;
     }
-  
-    const _sync = new sync(config[0].JF_HOST, config[0].JF_API_KEY);
-   
-    let userid=config[0].settings?.preferred_admin?.userid;
+
+    const _sync = new sync(config.JF_HOST, config.JF_API_KEY);
+
+    let userid=config.settings?.preferred_admin?.userid;
 
     if(!userid)
     {
@@ -971,7 +890,7 @@ router.post("/fetchItem", async (req, res) => {
     res.status(500);
     res.send(error);
   }
-  
+
 });
 
 
@@ -980,44 +899,52 @@ router.post("/fetchItem", async (req, res) => {
 
 //////////////////////////////////////////////////////syncPlaybackPluginData
 router.get("/syncPlaybackPluginData", async (req, res) => {
-  let startTime = moment();
-  let refLog={loggedData:[],result:'Success'};
+  const config = await new configClass().getConfig();
 
-  const { rows } = await db.query('SELECT * FROM app_config where "ID"=1');
-  if (rows[0]?.JF_HOST === null || rows[0]?.JF_API_KEY === null) {
-    res.send({ error: "Config Details Not Found" });
-    refLog.loggedData.push({ Message: "Error: Config details not found!" });
-    refLog.result='Failed';
-    return;
+  const uuid = randomUUID();
+  PlaybacksyncTask={loggedData:[],uuid:uuid};
+  try
+  {
+    await logging.insertLog(uuid,triggertype.Manual,taskName.import);
+    sendUpdate("PlaybackSyncTask",{type:"Start",message:"Playback Plugin Sync Started"});
+
+
+    if (config.error) {
+      res.send({ error: config.error });
+      PlaybacksyncTask.loggedData.push({ Message: config.error });
+      await logging.updateLog(uuid,PlaybacksyncTask.loggedData,taskstate.FAILED);
+      return;
+    }
+
+    await sleep(5000);
+    await syncPlaybackPluginData();
+
+    await logging.updateLog(PlaybacksyncTask.uuid,PlaybacksyncTask.loggedData,taskstate.SUCCESS);
+    sendUpdate("PlaybackSyncTask",{type:"Success",message:"Playback Plugin Sync Completed"});
+    res.send("syncPlaybackPluginData Complete");
+  }catch(error)
+  {
+    PlaybacksyncTask.loggedData.push({color: "red",Message: getErrorLineNumber(error)+ ": Error: "+error,});
+    await logging.updateLog(PlaybacksyncTask.uuid,PlaybacksyncTask.loggedData,taskstate.FAILED);
+    res.send("syncPlaybackPluginData Halted with Errors");
   }
 
-  await syncPlaybackPluginData(refLog);
-  const uuid = randomUUID();
-  
-    let endTime = moment();
-   
-    let diffInSeconds = endTime.diff(startTime, 'seconds');
-  
-    const log=
-    {
-      "Id":uuid,
-      "Name":"Jellyfin Playback Reporting Plugin Sync",
-      "Type":"Task",
-      "ExecutionType":"Manual",
-      "Duration":diffInSeconds,
-      "TimeRun":startTime,
-      "Log":JSON.stringify(refLog.loggedData),
-      "Result":refLog.result
-  
-    };
-     logging.insertLog(log);
-  res.send("syncPlaybackPluginData Complete");
 
 });
+
+function sleep(ms) {
+  return new Promise((resolve) => {
+    setTimeout(resolve, ms);
+  });
+}
 
 //////////////////////////////////////
 
 
 
-module.exports = 
-{router,fullSync};
+module.exports =
+{
+  router,
+  fullSync,
+  partialSync,
+};

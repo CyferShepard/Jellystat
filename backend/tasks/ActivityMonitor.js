@@ -1,56 +1,41 @@
 const db = require("../db");
 const pgp = require("pg-promise")();
-const axios = require("axios");
 
 const moment = require('moment');
 const { columnsPlayback, mappingPlayback } = require('../models/jf_playback_activity');
 const { jf_activity_watchdog_columns, jf_activity_watchdog_mapping } = require('../models/jf_activity_watchdog');
 const { randomUUID }  = require('crypto');
-const https = require('https');
+const configClass = require("../classes/config");
+const JellyfinAPI = require("../classes/jellyfin-api");
 
-const agent = new https.Agent({
-  rejectUnauthorized: (process.env.REJECT_SELF_SIGNED_CERTIFICATES || 'true').toLowerCase() ==='true'
-});
-
-
-
-const axios_instance = axios.create({
-  httpsAgent: agent
-});
 
 async function ActivityMonitor(interval) {
+  
+  const Jellyfin = new JellyfinAPI();
   console.log("Activity Interval: " + interval);
 
  
 
   setInterval(async () => {
     try {
-      const { rows: config } = await db.query(
-        'SELECT * FROM app_config where "ID"=1'
-      );
+      const config=await new configClass().getConfig();
      
       
-      if(!config || config.length===0)
+      if(config.error)
       {
         return;
       }
-      const base_url = config[0].JF_HOST;
-      const apiKey = config[0].JF_API_KEY;
-    
-      if (base_url === null || config[0].JF_API_KEY === null) {
-        return;
-      }
 
-      const url = `${base_url}/Sessions`;
-      const response = await axios_instance.get(url, {
-        headers: {
-          "X-MediaBrowser-Token": apiKey,
-        },
-      });
-      const SessionData=response.data.filter(row => row.NowPlayingItem !== undefined);
+      const SessionData= await Jellyfin.getSessions().then((sessions) => sessions.filter(row => row.NowPlayingItem !== undefined));
 
       /////get data from jf_activity_monitor
       const WatchdogData=await db.query('SELECT * FROM jf_activity_watchdog').then((res) => res.rows);
+
+      /////return if no necessary changes made to reduce resource consumtion
+      if(SessionData.length===0 && WatchdogData.length===0)
+      {
+        return;
+      }
 
       // //compare to sessiondata
 
@@ -142,7 +127,7 @@ async function ActivityMonitor(interval) {
         })();
       }
 
-      //delete from db no longer in session data and insert into stats db (still to make)
+      //delete from db no longer in session data and insert into stats db
       //Bulk delete from db thats no longer on api
 
       const toDeleteIds = WatchdogData.filter((id) =>!SessionData.some((row) => row.Id === id.Id)).map((row) => row.Id);
@@ -177,13 +162,11 @@ async function ActivityMonitor(interval) {
 
       if(toDeleteIds.length>0)
       {
-        let result=await db.deleteBulk('jf_activity_watchdog',toDeleteIds)
-        // console.log(result);
+        await db.deleteBulk('jf_activity_watchdog',toDeleteIds)
       }
       if(playbackToInsert.length>0)
       {
-        let result=await db.insertBulk('jf_playback_activity',playbackToInsert,columnsPlayback);
-        //  console.log(result);
+        await db.insertBulk('jf_playback_activity',playbackToInsert,columnsPlayback);
       }
 
 

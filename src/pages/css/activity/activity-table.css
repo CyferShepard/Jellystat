@@ -30,6 +30,7 @@ th
 {
 
   cursor: pointer;
+  color: var(--secondary-color) !important;
 }
 
 

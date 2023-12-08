@@ -18,6 +18,7 @@
         "BackdropImageTags",
         "ParentId",
         "PrimaryImageHash",
+        "archived",
       ];
 
       const jf_library_items_mapping = (item) => ({
@@ -43,6 +44,7 @@
         BackdropImageTags: item.BackdropImageTags[0],
         ParentId: item.ParentId,
         PrimaryImageHash:  item.ImageTags && item.ImageTags.Primary && item.ImageBlurHashes && item.ImageBlurHashes.Primary && item.ImageBlurHashes.Primary[item.ImageTags["Primary"]] ? item.ImageBlurHashes.Primary[item.ImageTags["Primary"]] : null,
+        archived: false,
       });
 
   module.exports = {

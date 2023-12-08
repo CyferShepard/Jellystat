@@ -7,6 +7,7 @@
         "Type",
         "CollectionType",
         "ImageTagsPrimary",
+        "archived",
       ];
 
       const jf_libraries_mapping = (item) => ({
@@ -18,6 +19,7 @@
         CollectionType: item.CollectionType? item.CollectionType : 'mixed',
         ImageTagsPrimary:
           item.ImageTags && item.ImageTags.Primary ? item.ImageTags.Primary : null,
+        archived: false,
       });
 
   module.exports = {

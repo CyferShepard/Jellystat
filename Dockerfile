@@ -9,6 +9,9 @@ RUN npm install
 
 COPY ./ ./
 
+# Build the application
+RUN npm run build
+
 # Stage 2: Create the production image
 FROM node:slim
 
@@ -18,4 +21,4 @@ COPY --from=builder /app .
 
 EXPOSE 3000
 
-CMD ["npm", "run", "start-app"]
+CMD ["npm", "run", "start"]

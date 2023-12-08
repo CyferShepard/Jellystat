@@ -24,7 +24,7 @@
 ## Getting Started with Development
 - Clone the project from git
 - set your env variables before strating the server (Variable names as per the docker compose file).
-- Run `npm init` to install necessary packages
+- Run `npm install` to install necessary packages
 - Run `npm run start-server` to only run the backend nodejs server
 - Run `npm run start` to only run the frontend React UI
 - Run `npm run start-app` to run both backend and frontend at the same time

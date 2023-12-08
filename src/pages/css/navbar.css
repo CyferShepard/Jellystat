@@ -45,7 +45,7 @@
   font-size: 18px !important;
   text-decoration: none;
   margin-right: 4px;
-  background-color: var(--background-color);
+  background-color: var(--background-color) !important;
   transition: all 0.4s ease-in-out;
   border-radius: 8px;
   margin-bottom: 10px;
@@ -64,7 +64,7 @@
 
 .active
 {
-  background-color: var(--primary-color);
+  background-color: var(--primary-color) !important;
   transition: background-color 0.2s ease-in-out;
 }
 

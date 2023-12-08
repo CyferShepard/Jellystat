@@ -130,3 +130,9 @@ input[type=number] {
 .stat-items div a:hover{
   color:  var(--secondary-color) !important;
 }
+
+
+.item-name :hover{
+  color:  var(--secondary-color) !important;
+}
+

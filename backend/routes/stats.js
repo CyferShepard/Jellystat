@@ -149,7 +149,7 @@ router.post("/getUserLastPlayed", async (req, res) => {
   try {
     const { userid } = req.body;
     const { rows } = await db.query(
-      `select * from fs_last_user_activity($1) limit 15`, [userId]
+      `select * from fs_last_user_activity($1) limit 15`, [userid]
     );
     res.send(rows);
   } catch (error) {
@@ -245,7 +245,6 @@ router.get("/getLibraryMetadata", async (req, res) => {
 router.post("/getLibraryItemsWithStats", async (req, res) => {
   try{
     const  {libraryid}  = req.body;
-    console.log(`ENDPOINT CALLED: /getLibraryItems: `+libraryid);
     const { rows } = await db.query(
       `SELECT * FROM jf_library_items_with_playcount_playtime where "ParentId"=$1`, [libraryid]
     );
