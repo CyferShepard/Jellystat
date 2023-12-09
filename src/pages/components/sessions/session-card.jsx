@@ -129,7 +129,11 @@ function SessionCard(props) {
         <Col className="d-none d-lg-block stat-card-banner">
               <Card.Img
                 variant="top"
-                className="stat-card-image rounded-0 rounded-start"
+                className={props.data.session.NowPlayingItem.Type==='Audio' ? (
+                  "stat-card-image-audio rounded-0 rounded-start"
+                ) : (
+                  "stat-card-image rounded-0 rounded-start"
+                )}
                 src={"/proxy/Items/Images/Primary?id=" + (props.data.session.NowPlayingItem.SeriesId ? props.data.session.NowPlayingItem.SeriesId : props.data.session.NowPlayingItem.Id) + "&fillHeight=320&fillWidth=213&quality=50"}
               />
 

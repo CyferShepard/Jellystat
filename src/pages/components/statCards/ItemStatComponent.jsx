@@ -53,7 +53,11 @@ function ItemStatComponent(props) {
                 )}
                 {!props.data[0].archived ?
                 <Card.Img
-                  className="stat-card-image"
+                  className={props.isAudio ? (
+                    "stat-card-image-audio rounded-0 rounded-start"
+                  ) : (
+                    "stat-card-image rounded-0 rounded-start"
+                  )}
                   src={"proxy/Items/Images/Primary?id=" + props.data[0].Id + "&fillWidth=400&quality=90"}
                   style={{ display: loaded ? 'block' : 'none' }}
                   onLoad={handleImageLoad}
