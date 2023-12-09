@@ -68,7 +68,7 @@ function MVMovies(props) {
 
 
   return (
-    <ItemStatComponent base_url={config.hostUrl} data={data} heading={"MOST LISTENED MUSIC"} units={"Plays"}/>
+    <ItemStatComponent base_url={config.hostUrl} data={data} heading={"MOST LISTENED MUSIC"} units={"Plays"} isAudio={true}/>
   );
 }
 

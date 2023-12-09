@@ -22,9 +22,11 @@
   max-width: 120px !important;
 }
 
-
-
-
+.stat-card-image-audio {
+  width: 120px !important;
+  top: 15%;
+  position: relative;
+}
 
 .stat-card-image {
   width: 120px !important;
