@@ -6,11 +6,12 @@
   "scripts": {
     "start-client": "vite --host",
     "start-server": "cd backend && nodemon server.js",
-    "start-app": "concurrently \"npm run start-server\" \"npm run start-client\"",
+    "start-dev": "concurrently \"npm run start-server\" \"npm run start-client\"",
     "deploy-local": "npm run build && npm run start-server",
     "lint": "eslint . --ext js,jsx --report-unused-disable-directives --max-warnings 0",
     "preview": "vite preview",
     "build": "vite build",
+    "start-app": "cd backend && node server.js",
     "start": "cd backend && node server.js"
   },
   "dependencies": {

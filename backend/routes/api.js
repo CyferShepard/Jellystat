@@ -630,11 +630,17 @@ router.post("/getUserHistory", async (req, res) => {
 router.post("/validateSettings", async (req, res) => {
   const { url, apikey } = req.body;
 
+  var _url=url;
+  _url = _url.replace(/\/web\/index\.html#!\/home\.html$/, '');
+  if (!/^https?:\/\//i.test(url)) {
+    _url = 'http://' + url;
+  }
+
   let isValid = false;
   let errorMessage = "";
   try {
     await axios
-      .get(url + "/system/configuration", {
+      .get(_url + "/system/configuration", {
         headers: {
           "X-MediaBrowser-Token": apikey,
         },
@@ -657,6 +663,9 @@ router.post("/validateSettings", async (req, res) => {
         } else if (error.response && error.response.status === 404) {
           isValid = false;
           errorMessage = `Error ${error.response.status}: The requested URL was not found.`;
+        } else if (error.code === "EPROTO") {
+          isValid = false;
+          errorMessage = `Error: Network protocol mismatch. Please check your url.`;
         } else {
           isValid = false;
           errorMessage = `${error}`;
