@@ -5,6 +5,8 @@ services:
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: mypassword
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
   jellystat:
     image: jellystat
     environment:
@@ -13,7 +15,9 @@ services:
       POSTGRES_IP: jellystat-db
       POSTGRES_PORT: 5432
       JWT_SECRET: 'my-secret-jwt-key'
-      TZ: Africa/Johannesburg  
+      TZ: Africa/Johannesburg
+    volumes:
+      - jellystat-backup-data:/app/backend/backup-data
     ports:
       - "3000:3000"
     depends_on:
@@ -25,3 +29,7 @@ logging:
       options:
         max-file: "5"   # number of files or file count
         max-size: "10m" # file size
+
+volumes:
+  postgres-data:
+  jellystat-backup-data:
