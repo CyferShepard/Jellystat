@@ -171,7 +171,7 @@ async function ActivityMonitor(interval) {
       {
    
         ExistingDataToUpdate=playbackToInsert.filter((playbackData) => {
-          const existingrow=ExistingRecords.find((existing) => existing.NowPlayingItemId === playbackData.NowPlayingItemId);
+          const existingrow=ExistingRecords.find((existing) => existing.NowPlayingItemId === playbackData.NowPlayingItemId && existing.UserId === playbackData.UserId);
  
           if(existingrow)
           {
