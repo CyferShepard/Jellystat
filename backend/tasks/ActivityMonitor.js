@@ -184,9 +184,12 @@ async function ActivityMonitor(interval) {
         });
       }
 
-      //remove items from playbackToInsert that already exists in the recent playback activity so it doesnt duplicate
-      playbackToInsert = playbackToInsert.filter((pb) => !ExistingRecords.some(er => er.NowPlayingItemId === pb.NowPlayingItemId && er.UserId === pb.UserId));
-
+      //remove items from playbackToInsert that already exists in the recent playback activity so it doesnt duplicate or where PlaybackDuration===0
+      playbackToInsert = playbackToInsert.filter((pb) => pb.PlaybackDuration===0 || !ExistingRecords.some(er => er.NowPlayingItemId === pb.NowPlayingItemId && er.UserId === pb.UserId));
+      
+      //remove items where PlaybackDuration===0
+      
+      ExistingDataToUpdate = ExistingDataToUpdate.filter((pb) => pb.PlaybackDuration!==0);
 
 
       if(toDeleteIds.length>0)

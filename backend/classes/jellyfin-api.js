@@ -36,6 +36,9 @@ class JellyfinAPI {
                 case 404:
                   console.log(`[JELLYFIN-API]: 404 URL Not Found : ${error.request.path}`);
                   break;
+                case 503:
+                  console.log(`[JELLYFIN-API]: 503 Service Unavailable : ${error.request.path}`);
+                  break;  
                 default:
                   console.log(`[JELLYFIN-API]: Unexpected status code: ${error.response.status}`);
               }
