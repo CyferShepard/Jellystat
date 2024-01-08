@@ -41,6 +41,7 @@ async function ActivityMonitor(interval) {
 
       let WatchdogDataToInsert = [];
       let WatchdogDataToUpdate = [];
+   
       //filter fix if table is empty
 
       if (WatchdogData.length === 0) {
@@ -67,10 +68,10 @@ async function ActivityMonitor(interval) {
 
 
   
-      if (WatchdogDataToInsert.length !== 0) {
+      if (WatchdogDataToInsert.length > 0) {
+        //insert new rows where not existing items
         db.insertBulk("jf_activity_watchdog",WatchdogDataToInsert,jf_activity_watchdog_columns);
       }
-     
 
       //update wd state
       if(WatchdogDataToUpdate.length>0)
@@ -136,7 +137,7 @@ async function ActivityMonitor(interval) {
       const playbackData =  WatchdogData.filter((id) => !SessionData.some((row) => row.Id === id.Id));
 
       
-      const playbackToInsert = playbackData.map(obj => {
+      let playbackToInsert = playbackData.map(obj => {
         const uuid = randomUUID()
 
         obj.Id=uuid;
@@ -158,6 +159,35 @@ async function ActivityMonitor(interval) {
         return { ...rest };
       });
 
+    
+    const playbackToInsertIds=playbackToInsert.map((row) => row.NowPlayingItemId);
+
+    /////get data from jf_playback_activity within the last hour with progress of <=80% for current items in session
+    const ExistingRecords=await db.query(`SELECT * FROM jf_recent_playback_activity(1)`).then((res) => res.rows.filter((row) => playbackToInsertIds.includes(row.NowPlayingItemId) && row.Progress<=80.0));
+    let ExistingDataToUpdate = [];
+
+    //for each item in playbackToInsert, check if it exists in the recent playback activity and update accordingly
+      if(playbackToInsert.length>0 && ExistingRecords.length>0)
+      {
+   
+        ExistingDataToUpdate=playbackToInsert.filter((playbackData) => {
+          const existingrow=ExistingRecords.find((existing) => existing.NowPlayingItemId === playbackData.NowPlayingItemId);
+ 
+          if(existingrow)
+          {
+            playbackData.Id=existingrow.Id;
+            playbackData.PlaybackDuration=Number(existingrow.PlaybackDuration)+Number(playbackData.PlaybackDuration);
+            playbackData.ActivityDateInserted= moment().format('YYYY-MM-DD HH:mm:ss.SSSZ');
+            return true;
+          }
+          return false;
+        });
+      }
+
+      //remove items from playbackToInsert that already exists in the recent playback activity so it doesnt duplicate
+      playbackToInsert=playbackToInsert.filter((pb)=> !ExistingRecords.map(er=>er.NowPlayingItemId).includes(pb.NowPlayingItemId));
+
+
 
 
       if(toDeleteIds.length>0)
@@ -167,6 +197,11 @@ async function ActivityMonitor(interval) {
       if(playbackToInsert.length>0)
       {
         await db.insertBulk('jf_playback_activity',playbackToInsert,columnsPlayback);
+      }
+
+      if(ExistingDataToUpdate.length>0)
+      {
+        await db.insertBulk('jf_playback_activity',ExistingDataToUpdate,columnsPlayback);
       }
 
 
