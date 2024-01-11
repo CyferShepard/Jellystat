@@ -36,6 +36,17 @@ When contributing please ensure to log a pull request on the `unstable` branch
 Check out our dockerhub to run Jellystat:
 https://hub.docker.com/r/cyfershepard/jellystat
 
+### Environment variables from files (Docker secrets)
+You can set any environment variable from a file by using the prefix `FILE__`
+
+As an example:
+```yaml
+  jellystat:
+    environment:
+      FILE__MYVAR: /run/secrets/MYSECRETFILE
+```
+Will set the environment variable `MYVAR` based on the contents of the `/run/secrets/MYSECRETFILE` file. see [docker secrets](https://docs.docker.com/compose/use-secrets/) for more info.
+
 ## Screenshots
 
 <img src="./screenshots/Home.PNG">
