@@ -160,10 +160,10 @@ async function ActivityMonitor(interval) {
       });
 
     
-    const playbackToInsertIds=playbackToInsert.map((row) => row.NowPlayingItemId);
 
     /////get data from jf_playback_activity within the last hour with progress of <=80% for current items in session
-    const ExistingRecords=await db.query(`SELECT * FROM jf_recent_playback_activity(1)`).then((res) => res.rows.filter((row) => playbackToInsertIds.includes(row.NowPlayingItemId) && row.Progress<=80.0));
+
+    const ExistingRecords=await db.query(`SELECT * FROM jf_recent_playback_activity(1)`).then((res) => res.rows.filter((row) => playbackToInsert.some((pbi) => pbi.NowPlayingItemId===row.NowPlayingItemId && pbi.EpisodeId===row.EpisodeId) && row.Progress<=80.0));
     let ExistingDataToUpdate = [];
 
     //for each item in playbackToInsert, check if it exists in the recent playback activity and update accordingly
@@ -171,7 +171,7 @@ async function ActivityMonitor(interval) {
       {
    
         ExistingDataToUpdate=playbackToInsert.filter((playbackData) => {
-          const existingrow=ExistingRecords.find((existing) => existing.NowPlayingItemId === playbackData.NowPlayingItemId && existing.UserId === playbackData.UserId);
+          const existingrow=ExistingRecords.find((existing) => existing.NowPlayingItemId === playbackData.NowPlayingItemId && existing.EpisodeId===playbackData.EpisodeId && existing.UserId === playbackData.UserId);
  
           if(existingrow)
           {
@@ -185,8 +185,8 @@ async function ActivityMonitor(interval) {
       }
 
       //remove items from playbackToInsert that already exists in the recent playback activity so it doesnt duplicate or where PlaybackDuration===0
-      playbackToInsert = playbackToInsert.filter((pb) => pb.PlaybackDuration>0 && !ExistingRecords.some(er => er.NowPlayingItemId === pb.NowPlayingItemId && er.UserId === pb.UserId));
-      
+      playbackToInsert = playbackToInsert.filter((pb) => pb.PlaybackDuration>0 && !ExistingRecords.some(er => er.NowPlayingItemId === pb.NowPlayingItemId  && er.EpisodeId===pb.EpisodeId  && er.UserId === pb.UserId));
+
       //remove items where PlaybackDuration===0
       
       ExistingDataToUpdate = ExistingDataToUpdate.filter((pb) => pb.PlaybackDuration>0);
