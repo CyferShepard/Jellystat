@@ -824,6 +824,10 @@ router.get("/beginPartialSync", async (req, res) => {
 router.post("/fetchItem", async (req, res) => {
   try{
     const config = await new configClass().getConfig();
+    if (config.error) {
+      res.send({ error: config.error});
+      return;
+    }
 
     const { itemId } = req.body;
     if(itemId===undefined)
@@ -833,35 +837,41 @@ router.post("/fetchItem", async (req, res) => {
     }
 
 
-    const { rows:temp_lib_id } = await db.query('SELECT "Id" FROM jf_libraries limit 1');
-
     if (config.error) {
       res.status(503);
       res.send({ error: config.error });
       return;
     }
 
-    const _sync = new sync(config.JF_HOST, config.JF_API_KEY);
+    const libraries = await Jellyfin.getLibraries();
 
-    let userid=config.settings?.preferred_admin?.userid;
+    const item=[];
 
-    if(!userid)
-    {
-      const admins = await _sync.getAdminUser();
-      userid = admins[0].Id;
+    for (let i = 0; i < libraries.length; i++) {
+      const library = libraries[i];
+
+      let libraryItems=await Jellyfin.getItemsFromParentId(library.Id,itemId);
+
+      if(libraryItems.length>0)
+      {
+  
+        const libraryItemsWithParent = libraryItems.map((items) => ({
+          ...items,
+          ...{ ParentId: library.Id },
+        }));
+        item.push(...libraryItemsWithParent);
+
+      }
+
     }
 
-    let item=await _sync.getItem(itemId);
-    const libraryItemWithParent = item.map((items) => ({
-      ...items,
-      ...{ ParentId: temp_lib_id[0].Id },
-    }));
 
 
-    let item_info= await _sync.getItemInfo(itemId,userid);
 
 
-    let itemToInsert = await libraryItemWithParent.map(jf_library_items_mapping);
+    const item_info= await Jellyfin.getItemInfo(itemId);
+
+    let itemToInsert = await item.map(jf_library_items_mapping);
     let itemInfoToInsert = await item_info.map(jf_item_info_mapping);
 
     if (itemToInsert.length !== 0) {

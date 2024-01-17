@@ -132,13 +132,18 @@ class JellyfinAPI {
       }
     }
 
-    async getItemsFromParentId(id,params) {
+    async getItemsFromParentId(id,itemid,params) {
         if (!this.configReady)
         {
           return [];
         }
         try {   
           let url = `${this.config.JF_HOST}/Items?ParentId=${id}`;
+          if(itemid && itemid!=null)
+          {
+            url+=`&Ids=${itemid}`;
+          }
+
           let startIndex=params && params.startIndex ? params.startIndex :0;
           let increment=params && params.increment ? params.startIndex :200;
           let recursive=params && params.recursive!==undefined  ? params.recursive :true;
