@@ -4,6 +4,7 @@ const _POSTGRES_USER = process.env.POSTGRES_USER;
 const _POSTGRES_PASSWORD = process.env.POSTGRES_PASSWORD;
 const _POSTGRES_IP = process.env.POSTGRES_IP;
 const _POSTGRES_PORT = process.env.POSTGRES_PORT;
+const _POSTGRES_DATABASE = process.env.POSTGRES_DATABASE || 'jfstat';
 
 const client = new Client({
   host: _POSTGRES_IP,
@@ -15,7 +16,7 @@ const client = new Client({
 const createDatabase = async () => {
   try {
     await client.connect(); // gets connection
-    await client.query('CREATE DATABASE jfstat'); // sends queries
+    await client.query('CREATE DATABASE ' + _POSTGRES_DATABASE); // sends queries
     return true;
   } catch (error) {
     if (!error.stack.includes('already exists')) {

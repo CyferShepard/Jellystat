@@ -8,6 +8,7 @@ const _POSTGRES_USER = process.env.POSTGRES_USER;
 const _POSTGRES_PASSWORD = process.env.POSTGRES_PASSWORD;
 const _POSTGRES_IP = process.env.POSTGRES_IP;
 const _POSTGRES_PORT = process.env.POSTGRES_PORT;
+const _POSTGRES_DATABASE = process.env.POSTGRES_DATABASE || 'jfstat';
 
 if (
   [_POSTGRES_USER, _POSTGRES_PASSWORD, _POSTGRES_IP, _POSTGRES_PORT].includes(
@@ -21,7 +22,7 @@ if (
 const pool = new Pool({
   user: _POSTGRES_USER,
   host: _POSTGRES_IP,
-  database: 'jfstat',
+  database: _POSTGRES_DATABASE,
   password: _POSTGRES_PASSWORD,
   port: _POSTGRES_PORT,
 });
@@ -156,7 +157,7 @@ async function query(text, params) {
       );
     } else {
 
-      if(error.message && !error.message.contains('database "jfstat" does not exist'))
+      if(error.message && !error.message.contains('database "' + _POSTGRES_DATABASE + '" does not exist'))
       {
         console.error('Error occurred while executing query:', error.message);
       }
