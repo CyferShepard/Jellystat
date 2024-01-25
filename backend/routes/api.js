@@ -438,11 +438,11 @@ router.post("/getItemDetails", async (req, res) => {
     const { rows: items } = await db.query(query, [Id]);
 
     if (items.length === 0) {
-      query = `SELECT im."Name" "FileName",im.*,s.*, i.archived, i."PrimaryImageHash"  FROM jf_library_seasons s left join jf_item_info im on s."Id" = im."Id" left join jf_library_items i on i."Id"=s."SeriesId"  where s."Id"=$1`;
+      query = `SELECT im."Name" "FileName",im.*,s.*, s.archived, i."PrimaryImageHash"  FROM jf_library_seasons s left join jf_item_info im on s."Id" = im."Id" left join jf_library_items i on i."Id"=s."SeriesId"  where s."Id"=$1`;
       const { rows: seasons } = await db.query(query, [Id]);
 
       if (seasons.length === 0) {
-        query = `SELECT im."Name" "FileName",im.*,e.*, i.archived , i."PrimaryImageHash"  FROM jf_library_episodes e join jf_item_info im on e."EpisodeId" = im."Id" left join jf_library_items i on i."Id"=e."SeriesId" where e."EpisodeId"=$1`;
+        query = `SELECT im."Name" "FileName",im.*,e.*, e.archived , i."PrimaryImageHash"  FROM jf_library_episodes e join jf_item_info im on e."EpisodeId" = im."Id" left join jf_library_items i on i."Id"=e."SeriesId" where e."EpisodeId"=$1`;
         const { rows: episodes } = await db.query(query, [Id]);
 
         if (episodes.length !== 0) {
