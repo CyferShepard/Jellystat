@@ -78,9 +78,9 @@ function formatDurationTime(seconds) {
           <IconButton
             aria-label="expand row"
             size="small"
-            onClick={() => {if(data.Log.length>0){setOpen(!open);}}}
+            onClick={() => {if(data.Log !== null && data.Log.length>0){setOpen(!open);}}}
             >
-              {!open ? <AddCircleFillIcon opacity={data.Log.length>0 ?1 : 0} cursor={data.Log.length>1 ? "pointer":"default"}/> : <IndeterminateCircleFillIcon />}
+              {!open ? <AddCircleFillIcon opacity={data.Log !== null && data.Log.length>0 ?1 : 0} cursor={data.Log !== null && data.Log.length>1 ? "pointer":"default"}/> : <IndeterminateCircleFillIcon />}
           </IconButton>
         </TableCell>
         <TableCell>{data.Name}</TableCell>
