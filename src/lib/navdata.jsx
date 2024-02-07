@@ -1,53 +1,51 @@
 
 
 import HomeFillIcon from 'remixicon-react/HomeFillIcon';
-// import FileListFillIcon from 'remixicon-react/FileListFillIcon';
 import BarChartFillIcon from 'remixicon-react/BarChartFillIcon';
 import HistoryFillIcon from 'remixicon-react/HistoryFillIcon';
 import SettingsFillIcon from 'remixicon-react/SettingsFillIcon';
 import GalleryFillIcon from 'remixicon-react/GalleryFillIcon';
 import UserFillIcon from 'remixicon-react/UserFillIcon';
 import InformationFillIcon from 'remixicon-react/InformationFillIcon';
+import { Trans } from 'react-i18next';
 
-
-// import ReactjsFillIcon from 'remixicon-react/ReactjsFillIcon';
 
 export const navData = [
     {
         id: 0,
         icon: <HomeFillIcon/>,
-        text: "Home",
+        text: <Trans i18nKey="MENU_TABS.HOME" />,
         link: ""
     },
     {
         id: 1,
         icon: <GalleryFillIcon />,
-        text: "Libraries",
+        text: <Trans i18nKey="MENU_TABS.LIBRARIES" />,
         link: "libraries"
     },
     {
         id: 2,
         icon: <UserFillIcon />,
-        text: "Users",
+        text: <Trans i18nKey="MENU_TABS.USERS" />,
         link: "users"
     },
     {
         id: 4,
         icon: <HistoryFillIcon />,
-        text: "Activity",
+        text: <Trans i18nKey="MENU_TABS.ACTIVITY" />,
         link: "activity"
     },
     {
         id: 5,
         icon: <BarChartFillIcon />,
-        text: "Statistics",
+        text: <Trans i18nKey="MENU_TABS.STATISTICS" />,
         link: "statistics"
     },
 
     {
         id: 6,
         icon: <SettingsFillIcon />,
-        text: "Settings",
+        text: <Trans i18nKey="MENU_TABS.SETTINGS" />,
         link: "settings"
     }
     ,
@@ -55,7 +53,7 @@ export const navData = [
     {
         id: 7,
         icon: <InformationFillIcon />,
-        text: "About",
+        text: <Trans i18nKey="MENU_TABS.ABOUT" />,
         link: "about"
     }
 

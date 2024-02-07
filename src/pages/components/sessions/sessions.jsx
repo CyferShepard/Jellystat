@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import axios from '../../../lib/axios_instance';
 import Config from "../../../lib/config";
 // import API from "../../../classes/jellyfin-api";
@@ -8,6 +8,7 @@ import ErrorBoundary from "../general/ErrorBoundary";
 import SessionCard from "./session-card";
 
 import Loading from "../general/loading";
+import { Trans } from "react-i18next";
 
 function Sessions() {
   const [data, setData] = useState();
@@ -104,16 +105,17 @@ function Sessions() {
   if ((!data && config) || data.length === 0) {
     return(
     <div>
-      <h1  className="my-3">Sessions</h1>
+      
+      <h1  className="my-3"><Trans i18nKey="HOME_PAGE.SESSIONS" /></h1>
       <div style={{color:"grey", fontSize:"0.8em", fontStyle:"italic"}}>
-      No Active Sessions Found
+      <Trans i18nKey="SESSIONS.NO_SESSIONS" />
       </div>
     </div>);
   }
 
   return (
     <div>
-      <h1  className="my-3">Sessions</h1>
+      <h1  className="my-3"><Trans i18nKey="HOME_PAGE.SESSIONS" /></h1>
       <div className="sessions-container">
         {data && data.length>0 &&
           data

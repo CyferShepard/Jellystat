@@ -1,4 +1,4 @@
-import React, {useState} from "react";
+import {useState} from "react";
 import { Link } from "react-router-dom";
 import "../../css/library/library-card.css";
 
@@ -10,6 +10,8 @@ import TvLineIcon from "remixicon-react/TvLineIcon";
 import FilmLineIcon from "remixicon-react/FilmLineIcon";
 import FileMusicLineIcon from "remixicon-react/FileMusicLineIcon";
 import CheckboxMultipleBlankLineIcon from "remixicon-react/CheckboxMultipleBlankLineIcon";
+import { Trans } from "react-i18next";
+import i18next from "i18next";
 
 function LibraryCard(props) {
   const [imageLoaded, setImageLoaded] = useState(true);
@@ -143,62 +145,62 @@ function LibraryCard(props) {
 
           <Card.Body className="library-card-details">
             <Row className="space-between-end card-row">
-              <Col className="card-label">Library</Col>
+              <Col className="card-label"><Trans i18nKey="LIBRARY_CARD.LIBRARY" /></Col>
               <Col className="text-end">{props.data.Name}</Col>
             </Row>
 
             <Row className="space-between-end card-row">
-              <Col className="card-label">Type</Col>
+              <Col className="card-label"><Trans i18nKey="TYPE" /></Col>
               <Col className="text-end">{props.data.CollectionType==='tvshows' ? 'Series' : props.data.CollectionType==='movies'? "Movies" : props.data.CollectionType==='music'? "Music" : 'Mixed'}</Col>
             </Row>
 
             <Row className="space-between-end card-row">
-              <Col className="card-label">Total Time</Col>
+              <Col className="card-label"><Trans i18nKey="LIBRARY_CARD.TOTAL_TIME" /></Col>
               <Col className="text-end">{ticksToTimeString(props.data && props.data.total_play_time ? props.data.total_play_time:0)}</Col>
             </Row>
 
             <Row className="space-between-end card-row">
-              <Col className="card-label">Total Files</Col>
+              <Col className="card-label"><Trans i18nKey="LIBRARY_CARD.TOTAL_FILES" /></Col>
               <Col className="text-end">{props.metadata && props.metadata.files  ? props.metadata.files :0}</Col>
             </Row>
 
             <Row className="space-between-end card-row">
-              <Col className="card-label">Library Size</Col>
+              <Col className="card-label"><Trans i18nKey="LIBRARY_CARD.LIBRARY_SIZE" /></Col>
               <Col className="text-end">{formatFileSize(props.metadata && props.metadata.Size ? props.metadata.Size:0)}</Col>
             </Row>
 
             <Row className="space-between-end card-row">
-              <Col className="card-label">Total Plays</Col>
+              <Col className="card-label"><Trans i18nKey="LIBRARY_CARD.TOTAL_PLAYS" /></Col>
               <Col className="text-end">{props.data.Plays}</Col>
             </Row>
 
             <Row className="space-between-end card-row">
-              <Col className="card-label">Total Playback</Col>
+              <Col className="card-label"><Trans i18nKey="LIBRARY_CARD.TOTAL_PLAYBACK" /></Col>
               <Col className="text-end">{formatTotalWatchTime(props.data.total_playback_duration)}</Col>
             </Row>
 
             <Row className="space-between-end card-row">
-              <Col className="card-label">Last Played</Col>
+              <Col className="card-label"><Trans i18nKey="LIBRARY_CARD.LAST_PLAYED" /></Col>
               <Col className="text-end">{props.data.ItemName || 'n/a'}</Col>
             </Row>
 
             <Row className="space-between-end card-row">
-              <Col className="card-label">Last Activity</Col>
+              <Col className="card-label"><Trans i18nKey="LIBRARY_CARD.LAST_ACTIVITY" /></Col>
               <Col className="text-end">{props.data.LastActivity ? formatLastActivityTime(props.data.LastActivity) : 'never'}</Col>
             </Row>
 
             <Row className="space-between-end card-row">
-              <Col className="card-label">{props.data.CollectionType==='tvshows' ? 'Series' : props.data.CollectionType==='movies'? "Movies" : props.data.CollectionType==='music'? "Songs" : 'Files'}</Col>
+              <Col className="card-label">{props.data.CollectionType==='tvshows' ? i18next.t("SERIES") : props.data.CollectionType==='movies'? i18next.t("MOVIES") : props.data.CollectionType==='music'? i18next.t("SONGS") : i18next.t("FILES")}</Col>
               <Col className="text-end">{props.data.Library_Count}</Col>
             </Row>
 
             <Row className="space-between-end card-row" style={{opacity:props.data.CollectionType==='tvshows' ? '1' :'0'}}>
-              <Col className="card-label">Seasons</Col>
+              <Col className="card-label"><Trans i18nKey="SEASONS" /></Col>
               <Col className="text-end">{props.data.CollectionType==='tvshows' ? props.data.Season_Count : ''}</Col>
             </Row>
 
             <Row className="space-between-end card-row" style={{opacity:props.data.CollectionType==='tvshows' ? '1' :'0'}}>
-              <Col className="card-label">Episodes</Col>
+              <Col className="card-label"><Trans i18nKey="EPISODES" /></Col>
               <Col className="text-end">{props.data.CollectionType==='tvshows' ? props.data.Episode_Count : ''}</Col>
             </Row>
             

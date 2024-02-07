@@ -1,0 +1,72 @@
+{
+    "JELLYSTAT": "Jellystat",
+    "MENU_TABS": {
+      "HOME": "Home",
+      "LIBRARIES": "Libraries",
+      "USERS": "Users",
+      "ACTIVITY": "Activity",
+      "STATISTICS": "Statistics",
+      "SETTINGS": "Settings",
+      "ABOUT": "About",
+      "LOGOUT": "Logout"
+    },
+    "HOME_PAGE": {
+        "SESSIONS": "Sessions",
+        "RECENTLY_ADDED": "Recently Added",
+        "WATCH_STATISTIC": "Watch Statistics",
+        "LIBRARY_OVERVIEW": "Library Overview"
+      },
+    "SESSIONS":{
+        "NO_SESSIONS": "No Active Sessions Found"
+    },
+    "STAT_CARDS": {
+      "MOST_VIEWED_MOVIES": "MOST VIEWED MOVIES",
+      "MOST_POPULAR_MOVIES": "MOST POPULAR MOVIES",
+      "MOST_VIEWED_SERIES": "MOST VIEWED SERIES",
+      "MOST_POPULAR_SERIES": "MOST POPULAR SERIES",
+      "MOST_LISTENED_MUSIC": "MOST LISTENED MUSIC",
+      "MOST_POPULAR_MUSIC": "MOST POPULAR MUSIC",
+      "MOST_VIEWED_LIBRARIES": "MOST VIEWED LIBRARIES",
+      "MOST_USED_CLIENTS": "MOST USED CLIENTS",
+      "MOST_ACTIVE_USERS": "MOST ACTIVE USERS"
+    },
+    "LIBRARY_OVERVIEW": {
+        "MOVIE_LIBRARIES": "MOVIE LIBRARIES",
+        "SHOW_LIBRARIES": "SHOW LIBRARIES",
+        "MUSIC_LIBRARIES": "MUSIC LIBRARIES",
+        "MIXED_LIBRARIES": "MIXED LIBRARIES"
+    },
+    "LIBRARY_CARD": {
+        "LIBRARY": "Library",
+        "TOTAL_TIME": "Total Time",      
+        "TOTAL_FILES": "Total Files",
+        "LIBRARY_SIZE": "Library Size",
+        "TOTAL_PLAYS": "Total Plays",
+        "TOTAL_PLAYBACK": "Total Playback",
+        "LAST_PLAYED": "Last Played",
+        "LAST_ACTIVITY": "Last Activity"
+    },
+    "SHOW_ARCHIVED_LIBRARIES":"Show Archived Libraries",
+    "HIDE_ARCHIVED_LIBRARIES":"Hide Archived Libraries",
+    "UNITS":{
+        "DAYS": "Days",
+        "HOURS": "Hours",
+        "MINUTES": "Minutes",
+        "SECONDS": "Seconds",
+        "PLAYS": "Plays",
+        "ITEMS": "Items"
+    },
+    "TOTAL": "Total",
+    "LAST": "Last",
+    "SERIES": "Series",
+    "SEASONS": "Seasons",
+    "EPISODES": "Episodes",
+    "MOVIES": "Movies",
+    "SONGS": "Songs",
+    "FILES": "Files",
+    "LIBRARIES": "Libraries",
+    "USERS": "Users",
+    "TYPE": "Type",
+    "NEW_VERSION_AVAILABLE":"New version available"
+
+  }

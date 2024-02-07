@@ -1,10 +1,11 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import axios from "axios";
 import ItemStatComponent from "./ItemStatComponent";
 
 
 
 import ComputerLineIcon from "remixicon-react/ComputerLineIcon";
+import { Trans } from "react-i18next";
 
 function MostUsedClient(props) {
   const [data, setData] = useState();
@@ -52,7 +53,7 @@ function MostUsedClient(props) {
 
 
   return (
-        <ItemStatComponent icon={  <ComputerLineIcon color="white" size={'100%'}/>} data={data} heading={"MOST USED CLIENTS"} units={"Plays"}/>
+        <ItemStatComponent icon={  <ComputerLineIcon color="white" size={'100%'}/>} data={data} heading={<Trans i18nKey="STAT_CARDS.MOST_USED_CLIENTS" />} units={<Trans i18nKey="UNITS.PLAYS" />}/>
   );
 }
 

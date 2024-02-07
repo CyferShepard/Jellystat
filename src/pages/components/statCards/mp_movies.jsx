@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import axios from "axios";
 import Config from "../../../lib/config";
 
@@ -6,6 +6,7 @@ import Config from "../../../lib/config";
 
 import ItemStatComponent from "./ItemStatComponent";
 import Loading from "../general/loading";
+import { Trans } from "react-i18next";
 
 function MPMovies(props) {
   const [data, setData] = useState();
@@ -75,7 +76,7 @@ function MPMovies(props) {
   }
 
   return (
-  <ItemStatComponent base_url={config.hostUrl} data={data} heading={"MOST POPULAR MOVIES"} units={"Users"}/>
+  <ItemStatComponent base_url={config.hostUrl} data={data} heading={<Trans i18nKey="STAT_CARDS.MOST_POPULAR_MOVIES" />} units={<Trans i18nKey="USERS" />}/>
   );
 }
 

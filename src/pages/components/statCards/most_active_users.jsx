@@ -1,10 +1,11 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import axios from "axios";
 import Config from "../../../lib/config";
 import ItemStatComponent from "./ItemStatComponent";
 
 
 import AccountCircleFillIcon from "remixicon-react/AccountCircleFillIcon";
+import { Trans } from "react-i18next";
 
 function MostActiveUsers(props) {
   const [data, setData] = useState();
@@ -81,7 +82,7 @@ function MostActiveUsers(props) {
   };
 
   return (
-    <ItemStatComponent icon={loaded ? <UserImage/> : <AccountCircleFillIcon size="100%" />}  data={data} heading={"MOST ACTIVE USERS"} units={"Plays"}/>
+    <ItemStatComponent icon={loaded ? <UserImage/> : <AccountCircleFillIcon size="100%" />}  data={data} heading={<Trans i18nKey="STAT_CARDS.MOST_ACTIVE_USERS" />} units={<Trans i18nKey="UNITS.PLAYS" />}/>
   );
 }
 

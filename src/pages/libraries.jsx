@@ -9,6 +9,8 @@ import ErrorBoundary from "./components/general/ErrorBoundary";
 import EyeOffFillIcon from 'remixicon-react/EyeOffFillIcon';
 import EyeFillIcon from 'remixicon-react/EyeFillIcon';
 import { Tooltip } from "react-bootstrap";
+import { Trans } from "react-i18next";
+import i18next from "i18next";
 
 
 function Libraries() {
@@ -82,16 +84,16 @@ function Libraries() {
   return (
     <div className="libraries">
       <div className="d-flex flex-row justify-content-between align-items-center">
-      <h1 className="py-4">Libraries</h1>
+      <h1 className="py-4"><Trans i18nKey="LIBRARIES" /></h1>
       {
         showArchived ?
-        <Tooltip title={"Hide Archived Libraries"} className="tooltip-icon-button">
+        <Tooltip title={i18next.t("HIDE_ARCHIVED_LIBRARIES")} className="tooltip-icon-button">
           <button className="btn" onClick={()=> setShowArchived(!showArchived)}>
             <EyeFillIcon/>
           </button>
         </Tooltip>
         :
-        <Tooltip title={"Show Archived Libraries"} className="tooltip-icon-button">
+        <Tooltip title={i18next.t("SHOW_ARCHIVED_LIBRARIES")} className="tooltip-icon-button">
           <button className="btn" onClick={()=> setShowArchived(!showArchived)}>
             <EyeOffFillIcon/>
           </button>

@@ -1,7 +1,8 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import axios from "axios";
 import Config from "../../../lib/config";
 import ItemStatComponent from "./ItemStatComponent";
+import { Trans } from "react-i18next";
 
 function MVMovies(props) {
   const [data, setData] = useState();
@@ -68,7 +69,7 @@ function MVMovies(props) {
 
 
   return (
-    <ItemStatComponent base_url={config.hostUrl} data={data} heading={"MOST LISTENED MUSIC"} units={"Plays"} isAudio={true}/>
+    <ItemStatComponent base_url={config.hostUrl} data={data} heading={<Trans i18nKey="STAT_CARDS.MOST_LISTENED_MUSIC" />} units={<Trans i18nKey="UNITS.PLAYS" />} isAudio={true}/>
   );
 }
 

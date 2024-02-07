@@ -5,6 +5,7 @@ import LogoutBoxLineIcon from "remixicon-react/LogoutBoxLineIcon";
 import logo_dark from '../../images/icon-b-512.png';
 import "../../css/navbar.css";
 import VersionCard from "./version-card";
+import { Trans } from "react-i18next";
 
 export default function Navbar() {
   const handleLogout = () => {
@@ -20,7 +21,7 @@ export default function Navbar() {
         <BootstrapNavbar.Brand as={Link} to={"/"} className="d-none d-md-inline">
 
           <img src={logo_dark} style={{height:"52px"}} className="px-2" alt=''/>
-          <span>Jellystat</span>
+          <span><Trans i18nKey="JELLYSTAT" /></span>
         </BootstrapNavbar.Brand>
 
 
@@ -42,7 +43,7 @@ export default function Navbar() {
             })}
             <Nav.Link className="navitem  p-2 logout" href="#logout" onClick={handleLogout}>
               <LogoutBoxLineIcon />
-              <span className="d-none d-md-block nav-text">Logout</span>
+              <span className="d-none d-md-block nav-text"><Trans i18nKey="MENU_TABS.LOGOUT" /></span>
             </Nav.Link>
           </Nav>
 
