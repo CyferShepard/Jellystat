@@ -7,6 +7,7 @@ import Config from "../lib/config";
 
 import ActivityTable from "./components/activity/activity-table";
 import Loading from "./components/general/loading";
+import { Trans } from "react-i18next";
 
 function Activity() {
   const [data, setData] = useState();
@@ -71,10 +72,10 @@ function Activity() {
   if (data.length === 0) {
     return (<div>
       <div className="Heading">
-      <h1>Activity</h1>
+      <h1><Trans i18nKey="MENU_TABS.ACTIVITY"/></h1>
       </div>
       <div className="Activity">
-      <h1>No Activity to display</h1>
+      <h1><Trans i18nKey="ERROR_MESSAGES.NO_ACTIVITY"/></h1>
       </div>
     </div>
     );
@@ -83,9 +84,9 @@ function Activity() {
   return (
     <div className="Activity">
       <div className="Heading">
-      <h1>Activity</h1>
+      <h1><Trans i18nKey="MENU_TABS.ACTIVITY"/></h1>
       <div className="pagination-range">
-          <div className="header">Items</div>
+          <div className="header"><Trans i18nKey="UNITS.ITEMS"/></div>
           <select value={itemCount} onChange={(event) => {setItemCount(event.target.value);}}>
                 <option value="10">10</option>
                 <option value="25">25</option>

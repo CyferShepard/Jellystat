@@ -106,9 +106,9 @@ function LibraryCard(props) {
 
   function formatLastActivityTime(time) {
     const units = {
-      days: ['Day', 'Days'],
-      hours: ['Hour', 'Hours'],
-      minutes: ['Minute', 'Minutes']
+      days: [i18next.t("UNITS.DAY"), i18next.t("UNITS.DAYS")],
+      hours: [i18next.t("UNITS.HOUR"), i18next.t("UNITS.HOUR")],
+      minutes: [i18next.t("UNITS.MINUTE"), i18next.t("UNITS.MINUTES")]
     };
   
     let formattedTime = '';
@@ -120,7 +120,7 @@ function LibraryCard(props) {
       }
     }
   
-    return `${formattedTime}ago`;
+    return `${formattedTime+i18next.t("AGO").toLowerCase()}`;
   }
   
   return (
@@ -170,7 +170,7 @@ function LibraryCard(props) {
             </Row>
 
             <Row className="space-between-end card-row">
-              <Col className="card-label"><Trans i18nKey="LIBRARY_CARD.TOTAL_PLAYS" /></Col>
+              <Col className="card-label"><Trans i18nKey="TOTAL_PLAYS" /></Col>
               <Col className="text-end">{props.data.Plays}</Col>
             </Row>
 

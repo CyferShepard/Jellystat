@@ -19,6 +19,8 @@ import { visuallyHidden } from '@mui/utils';
 import "./css/users/users.css";
 
 import Loading from "./components/general/loading";
+import i18next from "i18next";
+import { Trans } from "react-i18next";
 
 const token = localStorage.getItem('token');
 
@@ -35,37 +37,37 @@ function EnhancedTableHead(props) {
       id: 'UserName',
       numeric: false,
       disablePadding: true,
-      label: 'User',
+      label: i18next.t("USER"),
     },
     {
       id: 'LastWatched',
       numeric: false,
       disablePadding: false,
-      label: 'Last Watched',
+      label: i18next.t("LAST_WATCHED"),
     },
     {
       id: 'LastClient',
       numeric: false,
       disablePadding: false,
-      label: 'Last Client',
+      label: i18next.t("USERS_PAGE.LAST_CLIENT"),
     },
     {
       id: 'TotalPlays',
       numeric: false,
       disablePadding: false,
-      label: 'Plays',
+      label: i18next.t("UNITS.PLAYS"),
     },
     {
       id: 'TotalWatchTime',
       numeric: false,
       disablePadding: false,
-      label: 'Watch Time',
+      label: i18next.t("WATCH_TIME"),
     },    
     {
       id: 'LastSeen',
       numeric: false,
       disablePadding: false,
-      label: 'Last Seen',
+      label: i18next.t("USERS.LAST_SEEN"),
     },
   ];
 
@@ -110,11 +112,11 @@ function Row(row) {
     let formattedTime='';
     if(hours)
     {
-      formattedTime+=`${hours} hours`;
+      formattedTime+=`${hours} ${i18next.t("UNITS.HOURS")}`;
     }
     if(minutes)
     {
-      formattedTime+=` ${minutes} minutes`;
+      formattedTime+=` ${minutes} ${i18next.t("UNITS.MINUTES")}`;
     }
   
     return formattedTime ;
@@ -122,10 +124,10 @@ function Row(row) {
 
   function formatLastSeenTime(time) {
     const units = {
-      days: ['Day', 'Days'],
-      hours: ['Hour', 'Hours'],
-      minutes: ['Minute', 'Minutes'],
-      seconds: ['Second', 'Seconds']
+      days: [i18next.t("UNITS.DAY"), i18next.t("UNITS.DAYS")],
+      hours: [i18next.t("UNITS.HOUR"), i18next.t("UNITS.HOUR")],
+      minutes: [i18next.t("UNITS.MINUTE"), i18next.t("UNITS.MINUTES")],
+      seconds: [i18next.t("UNITS.SECOND"), i18next.t("UNITS.SECONDS")]
     };
   
     let formattedTime = '';
@@ -137,7 +139,7 @@ function Row(row) {
       }
     }
   
-    return `${formattedTime}ago`;
+    return `${formattedTime+i18next.t("AGO").toLowerCase()}`;
   }
 
 
@@ -160,11 +162,11 @@ function Row(row) {
                 )}
         </TableCell>
         <TableCell><Link to={`/users/${data.UserId}`} className="text-decoration-none">{data.UserName}</Link></TableCell>
-        <TableCell><Link to={`/libraries/item/${data.NowPlayingItemId}`} className="text-decoration-none">{data.LastWatched || 'never'}</Link></TableCell>
-        <TableCell>{data.LastClient || 'n/a'}</TableCell>
+        <TableCell style={{textTransform:data.LastWatched ? 'none':'lowercase'}}><Link to={`/libraries/item/${data.NowPlayingItemId}`} className="text-decoration-none">{data.LastWatched || i18next.t("ERROR_MESSAGES.NEVER")}</Link></TableCell>
+        <TableCell style={{textTransform:data.LastClient ? 'none':'lowercase'}}>{data.LastClient || i18next.t("ERROR_MESSAGES.N/A")}</TableCell>
         <TableCell>{data.TotalPlays}</TableCell>
-        <TableCell>{formatTotalWatchTime(data.TotalWatchTime) || '0 minutes'}</TableCell>
-        <TableCell>{data.LastSeen ? formatLastSeenTime(data.LastSeen) : 'never'}</TableCell>
+        <TableCell>{formatTotalWatchTime(data.TotalWatchTime) || `0 ${i18next.t("UNITS.MINUTES")}`}</TableCell>
+        <TableCell style={{textTransform: data.LastSeen ? 'none' :'lowercase'}}>{data.LastSeen ? formatLastSeenTime(data.LastSeen) : i18next.t("ERROR_MESSAGES.NEVER")}</TableCell>
 
       </TableRow>
     </React.Fragment>
@@ -248,10 +250,10 @@ function Users() {
         return ' never';
       }
     const units = {
-      days: ['Day', 'Days'],
-      hours: ['Hour', 'Hours'],
-      minutes: ['Minute', 'Minutes'],
-      seconds: ['Second', 'Seconds']
+      days: [i18next.t("UNITS.DAY"), i18next.t("UNITS.DAYS")],
+      hours: [i18next.t("UNITS.HOUR"), i18next.t("UNITS.HOUR")],
+      minutes: [i18next.t("UNITS.MINUTE"), i18next.t("UNITS.MINUTES")],
+      seconds: [i18next.t("UNITS.SECOND"), i18next.t("UNITS.SECONDS")]
     };
   
     let formattedTime = '';
@@ -263,7 +265,7 @@ function Users() {
       }
     }
   
-    return `${formattedTime}ago`;
+    return `${formattedTime+i18next.t("AGO").toLowerCase()}`;
   }
 
 
@@ -343,9 +345,9 @@ function Users() {
   return (
     <div className="Users">
       <div className="Heading py-2">
-      <h1 >All Users</h1>
+      <h1><Trans i18nKey="USERS_PAGE.ALL_USERS"/></h1>
       <div className="pagination-range">
-          <div className="header">Items</div>
+          <div className="header"><Trans i18nKey="UNITS.ITEMS"/></div>
           <select value={itemCount} onChange={(event) => {setRowsPerPage(event.target.value); setPage(0); setItemCount(event.target.value);}}>
                 <option value="10">10</option>
                 <option value="25">25</option>
@@ -376,21 +378,21 @@ function Users() {
             <div className='d-flex justify-content-end my-2'>
                 <ButtonGroup className="pagination-buttons">
                     <Button className="page-btn" onClick={()=>setPage(0)} disabled={page === 0}>
-                      First
+                    <Trans i18nKey="TABLE_NAV_BUTTONS.FIRST"/>
                     </Button>
 
                     <Button className="page-btn" onClick={handlePreviousPageClick}  disabled={page === 0}>
-                      Previous
+                    <Trans i18nKey="TABLE_NAV_BUTTONS.PREVIOUS"/>
                     </Button>
 
                     <div className="page-number d-flex align-items-center justify-content-center">{`${page *rowsPerPage + 1}-${Math.min((page * rowsPerPage+ 1 ) +  (rowsPerPage - 1),data.length)} of ${data.length}`}</div>
 
                     <Button className="page-btn" onClick={handleNextPageClick}  disabled={page >= Math.ceil(data.length / rowsPerPage) - 1}>
-                      Next
+                    <Trans i18nKey="TABLE_NAV_BUTTONS.NEXT"/>
                     </Button>
 
                     <Button className="page-btn" onClick={()=>setPage(Math.ceil(data.length / rowsPerPage) - 1)} disabled={page >= Math.ceil(data.length / rowsPerPage) - 1}>
-                      Last
+                    <Trans i18nKey="TABLE_NAV_BUTTONS.LAST"/>
                     </Button>
                 </ButtonGroup>
             </div>

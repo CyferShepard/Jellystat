@@ -15,6 +15,7 @@ import LibraryItems from './library/library-items';
 import ErrorBoundary from './general/ErrorBoundary';
 
 import { Tabs, Tab, Button, ButtonGroup } from 'react-bootstrap';
+import { Trans } from 'react-i18next';
 
 
 
@@ -73,9 +74,9 @@ function LibraryInfo() {
       <div>
       <p className="user-name">{data.Name}</p>
           <ButtonGroup>
-              <Button onClick={() => setActiveTab('tabOverview')} active={activeTab==='tabOverview'} variant='outline-primary' type='button'>Overview</Button>
-              <Button onClick={() => setActiveTab('tabItems')} active={activeTab==='tabItems'} variant='outline-primary' type='button'>Media</Button>
-              <Button onClick={() => setActiveTab('tabActivity')} active={activeTab==='tabActivity'} variant='outline-primary' type='button'>Activity</Button>
+              <Button onClick={() => setActiveTab('tabOverview')} active={activeTab==='tabOverview'} variant='outline-primary' type='button'><Trans i18nKey="TAB_CONTROLS.OVERVIEW"/></Button>
+              <Button onClick={() => setActiveTab('tabItems')} active={activeTab==='tabItems'} variant='outline-primary' type='button'><Trans i18nKey="MEDIA"/></Button>
+              <Button onClick={() => setActiveTab('tabActivity')} active={activeTab==='tabActivity'} variant='outline-primary' type='button'><Trans i18nKey="TAB_CONTROLS.ACTIVITY"/></Button>
           </ButtonGroup>
       </div>
 
@@ -91,11 +92,11 @@ function LibraryInfo() {
            
        <LibraryLastWatched LibraryId={LibraryId}/>
           </Tab>
-          <Tab eventKey="tabActivity" className='bg-transparent'>
-            <LibraryActivity LibraryId={LibraryId}/>
-          </Tab>
           <Tab eventKey="tabItems" className='bg-transparent'>
             <LibraryItems LibraryId={LibraryId}/>
+          </Tab>
+          <Tab eventKey="tabActivity" className='bg-transparent'>
+            <LibraryActivity LibraryId={LibraryId}/>
           </Tab>
         </Tabs>
     </div>

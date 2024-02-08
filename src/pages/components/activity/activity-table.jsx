@@ -22,6 +22,8 @@ import IndeterminateCircleFillIcon from 'remixicon-react/IndeterminateCircleFill
 import StreamInfo from './stream_info';
 
 import '../../css/activity/activity-table.css';
+import { Trans } from 'react-i18next';
+import i18next from 'i18next';
 
 // localStorage.setItem('hour12',true);
 
@@ -42,7 +44,7 @@ function formatTotalWatchTime(seconds) {
   }
 
   if (remainingSeconds > 0) {
-    timeString += `${remainingSeconds} ${remainingSeconds === 1 ? 'second' : 'seconds'}`;
+    timeString += `${remainingSeconds} ${remainingSeconds === 1 ? i18next.t("UNITS.SECOND").toLowerCase() : i18next.t("UNITS.SECONDS").toLowerCase()}`;
   }
 
   return timeString.trim();
@@ -84,12 +86,12 @@ function Row(data) {
 
       <Modal show={modalState} onHide={()=>setModalState(false)} >
         <Modal.Header>
-          <Modal.Title>Stream Info: {!row.SeriesName ? row.NowPlayingItemName : row.SeriesName+' - '+ row.NowPlayingItemName} ({row.UserName})</Modal.Title>
+          <Modal.Title><Trans i18nKey="ACTIVITY_TABLE.MODAL.HEADER"/>: {!row.SeriesName ? row.NowPlayingItemName : row.SeriesName+' - '+ row.NowPlayingItemName} ({row.UserName})</Modal.Title>
         </Modal.Header>
         <StreamInfo data={modalData}/>
         <Modal.Footer>
           <Button variant="outline-primary" onClick={()=>setModalState(false)}>
-            Close
+          <Trans i18nKey="CLOSE"/>
           </Button>
         </Modal.Footer>
       </Modal>
@@ -120,13 +122,13 @@ function Row(data) {
               <Table aria-label="sub-activity" className='rounded-2'>
                 <TableHead>
                   <TableRow>
-                    <TableCell>User</TableCell>
-                    <TableCell>IP Address</TableCell>
-                    <TableCell>Title</TableCell>
-                    <TableCell>Client</TableCell>
-                    <TableCell>Date</TableCell>
-                    <TableCell>Playback Duration</TableCell>
-                    <TableCell>Plays</TableCell>
+                    <TableCell><Trans i18nKey="USER"/></TableCell>
+                    <TableCell><Trans i18nKey="ACTIVITY_TABLE.IP_ADDRESS"/></TableCell>
+                    <TableCell><Trans i18nKey="TITLE"/></TableCell>
+                    <TableCell><Trans i18nKey="ACTIVITY_TABLE.CLIENT"/></TableCell>
+                    <TableCell><Trans i18nKey="ACTIVITY_TABLE.DATE"/></TableCell>
+                    <TableCell><Trans i18nKey="ACTIVITY_TABLE.PLAYBACK_DURATION"/></TableCell>
+                    <TableCell><Trans i18nKey="UNITS.PLAYS"/></TableCell>
                   </TableRow>
                 </TableHead>
                 <TableBody>
@@ -163,43 +165,43 @@ function EnhancedTableHead(props) {
       id: 'UserName',
       numeric: false,
       disablePadding: false,
-      label: 'User',
+      label: i18next.t("USER"),
     },
     {
       id: 'RemoteEndPoint',
       numeric: false,
       disablePadding: false,
-      label: 'IP Address',
+      label: i18next.t("ACTIVITY_TABLE.IP_ADDRESS"),
     },
     {
       id: 'NowPlayingItemName',
       numeric: false,
       disablePadding: false,
-      label: 'Title',
+      label: i18next.t("TITLE"),
     },
     {
       id: 'Client',
       numeric: false,
       disablePadding: false,
-      label: 'Client',
+      label: i18next.t("ACTIVITY_TABLE.CLIENT"),
     },
     {
       id: 'ActivityDateInserted',
       numeric: false,
       disablePadding: false,
-      label: 'Date',
+      label: i18next.t("ACTIVITY_TABLE.DATE"),
     },
     {
       id: 'PlaybackDuration',
       numeric: false,
       disablePadding: false,
-      label: 'Total Playback',
+      label: i18next.t("ACTIVITY_TABLE.TOTAL_PLAYBACK"),
     },    
     {
       id: 'TotalPlays',
       numeric: false,
       disablePadding: false,
-      label: 'Total Plays',
+      label: i18next.t("TOTAL_PLAYS"),
     },
   ];
 
@@ -326,7 +328,7 @@ export default function ActivityTable(props) {
             {visibleRows.map((row) => (
                 <Row key={row.Id+row.NowPlayingItemId+row.EpisodeId} row={row} />
               ))}
-              {props.data.length===0 ? <tr><td colSpan="8" style={{ textAlign: "center", fontStyle: "italic" ,color:"grey"}} className='py-2'>No Activity Found</td></tr> :''}
+              {props.data.length===0 ? <tr><td colSpan="8" style={{ textAlign: "center", fontStyle: "italic" ,color:"grey"}} className='py-2'><Trans i18nKey="ERROR_MESSAGES.NO_ACTIVITY"/></td></tr> :''}
             
           </TableBody>
         </Table>
@@ -335,21 +337,21 @@ export default function ActivityTable(props) {
             <div className='d-flex justify-content-end my-2'>
                 <ButtonGroup className="pagination-buttons">
                     <Button className="page-btn" onClick={()=>setPage(0)} disabled={page === 0}>
-                      First
+                    <Trans i18nKey="TABLE_NAV_BUTTONS.FIRST"/>
                     </Button>
 
                     <Button className="page-btn" onClick={handlePreviousPageClick}  disabled={page === 0}>
-                      Previous
+                    <Trans i18nKey="TABLE_NAV_BUTTONS.PREVIOUS"/>
                     </Button>
 
                     <div className="page-number d-flex align-items-center justify-content-center">{`${(page *rowsPerPage) + 1}-${Math.min(((page * rowsPerPage)+ 1 ) +  (rowsPerPage - 1),props.data.length)} of ${props.data.length}`}</div>
 
                     <Button className="page-btn" onClick={handleNextPageClick}  disabled={page >= Math.ceil(props.data.length / rowsPerPage) - 1}>
-                      Next
+                    <Trans i18nKey="TABLE_NAV_BUTTONS.NEXT"/>
                     </Button>
 
                     <Button className="page-btn" onClick={()=>setPage(Math.ceil(props.data.length / rowsPerPage) - 1)} disabled={page >= Math.ceil(props.data.length / rowsPerPage) - 1}>
-                      Last
+                    <Trans i18nKey="TABLE_NAV_BUTTONS.LAST"/>
                     </Button>
                 </ButtonGroup>
             </div>

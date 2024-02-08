@@ -1,17 +1,19 @@
-import React, {useState} from "react";
+import {useState} from "react";
 import { Link } from "react-router-dom";
 import { Blurhash } from 'react-blurhash';
 import ArchiveDrawerFillIcon from 'remixicon-react/ArchiveDrawerFillIcon';
 
 import "../../css/lastplayed.css";
+import { Trans } from "react-i18next";
+import i18next from "i18next";
 
 function formatTime(time) {
 
     const units = {
-      days: ['Day', 'Days'],
-      hours: ['Hour', 'Hours'],
-      minutes: ['Minute', 'Minutes'],
-      seconds: ['Second', 'Seconds']
+      days: [i18next.t("UNITS.DAY"), i18next.t("UNITS.DAYS")],
+      hours: [i18next.t("UNITS.HOUR"), i18next.t("UNITS.HOUR")],
+      minutes: [i18next.t("UNITS.MINUTE"), i18next.t("UNITS.MINUTES")],
+      seconds: [i18next.t("UNITS.SECOND"), i18next.t("UNITS.SECONDS")]
     };
 
     let formattedTime = '';
@@ -26,7 +28,7 @@ function formatTime(time) {
       formattedTime = `${time.seconds} ${units.seconds[time.seconds > 1 ? 1 : 0]}`;
     }
 
-    return `${formattedTime} ago`;
+    return `${formattedTime+' '+i18next.t("AGO").toLowerCase()}`;
   }
 
 
@@ -59,7 +61,7 @@ function LastWatchedCard(props) {
         }
         <div className="d-flex flex-column justify-content-center align-items-center position-absolute">
           <ArchiveDrawerFillIcon className="w-100 h-100 mb-2"/>
-          <span>Archived</span>
+          <span><Trans i18nKey="ARCHIVED"/></span>
         </div>
       </div>
       }

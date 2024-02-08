@@ -12,6 +12,7 @@ import Config from "../../../lib/config";
 import "../../css/library/media-items.css";
 import "../../css/width_breakpoint_css.css";
 import "../../css/radius_breakpoint_css.css";
+import { Trans } from "react-i18next";
 
 function LibraryItems(props) {
   const [data, setData] = useState();
@@ -90,15 +91,15 @@ function LibraryItems(props) {
   return (
     <div className="library-items">
       <div className="d-md-flex justify-content-between">
-        <h1 className="my-3">Media</h1>
+        <h1 className="my-3"><Trans i18nKey="LIBRARY_INFO.MEDIA"/></h1>
 
 
         <div className="d-flex flex-column flex-md-row">
         <div className="d-flex flex-row w-100">
             <FormSelect onChange={(e) => sortOrderLogic(e.target.value) } className="my-md-3 w-100 rounded-0 rounded-start">
-              <option value="Title">Title</option>
-              <option value="Views">Views</option>
-              <option value="WatchTime">Watch Time</option>
+              <option value="Title"><Trans i18nKey="TITLE"/></option>
+              <option value="Views"><Trans i18nKey="VIEWS"/></option>
+              <option value="WatchTime"><Trans i18nKey="WATCH_TIME"/></option>
             </FormSelect>
 
             <Button className="my-md-3 rounded-0 rounded-end" onClick={()=>setSortAsc(!sortAsc)}>

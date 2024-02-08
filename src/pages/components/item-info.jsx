@@ -21,6 +21,8 @@ import ItemNotFound from "./item-info/item-not-found";
 import Config from "../../lib/config";
 import Loading from "./general/loading";
 import ItemOptions from "./item-info/item-options";
+import { Trans } from "react-i18next";
+import i18next from "i18next";
 
 
 
@@ -165,7 +167,7 @@ const cardBgStyle = {
             }
             <div className="d-flex flex-column justify-content-center align-items-center position-absolute">
               <ArchiveDrawerFillIcon className="w-100 h-100 mb-2"/>
-              <span>Archived</span>
+              <span><Trans i18nKey="ARCHIVED"/></span>
             </div>
           </div>
           }
@@ -182,23 +184,23 @@ const cardBgStyle = {
             }
 
           </h1>
-          <Link className="px-2" to={ config.hostUrl+"/web/index.html#!/details?id="+ (data.EpisodeId ||data.Id)}  title="Open in Jellyfin" target="_blank"><ExternalLinkFillIcon/></Link>
+          <Link className="px-2" to={ config.hostUrl+"/web/index.html#!/details?id="+ (data.EpisodeId ||data.Id)}  title={i18next.t("ITEM_INFO.OPEN_IN_JELLYFIN")} target="_blank"><ExternalLinkFillIcon/></Link>
         </div>
 
         <div className="my-3">
-            {data.Type==="Episode"? <p><Link to={`/libraries/item/${data.SeasonId}`} className="fw-bold">{data.SeasonName}</Link> Episode {data.IndexNumber} - {data.Name}</p> : <></> }
+            {data.Type==="Episode"? <p><Link to={`/libraries/item/${data.SeasonId}`} className="fw-bold">{data.SeasonName}</Link> <Trans i18nKey="EPISODE"/> {data.IndexNumber} - {data.Name}</p> : <></> }
             {data.Type==="Season"? <p>{data.Name}</p> : <></> }
-            {data.FileName ?  <p style={{color:"lightgrey"}} className="fst-italic fs-6">File Name: {data.FileName}</p> :<></>}
-            {data.Path ? <p style={{color:"lightgrey"}} className="fst-italic fs-6">File Path: {data.Path}</p> :<></>}
-            {data.RunTimeTicks ?  <p style={{color:"lightgrey"}} className="fst-italic fs-6">{data.Type==="Series"?"Average Runtime" : "Runtime"}: {ticksToTimeString(data.RunTimeTicks)}</p> :<></>}
-            {data.Size ? <p style={{color:"lightgrey"}} className="fst-italic fs-6">File Size: {formatFileSize(data.Size)}</p> :<></>}
+            {data.FileName ?  <p style={{color:"lightgrey"}} className="fst-italic fs-6"><Trans i18nKey="ITEM_INFO.FILE_NAME"/>: {data.FileName}</p> :<></>}
+            {data.Path ? <p style={{color:"lightgrey"}} className="fst-italic fs-6"><Trans i18nKey="ITEM_INFO.FILE_PATH"/>: {data.Path}</p> :<></>}
+            {data.RunTimeTicks ?  <p style={{color:"lightgrey"}} className="fst-italic fs-6">{data.Type==="Series"? i18next.t("ITEM_INFO.AVERAGE_RUNTIME") : i18next.t("ITEM_INFO.RUNTIME")}: {ticksToTimeString(data.RunTimeTicks)}</p> :<></>}
+            {data.Size ? <p style={{color:"lightgrey"}} className="fst-italic fs-6"><Trans i18nKey="ITEM_INFO.FILE_SIZE"/>: {formatFileSize(data.Size)}</p> :<></>}
 
         </div>
         <ButtonGroup>
-              <Button onClick={() => setActiveTab('tabOverview')} active={activeTab==='tabOverview'} variant='outline-primary' type='button'>Overview</Button>
-              <Button onClick={() => setActiveTab('tabActivity')} active={activeTab==='tabActivity'} variant='outline-primary' type='button'>Activity</Button>
+              <Button onClick={() => setActiveTab('tabOverview')} active={activeTab==='tabOverview'} variant='outline-primary' type='button'><Trans i18nKey="ITEM_INFO.OVERVIEW"/></Button>
+              <Button onClick={() => setActiveTab('tabActivity')} active={activeTab==='tabActivity'} variant='outline-primary' type='button'><Trans i18nKey="ITEM_INFO.ACTIVITY"/></Button>
 
-              {data.archived && (<Button onClick={() => setActiveTab('tabOptions')} active={activeTab==='tabOptions'} variant='outline-primary' type='button'>Options</Button>)}
+              {data.archived && (<Button onClick={() => setActiveTab('tabOptions')} active={activeTab==='tabOptions'} variant='outline-primary' type='button'><Trans i18nKey="ITEM_INFO.OPTIONS"/></Button>)}
         </ButtonGroup>
 
 

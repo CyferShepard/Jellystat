@@ -4,6 +4,7 @@ import { Link } from "react-router-dom";
 import { useParams } from 'react-router-dom';
 import ArchiveDrawerFillIcon from 'remixicon-react/ArchiveDrawerFillIcon';
 import "../../../css/lastplayed.css";
+import { Trans } from "react-i18next";
 
 
 
@@ -55,7 +56,7 @@ function MoreItemCards(props) {
             }
             <div className="d-flex flex-column justify-content-center align-items-center position-absolute">
               <ArchiveDrawerFillIcon className="w-100 h-100 mb-2"/>
-              <span>Archived</span>
+              <span><Trans i18nKey="ARCHIVED"/></span>
             </div>
           </div>
   }

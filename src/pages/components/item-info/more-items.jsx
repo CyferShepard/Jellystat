@@ -1,10 +1,11 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import axios from "axios";
 
 import MoreItemCards from "./more-items/more-items-card";
 
 import Config from "../../../lib/config";
 import "../../css/users/user-details.css";
+import i18next from "i18next";
 
 function MoreItems(props) {
   const [data, setData] = useState();
@@ -66,7 +67,7 @@ function MoreItems(props) {
 
   return (
     <div className="last-played">
-        <h1 className="my-3">{props.data.Type==="Season" ? "Episodes" : "Seasons"}</h1>
+        <h1 className="my-3">{props.data.Type==="Season" ? i18next.t("EPISODES") : i18next.t("SEASONS")}</h1>
         <div className="last-played-container">
         
          {data.sort((a,b) => a.IndexNumber-b.IndexNumber).map((item) => (

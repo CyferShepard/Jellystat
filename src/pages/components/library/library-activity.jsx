@@ -1,7 +1,8 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import axios from "axios";
 
 import ActivityTable from "../activity/activity-table";
+import { Trans } from "react-i18next";
 
 function LibraryActivity(props) {
   const [data, setData] = useState();
@@ -42,9 +43,9 @@ function LibraryActivity(props) {
   return (
     <div className="Activity">
     <div className="Heading">
-    <h1>Library Activity</h1>
+    <h1><Trans i18nKey={"LIBRARY_INFO.LIBRARY_ACTIVITY"}/></h1>
     <div className="pagination-range">
-        <div className="header">Items</div>
+        <div className="header"><Trans i18nKey={"UNITS.ITEMS"}/></div>
         <select value={itemCount} onChange={(event) => {setItemCount(event.target.value);}}>
               <option value="10">10</option>
               <option value="25">25</option>

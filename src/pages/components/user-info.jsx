@@ -1,5 +1,5 @@
 import { useParams } from 'react-router-dom';
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import axios from "axios";
 import AccountCircleFillIcon from "remixicon-react/AccountCircleFillIcon";
 import Config from "../../lib/config";
@@ -9,6 +9,7 @@ import GlobalStats from './user-info/globalStats';
 import LastPlayed from './user-info/lastplayed';
 import UserActivity from './user-info/user-activity';
 import "../css/users/user-details.css";
+import { Trans } from 'react-i18next';
 
 
 
@@ -93,8 +94,8 @@ function UserInfo() {
       <div>
       <p className="user-name">{data.Name}</p>
           <ButtonGroup>
-              <Button onClick={() => setActiveTab('tabOverview')} active={activeTab==='tabOverview'} variant='outline-primary' type='button'>Overview</Button>
-              <Button onClick={() => setActiveTab('tabActivity')} active={activeTab==='tabActivity'} variant='outline-primary' type='button'>Activity</Button>
+              <Button onClick={() => setActiveTab('tabOverview')} active={activeTab==='tabOverview'} variant='outline-primary' type='button'><Trans i18nKey="TAB_CONTROLS.OVERVIEW"/></Button>
+              <Button onClick={() => setActiveTab('tabActivity')} active={activeTab==='tabActivity'} variant='outline-primary' type='button'><Trans i18nKey="TAB_CONTROLS.ACTIVITY"/></Button>
           </ButtonGroup>
       </div>
 

@@ -41,32 +41,111 @@
         "TOTAL_TIME": "Total Time",      
         "TOTAL_FILES": "Total Files",
         "LIBRARY_SIZE": "Library Size",
-        "TOTAL_PLAYS": "Total Plays",
         "TOTAL_PLAYBACK": "Total Playback",
         "LAST_PLAYED": "Last Played",
         "LAST_ACTIVITY": "Last Activity"
     },
+    "GLOBAL_STATS":{
+      "LAST_24_HRS": "Last 24 Hours",
+      "LAST_7_DAYS": "Last 7 Days",
+      "LAST_30_DAYS": "Last 30 Days",
+      "ALL_TIME": "All Time",
+      "ITEM_STATS": "Item Stats"
+    },
+    "ITEM_INFO": {
+        "FILE_NAME": "File Name",
+        "FILE_PATH": "File Path",
+        "FILE_SIZE": "File Size",
+        "RUNTIME": "Runtime",
+        "AVERAGE_RUNTIME": "Average Runtime",
+        "OPEN_IN_JELLYFIN": "Open in Jellyfin",
+        "ARCHIVED_DATA_OPTIONS":"Archived Data Options",
+        "PURGE":"Purge",
+        "CONFIRM_ACTION":"Confirm Action",
+        "CONFIRM_ACTION_MESSAGE":"Are you sure you want to Purge this item",
+        "CONFIRM_ACTION_MESSAGE_2":"and Associated Playback Activity"
+    },
+    "LIBRARY_INFO":{
+      "LIBRARY_STATS": "Library Stats",
+      "LIBRARY_ACTIVITY": "Library Activity"
+    },
+    "TAB_CONTROLS":{
+      "OVERVIEW": "Overview",
+      "ACTIVITY": "Activity",
+      "OPTIONS": "Options"
+    },
+    "ITEM_ACTIVITY":"Item Activity",
+    "ACTIVITY_TABLE":{
+      "MODAL":{
+        "HEADER":"Stream Info"
+      },
+      "IP_ADDRESS":"IP Address",
+      "CLIENT":"Client",
+      "DATE":"Date",
+      "PLAYBACK_DURATION":"Playback Duration",
+      "TOTAL_PLAYBACK":"Total Playback"
+
+    },
+    "TABLE_NAV_BUTTONS":{
+      "FIRST":"First",
+      "LAST":"Last",
+      "NEXT":"Next",
+      "PREVIOUS":"Previous"
+    },
+    "PURGE_OPTIONS":{
+      "PURGE_CACHE":"Purge Cached Item",
+      "PURGE_CACHE_WITH_ACTIVITY":"Purge Cached Item and Playback Activity"
+    },
+    "ERROR_MESSAGES":{
+      "FETCH_THIS_ITEM":"Fetch this item from Jellyfin",
+      "NO_ACTIVITY":"No Activity Found",
+      "NEVER":"Never",
+      "N/A":"N/A"
+    },
     "SHOW_ARCHIVED_LIBRARIES":"Show Archived Libraries",
     "HIDE_ARCHIVED_LIBRARIES":"Hide Archived Libraries",
     "UNITS":{
+        "DAY": "Day",
         "DAYS": "Days",
+        "HOUR": "Hour",
         "HOURS": "Hours",
+        "MINUTE": "Minute",
         "MINUTES": "Minutes",
+        "SECOND": "Second",
         "SECONDS": "Seconds",
         "PLAYS": "Plays",
         "ITEMS": "Items"
     },
+    "USERS_PAGE":{
+      "ALL_USERS": "All Users",
+      "LAST_CLIENT": "Last Client",
+      "LAST_SEEN": "Last Seen",
+      "AGO": "Ago",
+      "USER_STATS": "User Stats",
+      "USER_ACTIVITY": "User Activity"
+  },
     "TOTAL": "Total",
     "LAST": "Last",
     "SERIES": "Series",
+    "SEASON": "Season",
     "SEASONS": "Seasons",
+    "EPISODE": "Episode",
     "EPISODES": "Episodes",
     "MOVIES": "Movies",
     "SONGS": "Songs",
     "FILES": "Files",
     "LIBRARIES": "Libraries",
+    "USER":"User",
     "USERS": "Users",
     "TYPE": "Type",
-    "NEW_VERSION_AVAILABLE":"New version available"
+    "NEW_VERSION_AVAILABLE":"New version available",
+    "ARCHIVED":"Archived",
+    "CLOSE":"Close",
+    "TOTAL_PLAYS": "Total Plays",
+    "TITLE":"Title",
+    "VIEWS": "Views",
+    "WATCH_TIME": "Watch Time",
+    "LAST_WATCHED": "Last Watched",
+    "MEDIA": "Media"
 
   }

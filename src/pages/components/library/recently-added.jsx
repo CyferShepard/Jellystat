@@ -5,6 +5,7 @@ import RecentlyAddedCard from "./RecentlyAdded/recently-added-card";
 
 import "../../css/users/user-details.css";
 import ErrorBoundary from "../general/ErrorBoundary";
+import { Trans } from "react-i18next";
 
 function RecentlyAdded(props) {
   const [data, setData] = useState();
@@ -57,7 +58,7 @@ function RecentlyAdded(props) {
 
   return (
     <div className="last-played">
-        <h1 className="my-3">Recently Added</h1>
+        <h1 className="my-3"><Trans i18nKey="HOME_PAGE.RECENTLY_ADDED"/></h1>
         <div className="last-played-container">
         {data && data.map((item) => (
                 <ErrorBoundary key={item.Id}>

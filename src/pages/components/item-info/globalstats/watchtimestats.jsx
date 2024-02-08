@@ -1,14 +1,14 @@
-import React from "react";
-
 import "../../../css/globalstats.css";
+import i18next from "i18next";
+import { Trans } from "react-i18next";
 
 function WatchTimeStats(props) {
 
   function formatTime(totalSeconds, numberClassName, labelClassName) {
     const units = [
-      { label: 'Day', seconds: 86400 },
-      { label: 'Hour', seconds: 3600 },
-      { label: 'Minute', seconds: 60 },
+      { label: i18next.t("UNITS.DAY"), seconds: 86400 },
+      { label: i18next.t("UNITS.HOUR"), seconds: 3600 },
+      { label: i18next.t("UNITS.MINUTE"), seconds: 60 },
     ];
   
     const parts = units.reduce((result, { label, seconds }) => {
@@ -17,8 +17,7 @@ function WatchTimeStats(props) {
         const formattedValue = <p className={numberClassName}>{value}</p>;
         const formattedLabel = (
           <span className={labelClassName}>
-            {label}
-            {value === 1 ? '' : 's'}
+            {value === 1 ? label : i18next.t(`UNITS.${label.toUpperCase()}S`) }
           </span>
         );
         result.push(
@@ -35,7 +34,7 @@ function WatchTimeStats(props) {
       return (
         <>
           <p className={numberClassName}>0</p>{' '}
-          <p className={labelClassName}>Minutes</p>
+          <p className={labelClassName}><Trans i18nKey="UNITS.MINUTES"/></p>
         </>
       );
     }
@@ -53,7 +52,7 @@ function WatchTimeStats(props) {
 
       <div className="play-duration-stats" key={props.data.ItemId}>
               <p className="stat-value"> {props.data.Plays || 0}</p>
-              <p className="stat-unit" >Plays /</p>
+              <p className="stat-unit" ><Trans i18nKey="UNITS.PLAYS"/> /</p>
 
               <>{formatTime(props.data.total_playback_duration || 0,'stat-value','stat-unit')}</>
 
