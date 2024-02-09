@@ -1,4 +1,4 @@
-import React, {useState} from "react";
+import {useState} from "react";
 import axios from "axios";
 import "../../css/library/library-card.css";
 
@@ -8,6 +8,7 @@ import TvLineIcon from "remixicon-react/TvLineIcon";
 import FilmLineIcon from "remixicon-react/FilmLineIcon";
 import FileMusicLineIcon from "remixicon-react/FileMusicLineIcon";
 import CheckboxMultipleBlankLineIcon from "remixicon-react/CheckboxMultipleBlankLineIcon";
+import { Trans } from "react-i18next";
 
 function SelectionCard(props) {
   const [imageLoaded, setImageLoaded] = useState(true);
@@ -65,18 +66,18 @@ function SelectionCard(props) {
 
           <Card.Body className="library-card-details-inv rounded-bottom">
             <Row className="space-between-end card-row">
-              <Col className="card-label">Library</Col>
+              <Col className="card-label"><Trans i18nKey={"LIBRARY_CARD.LIBRARY"}/></Col>
               <Col className="text-end">{props.data.Name}</Col>
             </Row>
 
             <Row className="space-between-end card-row">
-              <Col className="card-label">Type</Col>
+              <Col className="card-label"><Trans i18nKey={"TYPE"}/></Col>
               <Col className="text-end">{props.data.CollectionType==='tvshows' ? 'Series' : props.data.CollectionType==='movies'? "Movies" : props.data.CollectionType==='music'? "Music" : 'Mixed'}</Col>
             </Row>
 
             <Row className="space-between-end card-row">
 
-                <Col className="card-label">Tracked</Col>
+                <Col className="card-label"><Trans i18nKey={"LIBRARY_CARD.TRACKED"}/></Col>
                 <Col className="text-end">                    
                     <Form>
                       <Form.Check

@@ -1,31 +1,33 @@
+import { Trans } from "react-i18next";
+import i18n from "../localization";
 
 export const taskList = [
     {
         id: 0,
         name: "PartialJellyfinSync",
-        description: "Recently Added Items Sync",
-        type: "Job",
+        description: <Trans i18nKey={"TASK_DESCRIPTION.PartialJellyfinSync"}/>,
+        type:i18n.t("TASK_TYPE.JOB"),
         link: "/sync/beginPartialSync"
     },
     {
         id: 1,
         name: "JellyfinSync",
-        description: "Complete Sync with Jellyfin",
-        type: "Job",
+        description: <Trans i18nKey={"TASK_DESCRIPTION.JellyfinSync"}/>,
+        type: i18n.t("TASK_TYPE.JOB"),
         link: "/sync/beginSync"
     },
     {
         id: 2,
         name: "Jellyfin Playback Reporting Plugin Sync",
-        description: "Import Playback Reporting Plugin Data",
-        type: "Import",
+        description: <Trans i18nKey={"TASK_DESCRIPTION.Jellyfin_Playback_Reporting_Plugin_Sync"}/>,
+        type: i18n.t("TASK_TYPE.IMPORT"),
         link: "/sync/syncPlaybackPluginData"
     },
     {
         id: 3,
         name: "Backup",
-        description: "Backup Jellystat",
-        type: "Job",
+        description: <Trans i18nKey={"TASK_DESCRIPTION.Backup"}/>,
+        type: i18n.t("TASK_TYPE.JOB"),
         link: "/backup/beginBackup"
     },
     

@@ -18,6 +18,7 @@ import EyeOffFillIcon from 'remixicon-react/EyeOffFillIcon';
 
 import "../../css/settings/settings.css";
 import {  InputGroup } from "react-bootstrap";
+import { Trans } from "react-i18next";
 
 export default function SettingsConfig() {
   const [config, setConfig] = useState(null);
@@ -187,11 +188,11 @@ export default function SettingsConfig() {
 
     return (
       <div>
-        <h1>Settings</h1>
+        <h1><Trans i18nKey={"SETTINGS_PAGE.SETTINGS"}/></h1>
         <Form onSubmit={handleFormSubmit} className="settings-form">
           <Form.Group as={Row} className="mb-3" >
             <Form.Label column className="">
-              Jellyfin Url
+            <Trans i18nKey={"SETTINGS_PAGE.JELLYFIN_URL"}/>
             </Form.Label>
             <Col sm="10">
               <Form.Control  id="JF_HOST"  name="JF_HOST" value={formValues.JF_HOST || ""} onChange={handleFormChange}  placeholder="http://127.0.0.1:8096 or http://example.jellyfin.server" />
@@ -200,7 +201,7 @@ export default function SettingsConfig() {
 
           <Form.Group as={Row} className="mb-3">
             <Form.Label column  className="">
-              API Key
+            <Trans i18nKey={"SETTINGS_PAGE.API_KEY"}/>
             </Form.Label>
             <Col sm="10">
             <InputGroup>
@@ -223,13 +224,13 @@ export default function SettingsConfig() {
             <></>
           )}
           <div className="d-flex flex-column flex-md-row justify-content-end align-items-md-center">
-          <Button variant="outline-success" type="submit"> Save </Button>
+          <Button variant="outline-success" type="submit"><Trans i18nKey={"SETTINGS_PAGE.JELLYFIN_URL"}/></Button>
           </div>
 
         </Form>
         <Form className="settings-form">
          <Form.Group as={Row} className="mb-3">
-           <Form.Label column  className="">Select Preferred Admin Account</Form.Label>
+           <Form.Label column  className=""><Trans i18nKey={"SETTINGS_PAGE.SELECT_ADMIN"}/></Form.Label>
            <Col>
               <Dropdown className="w-100">
                 <Dropdown.Toggle variant="outline-primary" id="dropdown-basic" className="w-100">
@@ -252,11 +253,11 @@ export default function SettingsConfig() {
 
         <Form className="settings-form">
          <Form.Group as={Row} className="mb-3">
-           <Form.Label column  className="">Hour Format</Form.Label>
+           <Form.Label column  className=""><Trans i18nKey={"SETTINGS_PAGE.HOUR_FORMAT"}/></Form.Label>
            <Col >
               <ToggleButtonGroup type="checkbox" className="d-flex" >
-                  <ToggleButton variant="outline-primary" active={twelve_hr}  onClick={()=> {toggle12Hr(true);}}>12 Hours</ToggleButton>
-                  <ToggleButton variant="outline-primary" active={!twelve_hr}  onClick={()=>{toggle12Hr(false);}}>24 Hours</ToggleButton>
+                  <ToggleButton variant="outline-primary" active={twelve_hr}  onClick={()=> {toggle12Hr(true);}}><Trans i18nKey={"SETTINGS_PAGE.HOUR_FORMAT_12"}/></ToggleButton>
+                  <ToggleButton variant="outline-primary" active={!twelve_hr}  onClick={()=>{toggle12Hr(false);}}><Trans i18nKey={"SETTINGS_PAGE.HOUR_FORMAT_24"}/></ToggleButton>
                </ToggleButtonGroup>
             </Col>  
           </Form.Group>

@@ -1,4 +1,4 @@
-import React, { useState,useEffect } from "react";
+import { useState,useEffect } from "react";
 import axios from "axios";
 import Form from 'react-bootstrap/Form';
 import Row from 'react-bootstrap/Row';
@@ -18,6 +18,7 @@ import Config from "../../../lib/config";
 
 import "../../css/settings/settings.css";
 import { InputGroup } from "react-bootstrap";
+import { Trans } from "react-i18next";
 
 export default function SettingsConfig() {
   const [use_password, setuse_password] = useState(true);
@@ -139,11 +140,11 @@ async function updatePassword(_current_password, _new_password) {
 
     return (
       <div>
-        <h1>Security</h1>
+        <h1><Trans i18nKey={"SETTINGS_PAGE.SECURITY"}/></h1>
         <Form onSubmit={handleFormSubmit} className="settings-form">
           <Form.Group as={Row} className="mb-3" >
             <Form.Label column className="">
-              Current Password
+            <Trans i18nKey={"SETTINGS_PAGE.CURRENT_PASSWORD"}/>
             </Form.Label>
             <Col sm="10">
                 <InputGroup>
@@ -155,7 +156,7 @@ async function updatePassword(_current_password, _new_password) {
 
           <Form.Group as={Row} className="mb-3" >
             <Form.Label column className="">
-              New Password
+            <Trans i18nKey={"SETTINGS_PAGE.NEW_PASSWORD"}/>
             </Form.Label>
             <Col sm="10">
               <InputGroup>
@@ -179,18 +180,18 @@ async function updatePassword(_current_password, _new_password) {
             <></>
           )}
           <div className="d-flex flex-column flex-md-row justify-content-end align-items-md-center">
-              <Button variant="outline-success" type="submit"> Update </Button>
+              <Button variant="outline-success" type="submit"><Trans i18nKey={"SETTINGS_PAGE.UPDATE"}/></Button>
           </div>
 
         </Form>
 
         <Form className="settings-form">
          <Form.Group as={Row} className="mb-3">
-           <Form.Label column  className="">Require Login</Form.Label>
+           <Form.Label column  className=""><Trans i18nKey={"SETTINGS_PAGE.REQUIRE_LOGIN"}/></Form.Label>
            <Col >
               <ToggleButtonGroup type="checkbox" className="d-flex" >
-                  <ToggleButton variant="outline-primary" active={use_password}  onClick={()=> {togglePasswordRequired(true);}}>Yes</ToggleButton>
-                  <ToggleButton variant="outline-primary" active={!use_password}  onClick={()=>{togglePasswordRequired(false);}}>No</ToggleButton>
+                  <ToggleButton variant="outline-primary" active={use_password}  onClick={()=> {togglePasswordRequired(true);}}><Trans i18nKey={"YES"}/></ToggleButton>
+                  <ToggleButton variant="outline-primary" active={!use_password}  onClick={()=>{togglePasswordRequired(false);}}><Trans i18nKey={"NO"}/></ToggleButton>
                </ToggleButtonGroup>
             </Col>  
           </Form.Group>

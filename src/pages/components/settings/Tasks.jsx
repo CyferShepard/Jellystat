@@ -1,6 +1,6 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import axios from "axios";
-import  Button  from "react-bootstrap/Button";
+import Button  from "react-bootstrap/Button";
 
 
 import Table from '@mui/material/Table';
@@ -15,6 +15,8 @@ import { taskList } from "../../../lib/tasklist";
 
 
 import "../../css/settings/settings.css";
+import i18n from "../../../localization";
+import { Trans } from "react-i18next";
 
 export default function Tasks() {
   const [processing, setProcessing] = useState(false);
@@ -93,25 +95,24 @@ export default function Tasks() {
 
 
       const intervals=[
-        {value:15, display:"15 Minutes"},
-        {value:30, display:"30 Minutes"},
-        {value:60, display:"1 Hour"},
-        {value:720, display:"12 Hours"},
-        {value:1440, display:"1 Day"},
-        {value:10080, display:"1 Week"}
+        {value:15, display:i18n.t("SETTINGS_PAGE.INTERVALS.15_MIN")},
+        {value:30, display:i18n.t("SETTINGS_PAGE.INTERVALS.30_MIN")},
+        {value:60, display:i18n.t("SETTINGS_PAGE.INTERVALS.1_HOUR")},
+        {value:720, display:i18n.t("SETTINGS_PAGE.INTERVALS.12_HOURS")},
+        {value:1440, display:i18n.t("SETTINGS_PAGE.INTERVALS.1_DAY")},
+        {value:10080, display:i18n.t("SETTINGS_PAGE.INTERVALS.1_WEEK")}
       ];
-
       return (
         <div className="tasks">
-          <h1 className="py-3">Tasks</h1>
+          <h1 className="py-3"><Trans i18nKey={"SETTINGS_PAGE.TASKS"}/></h1>
 
             <TableContainer className='rounded-2'>
                     <Table aria-label="collapsible table" >
                       <TableHead>
                         <TableRow>
-                          <TableCell>Task</TableCell>
-                          <TableCell>Type</TableCell>
-                          <TableCell>Interval</TableCell>
+                          <TableCell><Trans i18nKey={"SETTINGS_PAGE.TASK"}/></TableCell>
+                          <TableCell><Trans i18nKey={"TYPE"}/></TableCell>
+                          <TableCell><Trans i18nKey={"SETTINGS_PAGE.INTERVAL"}/></TableCell>
                           <TableCell></TableCell>
                         </TableRow>
                       </TableHead>
@@ -119,12 +120,13 @@ export default function Tasks() {
       
                         {taskList &&
                          taskList.map((task) => (
+      
                             <TableRow key={task.id}>
                               <TableCell>{task.description}</TableCell>
-                              <TableCell>{task.type}</TableCell>
+                              <TableCell><Trans i18nKey={task.type}/></TableCell>
                         
                               <TableCell>
-                              {task.type==='Job' ?
+                              {task.type=== "TASK_TYPE.JOB" ?
                                 <Dropdown className="w-100">
                                 <Dropdown.Toggle variant="outline-primary" id="dropdown-basic" className="w-100">
                                   {taskIntervals && intervals.find((interval) => interval.value === (taskIntervals[task.name]?.Interval || 15)).display}
@@ -142,7 +144,7 @@ export default function Tasks() {
                               }
 
                               </TableCell>
-                              <TableCell className="d-flex justify-content-center"> <Button variant={!processing ? "outline-primary" : "outline-light"} disabled={processing} onClick={() => executeTask(task.link)}>Start</Button></TableCell>
+                              <TableCell className="d-flex justify-content-center"> <Button variant={!processing ? "outline-primary" : "outline-light"} disabled={processing} onClick={() => executeTask(task.link)}><Trans i18nKey={"START"}/></Button></TableCell>
                             </TableRow>
 
                         ))}
