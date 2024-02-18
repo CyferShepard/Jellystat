@@ -67,7 +67,7 @@ function EnhancedTableHead(props) {
       id: 'LastSeen',
       numeric: false,
       disablePadding: false,
-      label: i18next.t("USERS.LAST_SEEN"),
+      label: i18next.t("USERS_PAGE.LAST_SEEN"),
     },
   ];
 

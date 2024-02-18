@@ -189,7 +189,7 @@ function EnhancedTableHead(props) {
       id: 'ActivityDateInserted',
       numeric: false,
       disablePadding: false,
-      label: i18next.t("ACTIVITY_TABLE.DATE"),
+      label: i18next.t("DATE"),
     },
     {
       id: 'PlaybackDuration',

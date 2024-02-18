@@ -91,7 +91,7 @@ function LibraryItems(props) {
   return (
     <div className="library-items">
       <div className="d-md-flex justify-content-between">
-        <h1 className="my-3"><Trans i18nKey="LIBRARY_INFO.MEDIA"/></h1>
+        <h1 className="my-3"><Trans i18nKey="MEDIA"/></h1>
 
 
         <div className="d-flex flex-column flex-md-row">
