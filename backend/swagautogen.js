@@ -38,13 +38,13 @@ const config = {
     securityDefinitions: {
         apiKey: {
             type: 'apiKey',
-            name: 'x-api-token', // The name of the header to pass the API key
+            name: 'x-api-token',
             in: 'header',
         },
     },
     security: [
         {
-            apiKey: [], // Reference the security definition defined above
+            apiKey: [],
         },
     ],
 };

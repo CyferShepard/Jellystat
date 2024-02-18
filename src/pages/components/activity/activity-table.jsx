@@ -126,7 +126,7 @@ function Row(data) {
                     <TableCell><Trans i18nKey="ACTIVITY_TABLE.IP_ADDRESS"/></TableCell>
                     <TableCell><Trans i18nKey="TITLE"/></TableCell>
                     <TableCell><Trans i18nKey="ACTIVITY_TABLE.CLIENT"/></TableCell>
-                    <TableCell><Trans i18nKey="ACTIVITY_TABLE.DATE"/></TableCell>
+                    <TableCell><Trans i18nKey="DATE"/></TableCell>
                     <TableCell><Trans i18nKey="ACTIVITY_TABLE.PLAYBACK_DURATION"/></TableCell>
                     <TableCell><Trans i18nKey="UNITS.PLAYS"/></TableCell>
                   </TableRow>

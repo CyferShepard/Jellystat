@@ -1,208 +1,225 @@
 {
-    "JELLYSTAT": "Jellystat",
-    "MENU_TABS": {
-      "HOME": "Home",
-      "LIBRARIES": "Libraries",
-      "USERS": "Users",
-      "ACTIVITY": "Activity",
-      "STATISTICS": "Statistics",
-      "SETTINGS": "Settings",
-      "ABOUT": "About",
-      "LOGOUT": "Logout"
-    },
-    "HOME_PAGE": {
-        "SESSIONS": "Sessions",
-        "RECENTLY_ADDED": "Recently Added",
-        "WATCH_STATISTIC": "Watch Statistics",
-        "LIBRARY_OVERVIEW": "Library Overview"
-      },
-    "SESSIONS":{
-        "NO_SESSIONS": "No Active Sessions Found"
-    },
-    "STAT_CARDS": {
-      "MOST_VIEWED_MOVIES": "MOST VIEWED MOVIES",
-      "MOST_POPULAR_MOVIES": "MOST POPULAR MOVIES",
-      "MOST_VIEWED_SERIES": "MOST VIEWED SERIES",
-      "MOST_POPULAR_SERIES": "MOST POPULAR SERIES",
-      "MOST_LISTENED_MUSIC": "MOST LISTENED MUSIC",
-      "MOST_POPULAR_MUSIC": "MOST POPULAR MUSIC",
-      "MOST_VIEWED_LIBRARIES": "MOST VIEWED LIBRARIES",
-      "MOST_USED_CLIENTS": "MOST USED CLIENTS",
-      "MOST_ACTIVE_USERS": "MOST ACTIVE USERS"
-    },
-    "LIBRARY_OVERVIEW": {
-        "MOVIE_LIBRARIES": "MOVIE LIBRARIES",
-        "SHOW_LIBRARIES": "SHOW LIBRARIES",
-        "MUSIC_LIBRARIES": "MUSIC LIBRARIES",
-        "MIXED_LIBRARIES": "MIXED LIBRARIES"
-    },
-    "LIBRARY_CARD": {
-        "LIBRARY": "Library",
-        "TOTAL_TIME": "Total Time",      
-        "TOTAL_FILES": "Total Files",
-        "LIBRARY_SIZE": "Library Size",
-        "TOTAL_PLAYBACK": "Total Playback",
-        "LAST_PLAYED": "Last Played",
-        "LAST_ACTIVITY": "Last Activity",
-        "TRACKED":"Tracked"
-    },
-    "GLOBAL_STATS":{
-      "LAST_24_HRS": "Last 24 Hours",
-      "LAST_7_DAYS": "Last 7 Days",
-      "LAST_30_DAYS": "Last 30 Days",
-      "ALL_TIME": "All Time",
-      "ITEM_STATS": "Item Stats"
-    },
-    "ITEM_INFO": {
-        "FILE_NAME": "File Name",
-        "FILE_PATH": "File Path",
-        "FILE_SIZE": "File Size",
-        "RUNTIME": "Runtime",
-        "AVERAGE_RUNTIME": "Average Runtime",
-        "OPEN_IN_JELLYFIN": "Open in Jellyfin",
-        "ARCHIVED_DATA_OPTIONS":"Archived Data Options",
-        "PURGE":"Purge",
-        "CONFIRM_ACTION":"Confirm Action",
-        "CONFIRM_ACTION_MESSAGE":"Are you sure you want to Purge this item",
-        "CONFIRM_ACTION_MESSAGE_2":"and Associated Playback Activity"
-    },
-    "LIBRARY_INFO":{
-      "LIBRARY_STATS": "Library Stats",
-      "LIBRARY_ACTIVITY": "Library Activity"
-    },
-    "TAB_CONTROLS":{
-      "OVERVIEW": "Overview",
-      "ACTIVITY": "Activity",
-      "OPTIONS": "Options"
-    },
-    "ITEM_ACTIVITY":"Item Activity",
-    "ACTIVITY_TABLE":{
-      "MODAL":{
-        "HEADER":"Stream Info"
-      },
-      "IP_ADDRESS":"IP Address",
-      "CLIENT":"Client",
-      "DATE":"Date",
-      "PLAYBACK_DURATION":"Playback Duration",
-      "TOTAL_PLAYBACK":"Total Playback"
-
-    },
-    "TABLE_NAV_BUTTONS":{
-      "FIRST":"First",
-      "LAST":"Last",
-      "NEXT":"Next",
-      "PREVIOUS":"Previous"
-    },
-    "PURGE_OPTIONS":{
-      "PURGE_CACHE":"Purge Cached Item",
-      "PURGE_CACHE_WITH_ACTIVITY":"Purge Cached Item and Playback Activity"
-    },
-    "ERROR_MESSAGES":{
-      "FETCH_THIS_ITEM":"Fetch this item from Jellyfin",
-      "NO_ACTIVITY":"No Activity Found",
-      "NEVER":"Never",
-      "N/A":"N/A",
-      "NO_STATS":"No Stats to display",
-      "NO_API_KEYS":"No Keys Found"
-    },
-    "SHOW_ARCHIVED_LIBRARIES":"Show Archived Libraries",
-    "HIDE_ARCHIVED_LIBRARIES":"Hide Archived Libraries",
-    "UNITS":{
-        "DAY": "Day",
-        "DAYS": "Days",
-        "HOUR": "Hour",
-        "HOURS": "Hours",
-        "MINUTE": "Minute",
-        "MINUTES": "Minutes",
-        "SECOND": "Second",
-        "SECONDS": "Seconds",
-        "PLAYS": "Plays",
-        "ITEMS": "Items"
-    },
-    "USERS_PAGE":{
-      "ALL_USERS": "All Users",
-      "LAST_CLIENT": "Last Client",
-      "LAST_SEEN": "Last Seen",
-      "AGO": "Ago",
-      "USER_STATS": "User Stats",
-      "USER_ACTIVITY": "User Activity"
-    },
-    "STAT_PAGE":{
-      "STATISTICS": "Statistics",
-      "DAILY_PLAY_PER_LIBRARY": "Daily Play Count Per Library",
-      "PLAY_COUNT_BY": "Play Count By"
-    },
-    "SETTINGS_PAGE":{
-      "SETTINGS": "Settings",
-      "LIBRARY_SETTINGS": "Library Settings",
-      "BACKUP": "Backup",
-      "LOGS": "Logs",
-      "JELLYFIN_URL": "Jellyfin URL",
-      "API_KEY": "API Key",
-      "API_KEYS": "API Keys",
-      "KEY_NAME": "Key Name",
-      "KEY": "Key",
-      "NAME": "Name",
-      "ADD_KEY": "Add Key",
-      "SELECT_ADMIN":"Select Preferred Admin Account",
-      "HOUR_FORMAT" : "Hour Format",
-      "HOUR_FORMAT_12" : "12 Hours",
-      "HOUR_FORMAT_24" : "24 Hours",
-      "SECURITY": "Security",
-      "CURRENT_PASSWORD": "Current Password",
-      "NEW_PASSWORD": "New Password",
-      "UPDATE": "Update",
-      "REQUIRE_LOGIN": "Require Login",
-      "TASK": "Task",
-      "TASKS": "Tasks",
-      "INTERVAL":"Interval",
-      "INTERVALS":{
-        "15_MIN":"15 Minutes",
-        "30_MIN":"30 Minutes",
-        "1_HOUR":"1 Hour",
-        "12_HOURS":"12 Hours",
-        "1_DAY":"1 Day",
-        "1_WEEK":"1 Week"
-      },
-      "SELECT_LIBRARIES_TO_IMPORT":"Select Libraries to Import",
-      "SELECT_LIBRARIES_TO_IMPORT_TOOLTIP":"Activity for Items within these libraries are still Tracked - Even when not imported."
-    },
-    "TASK_TYPE":{
-      "JOB":"Job",
-      "IMPORT":"Import"
-    },
-    "TASK_DESCRIPTION":{
-      "PartialJellyfinSync":"Recently Added Items Sync",
-      "JellyfinSync":"Complete Sync with Jellyfin",
-      "Jellyfin_Playback_Reporting_Plugin_Sync":"Import Playback Reporting Plugin Data",
-      "Backup":"Backup Jellystat"
-    },
-    "TOTAL": "Total",
-    "LAST": "Last",
-    "SERIES": "Series",
-    "SEASON": "Season",
-    "SEASONS": "Seasons",
-    "EPISODE": "Episode",
-    "EPISODES": "Episodes",
-    "MOVIES": "Movies",
-    "SONGS": "Songs",
-    "FILES": "Files",
+  "JELLYSTAT": "Jellystat",
+  "MENU_TABS": {
+    "HOME": "Home",
     "LIBRARIES": "Libraries",
-    "USER":"User",
     "USERS": "Users",
-    "TYPE": "Type",
-    "NEW_VERSION_AVAILABLE":"New version available",
-    "ARCHIVED":"Archived",
-    "CLOSE":"Close",
-    "TOTAL_PLAYS": "Total Plays",
-    "TITLE":"Title",
-    "VIEWS": "Views",
-    "WATCH_TIME": "Watch Time",
-    "LAST_WATCHED": "Last Watched",
-    "MEDIA": "Media",
-    "SAVE": "Save",
-    "YES": "Yes",
-    "NO": "No",
-    "START": "Start",
-    "DELETE": "Delete"
-  }
+    "ACTIVITY": "Activity",
+    "STATISTICS": "Statistics",
+    "SETTINGS": "Settings",
+    "ABOUT": "About",
+    "LOGOUT": "Logout"
+  },
+  "HOME_PAGE": {
+    "SESSIONS": "Sessions",
+    "RECENTLY_ADDED": "Recently Added",
+    "WATCH_STATISTIC": "Watch Statistics",
+    "LIBRARY_OVERVIEW": "Library Overview"
+  },
+  "SESSIONS": {
+    "NO_SESSIONS": "No Active Sessions Found"
+  },
+  "STAT_CARDS": {
+    "MOST_VIEWED_MOVIES": "MOST VIEWED MOVIES",
+    "MOST_POPULAR_MOVIES": "MOST POPULAR MOVIES",
+    "MOST_VIEWED_SERIES": "MOST VIEWED SERIES",
+    "MOST_POPULAR_SERIES": "MOST POPULAR SERIES",
+    "MOST_LISTENED_MUSIC": "MOST LISTENED MUSIC",
+    "MOST_POPULAR_MUSIC": "MOST POPULAR MUSIC",
+    "MOST_VIEWED_LIBRARIES": "MOST VIEWED LIBRARIES",
+    "MOST_USED_CLIENTS": "MOST USED CLIENTS",
+    "MOST_ACTIVE_USERS": "MOST ACTIVE USERS"
+  },
+  "LIBRARY_OVERVIEW": {
+    "MOVIE_LIBRARIES": "MOVIE LIBRARIES",
+    "SHOW_LIBRARIES": "SHOW LIBRARIES",
+    "MUSIC_LIBRARIES": "MUSIC LIBRARIES",
+    "MIXED_LIBRARIES": "MIXED LIBRARIES"
+  },
+  "LIBRARY_CARD": {
+    "LIBRARY": "Library",
+    "TOTAL_TIME": "Total Time",
+    "TOTAL_FILES": "Total Files",
+    "LIBRARY_SIZE": "Library Size",
+    "TOTAL_PLAYBACK": "Total Playback",
+    "LAST_PLAYED": "Last Played",
+    "LAST_ACTIVITY": "Last Activity",
+    "TRACKED": "Tracked"
+  },
+  "GLOBAL_STATS": {
+    "LAST_24_HRS": "Last 24 Hours",
+    "LAST_7_DAYS": "Last 7 Days",
+    "LAST_30_DAYS": "Last 30 Days",
+    "ALL_TIME": "All Time",
+    "ITEM_STATS": "Item Stats"
+  },
+  "ITEM_INFO": {
+    "FILE_PATH": "File Path",
+    "FILE_SIZE": "File Size",
+    "RUNTIME": "Runtime",
+    "AVERAGE_RUNTIME": "Average Runtime",
+    "OPEN_IN_JELLYFIN": "Open in Jellyfin",
+    "ARCHIVED_DATA_OPTIONS": "Archived Data Options",
+    "PURGE": "Purge",
+    "CONFIRM_ACTION": "Confirm Action",
+    "CONFIRM_ACTION_MESSAGE": "Are you sure you want to Purge this item",
+    "CONFIRM_ACTION_MESSAGE_2": "and Associated Playback Activity"
+  },
+  "LIBRARY_INFO": {
+    "LIBRARY_STATS": "Library Stats",
+    "LIBRARY_ACTIVITY": "Library Activity"
+  },
+  "TAB_CONTROLS": {
+    "OVERVIEW": "Overview",
+    "ACTIVITY": "Activity",
+    "OPTIONS": "Options"
+  },
+  "ITEM_ACTIVITY": "Item Activity",
+  "ACTIVITY_TABLE": {
+    "MODAL": {
+      "HEADER": "Stream Info"
+    },
+    "IP_ADDRESS": "IP Address",
+    "CLIENT": "Client",
+    "PLAYBACK_DURATION": "Playback Duration",
+    "TOTAL_PLAYBACK": "Total Playback"
+  },
+  "TABLE_NAV_BUTTONS": {
+    "FIRST": "First",
+    "LAST": "Last",
+    "NEXT": "Next",
+    "PREVIOUS": "Previous"
+  },
+  "PURGE_OPTIONS": {
+    "PURGE_CACHE": "Purge Cached Item",
+    "PURGE_CACHE_WITH_ACTIVITY": "Purge Cached Item and Playback Activity"
+  },
+  "ERROR_MESSAGES": {
+    "FETCH_THIS_ITEM": "Fetch this item from Jellyfin",
+    "NO_ACTIVITY": "No Activity Found",
+    "NEVER": "Never",
+    "N/A": "N/A",
+    "NO_STATS": "No Stats to display",
+    "NO_BACKUPS": "No Backups Found",
+    "NO_LOGS": "No Logs Found",
+    "NO_API_KEYS": "No Keys Found"
+  },
+  "SHOW_ARCHIVED_LIBRARIES": "Show Archived Libraries",
+  "HIDE_ARCHIVED_LIBRARIES": "Hide Archived Libraries",
+  "UNITS": {
+    "DAY": "Day",
+    "DAYS": "Days",
+    "HOUR": "Hour",
+    "HOURS": "Hours",
+    "MINUTE": "Minute",
+    "MINUTES": "Minutes",
+    "SECOND": "Second",
+    "SECONDS": "Seconds",
+    "PLAYS": "Plays",
+    "ITEMS": "Items"
+  },
+  "USERS_PAGE": {
+    "ALL_USERS": "All Users",
+    "LAST_CLIENT": "Last Client",
+    "LAST_SEEN": "Last Seen",
+    "AGO": "Ago",
+    "USER_STATS": "User Stats",
+    "USER_ACTIVITY": "User Activity"
+  },
+  "STAT_PAGE": {
+    "STATISTICS": "Statistics",
+    "DAILY_PLAY_PER_LIBRARY": "Daily Play Count Per Library",
+    "PLAY_COUNT_BY": "Play Count By"
+  },
+  "SETTINGS_PAGE": {
+    "SETTINGS": "Settings",
+    "LIBRARY_SETTINGS": "Library Settings",
+    "BACKUP": "Backup",
+    "BACKUPS": "Backups",
+    "CHOOSE_FILE": "Choose File",
+    "LOGS": "Logs",
+    "SIZE": "Size",
+    "JELLYFIN_URL": "Jellyfin URL",
+    "API_KEY": "API Key",
+    "API_KEYS": "API Keys",
+    "KEY_NAME": "Key Name",
+    "KEY": "Key",
+    "NAME": "Name",
+    "ADD_KEY": "Add Key",
+    "DURATION": "Duration",
+    "EXECUTION_TYPE": "Execution Type",
+    "RESULTS": "Results",
+    "SELECT_ADMIN": "Select Preferred Admin Account",
+    "HOUR_FORMAT": "Hour Format",
+    "HOUR_FORMAT_12": "12 Hours",
+    "HOUR_FORMAT_24": "24 Hours",
+    "SECURITY": "Security",
+    "CURRENT_PASSWORD": "Current Password",
+    "NEW_PASSWORD": "New Password",
+    "UPDATE": "Update",
+    "REQUIRE_LOGIN": "Require Login",
+    "TASK": "Task",
+    "TASKS": "Tasks",
+    "INTERVAL": "Interval",
+    "INTERVALS": {
+      "15_MIN": "15 Minutes",
+      "30_MIN": "30 Minutes",
+      "1_HOUR": "1 Hour",
+      "12_HOURS": "12 Hours",
+      "1_DAY": "1 Day",
+      "1_WEEK": "1 Week"
+    },
+    "SELECT_LIBRARIES_TO_IMPORT": "Select Libraries to Import",
+    "SELECT_LIBRARIES_TO_IMPORT_TOOLTIP": "Activity for Items within these libraries are still Tracked - Even when not imported."
+  },
+  "TASK_TYPE": {
+    "JOB": "Job",
+    "IMPORT": "Import"
+  },
+  "TASK_DESCRIPTION": {
+    "PartialJellyfinSync": "Recently Added Items Sync",
+    "JellyfinSync": "Complete Sync with Jellyfin",
+    "Jellyfin_Playback_Reporting_Plugin_Sync": "Import Playback Reporting Plugin Data",
+    "Backup": "Backup Jellystat"
+  },
+  "ABOUT_PAGE": {
+    "ABOUT_JELLYSTAT": "About Jellystat",
+    "VERSION": "Version",
+    "UPDATE_AVAILABLE": "Update Available",
+    "GITHUB": "Github",
+    "Backup": "Backup Jellystat"
+  },
+  "TOTAL": "Total",
+  "LAST": "Last",
+  "SERIES": "Series",
+  "SEASON": "Season",
+  "SEASONS": "Seasons",
+  "EPISODE": "Episode",
+  "EPISODES": "Episodes",
+  "MOVIES": "Movies",
+  "SONGS": "Songs",
+  "FILES": "Files",
+  "LIBRARIES": "Libraries",
+  "USER": "User",
+  "USERS": "Users",
+  "TYPE": "Type",
+  "NEW_VERSION_AVAILABLE": "New version available",
+  "ARCHIVED": "Archived",
+  "CLOSE": "Close",
+  "TOTAL_PLAYS": "Total Plays",
+  "TITLE": "Title",
+  "VIEWS": "Views",
+  "WATCH_TIME": "Watch Time",
+  "LAST_WATCHED": "Last Watched",
+  "MEDIA": "Media",
+  "SAVE": "Save",
+  "YES": "Yes",
+  "NO": "No",
+  "FILE_NAME": "File Name",
+  "DATE": "Date",
+  "START": "Start",
+  "DOWNLOAD": "Download",
+  "RESTORE": "Restore",
+  "ACTIONS": "Actions",
+  "DELETE": "Delete"
+}

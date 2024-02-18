@@ -1,22 +1,20 @@
 /* eslint-disable react/prop-types */
 import { useState, useEffect } from "react";
 import axios from "axios";
-import { useParams } from 'react-router-dom';
+import { useParams } from "react-router-dom";
 import { Link } from "react-router-dom";
-import { Blurhash } from 'react-blurhash';
-import {Row, Col, Tabs, Tab, Button, ButtonGroup } from 'react-bootstrap';
+import { Blurhash } from "react-blurhash";
+import { Row, Col, Tabs, Tab, Button, ButtonGroup } from "react-bootstrap";
 
 import ExternalLinkFillIcon from "remixicon-react/ExternalLinkFillIcon";
-import ArchiveDrawerFillIcon from 'remixicon-react/ArchiveDrawerFillIcon';
+import ArchiveDrawerFillIcon from "remixicon-react/ArchiveDrawerFillIcon";
 
-
-import GlobalStats from './item-info/globalStats';
+import GlobalStats from "./item-info/globalStats";
 import "../css/items/item-details.css";
 
 import MoreItems from "./item-info/more-items";
 import ItemActivity from "./item-info/item-activity";
 import ItemNotFound from "./item-info/item-not-found";
-
 
 import Config from "../../lib/config";
 import Loading from "./general/loading";
@@ -24,17 +22,14 @@ import ItemOptions from "./item-info/item-options";
 import { Trans } from "react-i18next";
 import i18next from "i18next";
 
-
-
 function ItemInfo() {
   const { Id } = useParams();
   const [data, setData] = useState();
   const [config, setConfig] = useState();
   const [refresh, setRefresh] = useState(true);
-  const [activeTab, setActiveTab] = useState('tabOverview');
+  const [activeTab, setActiveTab] = useState("tabOverview");
 
   const [loaded, setLoaded] = useState(false);
-
 
   function formatFileSize(sizeInBytes) {
     const sizeInMB = sizeInBytes / 1048576; // 1 MB = 1048576 bytes
@@ -51,184 +46,240 @@ function ItemInfo() {
     const hours = Math.floor(seconds / 3600);
     const minutes = Math.floor((seconds % 3600) / 60);
     const remainingSeconds = seconds % 60;
-    const timeString = `${hours.toString().padStart(2, "0")}:${minutes
+    const timeString = `${hours.toString().padStart(2, "0")}:${minutes.toString().padStart(2, "0")}:${remainingSeconds
       .toString()
-      .padStart(2, "0")}:${remainingSeconds.toString().padStart(2, "0")}`;
+      .padStart(2, "0")}`;
 
     return timeString;
   }
 
   const fetchData = async () => {
-    if(config){
+    if (config) {
       setRefresh(true);
-    try {
-      const itemData = await axios.post(`/api/getItemDetails`, {
-        Id: Id
-      }, {
-        headers: {
-          Authorization: `Bearer ${config.token}`,
-          "Content-Type": "application/json",
-        },
-      });
-      console.log(itemData.data[0]);
-      setData(itemData.data[0]);
-
-    } catch (error) {
-      setData({notfound:true, message:error.response.data});
-      console.log(error);
+      try {
+        const itemData = await axios.post(
+          `/api/getItemDetails`,
+          {
+            Id: Id,
+          },
+          {
+            headers: {
+              Authorization: `Bearer ${config.token}`,
+              "Content-Type": "application/json",
+            },
+          }
+        );
+        console.log(itemData.data[0]);
+        setData(itemData.data[0]);
+      } catch (error) {
+        setData({ notfound: true, message: error.response.data });
+        console.log(error);
+      }
+      setRefresh(false);
     }
-    setRefresh(false);
-  }
-
   };
 
-
-
-useEffect(() => {
-
-
-  const fetchConfig = async () => {
+  useEffect(() => {
+    const fetchConfig = async () => {
       try {
         const newConfig = await Config();
         setConfig(newConfig);
       } catch (error) {
-          console.log(error);
+        console.log(error);
       }
     };
 
+    fetchData();
 
-
-  fetchData();
-
-  if (!config) {
+    if (!config) {
       fetchConfig();
+    }
+
+    const intervalId = setInterval(fetchData, 60000 * 5);
+    return () => clearInterval(intervalId);
+    // eslint-disable-next-line
+  }, [config, Id]);
+
+  if (!data || refresh) {
+    return <Loading />;
   }
 
-  const intervalId = setInterval(fetchData, 60000 * 5);
-  return () => clearInterval(intervalId);
-  // eslint-disable-next-line
-}, [config, Id]);
+  if (data && data.notfound) {
+    return <ItemNotFound message="Item not found" itemId={Id} fetchdataMethod={fetchData} />;
+  }
 
+  const cardStyle = {
+    backgroundImage: `url(/proxy/Items/Images/Backdrop?id=${
+      ["Episode", "Season"].includes(data.Type) ? data.SeriesId : data.Id
+    }&fillWidth=800&quality=90)`,
+    height: "100%",
+    backgroundSize: "cover",
+  };
 
-
-
-
-
-
-if(!data || refresh)
-{
-  return <Loading/>;
-}
-
-if(data && data.notfound)
-{
-  return <ItemNotFound message="Item not found" itemId={Id} fetchdataMethod={fetchData}/>;
-}
-
-const cardStyle = {
-  backgroundImage: `url(/proxy/Items/Images/Backdrop?id=${(["Episode","Season"].includes(data.Type)? data.SeriesId : data.Id)}&fillWidth=800&quality=90)`,
-  height:'100%',
-  backgroundSize: 'cover',
-};
-
-const cardBgStyle = {
-  backgroundColor: 'rgb(0, 0, 0, 0.8)',
-
-};
-
+  const cardBgStyle = {
+    backgroundColor: "rgb(0, 0, 0, 0.8)",
+  };
 
   return (
     <div>
+      <div className="item-detail-container rounded-3" style={cardStyle}>
+        <Row className="justify-content-center justify-content-md-start rounded-3 g-0 p-4" style={cardBgStyle}>
+          <Col className="col-auto my-4 my-md-0 item-banner-image">
+            {!data.archived && data.PrimaryImageHash && data.PrimaryImageHash != null && !loaded ? (
+              <Blurhash
+                hash={data.PrimaryImageHash}
+                width={"200px"}
+                height={"300px"}
+                className="rounded-3 overflow-hidden"
+                style={{ display: "block" }}
+              />
+            ) : null}
+            {!data.archived ? (
+              <img
+                className="item-image"
+                src={
+                  "/proxy/Items/Images/Primary?id=" +
+                  (["Episode", "Season"].includes(data.Type) ? data.SeriesId : data.Id) +
+                  "&fillWidth=200&quality=90"
+                }
+                alt=""
+                style={{
+                  display: loaded ? "block" : "none",
+                }}
+                onLoad={() => setLoaded(true)}
+              />
+            ) : (
+              <div
+                className="d-flex flex-column justify-content-center align-items-center position-relative"
+                style={{ height: "300px", width: "200px" }}
+              >
+                {data.PrimaryImageHash && data.PrimaryImageHash != null ? (
+                  <Blurhash
+                    hash={data.PrimaryImageHash}
+                    width={"200px"}
+                    height={"300px"}
+                    className="rounded-3 overflow-hidden position-absolute"
+                    style={{ display: "block" }}
+                  />
+                ) : null}
+                <div className="d-flex flex-column justify-content-center align-items-center position-absolute">
+                  <ArchiveDrawerFillIcon className="w-100 h-100 mb-2" />
+                  <span>
+                    <Trans i18nKey="ARCHIVED" />
+                  </span>
+                </div>
+              </div>
+            )}
+          </Col>
 
-       <div className="item-detail-container rounded-3" style={cardStyle}>
-      <Row className="justify-content-center justify-content-md-start rounded-3 g-0 p-4" style={cardBgStyle}>
-        <Col className="col-auto my-4 my-md-0 item-banner-image" >
-        {!data.archived && data.PrimaryImageHash && data.PrimaryImageHash!=null && !loaded ? <Blurhash hash={data.PrimaryImageHash} width={'200px'}   height={'300px'} className="rounded-3 overflow-hidden" style={{display:'block'}}/> : null}
-        {!data.archived ?
-        <img
-            className="item-image"
-            src={
-              "/proxy/Items/Images/Primary?id=" +
-             (["Episode","Season"].includes(data.Type)? data.SeriesId : data.Id) +
-              "&fillWidth=200&quality=90"
-            }
-            alt=""
-            style={{
-              display: loaded ? "block" :"none"
-            }}
-            onLoad={() => setLoaded(true)}
-         />
-         :
-         <div className="d-flex flex-column justify-content-center align-items-center position-relative" style={{height: '300px', width:'200px'}}>
-            {((data.PrimaryImageHash && data.PrimaryImageHash!=null) )?
-                    <Blurhash hash={data.PrimaryImageHash } width={'200px'}   height={'300px'} className="rounded-3 overflow-hidden position-absolute" style={{display:'block'}}/>
-                    :
-                    null
-            }
-            <div className="d-flex flex-column justify-content-center align-items-center position-absolute">
-              <ArchiveDrawerFillIcon className="w-100 h-100 mb-2"/>
-              <span><Trans i18nKey="ARCHIVED"/></span>
+          <Col>
+            <div className="item-details">
+              <div className="d-flex">
+                <h1 className="">
+                  {data.SeriesId ? (
+                    <Link to={`/libraries/item/${data.SeriesId}`}>{data.SeriesName || data.Name}</Link>
+                  ) : (
+                    data.SeriesName || data.Name
+                  )}
+                </h1>
+                <Link
+                  className="px-2"
+                  to={config.hostUrl + "/web/index.html#!/details?id=" + (data.EpisodeId || data.Id)}
+                  title={i18next.t("ITEM_INFO.OPEN_IN_JELLYFIN")}
+                  target="_blank"
+                >
+                  <ExternalLinkFillIcon />
+                </Link>
+              </div>
+
+              <div className="my-3">
+                {data.Type === "Episode" ? (
+                  <p>
+                    <Link to={`/libraries/item/${data.SeasonId}`} className="fw-bold">
+                      {data.SeasonName}
+                    </Link>{" "}
+                    <Trans i18nKey="EPISODE" /> {data.IndexNumber} - {data.Name}
+                  </p>
+                ) : (
+                  <></>
+                )}
+                {data.Type === "Season" ? <p>{data.Name}</p> : <></>}
+                {data.FileName ? (
+                  <p style={{ color: "lightgrey" }} className="fst-italic fs-6">
+                    <Trans i18nKey="FILE_NAME" />: {data.FileName}
+                  </p>
+                ) : (
+                  <></>
+                )}
+                {data.Path ? (
+                  <p style={{ color: "lightgrey" }} className="fst-italic fs-6">
+                    <Trans i18nKey="ITEM_INFO.FILE_PATH" />: {data.Path}
+                  </p>
+                ) : (
+                  <></>
+                )}
+                {data.RunTimeTicks ? (
+                  <p style={{ color: "lightgrey" }} className="fst-italic fs-6">
+                    {data.Type === "Series" ? i18next.t("ITEM_INFO.AVERAGE_RUNTIME") : i18next.t("ITEM_INFO.RUNTIME")}:{" "}
+                    {ticksToTimeString(data.RunTimeTicks)}
+                  </p>
+                ) : (
+                  <></>
+                )}
+                {data.Size ? (
+                  <p style={{ color: "lightgrey" }} className="fst-italic fs-6">
+                    <Trans i18nKey="ITEM_INFO.FILE_SIZE" />: {formatFileSize(data.Size)}
+                  </p>
+                ) : (
+                  <></>
+                )}
+              </div>
+              <ButtonGroup>
+                <Button
+                  onClick={() => setActiveTab("tabOverview")}
+                  active={activeTab === "tabOverview"}
+                  variant="outline-primary"
+                  type="button"
+                >
+                  <Trans i18nKey="ITEM_INFO.OVERVIEW" />
+                </Button>
+                <Button
+                  onClick={() => setActiveTab("tabActivity")}
+                  active={activeTab === "tabActivity"}
+                  variant="outline-primary"
+                  type="button"
+                >
+                  <Trans i18nKey="ITEM_INFO.ACTIVITY" />
+                </Button>
+
+                {data.archived && (
+                  <Button
+                    onClick={() => setActiveTab("tabOptions")}
+                    active={activeTab === "tabOptions"}
+                    variant="outline-primary"
+                    type="button"
+                  >
+                    <Trans i18nKey="ITEM_INFO.OPTIONS" />
+                  </Button>
+                )}
+              </ButtonGroup>
             </div>
-          </div>
-          }
-        </Col>
-
-        <Col >
-        <div className="item-details">
-          <div className="d-flex">
-          <h1 className="">
-            {data.SeriesId?
-               <Link to={`/libraries/item/${data.SeriesId}`}>{data.SeriesName || data.Name}</Link>
-            :
-              data.SeriesName || data.Name
-            }
-
-          </h1>
-          <Link className="px-2" to={ config.hostUrl+"/web/index.html#!/details?id="+ (data.EpisodeId ||data.Id)}  title={i18next.t("ITEM_INFO.OPEN_IN_JELLYFIN")} target="_blank"><ExternalLinkFillIcon/></Link>
-        </div>
-
-        <div className="my-3">
-            {data.Type==="Episode"? <p><Link to={`/libraries/item/${data.SeasonId}`} className="fw-bold">{data.SeasonName}</Link> <Trans i18nKey="EPISODE"/> {data.IndexNumber} - {data.Name}</p> : <></> }
-            {data.Type==="Season"? <p>{data.Name}</p> : <></> }
-            {data.FileName ?  <p style={{color:"lightgrey"}} className="fst-italic fs-6"><Trans i18nKey="ITEM_INFO.FILE_NAME"/>: {data.FileName}</p> :<></>}
-            {data.Path ? <p style={{color:"lightgrey"}} className="fst-italic fs-6"><Trans i18nKey="ITEM_INFO.FILE_PATH"/>: {data.Path}</p> :<></>}
-            {data.RunTimeTicks ?  <p style={{color:"lightgrey"}} className="fst-italic fs-6">{data.Type==="Series"? i18next.t("ITEM_INFO.AVERAGE_RUNTIME") : i18next.t("ITEM_INFO.RUNTIME")}: {ticksToTimeString(data.RunTimeTicks)}</p> :<></>}
-            {data.Size ? <p style={{color:"lightgrey"}} className="fst-italic fs-6"><Trans i18nKey="ITEM_INFO.FILE_SIZE"/>: {formatFileSize(data.Size)}</p> :<></>}
-
-        </div>
-        <ButtonGroup>
-              <Button onClick={() => setActiveTab('tabOverview')} active={activeTab==='tabOverview'} variant='outline-primary' type='button'><Trans i18nKey="ITEM_INFO.OVERVIEW"/></Button>
-              <Button onClick={() => setActiveTab('tabActivity')} active={activeTab==='tabActivity'} variant='outline-primary' type='button'><Trans i18nKey="ITEM_INFO.ACTIVITY"/></Button>
-
-              {data.archived && (<Button onClick={() => setActiveTab('tabOptions')} active={activeTab==='tabOptions'} variant='outline-primary' type='button'><Trans i18nKey="ITEM_INFO.OPTIONS"/></Button>)}
-        </ButtonGroup>
-
-
+          </Col>
+        </Row>
       </div>
 
-        </Col>
-      </Row>
-
-
-    </div>
-
-
-        <Tabs defaultActiveKey="tabOverview" activeKey={activeTab} variant='pills' className="hide-tab-titles">
-          <Tab eventKey="tabOverview" title='' className='bg-transparent'>
-            <GlobalStats ItemId={Id}/>
-             {["Series","Season"].includes(data && data.Type)?
-             <MoreItems data={data}/>
-             :
-             <></>
-            }
-          </Tab>
-          <Tab eventKey="tabActivity" title='' className='bg-transparent'>
-            <ItemActivity itemid={Id}/>
-          </Tab>
-          <Tab eventKey="tabOptions" title='' className='bg-transparent'>
-            <ItemOptions itemid={Id}/>
-          </Tab>
-        </Tabs>
+      <Tabs defaultActiveKey="tabOverview" activeKey={activeTab} variant="pills" className="hide-tab-titles">
+        <Tab eventKey="tabOverview" title="" className="bg-transparent">
+          <GlobalStats ItemId={Id} />
+          {["Series", "Season"].includes(data && data.Type) ? <MoreItems data={data} /> : <></>}
+        </Tab>
+        <Tab eventKey="tabActivity" title="" className="bg-transparent">
+          <ItemActivity itemid={Id} />
+        </Tab>
+        <Tab eventKey="tabOptions" title="" className="bg-transparent">
+          <ItemOptions itemid={Id} />
+        </Tab>
+      </Tabs>
     </div>
   );
 }

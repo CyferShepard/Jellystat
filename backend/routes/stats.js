@@ -30,7 +30,17 @@ router.post("/getMostViewedByType", async (req, res) => {
     if(!valid_types.includes(type))
     {
       res.status(503);
-      return res.send('Invalid Type Value');
+      return res.send(`Invalid Type Value.\nValid Types: ${JSON.stringify(valid_types)}`);
+    }
+    if(isNaN(parseFloat(days)))
+    {
+      res.status(503);
+      return res.send(`Days needs to be a number.`);
+    }
+    if(Number(days)<0)
+    {
+      res.status(503);
+      return res.send(`Days cannot be less than 0`);
     }
   
 

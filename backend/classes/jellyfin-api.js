@@ -1,4 +1,3 @@
-const db = require("../db");
 const configClass = require("./config");
 const {axios} = require("./axios");
 

@@ -224,7 +224,7 @@ export default function SettingsConfig() {
             <></>
           )}
           <div className="d-flex flex-column flex-md-row justify-content-end align-items-md-center">
-          <Button variant="outline-success" type="submit"><Trans i18nKey={"SETTINGS_PAGE.JELLYFIN_URL"}/></Button>
+          <Button variant="outline-success" type="submit"><Trans i18nKey={"SETTINGS_PAGE.UPDATE"}/></Button>
           </div>
 
         </Form>
