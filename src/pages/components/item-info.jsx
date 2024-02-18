@@ -241,7 +241,7 @@ function ItemInfo() {
                   variant="outline-primary"
                   type="button"
                 >
-                  <Trans i18nKey="ITEM_INFO.OVERVIEW" />
+                  <Trans i18nKey="TAB_CONTROLS.OVERVIEW" />
                 </Button>
                 <Button
                   onClick={() => setActiveTab("tabActivity")}
@@ -249,7 +249,7 @@ function ItemInfo() {
                   variant="outline-primary"
                   type="button"
                 >
-                  <Trans i18nKey="ITEM_INFO.ACTIVITY" />
+                  <Trans i18nKey="TAB_CONTROLS.ACTIVITY" />
                 </Button>
 
                 {data.archived && (
@@ -259,7 +259,7 @@ function ItemInfo() {
                     variant="outline-primary"
                     type="button"
                   >
-                    <Trans i18nKey="ITEM_INFO.OPTIONS" />
+                    <Trans i18nKey="TAB_CONTROLS.OPTIONS" />
                   </Button>
                 )}
               </ButtonGroup>
