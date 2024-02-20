@@ -15,8 +15,8 @@ import { taskList } from "../../../lib/tasklist";
 
 
 import "../../css/settings/settings.css";
-import i18n from "../../../localization";
 import { Trans } from "react-i18next";
+import i18next from "i18next";
 
 export default function Tasks() {
   const [processing, setProcessing] = useState(false);
@@ -95,12 +95,12 @@ export default function Tasks() {
 
 
       const intervals=[
-        {value:15, display:i18n.t("SETTINGS_PAGE.INTERVALS.15_MIN")},
-        {value:30, display:i18n.t("SETTINGS_PAGE.INTERVALS.30_MIN")},
-        {value:60, display:i18n.t("SETTINGS_PAGE.INTERVALS.1_HOUR")},
-        {value:720, display:i18n.t("SETTINGS_PAGE.INTERVALS.12_HOURS")},
-        {value:1440, display:i18n.t("SETTINGS_PAGE.INTERVALS.1_DAY")},
-        {value:10080, display:i18n.t("SETTINGS_PAGE.INTERVALS.1_WEEK")}
+        {value:15, display:i18next.t("SETTINGS_PAGE.INTERVALS.15_MIN")},
+        {value:30, display:i18next.t("SETTINGS_PAGE.INTERVALS.30_MIN")},
+        {value:60, display:i18next.t("SETTINGS_PAGE.INTERVALS.1_HOUR")},
+        {value:720, display:i18next.t("SETTINGS_PAGE.INTERVALS.12_HOURS")},
+        {value:1440, display:i18next.t("SETTINGS_PAGE.INTERVALS.1_DAY")},
+        {value:10080, display:i18next.t("SETTINGS_PAGE.INTERVALS.1_WEEK")}
       ];
       return (
         <div className="tasks">

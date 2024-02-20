@@ -13,7 +13,7 @@ import Alert from "react-bootstrap/Alert";
 
 import "../../css/settings/backups.css";
 import { Trans } from "react-i18next";
-import i18n from "../../../localization";
+import i18next from "i18next";
 
 const token = localStorage.getItem("token");
 
@@ -131,7 +131,7 @@ function Row(file) {
         <TableCell>{formatFileSize(data.size)}</TableCell>
         <TableCell className="">
           <div className="d-flex justify-content-center">
-            <DropdownButton title={i18n.t("ACTIONS")} variant="outline-primary" disabled={disabled}>
+            <DropdownButton title={i18next.t("ACTIONS")} variant="outline-primary" disabled={disabled}>
               <Dropdown.Item as="button" variant="primary" onClick={() => downloadBackup(data.name)}>
               <Trans i18nKey={"DOWNLOAD"}/>
               </Dropdown.Item>
