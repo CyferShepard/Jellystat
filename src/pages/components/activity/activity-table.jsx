@@ -25,8 +25,6 @@ import '../../css/activity/activity-table.css';
 import { Trans } from 'react-i18next';
 import i18next from 'i18next';
 
-// localStorage.setItem('hour12',true);
-
 
 function formatTotalWatchTime(seconds) {
   const hours = Math.floor(seconds / 3600);
@@ -50,7 +48,7 @@ function formatTotalWatchTime(seconds) {
   return timeString.trim();
 }
 
-function Row(data) {
+function DataRow(data) {
   const { row } = data;
   const [open, setOpen] = React.useState(false);
   const twelve_hr = JSON.parse(localStorage.getItem('12hr'));
@@ -101,9 +99,9 @@ function Row(data) {
           <IconButton
             aria-label="expand row"
             size="small"
-            onClick={() => {if(row.results.length>1){setOpen(!open);}}}
+            onClick={() => {if(row.TotalPlays>1){setOpen(!open);}}}
             >
-              {!open ? <AddCircleFillIcon opacity={row.results.length>1 ?1 : 0} cursor={row.results.length>1 ? "pointer":"default"}/> : <IndeterminateCircleFillIcon />}
+              {!open ? <AddCircleFillIcon opacity={row.TotalPlays>1 ?1 : 0} cursor={row.TotalPlays>1 ? "pointer":"default"}/> : <IndeterminateCircleFillIcon />}
           </IconButton>
         </TableCell>
         <TableCell><Link to={`/users/${row.UserId}`} className='text-decoration-none'>{row.UserName}</Link></TableCell>
@@ -112,7 +110,7 @@ function Row(data) {
         <TableCell className='activity-client' ><span onClick={()=>openModal(row)}>{row.Client}</span></TableCell>
         <TableCell>{Intl.DateTimeFormat('en-UK', options).format(new Date(row.ActivityDateInserted))}</TableCell>
         <TableCell>{formatTotalWatchTime(row.PlaybackDuration) || '0 seconds'}</TableCell>
-        <TableCell>{row.results.length !==0 ? row.results.length : 1}</TableCell>
+        <TableCell>{row.TotalPlays}</TableCell>
       </TableRow>
       <TableRow>
         <TableCell style={{ paddingBottom: 0, paddingTop: 0 }} colSpan={8}>
@@ -326,7 +324,7 @@ export default function ActivityTable(props) {
             />
           <TableBody>
             {visibleRows.map((row) => (
-                <Row key={row.Id+row.NowPlayingItemId+row.EpisodeId} row={row} />
+                <DataRow key={row.Id+row.NowPlayingItemId+row.EpisodeId} row={row} />
               ))}
               {props.data.length===0 ? <tr><td colSpan="8" style={{ textAlign: "center", fontStyle: "italic" ,color:"grey"}} className='py-2'><Trans i18nKey="ERROR_MESSAGES.NO_ACTIVITY"/></td></tr> :''}
             

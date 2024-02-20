@@ -221,5 +221,21 @@
   "DOWNLOAD": "Download",
   "RESTORE": "Restore",
   "ACTIONS": "Actions",
-  "DELETE": "Delete"
+  "DELETE": "Delete",
+  "BITRATE": "Bitrate",
+  "CONTAINER": "Container",
+  "VIDEO": "Video",
+  "CODEC": "Codec",
+  "WIDTH": "Width",
+  "HEIGHT": "Height",
+  "FRAMERATE": "Framerate",
+  "DYNAMIC_RANGE": "Dynamic Range",
+  "ASPECT_RATIO": "Aspect Ratio",
+  "AUDIO": "Audio",
+  "CHANNELS": "Channels",
+  "LANGUAGE": "Language",
+  "STREAM_DETAILS": "Stream Details",
+  "SOURCE_DETAILS": "Source Details",
+  "DIRECT": "Direct",
+  "TRANSCODE": "Transcode"
 }
