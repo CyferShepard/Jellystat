@@ -130,7 +130,7 @@ class JellyfinAPI {
     }
   }
 
-  async getItemsFromParentId({ id, itemid, params, ws, syncTask, item }) {
+  async getItemsFromParentId({ id, itemid, params, ws, syncTask, wsMessage }) {
     if (!this.configReady) {
       return [];
     }
@@ -166,8 +166,8 @@ class JellyfinAPI {
         if (response.data.TotalRecordCount === undefined) {
           break;
         }
-        if (ws && syncTask && item) {
-          ws(syncTask.wsKey, { type: "Update", message: `${item.Name} (${((startIndex / total) * 100).toFixed(2)}%)` });
+        if (ws && syncTask && wsMessage) {
+          ws(syncTask.wsKey, { type: "Update", message: `${wsMessage} - ${((startIndex / total) * 100).toFixed(2)}%` });
         }
 
         await this.#delay(50);

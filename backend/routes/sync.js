@@ -557,12 +557,18 @@ async function fullSync(triggertype) {
     //for each item in library run get item using that id as the ParentId (This gets the children of the parent id)
     for (let i = 0; i < filtered_libraries.length; i++) {
       const item = filtered_libraries[i];
+      const wsMessage = "Fetching Data for Library : " + item.Name + ` (${i + 1}/${filtered_libraries.length})`;
       sendUpdate(syncTask.wsKey, {
         type: "Update",
-        message: "Fetching Data for Library : " + item.Name + ` (${i + 1}/${filtered_libraries.length})`,
+        message: wsMessage,
       });
 
-      let libraryItems = await Jellyfin.getItemsFromParentId({ id: item.Id, ws: sendUpdate, syncTask: syncTask, item: item });
+      let libraryItems = await Jellyfin.getItemsFromParentId({
+        id: item.Id,
+        ws: sendUpdate,
+        syncTask: syncTask,
+        wsMessage: wsMessage,
+      });
       if (libraryItems.length === 0) {
         syncTask.loggedData.push({ Message: "Error: No Items found for Library : " + item.Name });
       }
