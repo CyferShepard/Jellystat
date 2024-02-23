@@ -1,4 +1,4 @@
-version: '3'
+version: "3"
 services:
   jellystat-db:
     image: postgres
@@ -14,7 +14,7 @@ services:
       POSTGRES_PASSWORD: mypassword
       POSTGRES_IP: jellystat-db
       POSTGRES_PORT: 5432
-      JWT_SECRET: 'my-secret-jwt-key'
+      JWT_SECRET: "my-secret-jwt-key"
       TZ: Africa/Johannesburg
     volumes:
       - jellystat-backup-data:/app/backend/backup-data
@@ -22,13 +22,14 @@ services:
       - "3000:3000"
     depends_on:
       - jellystat-db
+    restart: unless-stopped
 networks:
   default:
 logging:
-      driver: "json-file"
-      options:
-        max-file: "5"   # number of files or file count
-        max-size: "10m" # file size
+  driver: "json-file"
+  options:
+    max-file: "5" # number of files or file count
+    max-size: "10m" # file size
 
 volumes:
   postgres-data:
