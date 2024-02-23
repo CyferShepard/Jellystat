@@ -347,7 +347,7 @@ async function syncItemInfo(seasons_and_episodes, library_items) {
 
     if ((existingItemInfo.length == 0 && syncTask.taskName === taskName.partialsync) || syncTask.taskName === taskName.fullsync) {
       //dont update item info if it already exists and running a partial sync
-      const data = await Jellyfin.getItemInfo(Item.Id);
+      const data = await Jellyfin.getItemInfo({ itemID: Item.Id });
       const mapped_data = await data.map((item) => jf_item_info_mapping(item, "Item"));
       data_to_insert.push(...mapped_data);
 
@@ -377,7 +377,7 @@ async function syncItemInfo(seasons_and_episodes, library_items) {
       syncTask.taskName === taskName.fullsync
     ) {
       //dont update item info if it already exists and running a partial sync
-      const episodedata = await Jellyfin.getItemInfo(Episode.EpisodeId);
+      const episodedata = await Jellyfin.getItemInfo({ itemID: Episode.EpisodeId });
       const mapped_data = await episodedata.map((item) => jf_item_info_mapping(item, "Episode"));
       data_to_insert.push(...mapped_data);
 
@@ -562,7 +562,7 @@ async function fullSync(triggertype) {
         message: "Fetching Data for Library : " + item.Name + ` (${i + 1}/${filtered_libraries.length})`,
       });
 
-      let libraryItems = await Jellyfin.getItemsFromParentId(item.Id);
+      let libraryItems = await Jellyfin.getItemsFromParentId({ id: item.Id, ws: sendUpdate, syncTask: syncTask, item: item });
       if (libraryItems.length === 0) {
         syncTask.loggedData.push({ Message: "Error: No Items found for Library : " + item.Name });
       }
@@ -659,7 +659,7 @@ async function partialSync(triggertype) {
         type: "Update",
         message: "Fetching Data for Library : " + library.Name + ` (${i + 1}/${filtered_libraries.length})`,
       });
-      let recentlyAddedForLibrary = await Jellyfin.getRecentlyAdded(library.Id, 10);
+      let recentlyAddedForLibrary = await Jellyfin.getRecentlyAdded({ libraryid: library.Id, limit: 10 });
 
       sendUpdate(syncTask.wsKey, { type: "Update", message: "Mapping Data for Library : " + library.Name });
       const libraryItemsWithParent = recentlyAddedForLibrary.map((items) => ({
@@ -673,7 +673,7 @@ async function partialSync(triggertype) {
     const library_items = data.filter((item) => ["Movie", "Audio", "Series"].includes(item.Type));
 
     for (const item of library_items.filter((item) => item.Type === "Series")) {
-      let dataForShow = await Jellyfin.getItemsFromParentId(item.Id);
+      let dataForShow = await Jellyfin.getItemsFromParentId({ id: item.Id });
       const seasons_and_episodes_for_show = dataForShow.filter((item) => ["Season", "Episode"].includes(item.Type));
       data.push(...seasons_and_episodes_for_show);
     }
@@ -804,7 +804,7 @@ router.post("/fetchItem", async (req, res) => {
     for (let i = 0; i < libraries.length; i++) {
       const library = libraries[i];
 
-      let libraryItems = await Jellyfin.getItemsFromParentId(library.Id, itemId);
+      let libraryItems = await Jellyfin.getItemsFromParentId({ id: library.Id, itemid: itemId });
 
       if (libraryItems.length > 0) {
         const libraryItemsWithParent = libraryItems.map((items) => ({
@@ -815,7 +815,7 @@ router.post("/fetchItem", async (req, res) => {
       }
     }
 
-    const item_info = await Jellyfin.getItemInfo(itemId);
+    const item_info = await Jellyfin.getItemInfo({ itemID: itemId });
 
     let itemToInsert = await item.map(jf_library_items_mapping);
     let itemInfoToInsert = await item_info.map(jf_item_info_mapping);
