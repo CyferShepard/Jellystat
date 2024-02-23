@@ -144,7 +144,7 @@ class JellyfinAPI {
           }
 
           let startIndex=params && params.startIndex ? params.startIndex :0;
-          let increment=params && params.increment ? params.startIndex :200;
+          let increment=params && params.increment ? params.increment :200;
           let recursive=params && params.recursive!==undefined  ? params.recursive :true;
           let total=200;
     
