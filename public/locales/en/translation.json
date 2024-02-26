@@ -102,7 +102,11 @@
     "NO_STATS": "No Stats to display",
     "NO_BACKUPS": "No Backups Found",
     "NO_LOGS": "No Logs Found",
-    "NO_API_KEYS": "No Keys Found"
+    "NO_API_KEYS": "No Keys Found",
+    "NETWORK_ERROR": "Unable to connect to Jellyfin Server",
+    "INVALID_LOGIN": "Invalid Username or Password",
+    "INVALID_URL": "Error {STATUS}: The requested URL was not found.",
+    "UNAUTHORIZED": "Error {STATUS}: Unauthorized"
   },
   "SHOW_ARCHIVED_LIBRARIES": "Show Archived Libraries",
   "HIDE_ARCHIVED_LIBRARIES": "Hide Archived Libraries",
@@ -237,5 +241,14 @@
   "STREAM_DETAILS": "Stream Details",
   "SOURCE_DETAILS": "Source Details",
   "DIRECT": "Direct",
-  "TRANSCODE": "Transcode"
+  "TRANSCODE": "Transcode",
+  "USERNAME": "Username",
+  "PASSWORD": "Password",
+  "LOGIN": "Login",
+  "FT_SETUP_PROGRESS": "First Time Setup Step {STEP} of {TOTAL}",
+  "VALIDATING": "Validating",
+  "SAVE_JELLYFIN_DETAILS": "Save Jellyfin Details",
+  "SETTINGS_SAVED": "Settings Saved",
+  "SUCCESS": "Success",
+  "CREATE_USER": "Create User"
 }

@@ -304,27 +304,15 @@ async function syncShowItems(data) {
   });
   syncTask.loggedData.push({ color: "yellow", Message: "Sync Complete" });
 }
-
 async function syncItemInfo(seasons_and_episodes, library_items) {
   syncTask.loggedData.push({ color: "lawngreen", Message: "Syncing... 5/6" });
   sendUpdate(syncTask.wsKey, { type: "Update", message: "Beginning Item Info Sync (5/6)" });
   syncTask.loggedData.push({ color: "yellow", Message: "Beginning File Info Sync" });
 
-  let Items = library_items
-    .filter((item) => item.Type !== "Series" && item.Type !== "Folder" && item.Id !== undefined)
-    .map(jf_library_items_mapping);
-  let Episodes = seasons_and_episodes
-    .filter((item) => item.Type === "Episode" && item.LocationType !== "Virtual" && item.Id !== undefined)
-    .map(jf_library_episodes_mapping);
-
-  if (syncTask.taskName === taskName.fullsync) {
-    const { rows: _Items } = await db.query(`SELECT *	FROM public.jf_library_items where "Type" not in ('Series','Folder')`);
-    const { rows: _Episodes } = await db.query(
-      `SELECT *	FROM public.jf_library_episodes e join jf_library_items i on i."Id"=e."SeriesId" where i.archived=false`
-    );
-    Items = _Items;
-    Episodes = _Episodes;
-  }
+  let Items = library_items.filter((item) => item.Type !== "Series" && item.Type !== "Folder" && item.Id !== undefined);
+  let Episodes = seasons_and_episodes.filter(
+    (item) => item.Type === "Episode" && item.LocationType !== "Virtual" && item.Id !== undefined
+  );
 
   let insertItemInfoCount = 0;
   let insertEpisodeInfoCount = 0;
@@ -347,8 +335,7 @@ async function syncItemInfo(seasons_and_episodes, library_items) {
 
     if ((existingItemInfo.length == 0 && syncTask.taskName === taskName.partialsync) || syncTask.taskName === taskName.fullsync) {
       //dont update item info if it already exists and running a partial sync
-      const data = await Jellyfin.getItemInfo({ itemID: Item.Id });
-      const mapped_data = await data.map((item) => jf_item_info_mapping(item, "Item"));
+      const mapped_data = await Item.MediaSources.map((item) => jf_item_info_mapping(item, "Item"));
       data_to_insert.push(...mapped_data);
 
       if (mapped_data.length !== 0) {
@@ -369,7 +356,7 @@ async function syncItemInfo(seasons_and_episodes, library_items) {
     });
 
     const existingEpisodeItemInfo = await db
-      .query(`SELECT *	FROM public.jf_item_info where "Id" = '${Episode.EpisodeId}'`)
+      .query(`SELECT *	FROM public.jf_item_info where "Id" = '${Episode.Id}'`)
       .then((res) => res.rows.map((row) => row.Id));
 
     if (
@@ -377,8 +364,7 @@ async function syncItemInfo(seasons_and_episodes, library_items) {
       syncTask.taskName === taskName.fullsync
     ) {
       //dont update item info if it already exists and running a partial sync
-      const episodedata = await Jellyfin.getItemInfo({ itemID: Episode.EpisodeId });
-      const mapped_data = await episodedata.map((item) => jf_item_info_mapping(item, "Episode"));
+      const mapped_data = await Episode.MediaSources.map((item) => jf_item_info_mapping(item, "Episode"));
       data_to_insert.push(...mapped_data);
 
       //filter fix if jf_libraries is empty

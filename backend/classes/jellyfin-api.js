@@ -41,7 +41,7 @@ class JellyfinAPI {
           console.log(`[JELLYFIN-API]: Unexpected status code: ${error.response.status}`);
       }
     } else {
-      console.log("Error", { ErrorAt: this.#getErrorLineNumber(error), Message: error.message });
+      console.log("[JELLYFIN-API]", { ErrorAt: this.#getErrorLineNumber(error), Message: error.message });
     }
   }
 
@@ -120,7 +120,7 @@ class JellyfinAPI {
           break;
         }
 
-        await this.#delay(50);
+        await this.#delay(10);
       }
 
       return final_response;
@@ -152,6 +152,7 @@ class JellyfinAPI {
             "X-MediaBrowser-Token": this.config.JF_API_KEY,
           },
           params: {
+            fields: "MediaSources",
             startIndex: startIndex,
             recursive: recursive,
             limit: increment,
@@ -170,7 +171,7 @@ class JellyfinAPI {
           ws(syncTask.wsKey, { type: "Update", message: `${wsMessage} - ${((startIndex / total) * 100).toFixed(2)}%` });
         }
 
-        await this.#delay(50);
+        await this.#delay(10);
       }
 
       return AllItems;
@@ -295,6 +296,9 @@ class JellyfinAPI {
       const response = await axios.get(url, {
         headers: {
           "X-MediaBrowser-Token": this.config.JF_API_KEY,
+        },
+        params: {
+          fields: "MediaSources",
         },
       });
 
