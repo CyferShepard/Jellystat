@@ -46,10 +46,11 @@ function ItemActivity(props) {
   let filteredData = data;
 
   if (searchQuery) {
-    filteredData = data.filter((item) =>
-      (!item.SeriesName ? item.NowPlayingItemName : item.SeriesName + " - " + item.NowPlayingItemName)
-        .toLowerCase()
-        .includes(searchQuery.toLowerCase())
+    filteredData = data.filter(
+      (item) =>
+        (!item.SeriesName ? item.NowPlayingItemName : item.SeriesName + " - " + item.NowPlayingItemName)
+          .toLowerCase()
+          .includes(searchQuery.toLowerCase()) || item.UserName.toLowerCase().includes(searchQuery.toLowerCase())
     );
   }
 

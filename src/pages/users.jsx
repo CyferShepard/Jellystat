@@ -393,15 +393,16 @@ function Users() {
   };
 
   let filteredData = visibleRows;
-
+  console.log(filteredData);
   if (searchQuery) {
-    filteredData = data.filter((item) =>
-      (!item.SeriesName ? item.NowPlayingItemName : item.SeriesName + " - " + item.NowPlayingItemName)
-        .toLowerCase()
-        .includes(searchQuery.toLowerCase())
+    filteredData = data.filter(
+      (item) =>
+        (item.LastWatched !== undefined &&
+          item.LastWatched !== null &&
+          item.LastWatched.toLowerCase().includes(searchQuery.toLowerCase())) ||
+        item.UserName.toLowerCase().includes(searchQuery.toLowerCase())
     );
   }
-
   return (
     <div className="Users">
       <div className="d-md-flex justify-content-between">
