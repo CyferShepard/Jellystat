@@ -1,47 +1,35 @@
-@import '../variables.module.css';
+@import "../variables.module.css";
 
-.activity-table
-{
-    background-color: var(--secondary-background-color);
-    color: white !important;
-    
+.activity-table {
+  background-color: var(--secondary-background-color);
+  color: white !important;
 }
 
-td,th, td>button
-{
+td,
+th,
+td > button {
   color: white !important;
   background-color: var(--tertiary-background-color);
-
 }
 
-th
-{
+th {
   color: white !important;
   background-color: rgba(200, 200, 200, 0.2);
-
 }
 
-.activity-client:hover
-{
+.activity-client:hover {
   color: var(--secondary-color) !important;
-
 }
-.activity-client:hover > span
-{
-
+.activity-client:hover > span {
   cursor: pointer;
   color: var(--secondary-color) !important;
 }
 
-
-
-td > a
-{
+td > a {
   color: white;
 }
 
-td:hover > a 
-{
+td:hover > a {
   color: var(--secondary-color);
 }
 
@@ -55,79 +43,63 @@ select option {
   outline: unset;
   width: 100%;
   border: none;
-  
-  }
-  
-.pagination-range .items
-{
-background-color: rgb(255, 255, 255, 0.1);
-padding-inline: 10px;
 }
 
-  .pagination-range .header
-{
-padding-inline: 10px;
-align-self: center;
+.pagination-range .items {
+  background-color: rgb(255, 255, 255, 0.1);
+  padding-inline: 10px;
 }
 
-.pagination-range
-{
-width: 130px;
-height: 35px;
-color: white;
-display: flex;
-background-color:  var(--secondary-background-color);
-border-radius: 8px;
-font-size: 1.2em;
-align-self: flex-end;
-justify-content: space-between;
+.pagination-range .header {
+  padding-inline: 10px;
+  align-self: center;
 }
 
-.pagination-range select
-{
-
-height: 35px;
-outline: none;
-border: none;
-border-radius: 8px;
-background-color: rgb(255, 255, 255, 0.1);
-color:white;
-font-size: 1em;
-
-
+.pagination-range {
+  width: 130px;
+  height: 35px;
+  color: white;
+  display: flex;
+  background-color: var(--secondary-background-color);
+  border-radius: 8px;
+  font-size: 1.2em;
+  align-self: flex-end;
+  justify-content: space-between;
 }
 
-.page-btn
-{
-  background-color:  var(--primary-color) !important;
-  border-color:  var(--primary-color)!important;
+.pagination-range select {
+  height: 35px;
+  outline: none;
+  border: none;
+  border-radius: 8px;
+  background-color: rgb(255, 255, 255, 0.1);
+  color: white;
+  font-size: 1em;
 }
 
-.MuiTableCell-head >  .Mui-active, .MuiTableSortLabel-icon
-{
+.page-btn {
+  background-color: var(--primary-color) !important;
+  border-color: var(--primary-color) !important;
+}
+
+.MuiTableCell-head > .Mui-active,
+.MuiTableSortLabel-icon {
   color: var(--secondary-color) !important;
 }
 
-.MuiTableCell-head :hover
-{
+.MuiTableCell-head :hover {
   color: var(--secondary-color) !important;
 }
 
-.modal-header
-{
-  color:  white;
+.modal-header {
+  color: white;
   border-bottom: none !important;
 }
 
-
-.modal-footer
-{
+.modal-footer {
   border-top: none !important;
 }
 
-
-.modal-content
-{
-  background-color:  var(--secondary-background-color) !important;
+.modal-content {
+  background-color: var(--secondary-background-color) !important;
 }
-

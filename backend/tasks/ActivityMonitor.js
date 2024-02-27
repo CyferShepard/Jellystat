@@ -25,8 +25,8 @@ async function ActivityMonitor(interval) {
       {
         return;
       }
-
-      const SessionData= await Jellyfin.getSessions().then((sessions) => sessions.filter(row => row.NowPlayingItem !== undefined));
+      const ExcludedUsers = config.settings?.ExcludedUsers || [];
+      const SessionData= await Jellyfin.getSessions().then((sessions) => sessions.filter(row => row.NowPlayingItem !== undefined && !ExcludedUsers.includes(row.UserId)));
 
       /////get data from jf_activity_monitor
       const WatchdogData=await db.query('SELECT * FROM jf_activity_watchdog').then((res) => res.rows);

@@ -177,6 +177,55 @@ router.post("/setExcludedLibraries", async (req, res) => {
   }
 });
 
+router.get("/UntrackedUsers", async (req, res) => {
+  const config = await new configClass().getConfig();
+
+  if (config.error) {
+    res.send({ error: config.error });
+    return;
+  }
+
+  try {
+    const ExcludedUsers = config.settings?.ExcludedUsers || [];
+
+    res.send(ExcludedUsers);
+  } catch (error) {
+    res.status(503);
+    res.send({ error: "Error: " + error });
+  }
+});
+
+router.post("/setUntrackedUsers", async (req, res) => {
+  const { userId } = req.body;
+  if (Array.isArray(userId) || userId === undefined) {
+    res.status(400);
+    return res.send("No Valid User ID provided");
+  }
+
+  const settingsjson = await db.query('SELECT settings FROM app_config where "ID"=1').then((res) => res.rows);
+
+  if (settingsjson.length > 0) {
+    const settings = settingsjson[0].settings || {};
+
+    let excludedUsers = settings.ExcludedUsers || [];
+    if (excludedUsers.includes(userId)) {
+      excludedUsers = excludedUsers.filter((item) => item !== userId);
+    } else {
+      excludedUsers.push(userId);
+    }
+    settings.ExcludedUsers = excludedUsers;
+
+    let query = 'UPDATE app_config SET settings=$1 where "ID"=1';
+
+    await db.query(query, [settings]);
+
+    res.send("Settings updated succesfully");
+  } else {
+    res.status(404);
+    res.send("Settings not found");
+  }
+});
+
 router.get("/keys", async (req, res) => {
   const config = await new configClass().getConfig();
 
@@ -446,14 +495,21 @@ router.get("/getHistory", async (req, res) => {
 
     const groupedResults = {};
     rows.forEach((row) => {
-      if (groupedResults[row.NowPlayingItemId + row.EpisodeId]) {
-        groupedResults[row.NowPlayingItemId + row.EpisodeId].results.push(row);
+      const key = row.NowPlayingItemId + row.EpisodeId;
+      if (groupedResults[key]) {
+        if (row.ActivityDateInserted > groupedResults[key].ActivityDateInserted) {
+          groupedResults[key] = {
+            ...row,
+            results: groupedResults[key].results,
+          };
+        }
+        groupedResults[key].results.push(row);
       } else {
-        groupedResults[row.NowPlayingItemId + row.EpisodeId] = {
+        groupedResults[key] = {
           ...row,
           results: [],
         };
-        groupedResults[row.NowPlayingItemId + row.EpisodeId].results.push(row);
+        groupedResults[key].results.push(row);
       }
     });
 
@@ -537,14 +593,29 @@ router.post("/getUserHistory", async (req, res) => {
 
     const groupedResults = {};
     rows.forEach((row) => {
-      if (groupedResults[row.NowPlayingItemId + row.EpisodeId]) {
-        groupedResults[row.NowPlayingItemId + row.EpisodeId].results.push(row);
+      const key = row.NowPlayingItemId + row.EpisodeId;
+      if (groupedResults[key]) {
+        if (row.ActivityDateInserted > groupedResults[key].ActivityDateInserted) {
+          groupedResults[key] = {
+            ...row,
+            results: groupedResults[key].results,
+          };
+        }
+        groupedResults[key].results.push(row);
       } else {
-        groupedResults[row.NowPlayingItemId + row.EpisodeId] = {
+        groupedResults[key] = {
           ...row,
           results: [],
         };
-        groupedResults[row.NowPlayingItemId + row.EpisodeId].results.push(row);
+        groupedResults[key].results.push(row);
+      }
+    });
+
+    // Update GroupedResults with playbackDurationSum
+    Object.values(groupedResults).forEach((row) => {
+      if (row.results && row.results.length > 0) {
+        row.PlaybackDuration = row.results.reduce((acc, item) => acc + parseInt(item.PlaybackDuration), 0);
+        row.TotalPlays = row.results.length;
       }
     });
 
