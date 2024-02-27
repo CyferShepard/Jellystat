@@ -5,7 +5,7 @@ import { Link } from "react-router-dom";
 import AccountCircleFillIcon from "remixicon-react/AccountCircleFillIcon";
 import CheckFillIcon from "remixicon-react/CheckFillIcon";
 import CloseFillIcon from "remixicon-react/CloseFillIcon";
-import { ButtonGroup, Button } from "react-bootstrap";
+import { ButtonGroup, Button, FormControl, FormSelect } from "react-bootstrap";
 
 import Table from "@mui/material/Table";
 import TableBody from "@mui/material/TableBody";
@@ -219,6 +219,7 @@ function Users() {
   const [rowsPerPage, setRowsPerPage] = React.useState(10);
   const [page, setPage] = React.useState(0);
   const [itemCount, setItemCount] = useState(10);
+  const [searchQuery, setSearchQuery] = useState("");
 
   const [order, setOrder] = React.useState("asc");
   const [orderBy, setOrderBy] = React.useState("LastSeen");
@@ -391,29 +392,50 @@ function Users() {
     setOrderBy(property);
   };
 
+  let filteredData = visibleRows;
+
+  if (searchQuery) {
+    filteredData = data.filter((item) =>
+      (!item.SeriesName ? item.NowPlayingItemName : item.SeriesName + " - " + item.NowPlayingItemName)
+        .toLowerCase()
+        .includes(searchQuery.toLowerCase())
+    );
+  }
+
   return (
     <div className="Users">
-      <div className="Heading py-2">
-        <h1>
+      <div className="d-md-flex justify-content-between">
+        <h1 className="my-3">
           <Trans i18nKey="USERS_PAGE.ALL_USERS" />
         </h1>
-        <div className="pagination-range">
-          <div className="header">
-            <Trans i18nKey="UNITS.ITEMS" />
+
+        <div className="d-flex flex-column flex-md-row">
+          <div className="d-flex flex-row w-100">
+            <div className="d-flex flex-col my-md-3 rounded-0 rounded-start  align-items-center px-2 bg-primary-1">
+              <Trans i18nKey="UNITS.ITEMS" />
+            </div>
+            <FormSelect
+              onChange={(event) => {
+                setRowsPerPage(event.target.value);
+                setPage(0);
+                setItemCount(event.target.value);
+              }}
+              value={itemCount}
+              className="my-md-3 w-md-75 rounded-0 rounded-end"
+            >
+              <option value="10">10</option>
+              <option value="25">25</option>
+              <option value="50">50</option>
+              <option value="100">100</option>
+            </FormSelect>
           </div>
-          <select
-            value={itemCount}
-            onChange={(event) => {
-              setRowsPerPage(event.target.value);
-              setPage(0);
-              setItemCount(event.target.value);
-            }}
-          >
-            <option value="10">10</option>
-            <option value="25">25</option>
-            <option value="50">50</option>
-            <option value="100">100</option>
-          </select>
+          <FormControl
+            type="text"
+            placeholder="Search"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="ms-md-3 my-3 w-sm-100 w-md-75"
+          />
         </div>
       </div>
 
@@ -421,7 +443,7 @@ function Users() {
         <Table aria-label="collapsible table">
           <EnhancedTableHead order={order} orderBy={orderBy} onRequestSort={handleRequestSort} rowCount={rowsPerPage} />
           <TableBody>
-            {visibleRows.map((row) => (
+            {filteredData.map((row) => (
               <Row key={row.UserId} data={row} updateTrackedState={updateTrackedState} hostUrl={config.hostUrl} />
             ))}
             {data.length === 0 ? (

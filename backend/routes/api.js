@@ -14,6 +14,38 @@ const { sendUpdate } = require("../ws");
 const router = express.Router();
 const Jellyfin = new JellyfinAPI();
 
+//Functions
+function groupActivity(rows) {
+  const groupedResults = {};
+  rows.forEach((row) => {
+    const key = row.NowPlayingItemId + row.EpisodeId;
+    if (groupedResults[key]) {
+      if (row.ActivityDateInserted > groupedResults[key].ActivityDateInserted) {
+        groupedResults[key] = {
+          ...row,
+          results: groupedResults[key].results,
+        };
+      }
+      groupedResults[key].results.push(row);
+    } else {
+      groupedResults[key] = {
+        ...row,
+        results: [],
+      };
+      groupedResults[key].results.push(row);
+    }
+  });
+
+  // Update GroupedResults with playbackDurationSum
+  Object.values(groupedResults).forEach((row) => {
+    if (row.results && row.results.length > 0) {
+      row.PlaybackDuration = row.results.reduce((acc, item) => acc + parseInt(item.PlaybackDuration), 0);
+      row.TotalPlays = row.results.length;
+    }
+  });
+  return groupedResults;
+}
+
 router.get("/getconfig", async (req, res) => {
   try {
     const config = await new configClass().getConfig();
@@ -493,33 +525,7 @@ router.get("/getHistory", async (req, res) => {
   try {
     const { rows } = await db.query(`SELECT * FROM jf_playback_activity order by "ActivityDateInserted" desc`);
 
-    const groupedResults = {};
-    rows.forEach((row) => {
-      const key = row.NowPlayingItemId + row.EpisodeId;
-      if (groupedResults[key]) {
-        if (row.ActivityDateInserted > groupedResults[key].ActivityDateInserted) {
-          groupedResults[key] = {
-            ...row,
-            results: groupedResults[key].results,
-          };
-        }
-        groupedResults[key].results.push(row);
-      } else {
-        groupedResults[key] = {
-          ...row,
-          results: [],
-        };
-        groupedResults[key].results.push(row);
-      }
-    });
-
-    // Update GroupedResults with playbackDurationSum
-    Object.values(groupedResults).forEach((row) => {
-      if (row.results && row.results.length > 0) {
-        row.PlaybackDuration = row.results.reduce((acc, item) => acc + parseInt(item.PlaybackDuration), 0);
-        row.TotalPlays = row.results.length;
-      }
-    });
+    const groupedResults = groupActivity(rows);
 
     res.send(Object.values(groupedResults));
   } catch (error) {
@@ -591,33 +597,7 @@ router.post("/getUserHistory", async (req, res) => {
       [userid]
     );
 
-    const groupedResults = {};
-    rows.forEach((row) => {
-      const key = row.NowPlayingItemId + row.EpisodeId;
-      if (groupedResults[key]) {
-        if (row.ActivityDateInserted > groupedResults[key].ActivityDateInserted) {
-          groupedResults[key] = {
-            ...row,
-            results: groupedResults[key].results,
-          };
-        }
-        groupedResults[key].results.push(row);
-      } else {
-        groupedResults[key] = {
-          ...row,
-          results: [],
-        };
-        groupedResults[key].results.push(row);
-      }
-    });
-
-    // Update GroupedResults with playbackDurationSum
-    Object.values(groupedResults).forEach((row) => {
-      if (row.results && row.results.length > 0) {
-        row.PlaybackDuration = row.results.reduce((acc, item) => acc + parseInt(item.PlaybackDuration), 0);
-        row.TotalPlays = row.results.length;
-      }
-    });
+    const groupedResults = groupActivity(rows);
 
     res.send(Object.values(groupedResults));
   } catch (error) {

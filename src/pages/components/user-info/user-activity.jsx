@@ -71,7 +71,7 @@ function UserActivity(props) {
                 setItemCount(event.target.value);
               }}
               value={itemCount}
-              className="my-md-3 w-75 rounded-0 rounded-end"
+              className="my-md-3 w-md-75 rounded-0 rounded-end"
             >
               <option value="10">10</option>
               <option value="25">25</option>
