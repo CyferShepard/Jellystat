@@ -393,7 +393,6 @@ function Users() {
   };
 
   let filteredData = visibleRows;
-  console.log(filteredData);
   if (searchQuery) {
     filteredData = data.filter(
       (item) =>
