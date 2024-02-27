@@ -807,13 +807,34 @@ router.post("/fetchItem", async (req, res) => {
       }
     }
 
-    const item_info = await Jellyfin.getItemInfo({ itemID: itemId });
-
-    let itemToInsert = await item.map(jf_library_items_mapping);
-    let itemInfoToInsert = await item_info.map(jf_item_info_mapping);
+    let insertTable = "jf_library_items";
+    let itemToInsert = await item.map((item) => {
+      if (item.Type === "Episode") {
+        insertTable = "jf_library_episodes";
+        return jf_library_episodes_mapping(item);
+      } else if (item[0].Type === "Season") {
+        insertTable = "jf_library_seasons";
+        return jf_library_seasons_mapping(item);
+      } else {
+        return jf_library_items_mapping(item);
+      }
+    });
+    let itemInfoToInsert = await item
+      .map((item) =>
+        item.MediaSources.map((iteminfo) => jf_item_info_mapping(iteminfo, item.Type == "Episode" ? "Episode" : "Item"))
+      )
+      .flat();
 
     if (itemToInsert.length !== 0) {
-      let result = await db.insertBulk("jf_library_items", itemToInsert, jf_library_items_columns);
+      let result = await db.insertBulk(
+        insertTable,
+        itemToInsert,
+        insertTable == "jf_library_items"
+          ? jf_library_items_columns
+          : insertTable == "jf_library_seasons"
+          ? jf_library_seasons_columns
+          : jf_library_episodes_columns
+      );
       if (result.Result === "SUCCESS") {
         let result_info = await db.insertBulk("jf_item_info", itemInfoToInsert, jf_item_info_columns);
         if (result_info.Result === "SUCCESS") {
@@ -831,7 +852,7 @@ router.post("/fetchItem", async (req, res) => {
       res.send("Unable to find Item");
     }
   } catch (error) {
-    // console.log(error);
+    console.log(error);
     res.status(500);
     res.send(error);
   }

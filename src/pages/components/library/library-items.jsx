@@ -100,6 +100,7 @@ function LibraryItems(props) {
               <option value="Title"><Trans i18nKey="TITLE"/></option>
               <option value="Views"><Trans i18nKey="VIEWS"/></option>
               <option value="WatchTime"><Trans i18nKey="WATCH_TIME"/></option>
+              <option value="Size"><Trans i18nKey="SETTINGS_PAGE.SIZE"/></option>
             </FormSelect>
 
             <Button className="my-md-3 rounded-0 rounded-end" onClick={()=>setSortAsc(!sortAsc)}>
@@ -139,6 +140,14 @@ function LibraryItems(props) {
                   return a.times_played-b.times_played;
                 }
                 return b.times_played-a.times_played;
+              }
+              else if(sortOrder==='Size')
+              {
+                if(sortAsc)
+                {
+                  return a.Size-b.Size;
+                }
+                return b.Size-a.Size;
               }
               else
               {

@@ -8,6 +8,7 @@ import { Row, Col, Tabs, Tab, Button, ButtonGroup } from "react-bootstrap";
 
 import ExternalLinkFillIcon from "remixicon-react/ExternalLinkFillIcon";
 import ArchiveDrawerFillIcon from "remixicon-react/ArchiveDrawerFillIcon";
+import ArrowLeftSLineIcon from "remixicon-react/ArrowLeftSLineIcon";
 
 import GlobalStats from "./item-info/globalStats";
 import "../css/items/item-details.css";
@@ -124,147 +125,189 @@ function ItemInfo() {
     <div>
       <div className="item-detail-container rounded-3" style={cardStyle}>
         <Row className="justify-content-center justify-content-md-start rounded-3 g-0 p-4" style={cardBgStyle}>
-          <Col className="col-auto my-4 my-md-0 item-banner-image">
-            {!data.archived && data.PrimaryImageHash && data.PrimaryImageHash != null && !loaded ? (
-              <Blurhash
-                hash={data.PrimaryImageHash}
-                width={"200px"}
-                height={"300px"}
-                className="rounded-3 overflow-hidden"
-                style={{ display: "block" }}
-              />
-            ) : null}
-            {!data.archived ? (
-              <img
-                className="item-image"
-                src={
-                  "/proxy/Items/Images/Primary?id=" +
-                  (["Episode", "Season"].includes(data.Type) ? data.SeriesId : data.Id) +
-                  "&fillWidth=200&quality=90"
-                }
-                alt=""
-                style={{
-                  display: loaded ? "block" : "none",
-                }}
-                onLoad={() => setLoaded(true)}
-              />
-            ) : (
-              <div
-                className="d-flex flex-column justify-content-center align-items-center position-relative"
-                style={{ height: "300px", width: "200px" }}
-              >
-                {data.PrimaryImageHash && data.PrimaryImageHash != null ? (
-                  <Blurhash
-                    hash={data.PrimaryImageHash}
-                    width={"200px"}
-                    height={"300px"}
-                    className="rounded-3 overflow-hidden position-absolute"
-                    style={{ display: "block" }}
-                  />
-                ) : null}
-                <div className="d-flex flex-column justify-content-center align-items-center position-absolute">
-                  <ArchiveDrawerFillIcon className="w-100 h-100 mb-2" />
-                  <span>
-                    <Trans i18nKey="ARCHIVED" />
-                  </span>
-                </div>
-              </div>
-            )}
-          </Col>
-
-          <Col>
-            <div className="item-details">
-              <div className="d-flex">
-                <h1 className="">
-                  {data.SeriesId ? (
-                    <Link to={`/libraries/item/${data.SeriesId}`}>{data.SeriesName || data.Name}</Link>
-                  ) : (
-                    data.SeriesName || data.Name
-                  )}
-                </h1>
-                <Link
-                  className="px-2"
-                  to={config.hostUrl + "/web/index.html#!/details?id=" + (data.EpisodeId || data.Id)}
-                  title={i18next.t("ITEM_INFO.OPEN_IN_JELLYFIN")}
-                  target="_blank"
-                >
-                  <ExternalLinkFillIcon />
+          {data.ParentId && (
+            <Row className="mb-3">
+              <Col className="col-auto pe-0">
+                <Link to={`/libraries/${data.ParentId}`}>
+                  <Button className="d-inline-block" variant={"outline-primary"}>
+                    {data.LibraryName}
+                  </Button>
                 </Link>
-              </div>
+              </Col>
+              {["Episode", "Season"].includes(data.Type) && (
+                <>
+                  <Col className="col-auto px-0 d-flex justify-content-center align-items-center">
+                    <ArrowLeftSLineIcon />
+                  </Col>
+                  <Col className="col-auto px-0">
+                    <Link to={`/libraries/item/${data.SeriesId}`}>
+                      <Button className="d-inline-block" variant={"outline-primary"}>
+                        {data.SeriesName}
+                      </Button>
+                    </Link>
+                  </Col>
+                </>
+              )}
+              {data.Type === "Episode" && (
+                <>
+                  <Col className="col-auto px-0 d-flex justify-content-center align-items-center">
+                    <ArrowLeftSLineIcon />
+                  </Col>
+                  <Col className="col-auto px-0">
+                    <Link to={`/libraries/item/${data.SeasonId}`}>
+                      <Button className="d-inline-block" variant={"outline-primary"}>
+                        {data.SeasonName}
+                      </Button>
+                    </Link>
+                  </Col>
+                </>
+              )}
+            </Row>
+          )}
 
-              <div className="my-3">
-                {data.Type === "Episode" ? (
-                  <p>
-                    <Link to={`/libraries/item/${data.SeasonId}`} className="fw-bold">
-                      {data.SeasonName}
-                    </Link>{" "}
-                    <Trans i18nKey="EPISODE" /> {data.IndexNumber} - {data.Name}
-                  </p>
-                ) : (
-                  <></>
-                )}
-                {data.Type === "Season" ? <p>{data.Name}</p> : <></>}
-                {data.FileName ? (
-                  <p style={{ color: "lightgrey" }} className="fst-italic fs-6">
-                    <Trans i18nKey="FILE_NAME" />: {data.FileName}
-                  </p>
-                ) : (
-                  <></>
-                )}
-                {data.Path ? (
-                  <p style={{ color: "lightgrey" }} className="fst-italic fs-6">
-                    <Trans i18nKey="ITEM_INFO.FILE_PATH" />: {data.Path}
-                  </p>
-                ) : (
-                  <></>
-                )}
-                {data.RunTimeTicks ? (
-                  <p style={{ color: "lightgrey" }} className="fst-italic fs-6">
-                    {data.Type === "Series" ? i18next.t("ITEM_INFO.AVERAGE_RUNTIME") : i18next.t("ITEM_INFO.RUNTIME")}:{" "}
-                    {ticksToTimeString(data.RunTimeTicks)}
-                  </p>
-                ) : (
-                  <></>
-                )}
-                {data.Size ? (
-                  <p style={{ color: "lightgrey" }} className="fst-italic fs-6">
-                    <Trans i18nKey="ITEM_INFO.FILE_SIZE" />: {formatFileSize(data.Size)}
-                  </p>
-                ) : (
-                  <></>
-                )}
-              </div>
-              <ButtonGroup>
-                <Button
-                  onClick={() => setActiveTab("tabOverview")}
-                  active={activeTab === "tabOverview"}
-                  variant="outline-primary"
-                  type="button"
+          <Row>
+            <Col className="col-auto my-4 my-md-0 item-banner-image">
+              {!data.archived && data.PrimaryImageHash && data.PrimaryImageHash != null && !loaded ? (
+                <Blurhash
+                  hash={data.PrimaryImageHash}
+                  width={"200px"}
+                  height={"300px"}
+                  className="rounded-3 overflow-hidden"
+                  style={{ display: "block" }}
+                />
+              ) : null}
+              {!data.archived ? (
+                <img
+                  className="item-image"
+                  src={
+                    "/proxy/Items/Images/Primary?id=" +
+                    (["Episode", "Season"].includes(data.Type) ? data.SeriesId : data.Id) +
+                    "&fillWidth=200&quality=90"
+                  }
+                  alt=""
+                  style={{
+                    display: loaded ? "block" : "none",
+                  }}
+                  onLoad={() => setLoaded(true)}
+                />
+              ) : (
+                <div
+                  className="d-flex flex-column justify-content-center align-items-center position-relative"
+                  style={{ height: "300px", width: "200px" }}
                 >
-                  <Trans i18nKey="TAB_CONTROLS.OVERVIEW" />
-                </Button>
-                <Button
-                  onClick={() => setActiveTab("tabActivity")}
-                  active={activeTab === "tabActivity"}
-                  variant="outline-primary"
-                  type="button"
-                >
-                  <Trans i18nKey="TAB_CONTROLS.ACTIVITY" />
-                </Button>
+                  {data.PrimaryImageHash && data.PrimaryImageHash != null ? (
+                    <Blurhash
+                      hash={data.PrimaryImageHash}
+                      width={"200px"}
+                      height={"300px"}
+                      className="rounded-3 overflow-hidden position-absolute"
+                      style={{ display: "block" }}
+                    />
+                  ) : null}
+                  <div className="d-flex flex-column justify-content-center align-items-center position-absolute">
+                    <ArchiveDrawerFillIcon className="w-100 h-100 mb-2" />
+                    <span>
+                      <Trans i18nKey="ARCHIVED" />
+                    </span>
+                  </div>
+                </div>
+              )}
+            </Col>
 
-                {data.archived && (
+            <Col>
+              <div className="item-details">
+                <div className="d-flex">
+                  <h1 className="">
+                    {data.SeriesId ? (
+                      <Link to={`/libraries/item/${data.SeriesId}`}>{data.SeriesName || data.Name}</Link>
+                    ) : (
+                      data.SeriesName || data.Name
+                    )}
+                  </h1>
+                  <Link
+                    className="px-2"
+                    to={config.hostUrl + "/web/index.html#!/details?id=" + (data.EpisodeId || data.Id)}
+                    title={i18next.t("ITEM_INFO.OPEN_IN_JELLYFIN")}
+                    target="_blank"
+                  >
+                    <ExternalLinkFillIcon />
+                  </Link>
+                </div>
+
+                <div className="my-3">
+                  {data.Type === "Episode" ? (
+                    <p>
+                      <Link to={`/libraries/item/${data.SeasonId}`} className="fw-bold">
+                        {data.SeasonName}
+                      </Link>{" "}
+                      <Trans i18nKey="EPISODE" /> {data.IndexNumber} - {data.Name}
+                    </p>
+                  ) : (
+                    <></>
+                  )}
+                  {data.Type === "Season" ? <p>{data.Name}</p> : <></>}
+                  {data.FileName ? (
+                    <p style={{ color: "lightgrey" }} className="fst-italic fs-6">
+                      <Trans i18nKey="FILE_NAME" />: {data.FileName}
+                    </p>
+                  ) : (
+                    <></>
+                  )}
+                  {data.Path ? (
+                    <p style={{ color: "lightgrey" }} className="fst-italic fs-6">
+                      <Trans i18nKey="ITEM_INFO.FILE_PATH" />: {data.Path}
+                    </p>
+                  ) : (
+                    <></>
+                  )}
+                  {data.RunTimeTicks ? (
+                    <p style={{ color: "lightgrey" }} className="fst-italic fs-6">
+                      {data.Type === "Series" ? i18next.t("ITEM_INFO.AVERAGE_RUNTIME") : i18next.t("ITEM_INFO.RUNTIME")}:{" "}
+                      {ticksToTimeString(data.RunTimeTicks)}
+                    </p>
+                  ) : (
+                    <></>
+                  )}
+                  {data.Size ? (
+                    <p style={{ color: "lightgrey" }} className="fst-italic fs-6">
+                      <Trans i18nKey="ITEM_INFO.FILE_SIZE" />: {formatFileSize(data.Size)}
+                    </p>
+                  ) : (
+                    <></>
+                  )}
+                </div>
+                <ButtonGroup>
                   <Button
-                    onClick={() => setActiveTab("tabOptions")}
-                    active={activeTab === "tabOptions"}
+                    onClick={() => setActiveTab("tabOverview")}
+                    active={activeTab === "tabOverview"}
                     variant="outline-primary"
                     type="button"
                   >
-                    <Trans i18nKey="TAB_CONTROLS.OPTIONS" />
+                    <Trans i18nKey="TAB_CONTROLS.OVERVIEW" />
                   </Button>
-                )}
-              </ButtonGroup>
-            </div>
-          </Col>
+                  <Button
+                    onClick={() => setActiveTab("tabActivity")}
+                    active={activeTab === "tabActivity"}
+                    variant="outline-primary"
+                    type="button"
+                  >
+                    <Trans i18nKey="TAB_CONTROLS.ACTIVITY" />
+                  </Button>
+
+                  {data.archived && (
+                    <Button
+                      onClick={() => setActiveTab("tabOptions")}
+                      active={activeTab === "tabOptions"}
+                      variant="outline-primary"
+                      type="button"
+                    >
+                      <Trans i18nKey="TAB_CONTROLS.OPTIONS" />
+                    </Button>
+                  )}
+                </ButtonGroup>
+              </div>
+            </Col>
+          </Row>
         </Row>
       </div>
 
