@@ -108,6 +108,7 @@ function EnhancedTableHead(props) {
 
 function Row(row) {
   const { data } = row;
+  const { updateTrackedState } = row;
 
   function formatTotalWatchTime(seconds) {
     const hours = Math.floor(seconds / 3600); // 1 hour = 3600 seconds
@@ -143,6 +144,31 @@ function Row(row) {
     return `${formattedTime + i18next.t("AGO").toLowerCase()}`;
   }
 
+  async function toggleTrackedState(userid) {
+    const url = `/api/setUntrackedUsers`;
+
+    await axios
+      .post(
+        url,
+        {
+          userId: userid,
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+        }
+      )
+      .then((response) => {
+        const excluded = response.data;
+        updateTrackedState(excluded);
+      })
+      .catch((error) => {
+        console.log(error);
+      });
+  }
+
   return (
     <React.Fragment>
       <TableRow sx={{ "& > *": { borderBottom: "unset" } }}>
@@ -158,7 +184,17 @@ function Row(row) {
             {data.UserName}
           </Link>
         </TableCell>
-        <TableCell>{data.Tracked ? <CheckFillIcon color={"#00A4DC"} /> : <CloseFillIcon color={"red"} />}</TableCell>
+        <TableCell>
+          {data.Tracked ? (
+            <Button className="p-0" variant="outline-dark" onClick={() => toggleTrackedState(data.UserId)}>
+              <CheckFillIcon color={"#00A4DC"} />
+            </Button>
+          ) : (
+            <Button className="p-0" variant="outline-dark" onClick={() => toggleTrackedState(data.UserId)}>
+              <CloseFillIcon color={"rgb(165, 29, 42)"} />
+            </Button>
+          )}
+        </TableCell>
         <TableCell style={{ textTransform: data.LastWatched ? "none" : "lowercase" }}>
           <Link to={`/libraries/item/${data.NowPlayingItemId}`} className="text-decoration-none">
             {data.LastWatched || i18next.t("ERROR_MESSAGES.NEVER")}
@@ -336,6 +372,17 @@ function Users() {
     return stabilizedThis.map((el) => el[0]);
   }
 
+  function updateTrackedState(excluded) {
+    let updatedData = data.map((item) => {
+      return {
+        ...item,
+        Tracked: !excluded.includes(item.UserId),
+      };
+    });
+
+    setData(updatedData);
+  }
+
   const visibleRows = stableSort(data, getComparator(order, orderBy)).slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage);
 
   const handleRequestSort = (event, property) => {
@@ -375,7 +422,7 @@ function Users() {
           <EnhancedTableHead order={order} orderBy={orderBy} onRequestSort={handleRequestSort} rowCount={rowsPerPage} />
           <TableBody>
             {visibleRows.map((row) => (
-              <Row key={row.UserId} data={row} hostUrl={config.hostUrl} />
+              <Row key={row.UserId} data={row} updateTrackedState={updateTrackedState} hostUrl={config.hostUrl} />
             ))}
             {data.length === 0 ? (
               <tr>

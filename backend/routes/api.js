@@ -219,7 +219,7 @@ router.post("/setUntrackedUsers", async (req, res) => {
 
     await db.query(query, [settings]);
 
-    res.send("Settings updated succesfully");
+    res.send(excludedUsers);
   } else {
     res.status(404);
     res.send("Settings not found");
