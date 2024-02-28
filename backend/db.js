@@ -157,9 +157,9 @@ async function query(text, params) {
       );
     } else {
 
-      if(error.message && !error.message.contains('database "' + _POSTGRES_DATABASE + '" does not exist'))
+      if(error.message && !error.message.includes('database "' + _POSTGRES_DATABASE + '" does not exist'))
       {
-        console.error('Error occurred while executing query:', error.message);
+        console.error('[JELLYSTAT]: Error occurred while executing query:', error.message);
       }
      
      
