@@ -812,7 +812,7 @@ router.post("/fetchItem", async (req, res) => {
       if (item.Type === "Episode") {
         insertTable = "jf_library_episodes";
         return jf_library_episodes_mapping(item);
-      } else if (item[0].Type === "Season") {
+      } else if (item.Type === "Season") {
         insertTable = "jf_library_seasons";
         return jf_library_seasons_mapping(item);
       } else {
