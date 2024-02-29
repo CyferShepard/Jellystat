@@ -1,48 +1,48 @@
-import React from 'react';
+import React from "react";
 import { Link } from "react-router-dom";
-import { Button, ButtonGroup,Modal } from "react-bootstrap";
+import { Button, ButtonGroup, Modal } from "react-bootstrap";
 
+import Table from "@mui/material/Table";
+import TableBody from "@mui/material/TableBody";
+import TableCell from "@mui/material/TableCell";
+import TableContainer from "@mui/material/TableContainer";
+import TableHead from "@mui/material/TableHead";
+import TableRow from "@mui/material/TableRow";
+import Collapse from "@mui/material/Collapse";
+import TableSortLabel from "@mui/material/TableSortLabel";
+import IconButton from "@mui/material/IconButton";
+import Box from "@mui/material/Box";
+import { visuallyHidden } from "@mui/utils";
 
-import Table from '@mui/material/Table';
-import TableBody from '@mui/material/TableBody';
-import TableCell from '@mui/material/TableCell';
-import TableContainer from '@mui/material/TableContainer';
-import TableHead from '@mui/material/TableHead';
-import TableRow from '@mui/material/TableRow';
-import Collapse from '@mui/material/Collapse';
-import TableSortLabel from '@mui/material/TableSortLabel';
-import IconButton from '@mui/material/IconButton';
-import Box from '@mui/material/Box';
-import { visuallyHidden } from '@mui/utils';
+import AddCircleFillIcon from "remixicon-react/AddCircleFillIcon";
+import IndeterminateCircleFillIcon from "remixicon-react/IndeterminateCircleFillIcon";
 
+import StreamInfo from "./stream_info";
 
-import AddCircleFillIcon from 'remixicon-react/AddCircleFillIcon';
-import IndeterminateCircleFillIcon from 'remixicon-react/IndeterminateCircleFillIcon';
-
-import StreamInfo from './stream_info';
-
-import '../../css/activity/activity-table.css';
-import { Trans } from 'react-i18next';
-import i18next from 'i18next';
-
+import "../../css/activity/activity-table.css";
+import { Trans } from "react-i18next";
+import i18next from "i18next";
+import IpInfoModal from "../ip-info";
 
 function formatTotalWatchTime(seconds) {
   const hours = Math.floor(seconds / 3600);
   const minutes = Math.floor((seconds % 3600) / 60);
   const remainingSeconds = seconds % 60;
 
-  let timeString = '';
+  let timeString = "";
 
   if (hours > 0) {
-    timeString += `${hours} ${hours === 1 ? 'hr' : 'hrs'} `;
+    timeString += `${hours} ${hours === 1 ? "hr" : "hrs"} `;
   }
 
   if (minutes > 0) {
-    timeString += `${minutes} ${minutes === 1 ? 'min' : 'mins'} `;
+    timeString += `${minutes} ${minutes === 1 ? "min" : "mins"} `;
   }
 
   if (remainingSeconds > 0) {
-    timeString += `${remainingSeconds} ${remainingSeconds === 1 ? i18next.t("UNITS.SECOND").toLowerCase() : i18next.t("UNITS.SECONDS").toLowerCase()}`;
+    timeString += `${remainingSeconds} ${
+      remainingSeconds === 1 ? i18next.t("UNITS.SECOND").toLowerCase() : i18next.t("UNITS.SECONDS").toLowerCase()
+    }`;
   }
 
   return timeString.trim();
@@ -51,22 +51,42 @@ function formatTotalWatchTime(seconds) {
 function DataRow(data) {
   const { row } = data;
   const [open, setOpen] = React.useState(false);
-  const twelve_hr = JSON.parse(localStorage.getItem('12hr'));
+  const twelve_hr = JSON.parse(localStorage.getItem("12hr"));
 
-  
-  const [modalState,setModalState]= React.useState(false);
-  const [modalData,setModalData]= React.useState();
+  const [modalState, setModalState] = React.useState(false);
+  const [modalData, setModalData] = React.useState();
 
-  
+  //IP MODAL
+
+  const ipv4Regex = new RegExp(
+    /\b(?!(10\.|172\.(1[6-9]|2[0-9]|3[0-1])\.|192\.168))(?:(?:2(?:[0-4][0-9]|5[0-5])|[0-1]?[0-9]?[0-9])\.){3}(?:(?:2([0-4][0-9]|5[0-5])|[0-1]?[0-9]?[0-9]))\b/
+  );
+
+  const [ipModalVisible, setIPModalVisible] = React.useState(false);
+  const [ipAddressLookup, setIPAddressLookup] = React.useState();
+
+  const isRemoteSession = (ipAddress) => {
+    ipv4Regex.lastIndex = 0;
+    if (ipv4Regex.test(ipAddress ?? ipAddressLookup)) {
+      return true;
+    }
+    return false;
+  };
+
   const openModal = (data) => {
     setModalData(data);
     setModalState(!modalState);
   };
-  
 
+  function showIPDataModal(ipAddress) {
+    ipv4Regex.lastIndex = 0;
+    setIPAddressLookup(ipAddress);
+    if (!isRemoteSession) {
+      return;
+    }
 
-
-
+    setIPModalVisible(true);
+  }
 
   const options = {
     day: "numeric",
@@ -78,69 +98,142 @@ function DataRow(data) {
     hour12: twelve_hr,
   };
 
-
   return (
     <React.Fragment>
+      <IpInfoModal show={ipModalVisible} onHide={() => setIPModalVisible(false)} ipAddress={ipAddressLookup} />
 
-      <Modal show={modalState} onHide={()=>setModalState(false)} >
+      <Modal show={modalState} onHide={() => setModalState(false)}>
         <Modal.Header>
-          <Modal.Title><Trans i18nKey="ACTIVITY_TABLE.MODAL.HEADER"/>: {!row.SeriesName ? row.NowPlayingItemName : row.SeriesName+' - '+ row.NowPlayingItemName} ({row.UserName})</Modal.Title>
+          <Modal.Title>
+            <Trans i18nKey="ACTIVITY_TABLE.MODAL.HEADER" />:{" "}
+            {!row.SeriesName ? row.NowPlayingItemName : row.SeriesName + " - " + row.NowPlayingItemName} ({row.UserName})
+          </Modal.Title>
         </Modal.Header>
-        <StreamInfo data={modalData}/>
+        <StreamInfo data={modalData} />
         <Modal.Footer>
-          <Button variant="outline-primary" onClick={()=>setModalState(false)}>
-          <Trans i18nKey="CLOSE"/>
+          <Button variant="outline-primary" onClick={() => setModalState(false)}>
+            <Trans i18nKey="CLOSE" />
           </Button>
         </Modal.Footer>
       </Modal>
 
-      <TableRow sx={{ '& > *': { borderBottom: 'unset' } }}>
+      <TableRow sx={{ "& > *": { borderBottom: "unset" } }}>
         <TableCell>
           <IconButton
             aria-label="expand row"
             size="small"
-            onClick={() => {if(row.TotalPlays>1){setOpen(!open);}}}
-            >
-              {!open ? <AddCircleFillIcon opacity={row.TotalPlays>1 ?1 : 0} cursor={row.TotalPlays>1 ? "pointer":"default"}/> : <IndeterminateCircleFillIcon />}
+            onClick={() => {
+              if (row.TotalPlays > 1) {
+                setOpen(!open);
+              }
+            }}
+          >
+            {!open ? (
+              <AddCircleFillIcon opacity={row.TotalPlays > 1 ? 1 : 0} cursor={row.TotalPlays > 1 ? "pointer" : "default"} />
+            ) : (
+              <IndeterminateCircleFillIcon />
+            )}
           </IconButton>
         </TableCell>
-        <TableCell><Link to={`/users/${row.UserId}`} className='text-decoration-none'>{row.UserName}</Link></TableCell>
-        <TableCell>{row.RemoteEndPoint || '-'}</TableCell>
-        <TableCell><Link to={`/libraries/item/${row.EpisodeId || row.NowPlayingItemId}`} className='text-decoration-none'>{!row.SeriesName ? row.NowPlayingItemName : row.SeriesName+' - '+ row.NowPlayingItemName}</Link></TableCell>
-        <TableCell className='activity-client' ><span onClick={()=>openModal(row)}>{row.Client}</span></TableCell>
-        <TableCell>{Intl.DateTimeFormat('en-UK', options).format(new Date(row.ActivityDateInserted))}</TableCell>
-        <TableCell>{formatTotalWatchTime(row.PlaybackDuration) || '0 seconds'}</TableCell>
+        <TableCell>
+          <Link to={`/users/${row.UserId}`} className="text-decoration-none">
+            {row.UserName}
+          </Link>
+        </TableCell>
+        {isRemoteSession(row.RemoteEndPoint) &&
+        import.meta.env.VITE_GEOLITE_ACCOUNT_ID &&
+        import.meta.env.VITE_GEOLITE_LICENSE_KEY ? (
+          <TableCell>
+            <Link className="text-decoration-none" onClick={() => showIPDataModal(row.RemoteEndPoint)}>
+              {row.RemoteEndPoint}
+            </Link>
+          </TableCell>
+        ) : (
+          <TableCell>{row.RemoteEndPoint || "-"}</TableCell>
+        )}
+        <TableCell>
+          <Link to={`/libraries/item/${row.EpisodeId || row.NowPlayingItemId}`} className="text-decoration-none">
+            {!row.SeriesName ? row.NowPlayingItemName : row.SeriesName + " - " + row.NowPlayingItemName}
+          </Link>
+        </TableCell>
+        <TableCell className="activity-client">
+          <span onClick={() => openModal(row)}>{row.Client}</span>
+        </TableCell>
+        <TableCell>{Intl.DateTimeFormat("en-UK", options).format(new Date(row.ActivityDateInserted))}</TableCell>
+        <TableCell>{formatTotalWatchTime(row.PlaybackDuration) || "0 seconds"}</TableCell>
         <TableCell>{row.TotalPlays}</TableCell>
       </TableRow>
       <TableRow>
         <TableCell style={{ paddingBottom: 0, paddingTop: 0 }} colSpan={8}>
           <Collapse in={open} timeout="auto" unmountOnExit>
             <Box sx={{ margin: 1 }}>
-
-              <Table aria-label="sub-activity" className='rounded-2'>
+              <Table aria-label="sub-activity" className="rounded-2">
                 <TableHead>
                   <TableRow>
-                    <TableCell><Trans i18nKey="USER"/></TableCell>
-                    <TableCell><Trans i18nKey="ACTIVITY_TABLE.IP_ADDRESS"/></TableCell>
-                    <TableCell><Trans i18nKey="TITLE"/></TableCell>
-                    <TableCell><Trans i18nKey="ACTIVITY_TABLE.CLIENT"/></TableCell>
-                    <TableCell><Trans i18nKey="DATE"/></TableCell>
-                    <TableCell><Trans i18nKey="ACTIVITY_TABLE.PLAYBACK_DURATION"/></TableCell>
-                    <TableCell><Trans i18nKey="UNITS.PLAYS"/></TableCell>
+                    <TableCell>
+                      <Trans i18nKey="USER" />
+                    </TableCell>
+                    <TableCell>
+                      <Trans i18nKey="ACTIVITY_TABLE.IP_ADDRESS" />
+                    </TableCell>
+                    <TableCell>
+                      <Trans i18nKey="TITLE" />
+                    </TableCell>
+                    <TableCell>
+                      <Trans i18nKey="ACTIVITY_TABLE.CLIENT" />
+                    </TableCell>
+                    <TableCell>
+                      <Trans i18nKey="DATE" />
+                    </TableCell>
+                    <TableCell>
+                      <Trans i18nKey="ACTIVITY_TABLE.PLAYBACK_DURATION" />
+                    </TableCell>
+                    <TableCell>
+                      <Trans i18nKey="UNITS.PLAYS" />
+                    </TableCell>
                   </TableRow>
                 </TableHead>
                 <TableBody>
-                  {row.results.sort((a, b) => new Date(b.ActivityDateInserted) - new Date(a.ActivityDateInserted)).map((resultRow) => (
-                    <TableRow key={resultRow.Id}>
-                        <TableCell><Link to={`/users/${resultRow.UserId}`} className='text-decoration-none'>{resultRow.UserName}</Link></TableCell>
-                        <TableCell>{resultRow.RemoteEndPoint || '-'}</TableCell>
-                        <TableCell><Link to={`/libraries/item/${resultRow.EpisodeId || resultRow.NowPlayingItemId}`} className='text-decoration-none'>{!resultRow.SeriesName ? resultRow.NowPlayingItemName : resultRow.SeriesName+' - '+ resultRow.NowPlayingItemName}</Link></TableCell>
-                        <TableCell className='activity-client' ><span onClick={()=>openModal(resultRow)}>{resultRow.Client}</span></TableCell>
-                        <TableCell>{Intl.DateTimeFormat('en-UK', options).format(new Date(resultRow.ActivityDateInserted))}</TableCell>
-                        <TableCell>{formatTotalWatchTime(resultRow.PlaybackDuration) || '0 seconds'}</TableCell>
+                  {row.results
+                    .sort((a, b) => new Date(b.ActivityDateInserted) - new Date(a.ActivityDateInserted))
+                    .map((resultRow) => (
+                      <TableRow key={resultRow.Id}>
+                        <TableCell>
+                          <Link to={`/users/${resultRow.UserId}`} className="text-decoration-none">
+                            {resultRow.UserName}
+                          </Link>
+                        </TableCell>
+                        {isRemoteSession(resultRow.RemoteEndPoint) &&
+                        import.meta.env.VITE_GEOLITE_ACCOUNT_ID &&
+                        import.meta.env.VITE_GEOLITE_LICENSE_KEY ? (
+                          <TableCell>
+                            <Link className="text-decoration-none" onClick={() => showIPDataModal(resultRow.RemoteEndPoint)}>
+                              {resultRow.RemoteEndPoint}
+                            </Link>
+                          </TableCell>
+                        ) : (
+                          <TableCell>{resultRow.RemoteEndPoint || "-"}</TableCell>
+                        )}
+                        <TableCell>
+                          <Link
+                            to={`/libraries/item/${resultRow.EpisodeId || resultRow.NowPlayingItemId}`}
+                            className="text-decoration-none"
+                          >
+                            {!resultRow.SeriesName
+                              ? resultRow.NowPlayingItemName
+                              : resultRow.SeriesName + " - " + resultRow.NowPlayingItemName}
+                          </Link>
+                        </TableCell>
+                        <TableCell className="activity-client">
+                          <span onClick={() => openModal(resultRow)}>{resultRow.Client}</span>
+                        </TableCell>
+                        <TableCell>
+                          {Intl.DateTimeFormat("en-UK", options).format(new Date(resultRow.ActivityDateInserted))}
+                        </TableCell>
+                        <TableCell>{formatTotalWatchTime(resultRow.PlaybackDuration) || "0 seconds"}</TableCell>
                         <TableCell>1</TableCell>
-                    </TableRow>
-                  ))}
+                      </TableRow>
+                    ))}
                 </TableBody>
               </Table>
             </Box>
@@ -152,78 +245,76 @@ function DataRow(data) {
 }
 
 function EnhancedTableHead(props) {
-  const {  order, orderBy, onRequestSort } =
-    props;
+  const { order, orderBy, onRequestSort } = props;
   const createSortHandler = (property) => (event) => {
     onRequestSort(event, property);
   };
 
   const headCells = [
     {
-      id: 'UserName',
+      id: "UserName",
       numeric: false,
       disablePadding: false,
       label: i18next.t("USER"),
     },
     {
-      id: 'RemoteEndPoint',
+      id: "RemoteEndPoint",
       numeric: false,
       disablePadding: false,
       label: i18next.t("ACTIVITY_TABLE.IP_ADDRESS"),
     },
     {
-      id: 'NowPlayingItemName',
+      id: "NowPlayingItemName",
       numeric: false,
       disablePadding: false,
       label: i18next.t("TITLE"),
     },
     {
-      id: 'Client',
+      id: "Client",
       numeric: false,
       disablePadding: false,
       label: i18next.t("ACTIVITY_TABLE.CLIENT"),
     },
     {
-      id: 'ActivityDateInserted',
+      id: "ActivityDateInserted",
       numeric: false,
       disablePadding: false,
       label: i18next.t("DATE"),
     },
     {
-      id: 'PlaybackDuration',
+      id: "PlaybackDuration",
       numeric: false,
       disablePadding: false,
       label: i18next.t("ACTIVITY_TABLE.TOTAL_PLAYBACK"),
-    },    
+    },
     {
-      id: 'TotalPlays',
+      id: "TotalPlays",
       numeric: false,
       disablePadding: false,
       label: i18next.t("TOTAL_PLAYS"),
     },
   ];
 
-
   return (
     <TableHead>
       <TableRow>
-        <TableCell/>
+        <TableCell />
         {headCells.map((headCell) => (
           <TableCell
             key={headCell.id}
-            align={headCell.numeric ? 'right' : 'left'}
-            padding={headCell.disablePadding ? 'none' : 'normal'}
+            align={headCell.numeric ? "right" : "left"}
+            padding={headCell.disablePadding ? "none" : "normal"}
             sortDirection={orderBy === headCell.id ? order : false}
           >
             <TableSortLabel
               active={orderBy === headCell.id}
-              direction={orderBy === headCell.id ? order : 'asc'}
+              direction={orderBy === headCell.id ? order : "asc"}
               onClick={createSortHandler(headCell.id)}
             >
               {headCell.label}
               {orderBy === headCell.id ? (
                 <Box component="span" sx={visuallyHidden}>
-                  {order === 'desc' ? 'sorted descending' : 'sorted ascending'}
+                  {order === "desc" ? "sorted descending" : "sorted ascending"}
                 </Box>
               ) : null}
             </TableSortLabel>
@@ -238,122 +329,120 @@ export default function ActivityTable(props) {
   const [page, setPage] = React.useState(0);
   const [rowsPerPage, setRowsPerPage] = React.useState(10);
 
-  const [order, setOrder] = React.useState('desc');
-  const [orderBy, setOrderBy] = React.useState('ActivityDateInserted');
+  const [order, setOrder] = React.useState("desc");
+  const [orderBy, setOrderBy] = React.useState("ActivityDateInserted");
 
-
-  if(rowsPerPage!==props.itemCount)
-  {
+  if (rowsPerPage !== props.itemCount) {
     setRowsPerPage(props.itemCount);
     setPage(0);
   }
 
-
   const handleNextPageClick = () => {
     setPage((prevPage) => Number(prevPage) + 1);
-
   };
 
   const handlePreviousPageClick = () => {
     setPage((prevPage) => Number(prevPage) - 1);
-
   };
 
+  function descendingComparator(a, b, orderBy) {
+    if (b[orderBy] < a[orderBy]) {
+      return -1;
+    }
+    if (b[orderBy] > a[orderBy]) {
+      return 1;
+    }
+    return 0;
+  }
 
-    function descendingComparator(a, b, orderBy) {
-      if (b[orderBy] < a[orderBy]) {
-        return -1;
+  // eslint-disable-next-line
+  function getComparator(order, orderBy) {
+    return order === "desc" ? (a, b) => descendingComparator(a, b, orderBy) : (a, b) => -descendingComparator(a, b, orderBy);
+  }
+
+  function stableSort(array, comparator) {
+    const stabilizedThis = array.map((el, index) => [el, index]);
+
+    stabilizedThis.sort((a, b) => {
+      const order = comparator(a[0], b[0]);
+      if (order !== 0) {
+        return order;
       }
-      if (b[orderBy] > a[orderBy]) {
-        return 1;
-      }
-      return 0;
-    }
-   
-    // eslint-disable-next-line 
-    function getComparator(order, orderBy) {
-      return order === 'desc'
-        ? (a, b) => descendingComparator(a, b, orderBy)
-        : (a, b) => -descendingComparator(a, b, orderBy);
-    }
-    
+      return a[1] - b[1];
+    });
 
-    function stableSort(array, comparator) {
-      const stabilizedThis = array.map((el, index) => [el, index]);
+    return stabilizedThis.map((el) => el[0]);
+  }
 
-      stabilizedThis.sort((a, b) => {
+  const visibleRows = React.useMemo(
+    () =>
+      stableSort(props.data, getComparator(order, orderBy)).slice(
+        page * Number(rowsPerPage),
+        page * Number(rowsPerPage) + Number(rowsPerPage)
+      ),
+    [order, orderBy, page, rowsPerPage, getComparator, props.data]
+  );
 
-        const order = comparator(a[0], b[0]);
-        if (order !== 0) {
-          return order;
-        }
-        return a[1] - b[1];
-        
-      });
-
-      return stabilizedThis.map((el) => el[0]);
-    }
-
-    const visibleRows = React.useMemo(
-      () =>
-        stableSort(props.data, getComparator(order, orderBy)).slice(
-          page * Number(rowsPerPage),
-          page * Number(rowsPerPage) + Number(rowsPerPage),
-        ),
-      [order, orderBy, page, rowsPerPage, getComparator, props.data],
-    );
-
-    const handleRequestSort = (event, property) => {
-      const isAsc = orderBy === property && order === 'asc';
-      setOrder(isAsc ? 'desc' : 'asc');
-      setOrderBy(property);
-    };
-
-  
-  
+  const handleRequestSort = (event, property) => {
+    const isAsc = orderBy === property && order === "asc";
+    setOrder(isAsc ? "desc" : "asc");
+    setOrderBy(property);
+  };
 
   return (
     <>
-      <TableContainer className='rounded-2'>
-        <Table aria-label="collapsible table" >
-        <EnhancedTableHead
-              order={order}
-              orderBy={orderBy}
-              onRequestSort={handleRequestSort}
-              rowCount={rowsPerPage}
-            />
+      <TableContainer className="rounded-2">
+        <Table aria-label="collapsible table">
+          <EnhancedTableHead order={order} orderBy={orderBy} onRequestSort={handleRequestSort} rowCount={rowsPerPage} />
           <TableBody>
             {visibleRows.map((row) => (
-                <DataRow key={row.Id+row.NowPlayingItemId+row.EpisodeId} row={row} />
-              ))}
-              {props.data.length===0 ? <tr><td colSpan="8" style={{ textAlign: "center", fontStyle: "italic" ,color:"grey"}} className='py-2'><Trans i18nKey="ERROR_MESSAGES.NO_ACTIVITY"/></td></tr> :''}
-            
+              <DataRow key={row.Id + row.NowPlayingItemId + row.EpisodeId} row={row} />
+            ))}
+            {props.data.length === 0 ? (
+              <tr>
+                <td colSpan="8" style={{ textAlign: "center", fontStyle: "italic", color: "grey" }} className="py-2">
+                  <Trans i18nKey="ERROR_MESSAGES.NO_ACTIVITY" />
+                </td>
+              </tr>
+            ) : (
+              ""
+            )}
           </TableBody>
         </Table>
       </TableContainer>
 
-            <div className='d-flex justify-content-end my-2'>
-                <ButtonGroup className="pagination-buttons">
-                    <Button className="page-btn" onClick={()=>setPage(0)} disabled={page === 0}>
-                    <Trans i18nKey="TABLE_NAV_BUTTONS.FIRST"/>
-                    </Button>
+      <div className="d-flex justify-content-end my-2">
+        <ButtonGroup className="pagination-buttons">
+          <Button className="page-btn" onClick={() => setPage(0)} disabled={page === 0}>
+            <Trans i18nKey="TABLE_NAV_BUTTONS.FIRST" />
+          </Button>
 
-                    <Button className="page-btn" onClick={handlePreviousPageClick}  disabled={page === 0}>
-                    <Trans i18nKey="TABLE_NAV_BUTTONS.PREVIOUS"/>
-                    </Button>
+          <Button className="page-btn" onClick={handlePreviousPageClick} disabled={page === 0}>
+            <Trans i18nKey="TABLE_NAV_BUTTONS.PREVIOUS" />
+          </Button>
 
-                    <div className="page-number d-flex align-items-center justify-content-center">{`${(page *rowsPerPage) + 1}-${Math.min(((page * rowsPerPage)+ 1 ) +  (rowsPerPage - 1),props.data.length)} of ${props.data.length}`}</div>
+          <div className="page-number d-flex align-items-center justify-content-center">{`${page * rowsPerPage + 1}-${Math.min(
+            page * rowsPerPage + 1 + (rowsPerPage - 1),
+            props.data.length
+          )} of ${props.data.length}`}</div>
 
-                    <Button className="page-btn" onClick={handleNextPageClick}  disabled={page >= Math.ceil(props.data.length / rowsPerPage) - 1}>
-                    <Trans i18nKey="TABLE_NAV_BUTTONS.NEXT"/>
-                    </Button>
+          <Button
+            className="page-btn"
+            onClick={handleNextPageClick}
+            disabled={page >= Math.ceil(props.data.length / rowsPerPage) - 1}
+          >
+            <Trans i18nKey="TABLE_NAV_BUTTONS.NEXT" />
+          </Button>
 
-                    <Button className="page-btn" onClick={()=>setPage(Math.ceil(props.data.length / rowsPerPage) - 1)} disabled={page >= Math.ceil(props.data.length / rowsPerPage) - 1}>
-                    <Trans i18nKey="TABLE_NAV_BUTTONS.LAST"/>
-                    </Button>
-                </ButtonGroup>
-            </div>
-    
+          <Button
+            className="page-btn"
+            onClick={() => setPage(Math.ceil(props.data.length / rowsPerPage) - 1)}
+            disabled={page >= Math.ceil(props.data.length / rowsPerPage) - 1}
+          >
+            <Trans i18nKey="TABLE_NAV_BUTTONS.LAST" />
+          </Button>
+        </ButtonGroup>
+      </div>
     </>
   );
 }

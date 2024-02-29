@@ -250,5 +250,15 @@
   "SAVE_JELLYFIN_DETAILS": "Save Jellyfin Details",
   "SETTINGS_SAVED": "Settings Saved",
   "SUCCESS": "Success",
-  "CREATE_USER": "Create User"
+  "CREATE_USER": "Create User",
+  "GEOLOCATION_INFO_FOR": "Geolocation Info for",
+  "CITY": "City",
+  "REGION": "Region",
+  "COUNTRY": "Country",
+  "ORGANIZATION": "Organization",
+  "ISP": "ISP",
+  "LATITUDE": "Latitude",
+  "LONGITUDE": "Longitude",
+  "TIMEZONE": "Timezone",
+  "POSTCODE": "Postcode"
 }

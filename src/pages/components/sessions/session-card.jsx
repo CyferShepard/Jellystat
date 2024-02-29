@@ -74,56 +74,35 @@ function SessionCard(props) {
 
 
 
-  const token = localStorage.getItem('token');
-
   const ipv4Regex = new RegExp(/\b(?!(10\.|172\.(1[6-9]|2[0-9]|3[0-1])\.|192\.168))(?:(?:2(?:[0-4][0-9]|5[0-5])|[0-1]?[0-9]?[0-9])\.){3}(?:(?:2([0-4][0-9]|5[0-5])|[0-1]?[0-9]?[0-9]))\b/);
 
-  const [modalVisible, setModalVisible] = useState(false);
-  const [modalData, setModalData] = useState();
-  const [isRemoteSession, setIsRemoteSession] = useState();
+  const [ipModalVisible, setIPModalVisible] = React.useState(false);
+  const [ipAddressLookup, setIPAddressLookup] = React.useState();
 
-  useEffect(() => {
+  const isRemoteSession = (ipAddress) => {
     ipv4Regex.lastIndex = 0;
-    if(ipv4Regex.test(props.data.session.RemoteEndPoint)) {
-      setIsRemoteSession(true)
-    }    
-  }, []);
+    if (ipv4Regex.test(ipAddress ?? ipAddressLookup)) {
+      return true;
+    }
+    return false;
+  };
 
-  function showModal() {
-    if(!isRemoteSession) {
-        return
+  
+  function showIPDataModal(ipAddress) {
+    ipv4Regex.lastIndex = 0;
+    setIPAddressLookup(ipAddress);
+    if (!isRemoteSession) {
+      return;
     }
 
-    const fetchData = async () => {
-      const result = await axios.post(`/utils/geolocateIp`, {
-          ipAddress: props.data.session.RemoteEndPoint
-      }, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json",
-          }
-      });
-      setModalData(result.data);
-    };
-
-    if(!modalData) {
-      fetchData();
-    }
-
-    setModalVisible(true);
+    setIPModalVisible(true);
   }
 
-  function hideModal() {
-    setModalVisible(false);
-  }
+
   
   return (
     <Card className="stat-card" style={cardStyle}>
-      <IpInfoModal
-        show={modalVisible}
-        onHide={hideModal}
-        ipAddress={props.data.session.RemoteEndPoint}
-        geodata={modalData}/>
+      <IpInfoModal show={ipModalVisible} onHide={() => setIPModalVisible(false)} ipAddress={ipAddressLookup} />
     <div style={cardBgStyle} className="rounded-top">
       <Row className="h-100">
         <Col className="d-none d-lg-block stat-card-banner">
@@ -162,9 +141,8 @@ function SessionCard(props) {
                     <Row>
                       <Col className="col-auto ellipse">
 
-                        {isRemoteSession && (import.meta.env.VITE_GEOLITE_ACCOUNT_ID && import.meta.env.VITE_GEOLITE_LICENSE_KEY) ? 
+                        {isRemoteSession(props.data.session.RemoteEndPoint) && (import.meta.env.VITE_GEOLITE_ACCOUNT_ID && import.meta.env.VITE_GEOLITE_LICENSE_KEY) ? 
                           <Card.Text>                            
-                            IP Address: <Link onClick={showModal}>{props.data.session.RemoteEndPoint}</Link>
                           </Card.Text>
                           :
                           <span>
