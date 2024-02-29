@@ -540,19 +540,7 @@ router.post("/getLibraryHistory", async (req, res) => {
       `select a.* from jf_playback_activity a join jf_library_items i on i."Id"=a."NowPlayingItemId"  where i."ParentId"=$1 order by "ActivityDateInserted" desc`,
       [libraryid]
     );
-    const groupedResults = {};
-    rows.forEach((row) => {
-      if (groupedResults[row.NowPlayingItemId + row.EpisodeId]) {
-        groupedResults[row.NowPlayingItemId + row.EpisodeId].results.push(row);
-      } else {
-        groupedResults[row.NowPlayingItemId + row.EpisodeId] = {
-          ...row,
-          results: [],
-        };
-        groupedResults[row.NowPlayingItemId + row.EpisodeId].results.push(row);
-      }
-    });
-
+    const groupedResults = groupActivity(rows);
     res.send(Object.values(groupedResults));
   } catch (error) {
     console.log(error);
