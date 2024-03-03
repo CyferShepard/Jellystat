@@ -91,7 +91,7 @@ export default function IpInfoModal(props) {
                 loading="async"
                 referrerPolicy="no-referrer-when-downgrade"
                 src={`https://www.google.com/maps/embed/v1/place?key=AIzaSyAxp7Zvxi5FnTJJHwCnUR-OcZ-E1H2-gf4&q=${geodata.location?.latitude},${geodata.location?.longitude}&zoom=14`}
-                allowfullscreen
+                allowFullScreen
               ></iframe>
             )}
           </TableContainer>
