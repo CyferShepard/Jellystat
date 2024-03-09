@@ -152,8 +152,6 @@ router.post("/updateCredentials", async (req, res) => {
     return;
   }
 
-  console.log(`ENDPOINT CALLED: /updateCredentials: ` + username);
-
   if (username !== undefined && username === "") {
     result.isValid = false;
     result.errorMessage = "Username cannot be empty";
@@ -172,8 +170,6 @@ router.post("/updateCredentials", async (req, res) => {
       res.send(result);
       return;
     }
-
-    console.log(`ENDPOINT CALLED: /updateCredentials: ` + current_password + " " + new_password);
 
     if (config.APP_PASSWORD === current_password) {
       if (config.APP_PASSWORD === new_password) {
