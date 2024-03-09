@@ -17,7 +17,14 @@ function LibraryItems(props) {
   const [config, setConfig] = useState();
   const [searchQuery, setSearchQuery] = useState("");
   const [sortOrder, setSortOrder] = useState("Title");
-  const [sortAsc, setSortAsc] = useState(true);
+  const [sortAsc, setSortAsc] = useState("all");
+
+  const archive = {
+    all: "all",
+    archived: "true",
+    not_archived: "false",
+  };
+  const [showArchived, setShowArchived] = useState(archive.all);
 
   useEffect(() => {
     const fetchConfig = async () => {
@@ -69,9 +76,19 @@ function LibraryItems(props) {
   }
 
   let filteredData = data;
-
-  if (searchQuery) {
-    filteredData = data.filter((item) => item.Name.toLowerCase().includes(searchQuery.toLowerCase()));
+  if (data) {
+    filteredData = data.filter((item) => {
+      let match = false;
+      if (showArchived == archive.all || item.archived == (showArchived == "true")) {
+        match = true;
+      }
+      if (searchQuery) {
+        match =
+          item.Name.toLowerCase().includes(searchQuery.toLowerCase()) &&
+          (showArchived == archive.all || item.archived == (showArchived == "true"));
+      }
+      return match;
+    });
   }
 
   if (!data || !config) {
@@ -87,7 +104,22 @@ function LibraryItems(props) {
 
         <div className="d-flex flex-column flex-md-row">
           <div className="d-flex flex-row w-100">
-            <FormSelect onChange={(e) => sortOrderLogic(e.target.value)} className="my-md-3 w-100 rounded-0 rounded-start">
+            <FormSelect onChange={(e) => setShowArchived(e.target.value)} className="my-md-3 w-100 rounded">
+              <option value="all">
+                <Trans i18nKey="ALL" />
+              </option>
+              <option value="true">
+                <Trans i18nKey="ARCHIVED" />
+              </option>
+              <option value="false">
+                <Trans i18nKey="NOT_ARCHIVED" />
+              </option>
+            </FormSelect>
+
+            <FormSelect
+              onChange={(e) => sortOrderLogic(e.target.value)}
+              className="ms-md-3 my-md-3 w-100 rounded-0 rounded-start"
+            >
               <option value="Title">
                 <Trans i18nKey="TITLE" />
               </option>

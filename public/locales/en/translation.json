@@ -92,7 +92,11 @@
   },
   "PURGE_OPTIONS": {
     "PURGE_CACHE": "Purge Cached Item",
-    "PURGE_CACHE_WITH_ACTIVITY": "Purge Cached Item and Playback Activity"
+    "PURGE_CACHE_WITH_ACTIVITY": "Purge Cached Item and Playback Activity",
+    "PURGE_LIBRARY_CACHE": "Purge Cached Library and Items",
+    "PURGE_LIBRARY_CACHE_WITH_ACTIVITY": "Purge Cached Library, Items and Activity",
+    "PURGE_LIBRARY_ITEMS_CACHE": "Purge Cached Library Items Only",
+    "PURGE_LIBRARY_ITEMS_CACHE_WITH_ACTIVITY": "Purge Cached Library Items and Activity Only"
   },
   "ERROR_MESSAGES": {
     "FETCH_THIS_ITEM": "Fetch this item from Jellyfin",
@@ -211,6 +215,8 @@
   "TYPE": "Type",
   "NEW_VERSION_AVAILABLE": "New version available",
   "ARCHIVED": "Archived",
+  "NOT_ARCHIVED": "Not Archived",
+  "ALL": "All",
   "CLOSE": "Close",
   "TOTAL_PLAYS": "Total Plays",
   "TITLE": "Title",

@@ -147,3 +147,7 @@ h2 {
 .bg-primary-1 {
   background-color: var(--primary-color) !important;
 }
+
+.hide-tab-titles {
+  display: none !important;
+}

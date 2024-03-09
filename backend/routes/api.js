@@ -46,6 +46,40 @@ function groupActivity(rows) {
   return groupedResults;
 }
 
+async function purgeLibraryItems(id, withActivity) {
+  const { rows: items } = await db.query(`select * from jf_library_items where "ParentId"=$1 and archived=true`, [id]);
+  let seasonIds = [];
+  let episodeIds = [];
+
+  for (const item of items) {
+    const { rows: seasons } = await db.query(`select * from jf_library_seasons where "SeriesId"=$1 and archived=true`, [item.Id]);
+    seasonIds.push(...seasons.map((item) => item.Id));
+    const { rows: episodes } = await db.query(`select * from jf_library_episodes where "SeriesId"=$1 and archived=true`, [
+      item.Id,
+    ]);
+    episodeIds.push(...episodes.map((item) => item.Id));
+  }
+
+  if (episodeIds.length > 0) {
+    await db.deleteBulk("jf_library_episodes", episodeIds);
+  }
+
+  if (seasonIds.length > 0) {
+    await db.deleteBulk("jf_library_seasons", seasonIds);
+  }
+
+  await db.query(`delete from jf_library_items where "ParentId"=$1 and archived=true`, [id]);
+
+  if (withActivity) {
+    const deleteQuery = {
+      text: `DELETE FROM jf_playback_activity WHERE${
+        episodeIds.length > 0 ? ` "EpisodeId" IN (${pgp.as.csv(episodeIds)})  OR` : ""
+      }${seasonIds.length > 0 ? ` "SeasonId" IN (${pgp.as.csv(seasonIds)}) OR` : ""} "NowPlayingItemId"='${id}'`,
+    };
+    await db.query(deleteQuery);
+  }
+}
+
 router.get("/getconfig", async (req, res) => {
   try {
     const config = await new configClass().getConfig();
@@ -72,6 +106,12 @@ router.post("/setconfig", async (req, res) => {
   try {
     const { JF_HOST, JF_API_KEY } = req.body;
 
+    if (JF_HOST === undefined && JF_API_KEY === undefined) {
+      res.status(400);
+      res.send("JF_HOST and JF_API_KEY are required for configuration");
+      return;
+    }
+
     const { rows: getConfig } = await db.query('SELECT * FROM app_config where "ID"=1');
 
     let query = 'UPDATE app_config SET "JF_HOST"=$1, "JF_API_KEY"=$2 where "ID"=1';
@@ -88,6 +128,12 @@ router.post("/setconfig", async (req, res) => {
 router.post("/setPreferredAdmin", async (req, res) => {
   try {
     const { userid, username } = req.body;
+
+    if (userid === undefined && username === undefined) {
+      res.status(400);
+      res.send("A valid userid and username is required for preferred admin");
+      return;
+    }
 
     const settingsjson = await db.query('SELECT settings FROM app_config where "ID"=1').then((res) => res.rows);
 
@@ -116,14 +162,13 @@ router.post("/setRequireLogin", async (req, res) => {
   try {
     const { REQUIRE_LOGIN } = req.body;
 
-    if (REQUIRE_LOGIN === undefined) {
-      res.status(503);
-      res.send(rows);
+    if (REQUIRE_LOGIN === undefined || typeof REQUIRE_LOGIN !== "boolean") {
+      res.status(400);
+      res.send("A valid value(true/false) is required for REQUIRE_LOGIN");
+      return;
     }
 
     let query = 'UPDATE app_config SET "REQUIRE_LOGIN"=$1 where "ID"=1';
-
-    console.log(`ENDPOINT CALLED: /setRequireLogin: ` + REQUIRE_LOGIN);
 
     const { rows } = await db.query(query, [REQUIRE_LOGIN]);
     res.send(rows);
@@ -252,6 +297,12 @@ router.get("/TrackedLibraries", async (req, res) => {
 router.post("/setExcludedLibraries", async (req, res) => {
   const { libraryID } = req.body;
 
+  if (libraryID === undefined) {
+    res.status(400);
+    res.send("No Library Id provided");
+    return;
+  }
+
   const settingsjson = await db.query('SELECT settings FROM app_config where "ID"=1').then((res) => res.rows);
 
   if (settingsjson.length > 0) {
@@ -357,6 +408,13 @@ router.delete("/keys", async (req, res) => {
 
 router.post("/keys", async (req, res) => {
   const { name } = req.body;
+
+  if (name === undefined) {
+    res.status(400);
+    res.send("Key Name is required to generate a key");
+    return;
+  }
+
   const config = await new configClass().getConfig();
 
   if (!name) {
@@ -399,6 +457,12 @@ router.get("/getTaskSettings", async (req, res) => {
 
 router.post("/setTaskSettings", async (req, res) => {
   const { taskname, Interval } = req.body;
+
+  if (taskname === undefined || Interval === undefined) {
+    res.status(400);
+    res.send("Task Name and Interval are required");
+    return;
+  }
 
   try {
     const settingsjson = await db.query('SELECT settings FROM app_config where "ID"=1').then((res) => res.rows);
@@ -446,6 +510,13 @@ router.get("/CheckForUpdates", async (req, res) => {
 router.post("/getUserDetails", async (req, res) => {
   try {
     const { userid } = req.body;
+
+    if (userid === undefined) {
+      res.status(400);
+      res.send("No User Id provided");
+      return;
+    }
+
     const { rows } = await db.query(`select * from jf_users where "Id"='${userid}'`);
     res.send(rows[0]);
   } catch (error) {
@@ -467,6 +538,13 @@ router.get("/getLibraries", async (req, res) => {
 router.post("/getLibrary", async (req, res) => {
   try {
     const { libraryid } = req.body;
+
+    if (libraryid === undefined) {
+      res.status(400);
+      res.send("No Library Id provided");
+      return;
+    }
+
     const { rows } = await db.query(`select * from jf_libraries where "Id"='${libraryid}'`);
     res.send(rows[0]);
   } catch (error) {
@@ -479,6 +557,13 @@ router.post("/getLibrary", async (req, res) => {
 router.post("/getLibraryItems", async (req, res) => {
   try {
     const { libraryid } = req.body;
+
+    if (libraryid === undefined) {
+      res.status(400);
+      res.send("No Library Id provided");
+      return;
+    }
+
     const { rows } = await db.query(`SELECT * FROM jf_library_items where "ParentId"=$1`, [libraryid]);
     res.send(rows);
   } catch (error) {
@@ -489,6 +574,12 @@ router.post("/getLibraryItems", async (req, res) => {
 router.post("/getSeasons", async (req, res) => {
   try {
     const { Id } = req.body;
+
+    if (Id === undefined) {
+      res.status(400);
+      res.send("No Season Id provided");
+      return;
+    }
 
     const { rows } = await db.query(
       `SELECT s.*,i.archived, i."PrimaryImageHash", (select count(e.*) "Episodes" from jf_library_episodes e  where e."SeasonId"=s."Id") ,(select sum(ii."Size") "Size" from jf_library_episodes e join jf_item_info ii on ii."Id"=e."EpisodeId" where e."SeasonId"=s."Id") FROM jf_library_seasons s left join jf_library_items i on i."Id"=s."SeriesId" where "SeriesId"=$1`,
@@ -503,6 +594,13 @@ router.post("/getSeasons", async (req, res) => {
 router.post("/getEpisodes", async (req, res) => {
   try {
     const { Id } = req.body;
+
+    if (Id === undefined) {
+      res.status(400);
+      res.send("No Episode Id provided");
+      return;
+    }
+
     const { rows } = await db.query(
       `SELECT e.*,i.archived, i."PrimaryImageHash" FROM jf_library_episodes e left join jf_library_items i on i."Id"=e."SeriesId" where "SeasonId"=$1`,
       [Id]
@@ -516,6 +614,11 @@ router.post("/getEpisodes", async (req, res) => {
 router.post("/getItemDetails", async (req, res) => {
   try {
     const { Id } = req.body;
+    if (Id === undefined) {
+      res.status(400);
+      res.send("No ID provided");
+      return;
+    }
     // let query = `SELECT im."Name" "FileName",im.*,i.* FROM jf_library_items i left join jf_item_info im on i."Id" = im."Id" where i."Id"=$1`;
     let query = `SELECT im."Name" "FileName",im."Id",im."Path",im."Name",im."Bitrate",im."MediaStreams",im."Type",  COALESCE(im."Size" ,(SELECT SUM(im."Size") FROM jf_library_seasons s JOIN jf_library_episodes e on s."Id"=e."SeasonId" JOIN jf_item_info im ON im."Id" = e."EpisodeId" WHERE s."SeriesId" = i."Id")) "Size",i.*, (select "Name" from jf_libraries l where l."Id"=i."ParentId") "LibraryName" FROM jf_library_items i left join jf_item_info im on i."Id" = im."Id" where i."Id"=$1`;
 
@@ -549,6 +652,12 @@ router.post("/getItemDetails", async (req, res) => {
 router.delete("/item/purge", async (req, res) => {
   try {
     const { id, withActivity } = req.body;
+
+    if (id === undefined) {
+      res.status(400);
+      res.send("No Item ID provided");
+      return;
+    }
 
     const { rows: episodes } = await db.query(`select * from jf_library_episodes where "SeriesId"=$1`, [id]);
     if (episodes.length > 0) {
@@ -587,6 +696,59 @@ router.delete("/item/purge", async (req, res) => {
   }
 });
 
+router.delete("/library/purge", async (req, res) => {
+  try {
+    const { id, withActivity } = req.body;
+
+    if (id === undefined) {
+      res.status(400);
+      res.send("No Library ID provided");
+      return;
+    }
+
+    await purgeLibraryItems(id, withActivity);
+
+    await db.query(`delete from jf_libraries where "Id"=$1`, [id]);
+
+    sendUpdate("GeneralAlert", {
+      type: "Success",
+      message: `Library ${withActivity ? "with Playback Activity" : ""} has been Purged`,
+    });
+    res.send("Item purged succesfully");
+  } catch (error) {
+    console.log(error);
+    sendUpdate("GeneralAlert", { type: "Error", message: `There was an error Purging the Data` });
+
+    res.status(503);
+    res.send(error);
+  }
+});
+
+router.delete("/libraryItems/purge", async (req, res) => {
+  try {
+    const { id, withActivity } = req.body;
+    if (id === undefined) {
+      res.status(400);
+      res.send("No Library ID provided");
+      return;
+    }
+
+    await purgeLibraryItems(id, withActivity);
+
+    sendUpdate("GeneralAlert", {
+      type: "Success",
+      message: `Library Items ${withActivity ? "with Playback Activity" : ""} has been Purged`,
+    });
+    res.send("Item purged succesfully");
+  } catch (error) {
+    console.log(error);
+    sendUpdate("GeneralAlert", { type: "Error", message: `There was an error Purging the Data` });
+
+    res.status(503);
+    res.send(error);
+  }
+});
+
 //DB Queries - History
 router.get("/getHistory", async (req, res) => {
   try {
@@ -603,6 +765,13 @@ router.get("/getHistory", async (req, res) => {
 router.post("/getLibraryHistory", async (req, res) => {
   try {
     const { libraryid } = req.body;
+
+    if (libraryid === undefined) {
+      res.status(400);
+      res.send("No Library ID provided");
+      return;
+    }
+
     const { rows } = await db.query(
       `select a.* from jf_playback_activity a join jf_library_items i on i."Id"=a."NowPlayingItemId"  where i."ParentId"=$1 order by "ActivityDateInserted" desc`,
       [libraryid]
@@ -619,6 +788,12 @@ router.post("/getLibraryHistory", async (req, res) => {
 router.post("/getItemHistory", async (req, res) => {
   try {
     const { itemid } = req.body;
+
+    if (itemid === undefined) {
+      res.status(400);
+      res.send("No Item ID provided");
+      return;
+    }
 
     const { rows } = await db.query(
       `select jf_playback_activity.*
@@ -645,6 +820,12 @@ router.post("/getUserHistory", async (req, res) => {
   try {
     const { userid } = req.body;
 
+    if (userid === undefined) {
+      res.status(400);
+      res.send("No User ID provided");
+      return;
+    }
+
     const { rows } = await db.query(
       `select jf_playback_activity.*
       from jf_playback_activity jf_playback_activity
@@ -666,6 +847,12 @@ router.post("/getUserHistory", async (req, res) => {
 
 router.post("/validateSettings", async (req, res) => {
   const { url, apikey } = req.body;
+
+  if (url === undefined || apikey === undefined) {
+    res.status(400);
+    res.send("URL or API Key not provided");
+    return;
+  }
 
   var _url = url;
   _url = _url.replace(/\/web\/index\.html#!\/home\.html$/, "");

@@ -45,7 +45,7 @@ function MoreItemCards(props) {
                 src={`${"/proxy/Items/Images/Primary?id=" + Id + "&fillHeight=320&fillWidth=213&quality=50"}`}
                 alt=""
                 onLoad={() => setLoaded(true)}
-                style={loaded ? { backgroundImage: `url(path/to/image.jpg)` } : { display: "none" }}
+                style={loaded ? { display: "block" } : { display: "none" }}
               />
             ) : (
               <img
@@ -57,7 +57,7 @@ function MoreItemCards(props) {
                 alt=""
                 onLoad={() => setLoaded(true)}
                 onError={() => setFallback(true)}
-                style={loaded ? { backgroundImage: `url(path/to/image.jpg)` } : { display: "none" }}
+                style={loaded ? { display: "block" } : { display: "none" }}
               />
             )
           ) : (

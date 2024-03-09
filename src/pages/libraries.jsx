@@ -6,12 +6,11 @@ import "./css/library/libraries.css";
 import Loading from "./components/general/loading";
 import LibraryCard from "./components/library/library-card";
 import ErrorBoundary from "./components/general/ErrorBoundary";
-import EyeOffFillIcon from 'remixicon-react/EyeOffFillIcon';
-import EyeFillIcon from 'remixicon-react/EyeFillIcon';
+import EyeOffFillIcon from "remixicon-react/EyeOffFillIcon";
+import EyeFillIcon from "remixicon-react/EyeFillIcon";
 import { Tooltip } from "react-bootstrap";
 import { Trans } from "react-i18next";
 import i18next from "i18next";
-
 
 function Libraries() {
   const [data, setData] = useState();
@@ -32,8 +31,7 @@ function Libraries() {
     };
 
     const fetchLibraries = () => {
-      if(config)
-      {
+      if (config) {
         const url = `/stats/getLibraryCardStats`;
         axios
           .get(url, {
@@ -49,9 +47,9 @@ function Libraries() {
             console.log(error);
           });
 
-          const metadataurl = `/stats/getLibraryMetadata`;
+        const metadataurl = `/stats/getLibraryMetadata`;
 
-          axios
+        axios
           .get(metadataurl, {
             headers: {
               Authorization: `Bearer ${config.token}`,
@@ -67,7 +65,6 @@ function Libraries() {
       }
     };
 
-
     if (!config) {
       fetchConfig();
     }
@@ -75,7 +72,7 @@ function Libraries() {
     fetchLibraries();
     const intervalId = setInterval(fetchLibraries, 60000 * 60);
     return () => clearInterval(intervalId);
-  }, [ config]);
+  }, [config]);
 
   if (!data || !metadata) {
     return <Loading />;
@@ -84,34 +81,36 @@ function Libraries() {
   return (
     <div className="libraries">
       <div className="d-flex flex-row justify-content-between align-items-center">
-      <h1 className="py-4"><Trans i18nKey="LIBRARIES" /></h1>
-      {
-        showArchived ?
-        <Tooltip title={i18next.t("HIDE_ARCHIVED_LIBRARIES")} className="tooltip-icon-button">
-          <button className="btn" onClick={()=> setShowArchived(!showArchived)}>
-            <EyeFillIcon/>
-          </button>
-        </Tooltip>
-        :
-        <Tooltip title={i18next.t("SHOW_ARCHIVED_LIBRARIES")} className="tooltip-icon-button">
-          <button className="btn" onClick={()=> setShowArchived(!showArchived)}>
-            <EyeOffFillIcon/>
-          </button>
-        </Tooltip>
-      }
+        <h1 className="py-4">
+          <Trans i18nKey="LIBRARIES" />
+        </h1>
+        {data.filter((library) => library.archived === true).length > 0 &&
+          (showArchived ? (
+            <Tooltip title={i18next.t("HIDE_ARCHIVED_LIBRARIES")} className="tooltip-icon-button">
+              <button className="btn" onClick={() => setShowArchived(!showArchived)}>
+                <EyeFillIcon />
+              </button>
+            </Tooltip>
+          ) : (
+            <Tooltip title={i18next.t("SHOW_ARCHIVED_LIBRARIES")} className="tooltip-icon-button">
+              <button className="btn" onClick={() => setShowArchived(!showArchived)}>
+                <EyeOffFillIcon />
+              </button>
+            </Tooltip>
+          ))}
       </div>
-
 
       <div xs={1} md={2} lg={4} className="g-0 libraries-container">
-      {data &&
-          data.filter((library) => library.archived ===false || library.archived===showArchived) .sort((a,b) => a.Name-b.Name).map((item) => (
-                <ErrorBoundary key={item.Id} >
-                  <LibraryCard data={item} metadata={metadata.find(data => data.Id === item.Id)} base_url={config.hostUrl}/>
-                </ErrorBoundary>
-
+        {data &&
+          data
+            .filter((library) => library.archived === false || library.archived === showArchived)
+            .sort((a, b) => a.Name - b.Name)
+            .map((item) => (
+              <ErrorBoundary key={item.Id}>
+                <LibraryCard data={item} metadata={metadata.find((data) => data.Id === item.Id)} base_url={config.hostUrl} />
+              </ErrorBoundary>
             ))}
       </div>
-      
     </div>
   );
 }

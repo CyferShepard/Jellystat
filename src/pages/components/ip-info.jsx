@@ -101,20 +101,18 @@ export default function IpInfoModal(props) {
   }
 
   return (
-    <div>
-      <Modal show={props.show} onHide={() => props.onHide()}>
-        <Modal.Header closeButton>
-          <Modal.Title>
-            <Trans i18nKey={"GEOLOCATION_INFO_FOR"} /> {props.ipAddress}
-          </Modal.Title>
-        </Modal.Header>
-        {modalBody}
-        <Modal.Footer>
-          <Button variant="outline-primary" onClick={() => props.onHide()}>
-            <Trans i18nKey={"CLOSE"} />
-          </Button>
-        </Modal.Footer>
-      </Modal>
-    </div>
+    <Modal show={props.show} onHide={() => props.onHide()}>
+      <Modal.Header closeButton>
+        <Modal.Title>
+          <Trans i18nKey={"GEOLOCATION_INFO_FOR"} /> {props.ipAddress}
+        </Modal.Title>
+      </Modal.Header>
+      {modalBody}
+      <Modal.Footer>
+        <Button variant="outline-primary" onClick={() => props.onHide()}>
+          <Trans i18nKey={"CLOSE"} />
+        </Button>
+      </Modal.Footer>
+    </Modal>
   );
 }

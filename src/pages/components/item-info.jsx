@@ -70,7 +70,7 @@ function ItemInfo() {
             },
           }
         );
-        console.log(itemData.data[0]);
+
         setData(itemData.data[0]);
       } catch (error) {
         setData({ notfound: true, message: error.response.data });
@@ -312,14 +312,14 @@ function ItemInfo() {
       </div>
 
       <Tabs defaultActiveKey="tabOverview" activeKey={activeTab} variant="pills" className="hide-tab-titles">
-        <Tab eventKey="tabOverview" title="" className="bg-transparent">
+        <Tab eventKey="tabOverview" title="Overview" className="bg-transparent">
           <GlobalStats ItemId={Id} />
           {["Series", "Season"].includes(data && data.Type) ? <MoreItems data={data} /> : <></>}
         </Tab>
-        <Tab eventKey="tabActivity" title="" className="bg-transparent">
+        <Tab eventKey="tabActivity" title="Activity" className="bg-transparent">
           <ItemActivity itemid={Id} />
         </Tab>
-        <Tab eventKey="tabOptions" title="" className="bg-transparent">
+        <Tab eventKey="tabOptions" title="Options" className="bg-transparent">
           <ItemOptions itemid={Id} />
         </Tab>
       </Tabs>
