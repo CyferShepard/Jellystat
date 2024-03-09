@@ -71,7 +71,7 @@ class JellyfinAPI {
         },
       });
 
-      return response.data;
+      return response?.data || [];
     } catch (error) {
       this.#errorHandler(error);
       return [];
@@ -81,7 +81,7 @@ class JellyfinAPI {
   async getAdmins() {
     try {
       const users = await this.getUsers();
-      return users.filter((user) => user.Policy.IsAdministrator);
+      return users?.filter((user) => user.Policy.IsAdministrator) || [];
     } catch (error) {
       this.#errorHandler(error);
       return [];
@@ -112,10 +112,12 @@ class JellyfinAPI {
           },
         });
 
-        total = response.data.TotalRecordCount;
+        total = response?.data?.TotalRecordCount ?? 0;
         startIndex += increment;
 
-        final_response.push(...response.data.Items);
+        const result = response?.data?.Items || [];
+
+        final_response.push(...result);
         if (response.data.TotalRecordCount === undefined) {
           break;
         }
@@ -159,10 +161,12 @@ class JellyfinAPI {
           },
         });
 
-        total = response.data.TotalRecordCount;
+        total = response?.data?.TotalRecordCount || 0;
         startIndex += increment;
 
-        AllItems.push(...response.data.Items);
+        const result = response?.data?.Items || [];
+
+        AllItems.push(...result);
 
         if (response.data.TotalRecordCount === undefined) {
           break;
@@ -204,7 +208,7 @@ class JellyfinAPI {
         },
       });
 
-      return response.data.MediaSources;
+      return response?.data?.MediaSources || 0;
     } catch (error) {
       this.#errorHandler(error);
       return [];
@@ -224,9 +228,10 @@ class JellyfinAPI {
         },
       });
 
-      const libraries = response.data.Items.filter((library) => !["boxsets", "playlists"].includes(library.CollectionType));
+      const libraries =
+        response?.data?.Items?.filter((library) => !["boxsets", "playlists"].includes(library.CollectionType)) || [];
 
-      return libraries || [];
+      return libraries;
     } catch (error) {
       this.#errorHandler(error);
       return [];
@@ -246,7 +251,7 @@ class JellyfinAPI {
         },
       });
 
-      return response.data.Items.filter((item) => item.LocationType !== "Virtual");
+      return response?.data?.Items?.filter((item) => item.LocationType !== "Virtual") || [];
     } catch (error) {
       this.#errorHandler(error);
       return [];
@@ -266,7 +271,7 @@ class JellyfinAPI {
         },
       });
 
-      return response.data.Items.filter((item) => item.LocationType !== "Virtual");
+      return response?.data?.Items?.filter((item) => item.LocationType !== "Virtual") || [];
     } catch (error) {
       this.#errorHandler(error);
       return [];
@@ -302,7 +307,9 @@ class JellyfinAPI {
         },
       });
 
-      return response.data.filter((item) => item.LocationType !== "Virtual");
+      const items = response?.data?.filter((item) => item.LocationType !== "Virtual") || [];
+
+      return items;
     } catch (error) {
       this.#errorHandler(error);
       return [];

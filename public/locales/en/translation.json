@@ -106,7 +106,9 @@
     "NETWORK_ERROR": "Unable to connect to Jellyfin Server",
     "INVALID_LOGIN": "Invalid Username or Password",
     "INVALID_URL": "Error {STATUS}: The requested URL was not found.",
-    "UNAUTHORIZED": "Error {STATUS}: Unauthorized"
+    "UNAUTHORIZED": "Error {STATUS}: Unauthorized",
+    "PASSWORD_LENGTH": "Password Must be at least 6 characters long",
+    "USERNAME_REQUIRED": "Username is required"
   },
   "SHOW_ARCHIVED_LIBRARIES": "Show Archived Libraries",
   "HIDE_ARCHIVED_LIBRARIES": "Hide Archived Libraries",
@@ -250,6 +252,7 @@
   "SAVE_JELLYFIN_DETAILS": "Save Jellyfin Details",
   "SETTINGS_SAVED": "Settings Saved",
   "SUCCESS": "Success",
+  "PASSWORD_UPDATE_SUCCESS": "Successfully updated password",
   "CREATE_USER": "Create User",
   "GEOLOCATION_INFO_FOR": "Geolocation Info for",
   "CITY": "City",

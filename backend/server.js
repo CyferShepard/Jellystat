@@ -146,7 +146,7 @@ try {
 
       setupWebSocketServer(server);
       server.listen(PORT, LISTEN_IP, async () => {
-        console.log(`[JELLYSTAT] Server listening on http://${LISTEN_IP}:${PORT}`);
+        console.log(`[JELLYSTAT] Server listening on http://127.0.0.1:${PORT}`);
         ActivityMonitor.ActivityMonitor(1000);
         tasks.FullSyncTask();
         tasks.RecentlyAddedItemsSyncTask();

@@ -49,6 +49,11 @@ function groupActivity(rows) {
 router.get("/getconfig", async (req, res) => {
   try {
     const config = await new configClass().getConfig();
+    if (config.error) {
+      res.status(503);
+      res.send({ error: config.error });
+      return;
+    }
 
     const payload = {
       JF_HOST: config.JF_HOST,
@@ -71,7 +76,7 @@ router.post("/setconfig", async (req, res) => {
 
     let query = 'UPDATE app_config SET "JF_HOST"=$1, "JF_API_KEY"=$2 where "ID"=1';
     if (getConfig.length === 0) {
-      query = 'INSERT INTO app_config ("JF_HOST","JF_API_KEY","APP_USER","APP_PASSWORD") VALUES ($1,$2,null,null)';
+      query = 'INSERT INTO app_config ("ID","JF_HOST","JF_API_KEY","APP_USER","APP_PASSWORD") VALUES (1,$1,$2,null,null)';
     }
 
     const { rows } = await db.query(query, [JF_HOST, JF_API_KEY]);
@@ -125,6 +130,72 @@ router.post("/setRequireLogin", async (req, res) => {
   } catch (error) {
     console.log(error);
   }
+});
+
+router.post("/updateCredentials", async (req, res) => {
+  const { username, current_password, new_password } = req.body;
+  const config = await new configClass().getConfig();
+
+  let result = { isValid: true, errorMessage: "" };
+
+  if (config.error) {
+    result = { isValid: false, errorMessage: config.error };
+    res.status(503);
+    res.send(result);
+    return;
+  }
+  if (username === undefined && current_password === undefined && new_password === undefined) {
+    result.isValid = false;
+    result.errorMessage = "Invalid Parameters";
+    res.status(400);
+    res.send(result);
+    return;
+  }
+
+  console.log(`ENDPOINT CALLED: /updateCredentials: ` + username);
+
+  if (username !== undefined && username === "") {
+    result.isValid = false;
+    result.errorMessage = "Username cannot be empty";
+    res.status(400);
+    res.send(result);
+    return;
+  }
+
+  try {
+    if (username !== undefined && config.APP_USER !== username) {
+      await db.query(`UPDATE app_config SET "APP_USER"='${username}' where "ID"=1`);
+    }
+
+    if (current_password === undefined && new_password === undefined) {
+      res.status(400);
+      res.send(result);
+      return;
+    }
+
+    console.log(`ENDPOINT CALLED: /updateCredentials: ` + current_password + " " + new_password);
+
+    if (config.APP_PASSWORD === current_password) {
+      if (config.APP_PASSWORD === new_password) {
+        result.isValid = false;
+        result.errorMessage = "New Password cannot be the same as Old Password";
+      } else {
+        await db.query(
+          `UPDATE app_config SET "APP_PASSWORD"='${new_password}' where "ID"=1 AND "APP_PASSWORD"='${current_password}' `
+        );
+      }
+    } else {
+      result.isValid = false;
+      result.errorMessage = "Old Password is Invalid";
+    }
+  } catch (error) {
+    console.log(error);
+    result.errorMessage = error;
+  }
+  if (!result.isValid) {
+    res.status(400);
+  }
+  res.send(result);
 });
 
 router.post("/updatePassword", async (req, res) => {
@@ -605,6 +676,7 @@ router.post("/validateSettings", async (req, res) => {
   if (!/^https?:\/\//i.test(url)) {
     _url = "http://" + url;
   }
+  _url = _url.replace(/\/$/, "");
 
   let isValid = false;
   let errorMessage = "";
