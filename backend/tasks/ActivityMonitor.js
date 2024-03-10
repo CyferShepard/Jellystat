@@ -16,7 +16,7 @@ async function ActivityMonitor(interval) {
     try {
       const config = await new configClass().getConfig();
 
-      if (config.error) {
+      if (config.error || config.state !== 2) {
         return;
       }
       const ExcludedUsers = config.settings?.ExcludedUsers || [];

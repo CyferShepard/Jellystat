@@ -109,7 +109,7 @@ async function authenticate(req, res, next) {
       req.user = decoded.user;
       next();
     } catch (error) {
-      console.log(error);
+      console.log("Invalid token");
       return res.status(401).json({ message: "Invalid token" });
     }
   } else {
