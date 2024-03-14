@@ -5,7 +5,7 @@ class Config {
     try {
       const { rows: config } = await db.query('SELECT * FROM app_config where "ID"=1');
 
-      const state = await this.getConfigState(config);
+      const state = this.#getConfigState(config);
 
       if (state < 1) {
         return { error: "Config Details Not Found" };
@@ -31,33 +31,23 @@ class Config {
     return config.settings?.preferred_admin?.userid;
   }
 
-  async getConfigState(Configured) {
+  #getConfigState(Configured) {
     let state = 0;
     try {
       //state 0 = not configured
       //state 1 = configured and user set
       //state 2 = configured and user and api key set
 
-      if (Configured.length > 0) {
-        if (Configured[0].APP_USER === null) {
-          //safety check if user is null still return state 0
-          return state;
-        }
-
-        if (Configured[0].APP_USER !== null && Configured[0].JF_API_KEY === null) {
+      if (Configured.length > 0 && Configured[0].APP_USER !== null) {
+        if (Configured[0].JF_API_KEY === null || (typeof Configured[0].JF_API_KEY === 'string' && Configured[0].JF_API_KEY.trim() === "")) {
           //check if user is configured but API is not configured then return state 1
           state = 1;
-          return state;
-        }
-
-        if (Configured[0].APP_USER !== null && Configured[0].JF_API_KEY !== null) {
+        } else {
           //check if user is configured and API is configured then return state 2
           state = 2;
-          return state;
         }
-      } else {
-        return state;
       }
+      return state;
     } catch (error) {
       return state;
     }

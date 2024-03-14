@@ -15,40 +15,6 @@ if (JWT_SECRET === undefined) {
 
 const router = express.Router();
 
-async function getConfigState() {
-  let state = 0;
-  try {
-    const { rows: Configured } = await db.query(`SELECT * FROM app_config`);
-
-    //state 0 = not configured
-    //state 1 = configured and user set
-    //state 2 = configured and user and api key set
-
-    if (Configured.length > 0) {
-      if (Configured[0].APP_USER === null) {
-        //safety check if user is null still return state 0
-        return state;
-      }
-
-      if (Configured[0].APP_USER !== null && Configured[0].JF_API_KEY === null) {
-        //check if user is configured but API is not configured then return state 1
-        state = 1;
-        return state;
-      }
-
-      if (Configured[0].APP_USER !== null && Configured[0].JF_API_KEY !== null) {
-        //check if user is configured and API is configured then return state 2
-        state = 2;
-        return state;
-      }
-    } else {
-      return state;
-    }
-  } catch (error) {
-    return state;
-  }
-}
-
 router.post("/login", async (req, res) => {
   try {
     const { username, password } = req.body;
@@ -77,16 +43,21 @@ router.post("/login", async (req, res) => {
 });
 
 router.get("/isConfigured", async (req, res) => {
-  const state = await getConfigState();
-  res.json({ state: state, version: packageJson.version });
+  try {
+    const config = await new configClass().getConfig();
+    res.json({ state: config.state, version: packageJson.version });
+  } catch (error) {
+    console.log(error);
+    res.sendStatus(500);
+  }
 });
 
 router.post("/createuser", async (req, res) => {
   try {
     const { username, password } = req.body;
-    const configState = await getConfigState();
+    const config = await new configClass().getConfig();
 
-    if (configState < 2) {
+    if (config.state < 2) {
       const user = { id: 1, username: username };
 
       const hasConfig = await new configClass().getConfig();
