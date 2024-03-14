@@ -8,7 +8,7 @@ class Config {
       const state = this.#getConfigState(config);
 
       if (state < 1) {
-        return { error: "Config Details Not Found" };
+        return { state: 0, error: "Config Details Not Found" };
       }
 
       return {
@@ -39,7 +39,10 @@ class Config {
       //state 2 = configured and user and api key set
 
       if (Configured.length > 0 && Configured[0].APP_USER !== null) {
-        if (Configured[0].JF_API_KEY === null || (typeof Configured[0].JF_API_KEY === 'string' && Configured[0].JF_API_KEY.trim() === "")) {
+        if (
+          Configured[0].JF_API_KEY === null ||
+          (typeof Configured[0].JF_API_KEY === "string" && Configured[0].JF_API_KEY.trim() === "")
+        ) {
           //check if user is configured but API is not configured then return state 1
           state = 1;
         } else {

@@ -57,13 +57,11 @@ router.post("/createuser", async (req, res) => {
     const { username, password } = req.body;
     const config = await new configClass().getConfig();
 
-    if (config.state < 2) {
+    if (config.state != null && config.state < 2) {
       const user = { id: 1, username: username };
 
-      const hasConfig = await new configClass().getConfig();
-
       let query = 'INSERT INTO app_config ("ID","APP_USER","APP_PASSWORD") VALUES (1,$1,$2)';
-      if (!hasConfig.error) {
+      if (config.state > 0) {
         query = 'UPDATE app_config SET  "APP_USER"=$1, "APP_PASSWORD"=$2';
       }
 
