@@ -26,8 +26,6 @@ function Sessions() {
         setData(toSet);
       }
     });
-    console.log("Sessions: socket.on(sessions)");
-
     return () => {
       socket.off("sessions");
     };
