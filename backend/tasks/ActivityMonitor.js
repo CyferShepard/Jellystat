@@ -7,6 +7,7 @@ const { jf_activity_watchdog_columns, jf_activity_watchdog_mapping } = require("
 const { randomUUID } = require("crypto");
 const configClass = require("../classes/config");
 const JellyfinAPI = require("../classes/jellyfin-api");
+const { sendUpdate } = require("../ws");
 
 async function ActivityMonitor(interval) {
   const Jellyfin = new JellyfinAPI();
@@ -20,10 +21,9 @@ async function ActivityMonitor(interval) {
         return;
       }
       const ExcludedUsers = config.settings?.ExcludedUsers || [];
-      const SessionData = await Jellyfin.getSessions().then((sessions) =>
-        sessions.filter((row) => row.NowPlayingItem !== undefined && !ExcludedUsers.includes(row.UserId))
-      );
-
+      const apiSessionData = await Jellyfin.getSessions();
+      const SessionData = apiSessionData.filter((row) => row.NowPlayingItem !== undefined && !ExcludedUsers.includes(row.UserId));
+      sendUpdate("sessions", apiSessionData);
       /////get data from jf_activity_monitor
       const WatchdogData = await db.query("SELECT * FROM jf_activity_watchdog").then((res) => res.rows);
 
