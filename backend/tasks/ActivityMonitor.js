@@ -45,11 +45,24 @@ async function ActivityMonitor(interval) {
       } else {
         // otherwise, filter only new data to insert
         WatchdogDataToInsert = await SessionData.filter(
-          (session) => !WatchdogData.map((wdData) => wdData.Id).includes(session.Id)
+          (session) =>
+            !WatchdogData.filter(
+              (wdData) =>
+                wdData.Id === session.Id &&
+                wdData.UserId === session.UserId &&
+                wdData.NowPlayingItemId === session.NowPlayingItem.Id &&
+                wdData.EpisodeId === session.NowPlayingItem.EpisodeId
+            )
         ).map(jf_activity_watchdog_mapping);
 
         WatchdogDataToUpdate = WatchdogData.filter((wdData) => {
-          const session = SessionData.find((sessionData) => sessionData.Id === wdData.Id);
+          const session = SessionData.find(
+            (sessionData) =>
+              sessionData.Id === wdData.Id &&
+              wdData.UserId === sessionData.UserId &&
+              wdData.NowPlayingItemId === sessionData.NowPlayingItem.Id &&
+              wdData.EpisodeId === sessionData.NowPlayingItem.EpisodeId
+          );
           if (session && session.PlayState) {
             if (wdData.IsPaused !== session.PlayState.IsPaused) {
               wdData.IsPaused = session.PlayState.IsPaused;

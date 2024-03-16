@@ -436,65 +436,67 @@ async function syncPlaybackPluginData() {
   );
 
   if (!hasPlaybackReportingPlugin || hasPlaybackReportingPlugin.length === 0) {
-    PlaybacksyncTask.loggedData.push({ color: "lawngreen", Message: "Playback Reporting Plugin not detected. Skipping step." });
-    logging.updateLog(PlaybacksyncTask.uuid, PlaybacksyncTask.loggedData, taskstate.FAILED);
-    return;
-  }
-
-  //
-
-  PlaybacksyncTask.loggedData.push({ color: "dodgerblue", Message: "Determining query constraints." });
-  const OldestPlaybackActivity = await db
-    .query('SELECT  MIN("ActivityDateInserted") "OldestPlaybackActivity" FROM public.jf_playback_activity')
-    .then((res) => res.rows[0]?.OldestPlaybackActivity);
-
-  const MaxPlaybackReportingPluginID = await db
-    .query('SELECT MAX(rowid) "MaxRowId" FROM jf_playback_reporting_plugin_data')
-    .then((res) => res.rows[0]?.MaxRowId);
-
-  //Query Builder
-  let query = `SELECT rowid, * FROM PlaybackActivity`;
-
-  if (OldestPlaybackActivity) {
-    const formattedDateTime = moment(OldestPlaybackActivity).format("YYYY-MM-DD HH:mm:ss");
-
-    query = query + ` WHERE DateCreated < '${formattedDateTime}'`;
-
-    if (MaxPlaybackReportingPluginID) {
-      query = query + ` AND rowid > ${MaxPlaybackReportingPluginID}`;
-    }
-  } else if (MaxPlaybackReportingPluginID) {
-    query = query + ` WHERE rowid > ${MaxPlaybackReportingPluginID}`;
-  }
-
-  query += " order by rowid";
-
-  PlaybacksyncTask.loggedData.push({ color: "dodgerblue", Message: "Query built. Executing." });
-  //
-
-  const PlaybackData = await Jellyfin.StatsSubmitCustomQuery(query);
-
-  let DataToInsert = await PlaybackData.map(mappingPlaybackReporting);
-
-  if (DataToInsert.length > 0) {
-    PlaybacksyncTask.loggedData.push({ color: "dodgerblue", Message: `Inserting ${DataToInsert.length} Rows.` });
-    let result = await db.insertBulk("jf_playback_reporting_plugin_data", DataToInsert, columnsPlaybackReporting);
-
-    if (result.Result === "SUCCESS") {
-      PlaybacksyncTask.loggedData.push({ color: "dodgerblue", Message: `${DataToInsert.length} Rows have been inserted.` });
-      PlaybacksyncTask.loggedData.push({
-        color: "yellow",
-        Message: "Running process to format data to be inserted into the Activity Table",
-      });
-      await db.query("CALL ji_insert_playback_plugin_data_to_activity_table()");
-      PlaybacksyncTask.loggedData.push({ color: "dodgerblue", Message: "Process complete. Data has been inserted." });
+    if (!hasPlaybackReportingPlugin || hasPlaybackReportingPlugin.length === 0) {
+      PlaybacksyncTask.loggedData.push({ color: "dodgerblue", Message: `No new data to insert.` });
     } else {
-      PlaybacksyncTask.loggedData.push({ color: "red", Message: "Error: " + result.message });
-      await logging.updateLog(PlaybacksyncTask.uuid, PlaybacksyncTask.loggedData, taskstate.FAILED);
+      PlaybacksyncTask.loggedData.push({ color: "lawngreen", Message: "Playback Reporting Plugin not detected. Skipping step." });
     }
   } else {
-    PlaybacksyncTask.loggedData.push({ color: "dodgerblue", Message: `No new data to insert.` });
+    //
+
+    PlaybacksyncTask.loggedData.push({ color: "dodgerblue", Message: "Determining query constraints." });
+    const OldestPlaybackActivity = await db
+      .query('SELECT  MIN("ActivityDateInserted") "OldestPlaybackActivity" FROM public.jf_playback_activity')
+      .then((res) => res.rows[0]?.OldestPlaybackActivity);
+
+    const MaxPlaybackReportingPluginID = await db
+      .query('SELECT MAX(rowid) "MaxRowId" FROM jf_playback_reporting_plugin_data')
+      .then((res) => res.rows[0]?.MaxRowId);
+
+    //Query Builder
+    let query = `SELECT rowid, * FROM PlaybackActivity`;
+
+    if (OldestPlaybackActivity) {
+      const formattedDateTime = moment(OldestPlaybackActivity).format("YYYY-MM-DD HH:mm:ss");
+
+      query = query + ` WHERE DateCreated < '${formattedDateTime}'`;
+
+      if (MaxPlaybackReportingPluginID) {
+        query = query + ` AND rowid > ${MaxPlaybackReportingPluginID}`;
+      }
+    } else if (MaxPlaybackReportingPluginID) {
+      query = query + ` WHERE rowid > ${MaxPlaybackReportingPluginID}`;
+    }
+
+    query += " order by rowid";
+
+    PlaybacksyncTask.loggedData.push({ color: "dodgerblue", Message: "Query built. Executing." });
+    //
+
+    const PlaybackData = await Jellyfin.StatsSubmitCustomQuery(query);
+
+    let DataToInsert = await PlaybackData.map(mappingPlaybackReporting);
+
+    if (DataToInsert.length > 0) {
+      PlaybacksyncTask.loggedData.push({ color: "dodgerblue", Message: `Inserting ${DataToInsert.length} Rows.` });
+      let result = await db.insertBulk("jf_playback_reporting_plugin_data", DataToInsert, columnsPlaybackReporting);
+
+      if (result.Result === "SUCCESS") {
+        PlaybacksyncTask.loggedData.push({ color: "dodgerblue", Message: `${DataToInsert.length} Rows have been inserted.` });
+        PlaybacksyncTask.loggedData.push({
+          color: "yellow",
+          Message: "Running process to format data to be inserted into the Activity Table",
+        });
+      } else {
+        PlaybacksyncTask.loggedData.push({ color: "red", Message: "Error: " + result.message });
+        await logging.updateLog(PlaybacksyncTask.uuid, PlaybacksyncTask.loggedData, taskstate.FAILED);
+      }
+    }
+
+    PlaybacksyncTask.loggedData.push({ color: "dodgerblue", Message: "Process complete. Data has been imported." });
   }
+  await db.query("CALL ji_insert_playback_plugin_data_to_activity_table()");
+  PlaybacksyncTask.loggedData.push({ color: "dodgerblue", Message: "Any imported data has been processed." });
 
   PlaybacksyncTask.loggedData.push({ color: "lawngreen", Message: `Playback Reporting Plugin Sync Complete` });
 }
