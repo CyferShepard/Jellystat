@@ -65,7 +65,7 @@ class JellyfinAPI {
       if (line.trim().startsWith("at")) {
         const errorLine = line.trim();
         const startSubstring = errorLine.lastIndexOf("\\") == -1 ? errorLine.indexOf("(") + 1 : errorLine.lastIndexOf("\\") + 1;
-        const endSubstring = errorLine.lastIndexOf(")") == -1 ? errorLine.length : errorLine.lastIndexOf(")") - 1;
+        const endSubstring = errorLine.lastIndexOf(")") == -1 ? errorLine.length : errorLine.lastIndexOf(")");
         const lineNumber = errorLine.substring(startSubstring, endSubstring);
         errorLines.push({ TraceIndex: index, line: lineNumber });
       }
