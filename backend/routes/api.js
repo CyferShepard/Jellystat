@@ -859,51 +859,10 @@ router.post("/validateSettings", async (req, res) => {
   if (!/^https?:\/\//i.test(url)) {
     _url = "http://" + url;
   }
-  _url = _url.replace(/\/$/, "");
+  _url = _url.replace(/\/$/, "") + "/system/configuration";
 
-  let isValid = false;
-  let errorMessage = "";
-  try {
-    await axios
-      .get(_url + "/system/configuration", {
-        headers: {
-          "X-MediaBrowser-Token": apikey,
-        },
-      })
-      .then((response) => {
-        if (response.status === 200) {
-          isValid = true;
-        }
-      })
-      .catch((error) => {
-        if (error.code === "ERR_NETWORK") {
-          isValid = false;
-          errorMessage = `Error : Unable to connect to Jellyfin Server`;
-        } else if (error.code === "ECONNREFUSED") {
-          isValid = false;
-          errorMessage = `Error : Unable to connect to Jellyfin Server`;
-        } else if (error.response && error.response.status === 401) {
-          isValid = false;
-          errorMessage = `Error: ${error.response.status} Not Authorized. Please check API key`;
-        } else if (error.response && error.response.status === 404) {
-          isValid = false;
-          errorMessage = `Error ${error.response.status}: The requested URL was not found.`;
-        } else if (error.code === "EPROTO") {
-          isValid = false;
-          errorMessage = `Error: Network protocol mismatch. Please check your url.`;
-        } else {
-          isValid = false;
-          errorMessage = `${error}`;
-        }
-      });
-  } catch (error) {
-    isValid = false;
-    errorMessage = `Error: ${error}`;
-  }
-
-  console.log({ isValid: isValid, errorMessage: errorMessage });
-
-  res.send({ isValid: isValid, errorMessage: errorMessage });
+  const validation = await Jellyfin.validateSettings(_url, apikey);
+  res.send(validation);
 });
 
 module.exports = router;

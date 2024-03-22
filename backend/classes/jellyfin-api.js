@@ -41,15 +41,42 @@ class JellyfinAPI {
           console.log(`[JELLYFIN-API]: Unexpected status code: ${error.response.status}`);
       }
     } else {
-      console.log("[JELLYFIN-API]", { ErrorAt: this.#getErrorLineNumber(error), Message: error.message });
+      console.log("[JELLYFIN-API]", {
+        ErrorAt: this.#getErrorLineNumber(error),
+        ErrorLines: this.#getErrorLineNumbers(error),
+        Message: error.message,
+        // StackTrace: this.#getStackTrace(error),
+      });
     }
   }
 
   #getErrorLineNumber(error) {
-    const stackTrace = error.stack.split("\n");
+    const stackTrace = this.#getStackTrace(error);
     const errorLine = stackTrace[1].trim();
     const lineNumber = errorLine.substring(errorLine.lastIndexOf("\\") + 1, errorLine.lastIndexOf(")"));
     return lineNumber;
+  }
+
+  #getErrorLineNumbers(error) {
+    const stackTrace = this.#getStackTrace(error);
+    let errorLines = [];
+
+    for (const [index, line] of stackTrace.entries()) {
+      if (line.trim().startsWith("at")) {
+        const errorLine = line.trim();
+        const startSubstring = errorLine.lastIndexOf("\\") == -1 ? errorLine.indexOf("(") + 1 : errorLine.lastIndexOf("\\") + 1;
+        const endSubstring = errorLine.lastIndexOf(")") == -1 ? errorLine.length : errorLine.lastIndexOf(")") - 1;
+        const lineNumber = errorLine.substring(startSubstring, endSubstring);
+        errorLines.push({ TraceIndex: index, line: lineNumber });
+      }
+    }
+
+    return errorLines;
+  }
+
+  #getStackTrace(error) {
+    const stackTrace = error.stack.split("\n");
+    return stackTrace;
   }
 
   #delay(ms) {
@@ -376,6 +403,29 @@ class JellyfinAPI {
     } catch (error) {
       this.#errorHandler(error);
       return [];
+    }
+  }
+
+  async validateSettings(url, apikey) {
+    if (!this.configReady) {
+      return [];
+    }
+    try {
+      const response = await axios.get(url, {
+        headers: {
+          "X-MediaBrowser-Token": apikey,
+        },
+      });
+      return {
+        isValid: response.status === 200,
+        errorMessage: "",
+      };
+    } catch (error) {
+      this.#errorHandler(error);
+      return {
+        isValid: false,
+        errorMessage: error.message,
+      };
     }
   }
 }
