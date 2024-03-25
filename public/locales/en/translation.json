@@ -96,7 +96,8 @@
     "PURGE_LIBRARY_CACHE": "Purge Cached Library and Items",
     "PURGE_LIBRARY_CACHE_WITH_ACTIVITY": "Purge Cached Library, Items and Activity",
     "PURGE_LIBRARY_ITEMS_CACHE": "Purge Cached Library Items Only",
-    "PURGE_LIBRARY_ITEMS_CACHE_WITH_ACTIVITY": "Purge Cached Library Items and Activity Only"
+    "PURGE_LIBRARY_ITEMS_CACHE_WITH_ACTIVITY": "Purge Cached Library Items and Activity Only",
+    "PURGE_ACTIVITY": "Are you sure you want to Delete the selected Playback Activity?"
   },
   "ERROR_MESSAGES": {
     "FETCH_THIS_ITEM": "Fetch this item from Jellyfin",
@@ -269,5 +270,6 @@
   "LATITUDE": "Latitude",
   "LONGITUDE": "Longitude",
   "TIMEZONE": "Timezone",
-  "POSTCODE": "Postcode"
+  "POSTCODE": "Postcode",
+  "X_ROWS_SELECTED": "{ROWS} Rows Selected"
 }

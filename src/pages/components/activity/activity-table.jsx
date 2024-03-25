@@ -1,18 +1,10 @@
-import React from "react";
-import { Link } from "react-router-dom";
-import { Button, ButtonGroup, Modal } from "react-bootstrap";
-
-import Table from "@mui/material/Table";
-import TableBody from "@mui/material/TableBody";
-import TableCell from "@mui/material/TableCell";
-import TableContainer from "@mui/material/TableContainer";
-import TableHead from "@mui/material/TableHead";
-import TableRow from "@mui/material/TableRow";
-import Collapse from "@mui/material/Collapse";
-import TableSortLabel from "@mui/material/TableSortLabel";
-import IconButton from "@mui/material/IconButton";
-import Box from "@mui/material/Box";
-import { visuallyHidden } from "@mui/utils";
+/* eslint-disable react/prop-types */
+import React, { useMemo } from "react";
+import axios from "axios";
+import { enUS } from "@mui/material/locale";
+import { MRT_Localization_EN } from "material-react-table/locales/en";
+import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
+import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 
 import AddCircleFillIcon from "remixicon-react/AddCircleFillIcon";
 import IndeterminateCircleFillIcon from "remixicon-react/IndeterminateCircleFillIcon";
@@ -20,9 +12,15 @@ import IndeterminateCircleFillIcon from "remixicon-react/IndeterminateCircleFill
 import StreamInfo from "./stream_info";
 
 import "../../css/activity/activity-table.css";
-import { Trans } from "react-i18next";
 import i18next from "i18next";
 import IpInfoModal from "../ip-info";
+// import Loading from "../general/loading";
+import { MRT_TablePagination, MaterialReactTable, useMaterialReactTable } from "material-react-table";
+import { Box, ThemeProvider, Typography, createTheme } from "@mui/material";
+
+import { Link } from "react-router-dom";
+import { Button, Modal } from "react-bootstrap";
+import { Trans } from "react-i18next";
 
 function formatTotalWatchTime(seconds) {
   const hours = Math.floor(seconds / 3600);
@@ -48,10 +46,27 @@ function formatTotalWatchTime(seconds) {
   return timeString.trim();
 }
 
-function DataRow(data) {
-  const { row } = data;
-  const [open, setOpen] = React.useState(false);
+const colors = {
+  primary: "#5a2da5",
+  secondary: "#00A4DC",
+  backgroundColor: "#1e1c22",
+  secondaryBackgroundColor: "#2c2a2f",
+  tertiaryBackgroundColor: "#2f2e31",
+};
+const token = localStorage.getItem("token");
+
+export default function ActivityTable(props) {
   const twelve_hr = JSON.parse(localStorage.getItem("12hr"));
+  // eslint-disable-next-line react/prop-types
+  const [data, setData] = React.useState(props.data ?? []);
+  const uniqueUserNames = [...new Set(data.map((item) => item.UserName))];
+  const uniqueClients = [...new Set(data.map((item) => item.Client))];
+
+  const [rowSelection, setRowSelection] = React.useState({});
+  const [pagination, setPagination] = React.useState({
+    pageIndex: 0,
+    pageSize: 10, //customize the default page size
+  });
 
   const [modalState, setModalState] = React.useState(false);
   const [modalData, setModalData] = React.useState();
@@ -63,6 +78,7 @@ function DataRow(data) {
   );
 
   const [ipModalVisible, setIPModalVisible] = React.useState(false);
+  const [confirmDeleteShow, setDeleteShow] = React.useState(false);
   const [ipAddressLookup, setIPAddressLookup] = React.useState();
 
   const isRemoteSession = (ipAddress) => {
@@ -88,25 +104,307 @@ function DataRow(data) {
     setIPModalVisible(true);
   }
 
-  const options = {
-    day: "numeric",
-    month: "numeric",
-    year: "numeric",
-    hour: "numeric",
-    minute: "numeric",
-    second: "numeric",
-    hour12: twelve_hr,
-  };
+  async function deleteActivity() {
+    const url = `/api/deletePlaybackActivity`;
+
+    axios
+      .post(
+        url,
+        { ids: [...Object.keys(rowSelection)] },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+        }
+      )
+      .then((response) => {
+        setData(data.filter((item) => !rowSelection[item.Id]));
+        setRowSelection({});
+      })
+      .catch((error) => {
+        console.log(error);
+      });
+  }
+
+  // eslint-disable-next-line react/prop-types
+  if (pagination.pageSize !== props.itemCount) {
+    // eslint-disable-next-line react/prop-types
+    setPagination({ pageIndex: 0, pageSize: props.itemCount });
+  }
+
+  const columns = [
+    {
+      accessorKey: "UserName",
+      header: "User",
+      size: 100,
+      filterVariant: "select",
+      filterSelectOptions: uniqueUserNames,
+      Cell: ({ row }) => {
+        row = row.original;
+        return (
+          <Link to={`/users/${row.UserId}`} className="text-decoration-none">
+            {row.UserName}
+          </Link>
+        );
+      },
+    },
+    {
+      accessorKey: "RemoteEndPoint",
+      header: "IP Address",
+      size: 100,
+      Cell: ({ row }) => {
+        row = row.original;
+        if (
+          isRemoteSession(row.RemoteEndPoint) &&
+          import.meta.env.VITE_GEOLITE_ACCOUNT_ID &&
+          import.meta.env.VITE_GEOLITE_LICENSE_KEY
+        ) {
+          return (
+            <Link className="text-decoration-none" onClick={() => showIPDataModal(row.RemoteEndPoint)}>
+              {row.RemoteEndPoint}
+            </Link>
+          );
+        } else {
+          return <span>{row.RemoteEndPoint || "-"}</span>;
+        }
+      },
+    },
+    {
+      accessorFn: (row) => `${!row?.SeriesName ? row.NowPlayingItemName : row.SeriesName + " - " + row.NowPlayingItemName}`,
+      header: "Title",
+      size: 400,
+      grow: true,
+      Cell: ({ row }) => {
+        row = row.original;
+        return (
+          <Link to={`/libraries/item/${row.EpisodeId || row.NowPlayingItemId}`} className="text-decoration-none">
+            {!row.SeriesName ? row.NowPlayingItemName : row.SeriesName + " - " + row.NowPlayingItemName}
+          </Link>
+        );
+      },
+    },
+    {
+      accessorKey: "Client",
+      header: "Client",
+      filterVariant: "select",
+      filterSelectOptions: uniqueClients,
+      Cell: ({ row }) => {
+        row = row.original;
+        return (
+          <Link onClick={() => openModal(row)} className="text-decoration-none">
+            {row.Client}
+          </Link>
+        );
+      },
+      size: 100,
+    },
+    {
+      accessorFn: (row) => new Date(row.ActivityDateInserted),
+      header: "Date",
+      filterVariant: "date-range",
+      Cell: ({ row }) => {
+        const options = {
+          day: "numeric",
+          month: "numeric",
+          year: "numeric",
+          hour: "numeric",
+          minute: "numeric",
+          second: "numeric",
+          hour12: twelve_hr,
+        };
+        row = row.original;
+        return <span>{Intl.DateTimeFormat("en-UK", options).format(new Date(row.ActivityDateInserted))}</span>;
+      },
+      size: 100,
+    },
+    {
+      accessorKey: "PlaybackDuration",
+      header: "Total Playback",
+      Cell: ({ cell }) => <span>{formatTotalWatchTime(cell.getValue())}</span>,
+    },
+    {
+      accessorKey: "TotalPlays",
+      header: "Total Plays",
+      size: 100,
+      Cell: ({ cell }) => <span>{cell.getValue() ?? 1}</span>,
+    },
+  ];
+
+  const table = useMaterialReactTable({
+    columns,
+    data,
+
+    muiTableContainerProps: { sx: { maxHeight: "1200px" } },
+    enableExpandAll: false,
+    enableExpanding: true,
+    initialState: { expanded: false, showGlobalFilter: true, pagination: { pageSize: 10, pageIndex: 0 } },
+    localization: { MRT_Localization_EN },
+    showAlertBanner: false,
+    enableHiding: false,
+    enableFullScreenToggle: false,
+    enableGlobalFilter: false,
+    enableBottomToolbar: false,
+    enableRowSelection: (row) => row.original.Id,
+    enableSubRowSelection: true,
+    onRowSelectionChange: setRowSelection,
+    positionToolbarAlertBanner: "bottom",
+    renderTopToolbarCustomActions: ({ table }) => {
+      if (Object.keys(rowSelection).length > 0) {
+        return (
+          <Box sx={{ display: "flex", gap: "1rem", p: "4px" }}>
+            <span>
+              <Typography variant="h5">
+                {i18next.t("X_ROWS_SELECTED").replace("{ROWS}", Object.keys(rowSelection).length)}
+              </Typography>
+            </span>
+            <Button
+              color="error"
+              disabled={!table.getIsSomeRowsSelected()}
+              onClick={() => {
+                setDeleteShow(true);
+              }}
+              variant="danger"
+            >
+              <Trans i18nKey="DELETE" />
+            </Button>
+          </Box>
+        );
+      }
+    },
+    muiSelectCheckboxProps: {
+      color: "secondary",
+    },
+    state: { rowSelection, pagination },
+    filterFromLeafRows: true,
+    getSubRows: (row) => {
+      if (Array.isArray(row.results) && row.results.length == 1) {
+        row.results.pop();
+      }
+
+      return row.results;
+    }, //default
+    paginateExpandedRows: false,
+    onPaginationChange: setPagination,
+    getRowId: (row) => row.Id, //default
+    muiExpandButtonProps: ({ row }) => ({
+      children: row.getIsExpanded() ? <IndeterminateCircleFillIcon /> : <AddCircleFillIcon />,
+      onClick: () => table.setExpanded({ [row.id]: !row.getIsExpanded() }),
+      sx: {
+        transform: row.getIsExpanded() ? "rotate(180deg)" : "rotate(-90deg)",
+        transition: "transform 0.2s",
+      },
+    }),
+    muiPaginationProps: {
+      rowsPerPageOptions: [10, 25, 50, 100],
+      variant: "outlined",
+      showFirstButton: true,
+      showLastButton: true,
+      showRowsPerPage: false,
+    },
+    paginationDisplayMode: "pages",
+    muiTableBodyCellProps: {
+      sx: {
+        backgroundColor: colors.tertiaryBackgroundColor,
+      },
+    },
+    muiTableHeadCellProps: {
+      sx: {
+        backgroundColor: "rgba(200, 200, 200, 0)",
+      },
+    },
+    muiFilterAutocompleteProps: {
+      sx: {
+        color: colors.primary,
+      },
+    },
+
+    mrtTheme: () => ({
+      baseBackgroundColor: "rgb(64, 62, 67)",
+      // menuBackgroundColor: "#5a2da5",
+      selectedRowBackgroundColor: "rgba(0,0,0,0)",
+    }),
+  });
+  const theme = useMemo(
+    () =>
+      createTheme(
+        {
+          palette: {
+            mode: "dark",
+            primary: {
+              main: colors.secondary,
+            },
+            secondary: {
+              main: colors.primary,
+            },
+            info: {
+              main: colors.primary,
+            },
+            warning: {
+              main: colors.primary,
+            },
+          },
+          components: {
+            MuiTooltip: {
+              styleOverrides: {
+                tooltip: {
+                  backgroundColor: colors.tertiaryBackgroundColor,
+                },
+              },
+            },
+          },
+        },
+        enUS
+      ),
+    []
+  );
 
   return (
-    <React.Fragment>
+    <LocalizationProvider dateAdapter={AdapterDayjs}>
       <IpInfoModal show={ipModalVisible} onHide={() => setIPModalVisible(false)} ipAddress={ipAddressLookup} />
-
+      <Modal
+        show={confirmDeleteShow}
+        onHide={() => {
+          setDeleteShow(false);
+        }}
+      >
+        <Modal.Header closeButton>
+          <Modal.Title>
+            <Trans i18nKey="ITEM_INFO.CONFIRM_ACTION" />
+            {" - "}
+            {i18next.t("X_ROWS_SELECTED").replace("{ROWS}", Object.keys(rowSelection).length)}
+          </Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          <p>{i18next.t("PURGE_OPTIONS.PURGE_ACTIVITY")}</p>
+        </Modal.Body>
+        <Modal.Footer>
+          <button
+            className="btn btn-danger"
+            onClick={() => {
+              deleteActivity().then(() => setDeleteShow(false));
+            }}
+          >
+            <Trans i18nKey="DELETE" />
+          </button>
+          <button
+            className="btn btn-primary"
+            onClick={() => {
+              setDeleteShow(false);
+            }}
+          >
+            <Trans i18nKey="CLOSE" />
+          </button>
+        </Modal.Footer>
+      </Modal>
       <Modal show={modalState} onHide={() => setModalState(false)}>
         <Modal.Header>
           <Modal.Title>
-            <Trans i18nKey="ACTIVITY_TABLE.MODAL.HEADER" />:{" "}
-            {!row.SeriesName ? row.NowPlayingItemName : row.SeriesName + " - " + row.NowPlayingItemName} ({row.UserName})
+            <Trans i18nKey="ACTIVITY_TABLE.MODAL.HEADER" />:
+            {!modalData?.SeriesName
+              ? modalData?.NowPlayingItemName
+              : modalData?.SeriesName + " - " + modalData?.NowPlayingItemName}{" "}
+            ({modalData?.UserName})
           </Modal.Title>
         </Modal.Header>
         <StreamInfo data={modalData} />
@@ -116,333 +414,18 @@ function DataRow(data) {
           </Button>
         </Modal.Footer>
       </Modal>
-
-      <TableRow sx={{ "& > *": { borderBottom: "unset" } }}>
-        <TableCell>
-          <IconButton
-            aria-label="expand row"
-            size="small"
-            onClick={() => {
-              if (row.TotalPlays > 1) {
-                setOpen(!open);
-              }
-            }}
-          >
-            {!open ? (
-              <AddCircleFillIcon opacity={row.TotalPlays > 1 ? 1 : 0} cursor={row.TotalPlays > 1 ? "pointer" : "default"} />
-            ) : (
-              <IndeterminateCircleFillIcon />
-            )}
-          </IconButton>
-        </TableCell>
-        <TableCell>
-          <Link to={`/users/${row.UserId}`} className="text-decoration-none">
-            {row.UserName}
-          </Link>
-        </TableCell>
-        {isRemoteSession(row.RemoteEndPoint) &&
-        import.meta.env.VITE_GEOLITE_ACCOUNT_ID &&
-        import.meta.env.VITE_GEOLITE_LICENSE_KEY ? (
-          <TableCell>
-            <Link className="text-decoration-none" onClick={() => showIPDataModal(row.RemoteEndPoint)}>
-              {row.RemoteEndPoint}
-            </Link>
-          </TableCell>
-        ) : (
-          <TableCell>{row.RemoteEndPoint || "-"}</TableCell>
-        )}
-        <TableCell>
-          <Link to={`/libraries/item/${row.EpisodeId || row.NowPlayingItemId}`} className="text-decoration-none">
-            {!row.SeriesName ? row.NowPlayingItemName : row.SeriesName + " - " + row.NowPlayingItemName}
-          </Link>
-        </TableCell>
-        <TableCell className="activity-client">
-          <span onClick={() => openModal(row)}>{row.Client}</span>
-        </TableCell>
-        <TableCell>{Intl.DateTimeFormat("en-UK", options).format(new Date(row.ActivityDateInserted))}</TableCell>
-        <TableCell>{formatTotalWatchTime(row.PlaybackDuration) || "0 seconds"}</TableCell>
-        <TableCell>{row.TotalPlays}</TableCell>
-      </TableRow>
-      <TableRow>
-        <TableCell style={{ paddingBottom: 0, paddingTop: 0 }} colSpan={8}>
-          <Collapse in={open} timeout="auto" unmountOnExit>
-            <Box sx={{ margin: 1 }}>
-              <Table aria-label="sub-activity" className="rounded-2">
-                <TableHead>
-                  <TableRow>
-                    <TableCell>
-                      <Trans i18nKey="USER" />
-                    </TableCell>
-                    <TableCell>
-                      <Trans i18nKey="ACTIVITY_TABLE.IP_ADDRESS" />
-                    </TableCell>
-                    <TableCell>
-                      <Trans i18nKey="TITLE" />
-                    </TableCell>
-                    <TableCell>
-                      <Trans i18nKey="ACTIVITY_TABLE.CLIENT" />
-                    </TableCell>
-                    <TableCell>
-                      <Trans i18nKey="DATE" />
-                    </TableCell>
-                    <TableCell>
-                      <Trans i18nKey="ACTIVITY_TABLE.PLAYBACK_DURATION" />
-                    </TableCell>
-                    <TableCell>
-                      <Trans i18nKey="UNITS.PLAYS" />
-                    </TableCell>
-                  </TableRow>
-                </TableHead>
-                <TableBody>
-                  {row.results
-                    .sort((a, b) => new Date(b.ActivityDateInserted) - new Date(a.ActivityDateInserted))
-                    .map((resultRow) => (
-                      <TableRow key={resultRow.Id}>
-                        <TableCell>
-                          <Link to={`/users/${resultRow.UserId}`} className="text-decoration-none">
-                            {resultRow.UserName}
-                          </Link>
-                        </TableCell>
-                        {isRemoteSession(resultRow.RemoteEndPoint) &&
-                        import.meta.env.VITE_GEOLITE_ACCOUNT_ID &&
-                        import.meta.env.VITE_GEOLITE_LICENSE_KEY ? (
-                          <TableCell>
-                            <Link className="text-decoration-none" onClick={() => showIPDataModal(resultRow.RemoteEndPoint)}>
-                              {resultRow.RemoteEndPoint}
-                            </Link>
-                          </TableCell>
-                        ) : (
-                          <TableCell>{resultRow.RemoteEndPoint || "-"}</TableCell>
-                        )}
-                        <TableCell>
-                          <Link
-                            to={`/libraries/item/${resultRow.EpisodeId || resultRow.NowPlayingItemId}`}
-                            className="text-decoration-none"
-                          >
-                            {!resultRow.SeriesName
-                              ? resultRow.NowPlayingItemName
-                              : resultRow.SeriesName + " - " + resultRow.NowPlayingItemName}
-                          </Link>
-                        </TableCell>
-                        <TableCell className="activity-client">
-                          <span onClick={() => openModal(resultRow)}>{resultRow.Client}</span>
-                        </TableCell>
-                        <TableCell>
-                          {Intl.DateTimeFormat("en-UK", options).format(new Date(resultRow.ActivityDateInserted))}
-                        </TableCell>
-                        <TableCell>{formatTotalWatchTime(resultRow.PlaybackDuration) || "0 seconds"}</TableCell>
-                        <TableCell>1</TableCell>
-                      </TableRow>
-                    ))}
-                </TableBody>
-              </Table>
-            </Box>
-          </Collapse>
-        </TableCell>
-      </TableRow>
-    </React.Fragment>
-  );
-}
-
-function EnhancedTableHead(props) {
-  const { order, orderBy, onRequestSort } = props;
-  const createSortHandler = (property) => (event) => {
-    onRequestSort(event, property);
-  };
-
-  const headCells = [
-    {
-      id: "UserName",
-      numeric: false,
-      disablePadding: false,
-      label: i18next.t("USER"),
-    },
-    {
-      id: "RemoteEndPoint",
-      numeric: false,
-      disablePadding: false,
-      label: i18next.t("ACTIVITY_TABLE.IP_ADDRESS"),
-    },
-    {
-      id: "NowPlayingItemName",
-      numeric: false,
-      disablePadding: false,
-      label: i18next.t("TITLE"),
-    },
-    {
-      id: "Client",
-      numeric: false,
-      disablePadding: false,
-      label: i18next.t("ACTIVITY_TABLE.CLIENT"),
-    },
-    {
-      id: "ActivityDateInserted",
-      numeric: false,
-      disablePadding: false,
-      label: i18next.t("DATE"),
-    },
-    {
-      id: "PlaybackDuration",
-      numeric: false,
-      disablePadding: false,
-      label: i18next.t("ACTIVITY_TABLE.TOTAL_PLAYBACK"),
-    },
-    {
-      id: "TotalPlays",
-      numeric: false,
-      disablePadding: false,
-      label: i18next.t("TOTAL_PLAYS"),
-    },
-  ];
-
-  return (
-    <TableHead>
-      <TableRow>
-        <TableCell />
-        {headCells.map((headCell) => (
-          <TableCell
-            key={headCell.id}
-            align={headCell.numeric ? "right" : "left"}
-            padding={headCell.disablePadding ? "none" : "normal"}
-            sortDirection={orderBy === headCell.id ? order : false}
-          >
-            <TableSortLabel
-              active={orderBy === headCell.id}
-              direction={orderBy === headCell.id ? order : "asc"}
-              onClick={createSortHandler(headCell.id)}
-            >
-              {headCell.label}
-              {orderBy === headCell.id ? (
-                <Box component="span" sx={visuallyHidden}>
-                  {order === "desc" ? "sorted descending" : "sorted ascending"}
-                </Box>
-              ) : null}
-            </TableSortLabel>
-          </TableCell>
-        ))}
-      </TableRow>
-    </TableHead>
-  );
-}
-
-export default function ActivityTable(props) {
-  const [page, setPage] = React.useState(0);
-  const [rowsPerPage, setRowsPerPage] = React.useState(10);
-
-  const [order, setOrder] = React.useState("desc");
-  const [orderBy, setOrderBy] = React.useState("ActivityDateInserted");
-
-  if (rowsPerPage !== props.itemCount) {
-    setRowsPerPage(props.itemCount);
-    setPage(0);
-  }
-
-  const handleNextPageClick = () => {
-    setPage((prevPage) => Number(prevPage) + 1);
-  };
-
-  const handlePreviousPageClick = () => {
-    setPage((prevPage) => Number(prevPage) - 1);
-  };
-
-  function descendingComparator(a, b, orderBy) {
-    if (b[orderBy] < a[orderBy]) {
-      return -1;
-    }
-    if (b[orderBy] > a[orderBy]) {
-      return 1;
-    }
-    return 0;
-  }
-
-  // eslint-disable-next-line
-  function getComparator(order, orderBy) {
-    return order === "desc" ? (a, b) => descendingComparator(a, b, orderBy) : (a, b) => -descendingComparator(a, b, orderBy);
-  }
-
-  function stableSort(array, comparator) {
-    const stabilizedThis = array.map((el, index) => [el, index]);
-
-    stabilizedThis.sort((a, b) => {
-      const order = comparator(a[0], b[0]);
-      if (order !== 0) {
-        return order;
-      }
-      return a[1] - b[1];
-    });
-
-    return stabilizedThis.map((el) => el[0]);
-  }
-
-  const visibleRows = React.useMemo(
-    () =>
-      stableSort(props.data, getComparator(order, orderBy)).slice(
-        page * Number(rowsPerPage),
-        page * Number(rowsPerPage) + Number(rowsPerPage)
-      ),
-    [order, orderBy, page, rowsPerPage, getComparator, props.data]
-  );
-
-  const handleRequestSort = (event, property) => {
-    const isAsc = orderBy === property && order === "asc";
-    setOrder(isAsc ? "desc" : "asc");
-    setOrderBy(property);
-  };
-
-  return (
-    <>
-      <TableContainer className="rounded-2">
-        <Table aria-label="collapsible table">
-          <EnhancedTableHead order={order} orderBy={orderBy} onRequestSort={handleRequestSort} rowCount={rowsPerPage} />
-          <TableBody>
-            {visibleRows.map((row) => (
-              <DataRow key={row.Id + row.NowPlayingItemId + row.EpisodeId} row={row} />
-            ))}
-            {props.data.length === 0 ? (
-              <tr>
-                <td colSpan="8" style={{ textAlign: "center", fontStyle: "italic", color: "grey" }} className="py-2">
-                  <Trans i18nKey="ERROR_MESSAGES.NO_ACTIVITY" />
-                </td>
-              </tr>
-            ) : (
-              ""
-            )}
-          </TableBody>
-        </Table>
-      </TableContainer>
-
-      <div className="d-flex justify-content-end my-2">
-        <ButtonGroup className="pagination-buttons">
-          <Button className="page-btn" onClick={() => setPage(0)} disabled={page === 0}>
-            <Trans i18nKey="TABLE_NAV_BUTTONS.FIRST" />
-          </Button>
-
-          <Button className="page-btn" onClick={handlePreviousPageClick} disabled={page === 0}>
-            <Trans i18nKey="TABLE_NAV_BUTTONS.PREVIOUS" />
-          </Button>
-
-          <div className="page-number d-flex align-items-center justify-content-center">{`${page * rowsPerPage + 1}-${Math.min(
-            page * rowsPerPage + 1 + (rowsPerPage - 1),
-            props.data.length
-          )} of ${props.data.length}`}</div>
-
-          <Button
-            className="page-btn"
-            onClick={handleNextPageClick}
-            disabled={page >= Math.ceil(props.data.length / rowsPerPage) - 1}
-          >
-            <Trans i18nKey="TABLE_NAV_BUTTONS.NEXT" />
-          </Button>
-
-          <Button
-            className="page-btn"
-            onClick={() => setPage(Math.ceil(props.data.length / rowsPerPage) - 1)}
-            disabled={page >= Math.ceil(props.data.length / rowsPerPage) - 1}
-          >
-            <Trans i18nKey="TABLE_NAV_BUTTONS.LAST" />
-          </Button>
-        </ButtonGroup>
-      </div>
-    </>
+      <ThemeProvider theme={theme}>
+        <MaterialReactTable table={table} />
+        <Box
+          sx={{
+            display: "flex",
+            justifyContent: "end",
+            alignItems: "center",
+          }}
+        >
+          <MRT_TablePagination table={table} />
+        </Box>
+      </ThemeProvider>
+    </LocalizationProvider>
   );
 }

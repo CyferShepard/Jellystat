@@ -843,6 +843,26 @@ router.post("/getUserHistory", async (req, res) => {
   }
 });
 
+router.post("/deletePlaybackActivity", async (req, res) => {
+  try {
+    const { ids } = req.body;
+
+    if (ids === undefined || !Array.isArray(ids)) {
+      res.status(400);
+      res.send("A list of IDs is required. EG: [1,2,3]");
+      return;
+    }
+
+    await db.query(`DELETE from jf_playback_activity where "Id" = ANY($1)`, [ids]);
+    // const groupedResults = groupActivity(rows);
+    res.send(`${ids.length} Records Deleted`);
+  } catch (error) {
+    console.log(error);
+    res.status(503);
+    res.send(error);
+  }
+});
+
 //Jellyfin related functions
 
 router.post("/validateSettings", async (req, res) => {
