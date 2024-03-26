@@ -1,5 +1,5 @@
 /* eslint-disable react/prop-types */
-import React, { useMemo } from "react";
+import React, { useEffect, useMemo } from "react";
 import axios from "axios";
 import { enUS } from "@mui/material/locale";
 import { MRT_Localization_EN } from "material-react-table/locales/en";
@@ -57,7 +57,6 @@ const token = localStorage.getItem("token");
 
 export default function ActivityTable(props) {
   const twelve_hr = JSON.parse(localStorage.getItem("12hr"));
-  // eslint-disable-next-line react/prop-types
   const [data, setData] = React.useState(props.data ?? []);
   const uniqueUserNames = [...new Set(data.map((item) => item.UserName))];
   const uniqueClients = [...new Set(data.map((item) => item.Client))];
@@ -231,10 +230,13 @@ export default function ActivityTable(props) {
     },
   ];
 
+  useEffect(() => {
+    setData(props.data);
+  }, [props.data]);
+
   const table = useMaterialReactTable({
     columns,
     data,
-
     muiTableContainerProps: { sx: { maxHeight: "1200px" } },
     enableExpandAll: false,
     enableExpanding: true,
