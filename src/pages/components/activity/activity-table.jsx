@@ -241,6 +241,8 @@ export default function ActivityTable(props) {
     muiTableContainerProps: { sx: { maxHeight: "1200px" } },
     enableExpandAll: false,
     enableExpanding: true,
+    enableDensityToggle: false,
+    enableTopToolbar: Object.keys(rowSelection).length > 0,
     initialState: { expanded: false, showGlobalFilter: true, pagination: { pageSize: 10, pageIndex: 0 } },
     localization: { MRT_Localization_EN },
     showAlertBanner: false,
