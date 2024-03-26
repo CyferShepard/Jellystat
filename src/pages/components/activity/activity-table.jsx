@@ -241,7 +241,6 @@ export default function ActivityTable(props) {
     columns,
     data,
     columnFilterDisplayMode: "popover",
-    muiTableContainerProps: { sx: { maxHeight: "1200px" } },
     enableExpandAll: false,
     enableExpanding: true,
     enableDensityToggle: false,
