@@ -265,7 +265,6 @@ export default function ActivityTable(props) {
             </span>
             <Button
               color="error"
-              disabled={!table.getIsSomeRowsSelected()}
               onClick={() => {
                 setDeleteShow(true);
               }}
