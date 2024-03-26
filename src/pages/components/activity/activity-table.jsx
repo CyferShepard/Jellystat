@@ -254,7 +254,7 @@ export default function ActivityTable(props) {
     renderTopToolbarCustomActions: ({ table }) => {
       if (Object.keys(rowSelection).length > 0) {
         return (
-          <Box sx={{ display: "flex", gap: "1rem", p: "4px" }}>
+          <Box sx={{ display: "flex", gap: "1rem", p: "0px" }}>
             <span>
               <Typography variant="h5">
                 {i18next.t("X_ROWS_SELECTED").replace("{ROWS}", Object.keys(rowSelection).length)}
