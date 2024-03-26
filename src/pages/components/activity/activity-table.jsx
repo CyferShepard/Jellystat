@@ -237,6 +237,7 @@ export default function ActivityTable(props) {
   const table = useMaterialReactTable({
     columns,
     data,
+    columnFilterDisplayMode: "popover",
     muiTableContainerProps: { sx: { maxHeight: "1200px" } },
     enableExpandAll: false,
     enableExpanding: true,
