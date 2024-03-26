@@ -16,7 +16,7 @@ import i18next from "i18next";
 import IpInfoModal from "../ip-info";
 // import Loading from "../general/loading";
 import { MRT_TablePagination, MaterialReactTable, useMaterialReactTable } from "material-react-table";
-import { Box, ThemeProvider, Typography, createTheme } from "@mui/material";
+import { Box, MenuItem, ThemeProvider, Typography, createTheme } from "@mui/material";
 
 import { Link } from "react-router-dom";
 import { Button, Modal } from "react-bootstrap";
@@ -220,11 +220,14 @@ export default function ActivityTable(props) {
     {
       accessorKey: "PlaybackDuration",
       header: "Total Playback",
+      filterFn: (row, id, filterValue) => formatTotalWatchTime(row.getValue(id)).startsWith(filterValue),
+
       Cell: ({ cell }) => <span>{formatTotalWatchTime(cell.getValue())}</span>,
     },
     {
-      accessorKey: "TotalPlays",
+      accessorFn: (row) => Number(row.TotalPlays) ?? 1,
       header: "Total Plays",
+      filterFn: "betweenInclusive",
       size: 100,
       Cell: ({ cell }) => <span>{cell.getValue() ?? 1}</span>,
     },
