@@ -278,8 +278,24 @@ export default function ActivityTable(props) {
         );
       }
     },
+    muiTableBodyRowProps: {
+      sx: {
+        "&:hover .MuiCheckbox-root": {
+          opacity: 1,
+          color: colors.primary,
+        },
+      },
+    },
     muiSelectCheckboxProps: {
-      color: "secondary",
+      sx: {
+        opacity: 0,
+        "&:hover": {
+          opacity: 1,
+        },
+        "&.Mui-checked": {
+          opacity: 1,
+        },
+      },
     },
     state: { rowSelection, pagination },
     filterFromLeafRows: true,
@@ -327,8 +343,6 @@ export default function ActivityTable(props) {
 
     mrtTheme: () => ({
       baseBackgroundColor: "rgb(64, 62, 67)",
-      // menuBackgroundColor: "#5a2da5",
-      selectedRowBackgroundColor: "rgba(0,0,0,0)",
     }),
   });
   const theme = useMemo(
