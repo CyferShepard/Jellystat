@@ -225,7 +225,7 @@ export default function ActivityTable(props) {
       Cell: ({ cell }) => <span>{formatTotalWatchTime(cell.getValue())}</span>,
     },
     {
-      accessorFn: (row) => Number(row.TotalPlays) ?? 1,
+      accessorFn: (row) => Number(row.TotalPlays ?? 1),
       header: "Total Plays",
       filterFn: "betweenInclusive",
       size: 100,
