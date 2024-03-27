@@ -136,6 +136,8 @@ class JellyfinAPI {
             startIndex: startIndex,
             recursive: recursive,
             limit: increment,
+            isMissing: false,
+            excludeLocationTypes: "Virtual",
           },
         });
 
@@ -185,6 +187,8 @@ class JellyfinAPI {
             startIndex: startIndex,
             recursive: recursive,
             limit: increment,
+            isMissing: false,
+            excludeLocationTypes: "Virtual",
           },
         });
 

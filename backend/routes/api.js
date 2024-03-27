@@ -46,18 +46,37 @@ function groupActivity(rows) {
   return groupedResults;
 }
 
-async function purgeLibraryItems(id, withActivity) {
-  const { rows: items } = await db.query(`select * from jf_library_items where "ParentId"=$1 and archived=true`, [id]);
+async function purgeLibraryItems(id, withActivity, purgeAll = false) {
+  let items_query = `select * from jf_library_items where "ParentId"=$1`;
+
+  const { rows: items } = await db.query(items_query, [id]);
   let seasonIds = [];
   let episodeIds = [];
 
   for (const item of items) {
-    const { rows: seasons } = await db.query(`select * from jf_library_seasons where "SeriesId"=$1 and archived=true`, [item.Id]);
+    let season_query = `select * from jf_library_seasons where "SeriesId"=$1`;
+    if (!item.archived && !purgeAll) {
+      season_query += " and archived=true";
+    }
+    const { rows: seasons } = await db.query(season_query, [item.Id]);
     seasonIds.push(...seasons.map((item) => item.Id));
-    const { rows: episodes } = await db.query(`select * from jf_library_episodes where "SeriesId"=$1 and archived=true`, [
-      item.Id,
-    ]);
-    episodeIds.push(...episodes.map((item) => item.Id));
+    if (seasons.length > 0) {
+      for (const season of seasons) {
+        let episode_query = `select * from jf_library_episodes where "SeasonId"=$1`;
+        if (!item.archived && !season.archived && !purgeAll) {
+          episode_query += " and archived=true";
+        }
+        const { rows: episodes } = await db.query(episode_query, [season.Id]);
+        episodeIds.push(...episodes.map((item) => item.Id));
+      }
+    } else {
+      let episode_query = `select * from jf_library_episodes where "SeriesId"=$1`;
+      if (!item.archived && !purgeAll) {
+        episode_query += " and archived=true";
+      }
+      const { rows: episodes } = await db.query(episode_query, [item.Id]);
+      episodeIds.push(...episodes.map((item) => item.Id));
+    }
   }
 
   if (episodeIds.length > 0) {
@@ -68,7 +87,11 @@ async function purgeLibraryItems(id, withActivity) {
     await db.deleteBulk("jf_library_seasons", seasonIds);
   }
 
-  await db.query(`delete from jf_library_items where "ParentId"=$1 and archived=true`, [id]);
+  items_query = items_query.replace("select *", "delete");
+  if (!purgeAll) {
+    items_query += ` and archived=true`;
+  }
+  await db.query(items_query, [id]);
 
   if (withActivity) {
     const deleteQuery = {
@@ -582,7 +605,7 @@ router.post("/getSeasons", async (req, res) => {
     }
 
     const { rows } = await db.query(
-      `SELECT s.*,i.archived, i."PrimaryImageHash", (select count(e.*) "Episodes" from jf_library_episodes e  where e."SeasonId"=s."Id") ,(select sum(ii."Size") "Size" from jf_library_episodes e join jf_item_info ii on ii."Id"=e."EpisodeId" where e."SeasonId"=s."Id") FROM jf_library_seasons s left join jf_library_items i on i."Id"=s."SeriesId" where "SeriesId"=$1`,
+      `SELECT s.*, i."PrimaryImageHash", (select count(e.*) "Episodes" from jf_library_episodes e  where e."SeasonId"=s."Id") ,(select sum(ii."Size") "Size" from jf_library_episodes e join jf_item_info ii on ii."Id"=e."EpisodeId" where e."SeasonId"=s."Id") FROM jf_library_seasons s left join jf_library_items i on i."Id"=s."SeriesId" where "SeriesId"=$1`,
       [Id]
     );
     res.send(rows);
@@ -602,7 +625,7 @@ router.post("/getEpisodes", async (req, res) => {
     }
 
     const { rows } = await db.query(
-      `SELECT e.*,i.archived, i."PrimaryImageHash" FROM jf_library_episodes e left join jf_library_items i on i."Id"=e."SeriesId" where "SeasonId"=$1`,
+      `SELECT e.*, i."PrimaryImageHash" FROM jf_library_episodes e left join jf_library_items i on i."Id"=e."SeriesId" where "SeasonId"=$1`,
       [Id]
     );
     res.send(rows);
@@ -658,28 +681,39 @@ router.delete("/item/purge", async (req, res) => {
       res.send("No Item ID provided");
       return;
     }
-
-    const { rows: episodes } = await db.query(`select * from jf_library_episodes where "SeriesId"=$1`, [id]);
-    if (episodes.length > 0) {
-      await db.query(`delete from jf_library_episodes where "SeriesId"=$1`, [id]);
-    }
-
-    const { rows: seasons } = await db.query(`select * from jf_library_seasons where "SeriesId"=$1`, [id]);
+    const { rows: items } = await db.query(`select * from jf_library_items where "Id"=$1`, [id]);
+    const { rows: seasons } = await db.query(`select * from jf_library_seasons where "SeriesId"=$1 or "Id"=$1`, [id]);
     if (seasons.length > 0) {
-      await db.query(`delete from jf_library_seasons where "SeriesId"=$1`, [id]);
-    }
-
-    await db.query(`delete from jf_library_items where "Id"=$1`, [id]);
-
-    if (withActivity) {
-      const deleteQuery = {
-        text: `DELETE FROM jf_playback_activity WHERE${
-          episodes.length > 0 ? ` "EpisodeId" IN (${pgp.as.csv(episodes.map((item) => item.EpisodeId))})  OR` : ""
-        }${
-          seasons.length > 0 ? ` "SeasonId" IN (${pgp.as.csv(seasons.map((item) => item.SeasonId))}) OR` : ""
-        } "NowPlayingItemId"='${id}'`,
-      };
-      await db.query(deleteQuery);
+      for (const season of seasons) {
+        let delete_season_episodes_query = 'delete from jf_library_episodes where "SeasonId"=$1';
+        if (!season.archived && (items.length > 0 ? !items[0].archived : true)) {
+          delete_season_episodes_query += " and archived=true";
+        }
+        await db.query(delete_season_episodes_query, [season.Id]);
+        if (season.archived || (items.length > 0 && items[0].archived)) {
+          await db.query(`delete from jf_library_seasons where "Id"=$1`, [season.Id]);
+        }
+      }
+    } else {
+      const { rows: episodes } = await db.query(`select * from jf_library_episodes where "EpisodeId"=$1 and archived=true`, [id]);
+      if (episodes.length > 0) {
+        await db.query(`delete from jf_library_episodes where "EpisodeId"=$1 and archived=true`, [id]);
+      }
+      if (items.length > 0 && items[0].archived) {
+        await db.query(`delete from jf_library_episodes where "SeriesId"=$1`, [id]);
+        await db.query(`delete from jf_library_seasons where "SeriesId"=$1`, [id]);
+        await db.query(`delete from jf_library_items where "Id"=$1`, [id]);
+      }
+      if (withActivity) {
+        const deleteQuery = {
+          text: `DELETE FROM jf_playback_activity WHERE${
+            episodes.length > 0 ? ` "EpisodeId" IN (${pgp.as.csv(episodes.map((item) => item.EpisodeId))})  OR` : ""
+          }${
+            seasons.length > 0 ? ` "SeasonId" IN (${pgp.as.csv(seasons.map((item) => item.SeasonId))}) OR` : ""
+          } "NowPlayingItemId"='${id}'`,
+        };
+        await db.query(deleteQuery);
+      }
     }
 
     sendUpdate("GeneralAlert", {
@@ -706,7 +740,7 @@ router.delete("/library/purge", async (req, res) => {
       return;
     }
 
-    await purgeLibraryItems(id, withActivity);
+    await purgeLibraryItems(id, withActivity, true);
 
     await db.query(`delete from jf_libraries where "Id"=$1`, [id]);
 

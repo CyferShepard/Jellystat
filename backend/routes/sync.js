@@ -239,7 +239,7 @@ async function syncShowItems(data) {
         episodesToInsert = episodesToInsert.filter((episode) => !existingIdsEpisodes.some((id) => id === episode.EpisodeId));
       }
 
-      //Bulkinsert new data not on db
+      //Bulkinsert new seasons not on db
       if (seasonsToInsert.length !== 0) {
         let result = await db.insertBulk("jf_library_seasons", seasonsToInsert, jf_library_seasons_columns);
         if (result.Result === "SUCCESS") {
@@ -257,7 +257,7 @@ async function syncShowItems(data) {
         }
       }
 
-      //Bulkinsert new data not on db
+      //Bulkinsert new episodes not on db
       if (episodesToInsert.length !== 0) {
         let result = await db.insertBulk("jf_library_episodes", episodesToInsert, jf_library_episodes_columns);
         if (result.Result === "SUCCESS") {
@@ -286,7 +286,7 @@ async function syncShowItems(data) {
           syncTask.loggedData.push({ color: "orange", Message: toArchiveSeasons.length + " Seasons Archived." });
         }
         if (toArchiveEpisodes.length > 0) {
-          await _sync.updateSingleFieldOnDB("jf_library_episodes", toArchiveEpisodes, "archived", true);
+          await _sync.updateSingleFieldOnDB("jf_library_episodes", toArchiveEpisodes, "archived", true, "EpisodeId");
 
           syncTask.loggedData.push({ color: "orange", Message: toArchiveEpisodes.length + " Episodes Archived." });
         }
@@ -310,9 +310,7 @@ async function syncItemInfo(seasons_and_episodes, library_items) {
   syncTask.loggedData.push({ color: "yellow", Message: "Beginning File Info Sync" });
 
   let Items = library_items.filter((item) => item.Type !== "Series" && item.Type !== "Folder" && item.Id !== undefined);
-  let Episodes = seasons_and_episodes.filter(
-    (item) => item.Type === "Episode" && item.LocationType !== "Virtual" && item.Id !== undefined
-  );
+  let Episodes = seasons_and_episodes.filter((item) => item.Type === "Episode" && item.Id !== undefined);
 
   let insertItemInfoCount = 0;
   let insertEpisodeInfoCount = 0;
