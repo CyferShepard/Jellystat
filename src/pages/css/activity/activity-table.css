@@ -103,3 +103,20 @@ select option {
 .modal-content {
   background-color: var(--secondary-background-color) !important;
 }
+
+::-webkit-scrollbar {
+  width: 10px; /* set scrollbar width */
+}
+
+::-webkit-scrollbar-track {
+  background-color: transparent; /* set track color */
+}
+
+::-webkit-scrollbar-thumb {
+  background-color: #8888884d; /* set thumb color */
+  border-radius: 5px; /* round corners */
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background-color: #88888883; /* set thumb color */
+}

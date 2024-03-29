@@ -136,7 +136,6 @@ export default function ActivityTable(props) {
     {
       accessorKey: "UserName",
       header: "User",
-      size: 100,
       filterVariant: "select",
       filterSelectOptions: uniqueUserNames,
       Cell: ({ row }) => {
@@ -151,7 +150,7 @@ export default function ActivityTable(props) {
     {
       accessorKey: "RemoteEndPoint",
       header: "IP Address",
-      size: 100,
+
       Cell: ({ row }) => {
         row = row.original;
         if (
@@ -172,8 +171,7 @@ export default function ActivityTable(props) {
     {
       accessorFn: (row) => `${!row?.SeriesName ? row.NowPlayingItemName : row.SeriesName + " - " + row.NowPlayingItemName}`,
       header: "Title",
-      size: 400,
-      grow: true,
+      minSize: 300,
       Cell: ({ row }) => {
         row = row.original;
         return (
@@ -196,7 +194,6 @@ export default function ActivityTable(props) {
           </Link>
         );
       },
-      size: 100,
     },
     {
       accessorFn: (row) => new Date(row.ActivityDateInserted),
@@ -215,7 +212,6 @@ export default function ActivityTable(props) {
         row = row.original;
         return <span>{Intl.DateTimeFormat("en-UK", options).format(new Date(row.ActivityDateInserted))}</span>;
       },
-      size: 100,
     },
     {
       accessorKey: "PlaybackDuration",
@@ -228,7 +224,7 @@ export default function ActivityTable(props) {
       accessorFn: (row) => Number(row.TotalPlays ?? 1),
       header: "Total Plays",
       filterFn: "betweenInclusive",
-      size: 100,
+
       Cell: ({ cell }) => <span>{cell.getValue() ?? 1}</span>,
     },
   ];
@@ -241,6 +237,7 @@ export default function ActivityTable(props) {
     columns,
     data,
     columnFilterDisplayMode: "popover",
+    layoutMode: "grid",
     enableExpandAll: false,
     enableExpanding: true,
     enableDensityToggle: false,
@@ -278,6 +275,11 @@ export default function ActivityTable(props) {
         );
       }
     },
+    renderEmptyRowsFallback: ({ table }) => (
+      <span style={{ textAlign: "center", fontStyle: "italic", color: "grey" }} className="py-5">
+        <Trans i18nKey="ERROR_MESSAGES.NO_ACTIVITY" />
+      </span>
+    ),
     muiTableBodyRowProps: {
       sx: {
         "&:hover .MuiCheckbox-root": {
