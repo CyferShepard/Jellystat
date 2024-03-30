@@ -181,7 +181,8 @@
       "1_WEEK": "1 Week"
     },
     "SELECT_LIBRARIES_TO_IMPORT": "Select Libraries to Import",
-    "SELECT_LIBRARIES_TO_IMPORT_TOOLTIP": "Activity for Items within these libraries are still Tracked - Even when not imported."
+    "SELECT_LIBRARIES_TO_IMPORT_TOOLTIP": "Activity for Items within these libraries are still Tracked - Even when not imported.",
+    "DATE_ADDED": "Date Added"
   },
   "TASK_TYPE": {
     "JOB": "Job",

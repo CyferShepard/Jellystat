@@ -133,6 +133,7 @@ class JellyfinAPI {
             "X-MediaBrowser-Token": this.config.JF_API_KEY,
           },
           params: {
+            fields: "MediaSources,DateCreated",
             startIndex: startIndex,
             recursive: recursive,
             limit: increment,
@@ -183,7 +184,7 @@ class JellyfinAPI {
             "X-MediaBrowser-Token": this.config.JF_API_KEY,
           },
           params: {
-            fields: "MediaSources",
+            fields: "MediaSources,DateCreated",
             startIndex: startIndex,
             recursive: recursive,
             limit: increment,
@@ -334,7 +335,7 @@ class JellyfinAPI {
           "X-MediaBrowser-Token": this.config.JF_API_KEY,
         },
         params: {
-          fields: "MediaSources",
+          fields: "MediaSources,DateCreated",
         },
       });
 

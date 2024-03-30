@@ -103,7 +103,7 @@ function LibraryItems(props) {
         </h1>
 
         <div className="d-flex flex-column flex-md-row">
-          <div className="d-flex flex-row w-100">
+          <div className="d-flex flex-row w-md-75">
             <FormSelect onChange={(e) => setShowArchived(e.target.value)} className="my-md-3 w-100 rounded">
               <option value="all">
                 <Trans i18nKey="ALL" />
@@ -115,13 +115,17 @@ function LibraryItems(props) {
                 <Trans i18nKey="NOT_ARCHIVED" />
               </option>
             </FormSelect>
-
+          </div>
+          <div className="d-flex flex-row w-100  mt-2 mt-md-0">
             <FormSelect
               onChange={(e) => sortOrderLogic(e.target.value)}
               className="ms-md-3 my-md-3 w-100 rounded-0 rounded-start"
             >
               <option value="Title">
                 <Trans i18nKey="TITLE" />
+              </option>
+              <option value="Date">
+                <Trans i18nKey="SETTINGS_PAGE.DATE_ADDED" />
               </option>
               <option value="Views">
                 <Trans i18nKey="VIEWS" />
@@ -143,7 +147,7 @@ function LibraryItems(props) {
             placeholder="Search"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="ms-md-3 my-3 w-sm-100 w-md-75"
+            className="ms-md-3 mt-2 mb-2 my-md-3 w-sm-100 w-md-75"
           />
         </div>
       </div>
@@ -159,6 +163,11 @@ function LibraryItems(props) {
                 return titleA.localeCompare(titleB);
               }
               return titleB.localeCompare(titleA);
+            } else if (sortOrder === "Date") {
+              if (sortAsc) {
+                return new Date(a.DateCreated || 0) - new Date(b.DateCreated || 0);
+              }
+              return new Date(b.DateCreated || 0) - new Date(a.DateCreated || 0);
             } else if (sortOrder === "Views") {
               if (sortAsc) {
                 return a.times_played - b.times_played;
