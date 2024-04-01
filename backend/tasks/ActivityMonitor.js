@@ -27,7 +27,7 @@ async function ActivityMonitor(interval) {
       /////get data from jf_activity_monitor
       const WatchdogData = await db.query("SELECT * FROM jf_activity_watchdog").then((res) => res.rows);
 
-      /////return if no necessary changes made to reduce resource consumtion
+      /////return if no necessary changes made to reduce resource consumption
       if (SessionData.length === 0 && WatchdogData.length === 0) {
         return;
       }
@@ -50,21 +50,25 @@ async function ActivityMonitor(interval) {
               (wdData) =>
                 wdData.Id === session.Id &&
                 wdData.UserId === session.UserId &&
-                wdData.NowPlayingItemId === session.NowPlayingItem.Id &&
-                wdData.EpisodeId === session.NowPlayingItem.EpisodeId
+                (session.NowPlayingItem.SeriesId
+                  ? wdData.NowPlayingItemId === session.NowPlayingItem.SeriesId
+                  : wdData.NowPlayingItemId === session.NowPlayingItem.Id) &&
+                wdData.EpisodeId === session.NowPlayingItem.Id
             )
         ).map(jf_activity_watchdog_mapping);
 
         WatchdogDataToUpdate = WatchdogData.filter((wdData) => {
           const session = SessionData.find(
             (sessionData) =>
-              sessionData.Id === wdData.Id &&
+              wdData.Id === sessionData.Id &&
               wdData.UserId === sessionData.UserId &&
-              wdData.NowPlayingItemId === sessionData.NowPlayingItem.Id &&
-              wdData.EpisodeId === sessionData.NowPlayingItem.EpisodeId
+              (sessionData.NowPlayingItem.SeriesId
+                ? wdData.NowPlayingItemId === sessionData.NowPlayingItem.SeriesId
+                : wdData.NowPlayingItemId === sessionData.NowPlayingItem.Id) &&
+              wdData.EpisodeId === sessionData.NowPlayingItem.Id
           );
           if (session && session.PlayState) {
-            if (wdData.IsPaused !== session.PlayState.IsPaused) {
+            if (wdData.IsPaused != session.PlayState.IsPaused) {
               wdData.IsPaused = session.PlayState.IsPaused;
               return true;
             }
@@ -86,7 +90,7 @@ async function ActivityMonitor(interval) {
 
           let diffInSeconds = endTime.diff(startTime, "seconds");
 
-          if (obj.IsPaused) {
+          if (obj.IsPaused == true) {
             obj.PlaybackDuration = parseInt(obj.PlaybackDuration) + diffInSeconds;
           }
 
@@ -142,7 +146,7 @@ async function ActivityMonitor(interval) {
 
         let diffInSeconds = endTime.diff(startTime, "seconds");
 
-        if (!obj.IsPaused) {
+        if (obj.IsPaused == false) {
           obj.PlaybackDuration = parseInt(obj.PlaybackDuration) + diffInSeconds;
         }
 
@@ -151,6 +155,10 @@ async function ActivityMonitor(interval) {
 
         return { ...rest };
       });
+
+      if (playbackToInsert.length == 0 && toDeleteIds.length == 0) {
+        return;
+      }
 
       /////get data from jf_playback_activity within the last hour with progress of <=80% for current items in session
 

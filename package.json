@@ -5,7 +5,7 @@
   "main": "src/index.jsx",
   "scripts": {
     "start-client": "vite --host --port 3001",
-    "start-server": "cd backend && nodemon server.js",
+    "start-server": "cd backend && nodemon --inspect server.js",
     "start-dev": "concurrently \"npm run start-server\" \"npm run start-client\"",
     "deploy-local": "npm run build && npm run start-server",
     "lint": "eslint . --ext js,jsx --report-unused-disable-directives --max-warnings 0",
