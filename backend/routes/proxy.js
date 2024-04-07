@@ -163,4 +163,48 @@ router.get("/getRecentlyAdded", async (req, res) => {
   }
 });
 
+//Jellyfin related functions
+
+router.post("/validateSettings", async (req, res) => {
+  const { url, apikey } = req.body;
+
+  if (url === undefined || apikey === undefined) {
+    res.status(400);
+    res.send("URL or API Key not provided");
+    return;
+  }
+
+  const urlRegex = new RegExp(
+    "^((http|https):\\/\\/)?" + // optional protocol
+      "((([a-zA-Z0-9][a-zA-Z0-9-]*[a-zA-Z0-9])\\.)+" + // subdomain
+      "([a-zA-Z0-9][a-zA-Z0-9-]*[a-zA-Z0-9])" + // domain name
+      "|([0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3}))" + // OR ip (v4) address
+      "(\\:[0-9]+)?$", // port
+    "i" // case-insensitive
+  );
+
+  const isValidUrl = (string) => urlRegex.test(string);
+  console.log(url, isValidUrl(url));
+  if (!isValidUrl(url)) {
+    res.status(400);
+
+    res.send({
+      isValid: false,
+      errorMessage: "Invalid URL",
+    });
+    return;
+  }
+
+  var _url = url;
+  _url = _url.replace(/\/web\/index\.html#!\/home\.html$/, "");
+  if (!/^https?:\/\//i.test(url)) {
+    _url = "http://" + url;
+  }
+  _url = _url.replace(/\/$/, "") + "/system/configuration";
+
+  const validation = await Jellyfin.validateSettings(_url, apikey);
+
+  res.send(validation);
+});
+
 module.exports = router;

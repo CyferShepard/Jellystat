@@ -19,10 +19,10 @@ const knexConfig = require("./migrations");
 const authRouter = require("./routes/auth");
 const apiRouter = require("./routes/api");
 const proxyRouter = require("./routes/proxy");
-const syncRouter = require("./routes/sync");
+const { router: syncRouter } = require("./routes/sync");
 const statsRouter = require("./routes/stats");
-const backupRouter = require("./routes/backup");
-const logRouter = require("./routes/logging");
+const { router: backupRouter } = require("./routes/backup");
+const { router: logRouter } = require("./routes/logging");
 const utilsRouter = require("./routes/utils");
 
 // tasks
@@ -61,16 +61,16 @@ app.use("/proxy", proxyRouter, () => {
 app.use("/api", authenticate, apiRouter, () => {
   /*  #swagger.tags = ['API']*/
 }); // mount the API router at /api, with JWT middleware
-app.use("/sync", authenticate, syncRouter.router, () => {
+app.use("/sync", authenticate, syncRouter, () => {
   /*  #swagger.tags = ['Sync']*/
 }); // mount the API router at /sync, with JWT middleware
 app.use("/stats", authenticate, statsRouter, () => {
   /*  #swagger.tags = ['Stats']*/
 }); // mount the API router at /stats, with JWT middleware
-app.use("/backup", authenticate, backupRouter.router, () => {
+app.use("/backup", authenticate, backupRouter, () => {
   /*  #swagger.tags = ['Backup']*/
 }); // mount the API router at /backup, with JWT middleware
-app.use("/logs", authenticate, logRouter.router, () => {
+app.use("/logs", authenticate, logRouter, () => {
   /*  #swagger.tags = ['Logs']*/
 }); // mount the API router at /logs, with JWT middleware
 app.use("/utils", authenticate, utilsRouter, () => {

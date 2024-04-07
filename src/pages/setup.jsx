@@ -38,21 +38,18 @@ function Setup() {
   }
 
   async function validateSettings(_url, _apikey) {
-    const result = await axios.post(
-      "/api/validateSettings",
-      {
+    const result = await axios
+      .post("/proxy/validateSettings", {
         url: _url,
         apikey: _apikey,
-      },
-      {
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "application/json",
-        },
-      }
-    );
+      })
+      .catch((error) => {
+        return error.response;
+      });
 
     let data = result.data;
+    console.log(result);
+    console.log(data);
     return { isValid: data.isValid, errorMessage: data.errorMessage };
   }
 
@@ -70,12 +67,7 @@ function Setup() {
 
     // Send a POST request to /api/setconfig/ with the updated configuration
     axios
-      .post("/api/setconfig/", formValues, {
-        headers: {
-          Authorization: `Bearer ${config.token}`,
-          "Content-Type": "application/json",
-        },
-      })
+      .post("/auth/configSetup/", formValues)
       .then(async () => {
         setsubmitButtonText(i18next.t("SETTINGS_SAVED"));
         setProcessing(false);

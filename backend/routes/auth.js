@@ -83,4 +83,33 @@ router.post("/createuser", async (req, res) => {
   }
 });
 
+router.post("/configSetup", async (req, res) => {
+  try {
+    const { JF_HOST, JF_API_KEY } = req.body;
+    const config = await new configClass().getConfig();
+
+    if (JF_HOST === undefined && JF_API_KEY === undefined) {
+      res.status(400);
+      res.send("JF_HOST and JF_API_KEY are required for configuration");
+      return;
+    }
+
+    const { rows: getConfig } = await db.query('SELECT * FROM app_config where "ID"=1');
+
+    if (config.state != null && config.state < 2) {
+      let query = 'UPDATE app_config SET "JF_HOST"=$1, "JF_API_KEY"=$2 where "ID"=1';
+      if (getConfig.length === 0) {
+        query = 'INSERT INTO app_config ("ID","JF_HOST","JF_API_KEY","APP_USER","APP_PASSWORD") VALUES (1,$1,$2,null,null)';
+      }
+
+      const { rows } = await db.query(query, [JF_HOST, JF_API_KEY]);
+      res.send(rows);
+    } else {
+      res.sendStatus(500);
+    }
+  } catch (error) {
+    console.log(error);
+  }
+});
+
 module.exports = router;

@@ -412,9 +412,6 @@ class JellyfinAPI {
   }
 
   async validateSettings(url, apikey) {
-    if (!this.configReady) {
-      return [];
-    }
     try {
       const response = await axios.get(url, {
         headers: {

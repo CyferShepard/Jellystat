@@ -897,26 +897,4 @@ router.post("/deletePlaybackActivity", async (req, res) => {
   }
 });
 
-//Jellyfin related functions
-
-router.post("/validateSettings", async (req, res) => {
-  const { url, apikey } = req.body;
-
-  if (url === undefined || apikey === undefined) {
-    res.status(400);
-    res.send("URL or API Key not provided");
-    return;
-  }
-
-  var _url = url;
-  _url = _url.replace(/\/web\/index\.html#!\/home\.html$/, "");
-  if (!/^https?:\/\//i.test(url)) {
-    _url = "http://" + url;
-  }
-  _url = _url.replace(/\/$/, "") + "/system/configuration";
-
-  const validation = await Jellyfin.validateSettings(_url, apikey);
-  res.send(validation);
-});
-
 module.exports = router;
