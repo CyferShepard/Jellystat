@@ -173,14 +173,16 @@ async function ActivityMonitor(interval) {
         );
       let ExistingDataToUpdate = [];
 
-      //for each item in playbackToInsert, check if it exists in the recent playback activity and update accordingly
+      //for each item in playbackToInsert, check if it exists in the recent playback activity and update accordingly. insert new row if updating existing exceeds the runtime
       if (playbackToInsert.length > 0 && ExistingRecords.length > 0) {
         ExistingDataToUpdate = playbackToInsert.filter((playbackData) => {
           const existingrow = ExistingRecords.find(
             (existing) =>
               existing.NowPlayingItemId === playbackData.NowPlayingItemId &&
               existing.EpisodeId === playbackData.EpisodeId &&
-              existing.UserId === playbackData.UserId
+              existing.UserId === playbackData.UserId &&
+              (Number(existing.PlaybackDuration) + Number(playbackData.PlaybackDuration)) * 10000000 <=
+                Number(existing.RunTimeTicks)
           );
 
           if (existingrow) {
