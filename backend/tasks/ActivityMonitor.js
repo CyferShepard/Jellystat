@@ -50,10 +50,10 @@ async function ActivityMonitor(interval) {
               (wdData) =>
                 wdData.Id === session.Id &&
                 wdData.UserId === session.UserId &&
-                (session.NowPlayingItem.SeriesId
+                (session.NowPlayingItem.SeriesId != undefined
                   ? wdData.NowPlayingItemId === session.NowPlayingItem.SeriesId
                   : wdData.NowPlayingItemId === session.NowPlayingItem.Id) &&
-                wdData.EpisodeId === session.NowPlayingItem.Id
+                (session.NowPlayingItem.SeriesId != undefined ? wdData.EpisodeId === session.NowPlayingItem.Id : true)
             )
         ).map(jf_activity_watchdog_mapping);
 
@@ -62,10 +62,10 @@ async function ActivityMonitor(interval) {
             (sessionData) =>
               wdData.Id === sessionData.Id &&
               wdData.UserId === sessionData.UserId &&
-              (sessionData.NowPlayingItem.SeriesId
+              (sessionData.NowPlayingItem.SeriesId != undefined
                 ? wdData.NowPlayingItemId === sessionData.NowPlayingItem.SeriesId
                 : wdData.NowPlayingItemId === sessionData.NowPlayingItem.Id) &&
-              wdData.EpisodeId === sessionData.NowPlayingItem.Id
+              (sessionData.NowPlayingItem.SeriesId != undefined ? wdData.EpisodeId === sessionData.NowPlayingItem.Id : true)
           );
           if (session && session.PlayState) {
             if (wdData.IsPaused != session.PlayState.IsPaused) {
@@ -79,11 +79,13 @@ async function ActivityMonitor(interval) {
 
       if (WatchdogDataToInsert.length > 0) {
         //insert new rows where not existing items
+        // console.log("Inserted " + WatchdogDataToInsert.length + " wd playback records");
         db.insertBulk("jf_activity_watchdog", WatchdogDataToInsert, jf_activity_watchdog_columns);
       }
 
       //update wd state
       if (WatchdogDataToUpdate.length > 0) {
+        // console.log("Updated " + WatchdogDataToUpdate.length + " existing playback records");
         const WatchdogDataUpdated = WatchdogDataToUpdate.map((obj) => {
           let startTime = moment(obj.ActivityDateInserted, "YYYY-MM-DD HH:mm:ss.SSSZ");
           let endTime = moment();
@@ -213,10 +215,12 @@ async function ActivityMonitor(interval) {
       }
       if (playbackToInsert.length > 0) {
         await db.insertBulk("jf_playback_activity", playbackToInsert, columnsPlayback);
+        // console.log("Inserted " + playbackToInsert.length + " new playback records");
       }
 
       if (ExistingDataToUpdate.length > 0) {
         await db.insertBulk("jf_playback_activity", ExistingDataToUpdate, columnsPlayback);
+        // console.log("Updated " + playbackToInsert.length + " playback records");
       }
 
       ///////////////////////////
