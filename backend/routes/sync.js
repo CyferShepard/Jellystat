@@ -806,6 +806,11 @@ router.post("/fetchItem", async (req, res) => {
         item.push(...libraryItemsWithParent);
       }
     }
+    if (item.length === 0) {
+      res.status(404);
+      res.send({ error: "Error: Item not found in library" });
+      return;
+    }
 
     let insertTable = "jf_library_items";
     let itemToInsert = await item.map((item) => {
