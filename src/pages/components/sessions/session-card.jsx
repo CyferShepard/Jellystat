@@ -159,13 +159,16 @@ function SessionCard(props) {
                     <img
                      className="card-device-image"
                      src={
-                    "/proxy/web/assets/img/devices/?devicename=" 
-                    +
-                    (props.data.session.Client.toLowerCase().includes("web") ? 
-                    ( clientData.find(item => props.data.session.DeviceName.toLowerCase().includes(item)) || "other")
-                    :
-                    ( clientData.find(item => props.data.session.Client.toLowerCase().includes(item)) || "other")
-                    )}
+                      "/proxy/web/assets/img/devices/?devicename=" +
+                      (props.data.session.Client.toLowerCase() === "jellyfin mobile (ios)" && props.data.session.DeviceName.toLowerCase() === "iphone" ?
+                        "apple"
+                      :
+                        props.data.session.Client.toLowerCase().includes("web") ? 
+                          ( clientData.find(item => props.data.session.DeviceName.toLowerCase().includes(item)) || "other")
+                        :
+                          ( clientData.find(item => props.data.session.Client.toLowerCase().includes(item)) || "other")
+                      )
+                    }
                     alt=""
                      />
                   </Col>
