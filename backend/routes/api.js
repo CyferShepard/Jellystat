@@ -786,7 +786,13 @@ router.delete("/libraryItems/purge", async (req, res) => {
 //DB Queries - History
 router.get("/getHistory", async (req, res) => {
   try {
-    const { rows } = await db.query(`SELECT * FROM jf_playback_activity order by "ActivityDateInserted" desc`);
+    const { rows } = await db.query(`
+    SELECT a.*, e."IndexNumber" "EpisodeNumber",e."ParentIndexNumber" "SeasonNumber" 
+    FROM jf_playback_activity a
+    left join jf_library_episodes e
+    on a."EpisodeId"=e."EpisodeId"
+    and a."SeasonId"=e."SeasonId"
+     order by a."ActivityDateInserted" desc`);
 
     const groupedResults = groupActivity(rows);
 
@@ -807,7 +813,15 @@ router.post("/getLibraryHistory", async (req, res) => {
     }
 
     const { rows } = await db.query(
-      `select a.* from jf_playback_activity a join jf_library_items i on i."Id"=a."NowPlayingItemId"  where i."ParentId"=$1 order by "ActivityDateInserted" desc`,
+      `select a.* , e."IndexNumber" "EpisodeNumber",e."ParentIndexNumber" "SeasonNumber" 
+      from jf_playback_activity a 
+      join jf_library_items i 
+      on i."Id"=a."NowPlayingItemId" 
+      left join jf_library_episodes e
+      on a."EpisodeId"=e."EpisodeId"
+      and a."SeasonId"=e."SeasonId"  
+      where i."ParentId"=$1 
+      order by a."ActivityDateInserted" desc`,
       [libraryid]
     );
     const groupedResults = groupActivity(rows);
@@ -830,10 +844,13 @@ router.post("/getItemHistory", async (req, res) => {
     }
 
     const { rows } = await db.query(
-      `select jf_playback_activity.*
-      from jf_playback_activity jf_playback_activity
+      `select a.*, e."IndexNumber" "EpisodeNumber",e."ParentIndexNumber" "SeasonNumber" 
+      from jf_playback_activity a
+      left join jf_library_episodes e
+    on a."EpisodeId"=e."EpisodeId"
+    and a."SeasonId"=e."SeasonId"
       where
-      ("EpisodeId"=$1 OR "SeasonId"=$1 OR "NowPlayingItemId"=$1);`,
+      (a."EpisodeId"=$1 OR a."SeasonId"=$1 OR a."NowPlayingItemId"=$1);`,
       [itemid]
     );
 
@@ -861,9 +878,12 @@ router.post("/getUserHistory", async (req, res) => {
     }
 
     const { rows } = await db.query(
-      `select jf_playback_activity.*
-      from jf_playback_activity jf_playback_activity
-      where "UserId"=$1;`,
+      `select a.*, e."IndexNumber" "EpisodeNumber",e."ParentIndexNumber" "SeasonNumber" 
+      from jf_playback_activity a
+      left join jf_library_episodes e
+      on a."EpisodeId"=e."EpisodeId"
+      and a."SeasonId"=e."SeasonId"
+      where a."UserId"=$1;`,
       [userid]
     );
 

@@ -169,14 +169,21 @@ export default function ActivityTable(props) {
       },
     },
     {
-      accessorFn: (row) => `${!row?.SeriesName ? row.NowPlayingItemName : row.SeriesName + " - " + row.NowPlayingItemName}`,
+      accessorFn: (row) =>
+        `${
+          !row?.SeriesName
+            ? row.NowPlayingItemName
+            : row.SeriesName + " : S" + row.SeasonNumber + "E" + row.EpisodeNumber + " - " + row.NowPlayingItemName
+        }`,
       header: "Title",
       minSize: 300,
       Cell: ({ row }) => {
         row = row.original;
         return (
           <Link to={`/libraries/item/${row.EpisodeId || row.NowPlayingItemId}`} className="text-decoration-none">
-            {!row.SeriesName ? row.NowPlayingItemName : row.SeriesName + " - " + row.NowPlayingItemName}
+            {!row.SeriesName
+              ? row.NowPlayingItemName
+              : row.SeriesName + " : S" + row.SeasonNumber + "E" + row.EpisodeNumber + " - " + row.NowPlayingItemName}
           </Link>
         );
       },
