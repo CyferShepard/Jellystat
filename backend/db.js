@@ -94,33 +94,36 @@ async function insertBulk(table_name, data, columns) {
         currentItem.Id ? item.Id === currentItem.Id : item.rowid === currentItem.rowid
       );
 
-      let isNotPbDuplicate = true;
-      if (table_name.toLowerCase() === "jf_playback_activity") {
-        let uniqueItems = accumulator.filter(
-          (item, index, self) =>
-            index ===
-            self.findIndex(
-              (t) =>
-                moment(t.ActivityDateInserted, "YYYY-MM-DD HH:mm:ss.SSSZ")
-                  .millisecond(0)
-                  .isSame(moment(item.ActivityDateInserted, "YYYY-MM-DD HH:mm:ss.SSSZ").millisecond(0)) &&
-                t.UserId === item.UserId &&
-                t.NowPlayingItemId === item.NowPlayingItemId &&
-                t.SeasonId === item.SeasonId &&
-                t.EpisodeId === item.EpisodeId &&
-                t.PlaybackDuration === item.PlaybackDuration &&
-                t.DeviceId === item.DeviceId
-            )
-        );
-        isNotPbDuplicate = uniqueItems.length == 0 ? true : false;
-      }
-
-      if (isNotDuplicate && isNotPbDuplicate) {
+      if (isNotDuplicate) {
         accumulator.push(currentItem);
       }
 
       return accumulator;
     }, []);
+
+    if (table_name.toLowerCase() === "jf_playback_activity") {
+      data = data.reduce(async (accumulator, currentItem) => {
+        let isNotPbDuplicate = true;
+        const existingInsertCheck = await query(
+          `SELECT * FROM jf_activity_watchdog where "NowPlayingItemId" =$1 and "SeasonId"=$2 and "EpisodeId"=$3  and "UserId"=$4 and "DeviceId"=$5 order by "ActivityDateInserted" desc limit 1`,
+          [currentItem.NowPlayingItemId, currentItem.SeasonId, currentItem.EpisodeId, currentItem.UserId, currentItem.DeviceId]
+        ).then((res) => res.rows);
+
+        if (existingInsertCheck.length > 0) {
+          const pbTime = moment(existingInsertCheck[0].ActivityDateInserted, "YYYY-MM-DD HH:mm:ss.SSSZ").millisecond(0);
+          const ciTime = moment(currentItem.ActivityDateInserted, "YYYY-MM-DD HH:mm:ss.SSSZ").millisecond(0);
+          if (pbTime.isSame(ciTime)) {
+            isNotPbDuplicate = false;
+          }
+        }
+
+        if (isNotPbDuplicate) {
+          accumulator.push(currentItem);
+        }
+
+        return accumulator;
+      }, []);
+    }
   }
 
   //
