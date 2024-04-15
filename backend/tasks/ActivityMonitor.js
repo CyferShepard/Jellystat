@@ -50,6 +50,7 @@ async function ActivityMonitor(interval) {
               (wdData) =>
                 wdData.Id === session.Id &&
                 wdData.UserId === session.UserId &&
+                wdData.DeviceId === session.DeviceId &&
                 (session.NowPlayingItem.SeriesId != undefined
                   ? wdData.NowPlayingItemId === session.NowPlayingItem.SeriesId
                   : wdData.NowPlayingItemId === session.NowPlayingItem.Id) &&
@@ -62,6 +63,7 @@ async function ActivityMonitor(interval) {
             (sessionData) =>
               wdData.Id === sessionData.Id &&
               wdData.UserId === sessionData.UserId &&
+              wdData.DeviceId === sessionData.DeviceId &&
               (sessionData.NowPlayingItem.SeriesId != undefined
                 ? wdData.NowPlayingItemId === sessionData.NowPlayingItem.SeriesId
                 : wdData.NowPlayingItemId === sessionData.NowPlayingItem.Id) &&
