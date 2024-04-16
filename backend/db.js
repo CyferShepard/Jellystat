@@ -102,13 +102,14 @@ async function insertBulk(table_name, data, columns) {
     }, []);
 
     if (table_name.toLowerCase() === "jf_playback_activity") {
-      data = data.reduce(async (accumulator, currentItem) => {
-        let isNotPbDuplicate = true;
+      let accumulator = [];
+      for (const currentItem of data) {
         const existingInsertCheck = await query(
           `SELECT * FROM jf_activity_watchdog where "NowPlayingItemId" =$1 and "SeasonId"=$2 and "EpisodeId"=$3  and "UserId"=$4 and "DeviceId"=$5 order by "ActivityDateInserted" desc limit 1`,
           [currentItem.NowPlayingItemId, currentItem.SeasonId, currentItem.EpisodeId, currentItem.UserId, currentItem.DeviceId]
         ).then((res) => res.rows);
 
+        let isNotPbDuplicate = true;
         if (existingInsertCheck.length > 0) {
           const pbTime = moment(existingInsertCheck[0].ActivityDateInserted, "YYYY-MM-DD HH:mm:ss.SSSZ").millisecond(0);
           const ciTime = moment(currentItem.ActivityDateInserted, "YYYY-MM-DD HH:mm:ss.SSSZ").millisecond(0);
@@ -120,9 +121,9 @@ async function insertBulk(table_name, data, columns) {
         if (isNotPbDuplicate) {
           accumulator.push(currentItem);
         }
+      }
 
-        return accumulator;
-      }, []);
+      data = accumulator;
     }
   }
 

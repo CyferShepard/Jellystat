@@ -44,19 +44,18 @@ async function ActivityMonitor(interval) {
         WatchdogDataToInsert = await SessionData.map(jf_activity_watchdog_mapping);
       } else {
         // otherwise, filter only new data to insert
-        WatchdogDataToInsert = await SessionData.filter(
-          (session) =>
-            !WatchdogData.filter(
-              (wdData) =>
-                wdData.Id === session.Id &&
-                wdData.UserId === session.UserId &&
-                wdData.DeviceId === session.DeviceId &&
-                (session.NowPlayingItem.SeriesId != undefined
-                  ? wdData.NowPlayingItemId === session.NowPlayingItem.SeriesId
-                  : wdData.NowPlayingItemId === session.NowPlayingItem.Id) &&
-                (session.NowPlayingItem.SeriesId != undefined ? wdData.EpisodeId === session.NowPlayingItem.Id : true)
-            )
-        ).map(jf_activity_watchdog_mapping);
+        WatchdogDataToInsert = await SessionData.filter((sessionData) => {
+          return !WatchdogData.some(
+            (wdData) =>
+              wdData.Id === sessionData.Id &&
+              wdData.UserId === sessionData.UserId &&
+              wdData.DeviceId === sessionData.DeviceId &&
+              (sessionData.NowPlayingItem.SeriesId != undefined
+                ? wdData.NowPlayingItemId === sessionData.NowPlayingItem.SeriesId
+                : wdData.NowPlayingItemId === sessionData.NowPlayingItem.Id) &&
+              (sessionData.NowPlayingItem.SeriesId != undefined ? wdData.EpisodeId === sessionData.NowPlayingItem.Id : true)
+          );
+        }).map(jf_activity_watchdog_mapping);
 
         WatchdogDataToUpdate = WatchdogData.filter((wdData) => {
           const session = SessionData.find(
