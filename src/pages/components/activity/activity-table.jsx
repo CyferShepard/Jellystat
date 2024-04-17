@@ -203,6 +203,12 @@ export default function ActivityTable(props) {
       },
     },
     {
+      accessorKey: "DeviceName",
+      header: "Device",
+
+      // Cell: ({ cell }) => <span>{cell.getValue() ?? 1}</span>,
+    },
+    {
       accessorFn: (row) => new Date(row.ActivityDateInserted),
       header: "Date",
       filterVariant: "date-range",
