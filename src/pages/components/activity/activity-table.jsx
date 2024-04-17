@@ -205,12 +205,11 @@ export default function ActivityTable(props) {
     {
       accessorKey: "DeviceName",
       header: "Device",
-
-      // Cell: ({ cell }) => <span>{cell.getValue() ?? 1}</span>,
     },
     {
       accessorFn: (row) => new Date(row.ActivityDateInserted),
       header: "Date",
+      size: 110,
       filterVariant: "date-range",
       Cell: ({ row }) => {
         const options = {
@@ -229,6 +228,7 @@ export default function ActivityTable(props) {
     {
       accessorKey: "PlaybackDuration",
       header: "Total Playback",
+      minSize: 200,
       filterFn: (row, id, filterValue) => formatTotalWatchTime(row.getValue(id)).startsWith(filterValue),
 
       Cell: ({ cell }) => <span>{formatTotalWatchTime(cell.getValue())}</span>,
@@ -320,10 +320,10 @@ export default function ActivityTable(props) {
       }
 
       return row.results;
-    }, //default
+    },
     paginateExpandedRows: false,
     onPaginationChange: setPagination,
-    getRowId: (row) => row.Id, //default
+    getRowId: (row) => row.Id,
     muiExpandButtonProps: ({ row }) => ({
       children: row.getIsExpanded() ? <IndeterminateCircleFillIcon /> : <AddCircleFillIcon />,
       onClick: () => table.setExpanded({ [row.id]: !row.getIsExpanded() }),
