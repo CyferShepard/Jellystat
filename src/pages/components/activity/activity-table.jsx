@@ -16,7 +16,7 @@ import i18next from "i18next";
 import IpInfoModal from "../ip-info";
 // import Loading from "../general/loading";
 import { MRT_TablePagination, MaterialReactTable, useMaterialReactTable } from "material-react-table";
-import { Box, MenuItem, ThemeProvider, Typography, createTheme } from "@mui/material";
+import { Box, ThemeProvider, Typography, createTheme } from "@mui/material";
 
 import { Link } from "react-router-dom";
 import { Button, Modal } from "react-bootstrap";
@@ -117,7 +117,7 @@ export default function ActivityTable(props) {
           },
         }
       )
-      .then((response) => {
+      .then(() => {
         setData(data.filter((item) => !rowSelection[item.Id]));
         setRowSelection({});
       })
@@ -266,7 +266,7 @@ export default function ActivityTable(props) {
     enableSubRowSelection: true,
     onRowSelectionChange: setRowSelection,
     positionToolbarAlertBanner: "bottom",
-    renderTopToolbarCustomActions: ({ table }) => {
+    renderTopToolbarCustomActions: () => {
       if (Object.keys(rowSelection).length > 0) {
         return (
           <Box sx={{ display: "flex", gap: "1rem", p: "0px" }}>
@@ -288,7 +288,7 @@ export default function ActivityTable(props) {
         );
       }
     },
-    renderEmptyRowsFallback: ({ table }) => (
+    renderEmptyRowsFallback: () => (
       <span style={{ textAlign: "center", fontStyle: "italic", color: "grey" }} className="py-5">
         <Trans i18nKey="ERROR_MESSAGES.NO_ACTIVITY" />
       </span>

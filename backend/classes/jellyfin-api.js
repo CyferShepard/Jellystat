@@ -19,7 +19,7 @@ class JellyfinAPI {
     }, 5000); // Check every 5 seconds
   }
 
-  #errorHandler(error) {
+  #errorHandler(error, url) {
     if (error.response) {
       switch (error.response.status) {
         case 400:
@@ -45,6 +45,7 @@ class JellyfinAPI {
         ErrorAt: this.#getErrorLineNumber(error),
         ErrorLines: this.#getErrorLineNumbers(error),
         Message: error.message,
+        url: url,
         // StackTrace: this.#getStackTrace(error),
       });
     }
@@ -274,9 +275,8 @@ class JellyfinAPI {
     if (!this.configReady) {
       return [];
     }
+    let url = `${this.config.JF_HOST}/Shows/${SeriesId}/Seasons`;
     try {
-      let url = `${this.config.JF_HOST}/Shows/${SeriesId}/Seasons`;
-
       const response = await axios.get(url, {
         headers: {
           "X-MediaBrowser-Token": this.config.JF_API_KEY,
@@ -285,7 +285,7 @@ class JellyfinAPI {
 
       return response?.data?.Items?.filter((item) => item.LocationType !== "Virtual") || [];
     } catch (error) {
-      this.#errorHandler(error);
+      this.#errorHandler(error, url);
       return [];
     }
   }
