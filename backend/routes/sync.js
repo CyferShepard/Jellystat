@@ -81,7 +81,7 @@ class sync {
 
 async function syncUserData() {
   sendUpdate(syncTask.wsKey, { type: "Update", message: "Syncing User Data" });
-  syncTask.loggedData.push({ color: "lawngreen", Message: "Syncing... 1/6" });
+  syncTask.loggedData.push({ color: "lawngreen", Message: "Syncing... 1/7" });
   syncTask.loggedData.push({ color: "yellow", Message: "Beginning User Sync" });
 
   const _sync = new sync();
@@ -110,7 +110,7 @@ async function syncUserData() {
 
 async function syncLibraryFolders(data, existing_excluded_libraries) {
   sendUpdate(syncTask.wsKey, { type: "Update", message: "Syncing Library Folders" });
-  syncTask.loggedData.push({ color: "lawngreen", Message: "Syncing... 2/6" });
+  syncTask.loggedData.push({ color: "lawngreen", Message: "Syncing... 2/7" });
   syncTask.loggedData.push({ color: "yellow", Message: "Beginning Library Sync" });
   const _sync = new sync();
   const existingIds = await db
@@ -152,8 +152,8 @@ async function syncLibraryItems(data) {
   const _sync = new sync();
   const existingLibraryIds = await _sync.getExistingIDsforTable("jf_libraries"); // get existing library Ids from the db
 
-  syncTask.loggedData.push({ color: "lawngreen", Message: "Syncing... 3/6" });
-  sendUpdate(syncTask.wsKey, { type: "Update", message: "Beginning Library Item Sync (3/6)" });
+  syncTask.loggedData.push({ color: "lawngreen", Message: "Syncing... 3/7" });
+  sendUpdate(syncTask.wsKey, { type: "Update", message: "Beginning Library Item Sync (3/7)" });
   syncTask.loggedData.push({ color: "yellow", Message: "Beginning Library Item Sync" });
 
   data = data.filter((row) => existingLibraryIds.includes(row.ParentId));
@@ -193,8 +193,8 @@ async function syncLibraryItems(data) {
 
 async function syncShowItems(data) {
   const _sync = new sync();
-  syncTask.loggedData.push({ color: "lawngreen", Message: "Syncing... 4/6" });
-  sendUpdate(syncTask.wsKey, { type: "Update", message: "Beginning Show Item Sync (4/6)" });
+  syncTask.loggedData.push({ color: "lawngreen", Message: "Syncing... 4/7" });
+  sendUpdate(syncTask.wsKey, { type: "Update", message: "Beginning Show Item Sync (4/7)" });
   syncTask.loggedData.push({ color: "yellow", Message: "Beginning Seasons and Episode sync" });
 
   const { rows: shows } = await db.query(`SELECT *	FROM public.jf_library_items where "Type"='Series'`);
@@ -305,8 +305,8 @@ async function syncShowItems(data) {
   syncTask.loggedData.push({ color: "yellow", Message: "Sync Complete" });
 }
 async function syncItemInfo(seasons_and_episodes, library_items) {
-  syncTask.loggedData.push({ color: "lawngreen", Message: "Syncing... 5/6" });
-  sendUpdate(syncTask.wsKey, { type: "Update", message: "Beginning Item Info Sync (5/6)" });
+  syncTask.loggedData.push({ color: "lawngreen", Message: "Syncing... 5/7" });
+  sendUpdate(syncTask.wsKey, { type: "Update", message: "Beginning Item Info Sync (5/7)" });
   syncTask.loggedData.push({ color: "yellow", Message: "Beginning File Info Sync" });
 
   let Items = library_items.filter((item) => item.Type !== "Series" && item.Type !== "Folder" && item.Id !== undefined);
@@ -403,8 +403,8 @@ async function syncItemInfo(seasons_and_episodes, library_items) {
 
 async function removeOrphanedData() {
   const _sync = new sync();
-  syncTask.loggedData.push({ color: "lawngreen", Message: "Syncing... 6/6" });
-  sendUpdate(syncTask.wsKey, { type: "Update", message: "Cleaning up FileInfo/Episode/Season Records (6/6)" });
+  syncTask.loggedData.push({ color: "lawngreen", Message: "Syncing... 6/7" });
+  sendUpdate(syncTask.wsKey, { type: "Update", message: "Cleaning up FileInfo/Episode/Season Records (6/7)" });
   syncTask.loggedData.push({ color: "yellow", Message: "Removing Orphaned FileInfo/Episode/Season Records" });
 
   await db.query("CALL jd_remove_orphaned_data()");
@@ -419,6 +419,68 @@ async function removeOrphanedData() {
   await _sync.updateSingleFieldOnDB("jf_library_episodes", archived_seasons, "archived", true, "SeasonId");
 
   syncTask.loggedData.push({ color: "dodgerblue", Message: "Orphaned FileInfo/Episode/Season Removed." });
+
+  syncTask.loggedData.push({ color: "Yellow", Message: "Sync Complete" });
+}
+
+async function migrateArchivedActivty() {
+  const _sync = new sync();
+  syncTask.loggedData.push({ color: "lawngreen", Message: "Syncing... 7/7" });
+  sendUpdate(syncTask.wsKey, { type: "Update", message: "Migrating Archived Activity to New Items (7/7)" });
+  syncTask.loggedData.push({ color: "yellow", Message: "Migrating Archived Activity to New Items" });
+
+  //Movies
+  const movie_query = `
+  SELECT a."NowPlayingItemId" "OldNowPlayingItemId",i."Id" "NowPlayingItemId"
+	FROM jf_playback_activity a
+	join jf_library_items i
+	on a."NowPlayingItemName"=i."Name"
+	and a."NowPlayingItemId"!=i."Id"
+	and i.archived=false
+
+  where a."EpisodeId" is null
+  AND NOT EXISTS
+  (
+      SELECT 1
+      FROM jf_library_items i_e
+      WHERE a."NowPlayingItemId" = i_e."Id"
+      AND i_e.archived = false
+  )
+  `;
+
+  const episode_query = `
+  SELECT a."EpisodeId" "OldEpisodeId",e."EpisodeId" 
+	FROM jf_playback_activity a
+	join jf_library_episodes e
+	on a."NowPlayingItemName"=e."Name"
+	and a."EpisodeId"!=e."EpisodeId"
+	and e.archived=false
+
+  where a."EpisodeId" is not null
+
+  AND NOT EXISTS
+  (
+      SELECT 1
+      FROM jf_library_episodes i_e
+      WHERE a."EpisodeId" = i_e."EpisodeId"
+      AND i_e.archived = false
+  )
+  `;
+
+  const { rows: movieMapping } = await db.query(movie_query);
+  const { rows: episodeMapping } = await db.query(episode_query);
+
+  for (const movie of movieMapping) {
+    const updateQuery = `UPDATE jf_playback_activity SET "NowPlayingItemId" = '${movie.NowPlayingItemId}' WHERE "NowPlayingItemId" = '${movie.OldNowPlayingItemId}'`;
+    await db.query(updateQuery);
+  }
+
+  for (const episode of episodeMapping) {
+    const updateQuery = `UPDATE jf_playback_activity SET "EpisodeId" = '${episode.EpisodeId}' WHERE "EpisodeId" = '${episode.OldEpisodeId}'`;
+    await db.query(updateQuery);
+  }
+
+  syncTask.loggedData.push({ color: "dodgerblue", Message: "Archived Activity Migrated to New Items Succesfully." });
 
   syncTask.loggedData.push({ color: "Yellow", Message: "Sync Complete" });
 }
@@ -600,6 +662,8 @@ async function fullSync(triggertype) {
     //removeOrphanedData
     await removeOrphanedData();
 
+    await migrateArchivedActivty();
+
     await updateLibraryStatsData();
 
     await logging.updateLog(syncTask.uuid, syncTask.loggedData, taskstate.SUCCESS);
@@ -692,6 +756,8 @@ async function partialSync(triggertype) {
 
     //removeOrphanedData
     await removeOrphanedData();
+
+    await migrateArchivedActivty();
 
     await updateLibraryStatsData();
 
