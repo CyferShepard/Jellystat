@@ -140,10 +140,7 @@ async function ActivityMonitor(interval) {
       const playbackData = WatchdogData.filter((id) => !SessionData.some((row) => row.Id === id.Id));
 
       let playbackToInsert = playbackData.map((obj) => {
-        const uuid = randomUUID();
-
-        obj.Id = uuid;
-
+        obj.Id = obj.ActivityId;
         let startTime = moment(obj.ActivityDateInserted, "YYYY-MM-DD HH:mm:ss.SSSZ");
         let endTime = moment();
 
