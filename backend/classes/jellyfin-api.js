@@ -360,7 +360,11 @@ class JellyfinAPI {
           "X-MediaBrowser-Token": this.config.JF_API_KEY,
         },
       });
-      return response.data && Array.isArray(response.data) ? response.data : [];
+      let result = response.data && Array.isArray(response.data) ? response.data : [];
+      if (result.length > 0) {
+        result = result.filter((session) => session.NowPlayingItem !== undefined && session.NowPlayingItem.Type != "Trailer");
+      }
+      return result;
     } catch (error) {
       this.#errorHandler(error);
       return [];
