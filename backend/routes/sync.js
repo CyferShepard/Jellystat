@@ -449,10 +449,11 @@ async function migrateArchivedActivty() {
   `;
 
   const episode_query = `
-  SELECT a."EpisodeId" "OldEpisodeId",e."EpisodeId" 
+  SELECT a."EpisodeId" "OldEpisodeId",e."EpisodeId",e."SeasonId",e."SeriesId"
 	FROM jf_playback_activity a
 	join jf_library_episodes e
 	on a."NowPlayingItemName"=e."Name"
+  and a."SeriesName"=e."SeriesName"
 	and a."EpisodeId"!=e."EpisodeId"
 	and e.archived=false
 
@@ -476,7 +477,7 @@ async function migrateArchivedActivty() {
   }
 
   for (const episode of episodeMapping) {
-    const updateQuery = `UPDATE jf_playback_activity SET "EpisodeId" = '${episode.EpisodeId}' WHERE "EpisodeId" = '${episode.OldEpisodeId}'`;
+    const updateQuery = `UPDATE jf_playback_activity SET "EpisodeId" = '${episode.EpisodeId}', "SeasonId"='${episode.SeasonId}', "NowPlayingItemId"='${episode.SeriesId}' WHERE "EpisodeId" = '${episode.OldEpisodeId}'`;
     await db.query(updateQuery);
   }
 
