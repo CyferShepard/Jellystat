@@ -6,8 +6,8 @@ const router = express.Router();
 
 const geoliteUrlBase = 'https://geolite.info/geoip/v2.1/city';
 
-const geoliteAccountId = process.env.VITE_GEOLITE_ACCOUNT_ID;
-const geoliteLicenseKey = process.env.VITE_GEOLITE_LICENSE_KEY;
+const geoliteAccountId = process.env.JS_GEOLITE_ACCOUNT_ID;
+const geoliteLicenseKey = process.env.JS_GEOLITE_LICENSE_KEY;
 
 //https://stackoverflow.com/a/29268025
 const ipRegex = new RegExp(/\b(?!(10\.|172\.(1[6-9]|2[0-9]|3[0-1])\.|192\.168))(?:(?:2(?:[0-4][0-9]|5[0-5])|[0-1]?[0-9]?[0-9])\.){3}(?:(?:2([0-4][0-9]|5[0-5])|[0-1]?[0-9]?[0-9]))\b/);

@@ -33,7 +33,7 @@ i18n
     ReactDOM.createRoot(document.getElementById("root")).render(
       <React.StrictMode>
         <Suspense fallback={<Loading />} />
-        <BrowserRouter>
+        <BrowserRouter basename={import.meta.env.JS_BASE_URL ?? "/"}>
           <App />
         </BrowserRouter>
       </React.StrictMode>

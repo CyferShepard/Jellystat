@@ -155,8 +155,8 @@ export default function ActivityTable(props) {
         row = row.original;
         if (
           isRemoteSession(row.RemoteEndPoint) &&
-          import.meta.env.VITE_GEOLITE_ACCOUNT_ID &&
-          import.meta.env.VITE_GEOLITE_LICENSE_KEY
+          import.meta.env.JS_GEOLITE_ACCOUNT_ID &&
+          import.meta.env.JS_GEOLITE_LICENSE_KEY
         ) {
           return (
             <Link className="text-decoration-none" onClick={() => showIPDataModal(row.RemoteEndPoint)}>
