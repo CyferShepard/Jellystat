@@ -37,7 +37,7 @@
 | REJECT_SELF_SIGNED_CERTIFICATES | true    | false                    | Allow or deny self signed SSL certificates                                                                                               |
 | JWT_SECRET `REQUIRED`           | `null`  | my-secret-jwt-key        | JWT Key to be used to encrypt JWT tokens for authentication                                                                              |
 | JS_GEOLITE_ACCOUNT_ID           | `null`  | 123456                   | maxmind.com user id to be used for Geolocating IP Addresses (Can be found at https://www.maxmind.com/en/accounts/current/edit)           |
-| JS_GEOLITE_LICENSE_KEY          | `null`  | ASDWdaSdawe2sd186        | License key you need to generate on maxmin to use their services                                                                         |
+| JS_GEOLITE_LICENSE_KEY          | `null`  | ASDWdaSdawe2sd186        | License key you need to generate on maxmind to use their services                                                                        |
 
 ## Getting Started with Development
 
