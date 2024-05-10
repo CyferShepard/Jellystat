@@ -18,7 +18,7 @@ const Jellyfin = new JellyfinAPI();
 function groupActivity(rows) {
   const groupedResults = {};
   rows.forEach((row) => {
-    const key = row.NowPlayingItemId + row.EpisodeId;
+    const key = row.NowPlayingItemId + row.EpisodeId + row.UserId;
     if (groupedResults[key]) {
       if (row.ActivityDateInserted > groupedResults[key].ActivityDateInserted) {
         groupedResults[key] = {
