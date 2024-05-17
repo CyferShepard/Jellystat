@@ -19,10 +19,10 @@ i18n
   .use(LanguageDetector)
   .use(initReactI18next)
   .init({
-    fallbackLng: "en",
+    fallbackLng: "en-US",
     debug: false,
     detection: {
-      order: ["queryString", "cookie"],
+      order: ["navigator", "htmlTag", "querystring", "cookie", "localStorage", "sessionStorage", "path", "subdomain"],
       cache: ["cookie"],
     },
     interpolation: {
