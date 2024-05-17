@@ -134,6 +134,7 @@
     "LAST_CLIENT": "Last Client",
     "LAST_SEEN": "Last Seen",
     "AGO": "Ago",
+    "AGO_ALT": "",
     "USER_STATS": "User Stats",
     "USER_ACTIVITY": "User Activity"
   },

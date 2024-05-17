@@ -141,7 +141,7 @@ function Row(row) {
       }
     }
 
-    return `${formattedTime + i18next.t("AGO").toLowerCase()}`;
+    return `${formattedTime}`;
   }
 
   async function toggleTrackedState(userid) {
@@ -206,7 +206,7 @@ function Row(row) {
         <TableCell>{data.TotalPlays}</TableCell>
         <TableCell>{formatTotalWatchTime(data.TotalWatchTime) || `0 ${i18next.t("UNITS.MINUTES")}`}</TableCell>
         <TableCell style={{ textTransform: data.LastSeen ? "none" : "lowercase" }}>
-          {data.LastSeen ? formatLastSeenTime(data.LastSeen) : i18next.t("ERROR_MESSAGES.NEVER")}
+          {data.LastSeen ?  `${i18next.t("USERS_PAGE.AGO_ALT")} ${formatLastSeenTime(data.LastSeen)} ${i18next.t("USERS_PAGE.AGO").toLocaleLowerCase()}` : i18next.t("ERROR_MESSAGES.NEVER")}
         </TableCell>
       </TableRow>
     </React.Fragment>
@@ -317,7 +317,7 @@ function Users() {
       }
     }
 
-    return `${formattedTime + i18next.t("AGO").toLowerCase()}`;
+    return `${formattedTime}`;
   }
 
   function descendingComparator(a, b, orderBy) {

@@ -120,7 +120,7 @@ function LibraryCard(props) {
       }
     }
   
-    return `${formattedTime+i18next.t("AGO").toLowerCase()}`;
+    return formattedTime;
   }
   
   return (
@@ -186,7 +186,7 @@ function LibraryCard(props) {
 
             <Row className="space-between-end card-row">
               <Col className="card-label"><Trans i18nKey="LIBRARY_CARD.LAST_ACTIVITY" /></Col>
-              <Col className="text-end">{props.data.LastActivity ? formatLastActivityTime(props.data.LastActivity) : 'never'}</Col>
+              <Col className="text-end">{props.data.LastActivity ?`${i18next.t("USERS_PAGE.AGO_ALT")} ${ formatLastActivityTime(props.data.LastActivity)} ${i18next.t("USERS_PAGE.AGO").toLocaleLowerCase()}` : i18next.t("ERROR_MESSAGES.NEVER")}</Col>
             </Row>
 
             <Row className="space-between-end card-row">

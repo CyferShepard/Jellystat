@@ -27,7 +27,7 @@ function formatTime(time) {
     formattedTime = `${time.seconds} ${units.seconds[time.seconds > 1 ? 1 : 0]}`;
   }
 
-  return `${formattedTime + " " + i18next.t("AGO").toLowerCase()}`;
+  return formattedTime;
 }
 
 function LastWatchedCard(props) {
@@ -73,7 +73,7 @@ function LastWatchedCard(props) {
       </Link>
 
       <div className="last-item-details">
-        <div className="last-last-played">{formatTime(props.data.LastPlayed)}</div>
+        <div className="last-last-played">{`${i18next.t("USERS_PAGE.AGO_ALT")} ${formatTime(props.data.LastPlayed)} ${i18next.t("USERS_PAGE.AGO").toLocaleLowerCase()}`}</div>
 
         <div className="pb-2">
           <Link to={`/users/${props.data.UserId}`}>{props.data.UserName}</Link>
