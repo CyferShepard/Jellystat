@@ -19,11 +19,13 @@ import EyeOffFillIcon from 'remixicon-react/EyeOffFillIcon';
 import "../../css/settings/settings.css";
 import {  InputGroup } from "react-bootstrap";
 import { Trans } from "react-i18next";
+import { languages } from "../../../lib/languages";
 
 export default function SettingsConfig() {
   const [config, setConfig] = useState(null);
   const [admins, setAdmins] = useState();
   const [selectedAdmin, setSelectedAdmin] = useState('');
+  const [selectedLanguage, setSelectedLanguage] = useState(localStorage.getItem('i18nextLng')??'en-US');
   const [showKey, setKeyState] = useState(false);
   const [formValues, setFormValues] = useState({});
   const [isSubmitted, setisSubmitted] = useState("");
@@ -31,6 +33,8 @@ export default function SettingsConfig() {
   const [submissionMessage, setsubmissionMessage] = useState("");
   const token = localStorage.getItem('token');
   const [twelve_hr, set12hr] = useState(localStorage.getItem('12hr') === 'true');
+
+  
 
   const storage_12hr = localStorage.getItem('12hr');
 
@@ -168,6 +172,16 @@ export default function SettingsConfig() {
     });
   }
 
+  
+  function updateLanguage(event) {
+
+
+    const languageCode=event.target.getAttribute('value');
+    setSelectedLanguage(languageCode);
+    localStorage.setItem('i18nextLng',languageCode);
+  }
+
+
 
   if (loadSate === "Loading") {
     return <Loading />;
@@ -234,7 +248,7 @@ export default function SettingsConfig() {
            <Col>
               <Dropdown className="w-100">
                 <Dropdown.Toggle variant="outline-primary" id="dropdown-basic" className="w-100">
-                {selectedAdmin ? selectedAdmin.username : 'Select a Preferred Admin'}
+                {selectedAdmin ? selectedAdmin.username :<Trans i18nKey={"SETTINGS_PAGE.SELECT_AN_ADMIN"}/>}
                 </Dropdown.Toggle>
 
                 <Dropdown.Menu className="w-100" >
@@ -259,6 +273,28 @@ export default function SettingsConfig() {
                   <ToggleButton variant="outline-primary" active={twelve_hr}  onClick={()=> {toggle12Hr(true);}}><Trans i18nKey={"SETTINGS_PAGE.HOUR_FORMAT_12"}/></ToggleButton>
                   <ToggleButton variant="outline-primary" active={!twelve_hr}  onClick={()=>{toggle12Hr(false);}}><Trans i18nKey={"SETTINGS_PAGE.HOUR_FORMAT_24"}/></ToggleButton>
                </ToggleButtonGroup>
+            </Col>  
+          </Form.Group>
+
+        </Form>
+        <Form className="settings-form">
+         <Form.Group as={Row} className="mb-3">
+           <Form.Label column  className=""><Trans i18nKey={"SETTINGS_PAGE.LANGUAGE"}/></Form.Label>
+           <Col>
+              <Dropdown className="w-100">
+                <Dropdown.Toggle variant="outline-primary" id="dropdown-basic" className="w-100">
+                {languages.find((language) => language.id === selectedLanguage)?.description  || 'English'}
+                </Dropdown.Toggle>
+
+                <Dropdown.Menu className="w-100" >
+                {languages && languages.sort((a, b) => a.description - b.description)
+                          .map((language) => (
+    
+                            <Dropdown.Item onClick={updateLanguage} value={language.id} key={language.id}>{language.description}</Dropdown.Item>
+                          ))}
+
+                </Dropdown.Menu>
+              </Dropdown>
             </Col>  
           </Form.Group>
 
