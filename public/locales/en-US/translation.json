@@ -81,8 +81,22 @@
     },
     "IP_ADDRESS": "IP Address",
     "CLIENT": "Client",
+    "DEVICE": "Device",
     "PLAYBACK_DURATION": "Playback Duration",
-    "TOTAL_PLAYBACK": "Total Playback"
+    "TOTAL_PLAYBACK": "Total Playback",
+    "EXPAND": "Expand",
+    "COLLAPSE": "Collapse",
+    "SORT_BY": "Sort by",
+    "ASCENDING": "Ascending",
+    "DESCENDING": "Descending",
+    "CLEAR_SORT": "Clear Sort",
+    "CLEAR_FILTER": "Clear Filter",
+    "FILTER_BY": "Filter by",
+    "COLUMN_ACTIONS": "Column Actions",
+    "TOGGLE_SELECT_ROW": "Toggle Select Row",
+    "TOGGLE_SELECT_ALL": "Toggle Select All",
+    "MIN": "Min",
+    "MAX": "Max"
   },
   "TABLE_NAV_BUTTONS": {
     "FIRST": "First",
@@ -118,6 +132,8 @@
   "SHOW_ARCHIVED_LIBRARIES": "Show Archived Libraries",
   "HIDE_ARCHIVED_LIBRARIES": "Hide Archived Libraries",
   "UNITS": {
+    "MONTH": "Month",
+    "MONTHS": "Months",
     "DAY": "Day",
     "DAYS": "Days",
     "HOUR": "Hour",
@@ -204,6 +220,7 @@
     "GITHUB": "Github",
     "Backup": "Backup Jellystat"
   },
+  "SEARCH": "Search",
   "TOTAL": "Total",
   "LAST": "Last",
   "SERIES": "Series",
@@ -212,6 +229,7 @@
   "EPISODE": "Episode",
   "EPISODES": "Episodes",
   "MOVIES": "Movies",
+  "MUSIC": "Music",
   "SONGS": "Songs",
   "FILES": "Files",
   "LIBRARIES": "Libraries",

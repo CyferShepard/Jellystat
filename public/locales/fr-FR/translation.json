@@ -80,9 +80,23 @@
       "HEADER": "Stream Info"
     },
     "IP_ADDRESS": "Adresse IP",
-    "CLIENT": "Appareil",
+    "CLIENT": "Client",
+    "DEVICE": "Appareil",
     "PLAYBACK_DURATION": "Durée de la lecture",
-    "TOTAL_PLAYBACK": "Lecture totale"
+    "TOTAL_PLAYBACK": "Lecture totale",
+    "EXPAND": "Développer",
+    "COLLAPSE": "Réduire",
+    "SORT_BY": "Trier par",
+    "ASCENDING": "Croissant",
+    "DESCENDING": "Décroissant",
+    "CLEAR_SORT": "Annuler le tri",
+    "CLEAR_FILTER": "Annuler le filtre",
+    "FILTER_BY": "Filtrer par",
+    "COLUMN_ACTIONS": "Actions supplémentaires",
+    "TOGGLE_SELECT_ROW": "Inverser la sélection",
+    "TOGGLE_SELECT_ALL": "Inverser toutes les sélections",
+    "MIN": "Min",
+    "MAX": "Max"
   },
   "TABLE_NAV_BUTTONS": {
     "FIRST": "Première",
@@ -118,6 +132,8 @@
   "SHOW_ARCHIVED_LIBRARIES": "Afficher les médiathèques archivées",
   "HIDE_ARCHIVED_LIBRARIES": "Cacher les médiathèques archivées",
   "UNITS": {
+    "MONTH": "Mois",
+    "MONTHS": "Mois",
     "DAY": "Jour",
     "DAYS": "Jours",
     "HOUR": "Heure",
@@ -202,6 +218,7 @@
     "GITHUB": "Github",
     "Backup": "Sauvegarde de Jellystat"
   },
+  "SEARCH": "Recherche",
   "TOTAL": "Total",
   "LAST": "Last",
   "SERIES": "Séries",
@@ -210,6 +227,7 @@
   "EPISODE": "Épisode",
   "EPISODES": "Épisodes",
   "MOVIES": "Films",
+  "MUSIC": "Musiques",
   "SONGS": "Chansons",
   "FILES": "Fichiers",
   "LIBRARIES": "Médiathèques",

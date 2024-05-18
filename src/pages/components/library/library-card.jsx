@@ -53,22 +53,28 @@ function LibraryCard(props) {
     const days = Math.floor(seconds / 86400); // 1 day = 86400 seconds
     const hours = Math.floor((seconds % 86400) / 3600); // 1 hour = 3600 seconds
     const minutes = Math.floor(((seconds % 86400) % 3600) / 60); // 1 minute = 60 seconds
+
+    const units = {
+      months: [i18next.t("UNITS.MONTH"), i18next.t("UNITS.MONTHS")],
+      days: [i18next.t("UNITS.DAY"), i18next.t("UNITS.DAYS")],
+      hours: [i18next.t("UNITS.HOUR"), i18next.t("UNITS.HOURS")],
+      minutes: [i18next.t("UNITS.MINUTE"), i18next.t("UNITS.MINUTES")]
+    };
     
     let formattedTime = '';
     if (days) {
-      formattedTime += `${days} day${days > 1 ? 's' : ''}`;
+      formattedTime += `${days} ${days > 1 ? units.days[1] : units.days[0]}`;
     }
     
     if (hours) {
-      formattedTime += ` ${hours} hour${hours > 1 ? 's' : ''}`;
+      formattedTime += ` ${hours} ${hours > 1 ?  units.hours[1] : units.hours[0]}`;
     }
     
-    if (minutes) {
-      formattedTime += ` ${minutes} minute${minutes > 1 ? 's' : ''}`;
+    if (minutes) {      formattedTime += ` ${minutes} ${minutes > 1 ?  units.minutes[1] : units.minutes[0]}`;
     }
     
     if (!days && !hours && !minutes) {
-      formattedTime = '0 minutes';
+      formattedTime =`0 ${units.minutes[1]}`;
     }
     
     return formattedTime;
@@ -82,24 +88,31 @@ function LibraryCard(props) {
     const minutes = Math.floor((seconds % 3600) / 60); // 1 minute = 60 seconds
   
     const timeComponents = [];
+
+    const units = {
+      months: [i18next.t("UNITS.MONTH"), i18next.t("UNITS.MONTHS")],
+      days: [i18next.t("UNITS.DAY"), i18next.t("UNITS.DAYS")],
+      hours: [i18next.t("UNITS.HOUR"), i18next.t("UNITS.HOURS")],
+      minutes: [i18next.t("UNITS.MINUTE"), i18next.t("UNITS.MINUTES")]
+    };
   
     if (months) {
-      timeComponents.push(`${months} Month${months > 1 ? 's' : ''}`);
+      timeComponents.push(`${months} ${months > 1 ? units.months[1] : units.months[0] }`);
     }
   
     if (days) {
-      timeComponents.push(`${days} day${days > 1 ? 's' : ''}`);
+      timeComponents.push(`${days} ${days > 1 ? units.days[1] : units.days[0]}`);
     }
   
     if (hours) {
-      timeComponents.push(`${hours} hour${hours > 1 ? 's' : ''}`);
+      timeComponents.push(`${hours} ${hours > 1 ? units.hours[1] : units.hours[0]}`);
     }
   
     if (!months && minutes) {
-      timeComponents.push(`${minutes} minute${minutes > 1 ? 's' : ''}`);
+      timeComponents.push(`${minutes} ${minutes > 1 ? units.minutes[1] : units.minutes[0]}`);
     }
   
-    const formattedTime = timeComponents.length > 0 ? timeComponents.join(' ') : '0 minutes';
+    const formattedTime = timeComponents.length > 0 ? timeComponents.join(' ') : `0 ${units.minutes[1]}`;
     return formattedTime;
   }
   
@@ -151,7 +164,7 @@ function LibraryCard(props) {
 
             <Row className="space-between-end card-row">
               <Col className="card-label"><Trans i18nKey="TYPE" /></Col>
-              <Col className="text-end">{props.data.CollectionType==='tvshows' ? 'Series' : props.data.CollectionType==='movies'? "Movies" : props.data.CollectionType==='music'? "Music" : 'Mixed'}</Col>
+              <Col className="text-end">{props.data.CollectionType==='tvshows' ? <Trans i18nKey="SERIES" /> : props.data.CollectionType==='movies'? <Trans i18nKey="MOVIES" /> : props.data.CollectionType==='music'? <Trans i18nKey="MUSIC" /> : 'Mixed'}</Col>
             </Row>
 
             <Row className="space-between-end card-row">

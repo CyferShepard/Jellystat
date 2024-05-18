@@ -431,7 +431,7 @@ function Users() {
           </div>
           <FormControl
             type="text"
-            placeholder="Search"
+            placeholder= {i18next.t("SEARCH")}
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             className="ms-md-3 my-3 w-sm-100 w-md-75"

@@ -9,6 +9,7 @@ import ActivityTable from "./components/activity/activity-table";
 import Loading from "./components/general/loading";
 import { Trans } from "react-i18next";
 import { FormControl, FormSelect } from "react-bootstrap";
+import i18next from "i18next";
 
 function Activity() {
   const [data, setData] = useState();
@@ -115,7 +116,7 @@ function Activity() {
           </div>
           <FormControl
             type="text"
-            placeholder="Search"
+            placeholder= {i18next.t("SEARCH")}
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             className="ms-md-3 my-3 w-sm-100 w-md-75"

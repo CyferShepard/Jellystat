@@ -2,7 +2,7 @@
 import React, { useEffect, useMemo } from "react";
 import axios from "axios";
 import { enUS } from "@mui/material/locale";
-import { MRT_Localization_EN } from "material-react-table/locales/en";
+
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 
@@ -135,7 +135,7 @@ export default function ActivityTable(props) {
   const columns = [
     {
       accessorKey: "UserName",
-      header: "User",
+      header: i18next.t("USER"),
       filterVariant: "select",
       filterSelectOptions: uniqueUserNames,
       Cell: ({ row }) => {
@@ -149,7 +149,7 @@ export default function ActivityTable(props) {
     },
     {
       accessorKey: "RemoteEndPoint",
-      header: "IP Address",
+      header: i18next.t("ACTIVITY_TABLE.IP_ADDRESS"),
 
       Cell: ({ row }) => {
         row = row.original;
@@ -175,7 +175,7 @@ export default function ActivityTable(props) {
             ? row.NowPlayingItemName
             : row.SeriesName + " : S" + row.SeasonNumber + "E" + row.EpisodeNumber + " - " + row.NowPlayingItemName
         }`,
-      header: "Title",
+      header: i18next.t("TITLE"),
       minSize: 300,
       Cell: ({ row }) => {
         row = row.original;
@@ -190,7 +190,7 @@ export default function ActivityTable(props) {
     },
     {
       accessorKey: "Client",
-      header: "Client",
+      header: i18next.t("ACTIVITY_TABLE.CLIENT"),
       filterVariant: "select",
       filterSelectOptions: uniqueClients,
       Cell: ({ row }) => {
@@ -204,11 +204,11 @@ export default function ActivityTable(props) {
     },
     {
       accessorKey: "DeviceName",
-      header: "Device",
+      header: i18next.t("ACTIVITY_TABLE.DEVICE"),
     },
     {
       accessorFn: (row) => new Date(row.ActivityDateInserted),
-      header: "Date",
+      header: i18next.t("DATE"),
       size: 110,
       filterVariant: "date-range",
       Cell: ({ row }) => {
@@ -227,7 +227,7 @@ export default function ActivityTable(props) {
     },
     {
       accessorKey: "PlaybackDuration",
-      header: "Total Playback",
+      header: i18next.t("ACTIVITY_TABLE.TOTAL_PLAYBACK"),
       minSize: 200,
       filterFn: (row, id, filterValue) => formatTotalWatchTime(row.getValue(id)).startsWith(filterValue),
 
@@ -235,7 +235,7 @@ export default function ActivityTable(props) {
     },
     {
       accessorFn: (row) => Number(row.TotalPlays ?? 1),
-      header: "Total Plays",
+      header: i18next.t("TOTAL_PLAYS"),
       filterFn: "betweenInclusive",
 
       Cell: ({ cell }) => <span>{cell.getValue() ?? 1}</span>,
@@ -249,6 +249,17 @@ export default function ActivityTable(props) {
   const table = useMaterialReactTable({
     columns,
     data,
+    localization: {
+      expand: i18next.t("ACTIVITY_TABLE.EXPAND"),
+      collapse: i18next.t("ACTIVITY_TABLE.COLLAPSE"),
+      sortByColumnAsc: `${i18next.t("ACTIVITY_TABLE.SORT_BY")} {column} - ${i18next.t("ACTIVITY_TABLE.ASCENDING")}`,
+      sortByColumnDesc: `${i18next.t("ACTIVITY_TABLE.SORT_BY")} {column} - ${i18next.t("ACTIVITY_TABLE.DESCENDING")}`,
+      clearFilter: i18next.t("ACTIVITY_TABLE.CLEAR_FILTER"),
+      clearSort: i18next.t("ACTIVITY_TABLE.CLEAR_SORT"),
+      filterByColumn: `${i18next.t("ACTIVITY_TABLE.FILTER_BY")} {column}`,
+      toggleSelectAll: i18next.t("ACTIVITY_TABLE.TOGGLE_SELECT_ALL"),
+      toggleSelectRow: i18next.t("ACTIVITY_TABLE.TOGGLE_SELECT_ROW"),
+    },
     columnFilterDisplayMode: "popover",
     layoutMode: "grid",
     enableExpandAll: false,
@@ -266,7 +277,6 @@ export default function ActivityTable(props) {
         },
       ],
     },
-    localization: { MRT_Localization_EN },
     showAlertBanner: false,
     enableHiding: false,
     enableFullScreenToggle: false,
