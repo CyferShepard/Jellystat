@@ -120,7 +120,7 @@ function LibraryCard(props) {
   function formatLastActivityTime(time) {
     const units = {
       days: [i18next.t("UNITS.DAY"), i18next.t("UNITS.DAYS")],
-      hours: [i18next.t("UNITS.HOUR"), i18next.t("UNITS.HOUR")],
+      hours: [i18next.t("UNITS.HOUR"), i18next.t("UNITS.HOURS")],
       minutes: [i18next.t("UNITS.MINUTE"), i18next.t("UNITS.MINUTES")]
     };
   
