@@ -259,6 +259,7 @@ export default function ActivityTable(props) {
       filterByColumn: `${i18next.t("ACTIVITY_TABLE.FILTER_BY")} {column}`,
       toggleSelectAll: i18next.t("ACTIVITY_TABLE.TOGGLE_SELECT_ALL"),
       toggleSelectRow: i18next.t("ACTIVITY_TABLE.TOGGLE_SELECT_ROW"),
+      columnActions: i18next.t("ACTIVITY_TABLE.COLUMN_ACTIONS"),
     },
     columnFilterDisplayMode: "popover",
     layoutMode: "grid",
