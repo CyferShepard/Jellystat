@@ -14,7 +14,7 @@
     "SESSIONS": "Lectures",
     "RECENTLY_ADDED": "Récemment ajouté",
     "WATCH_STATISTIC": "Statistiques de lecture",
-    "LIBRARY_OVERVIEW": "Vue d'ensemble de la médiathèque"
+    "LIBRARY_OVERVIEW": "Vue d'ensemble des médiathèques"
   },
   "SESSIONS": {
     "NO_SESSIONS": "Aucune lecture en cours n'a été trouvée"
@@ -37,7 +37,7 @@
     "MIXED_LIBRARIES": "MIXED LIBRARIES"
   },
   "LIBRARY_CARD": {
-    "LIBRARY": "Médiathèques",
+    "LIBRARY": "Médiathèque",
     "TOTAL_TIME": "Durée totale",
     "TOTAL_FILES": "Total des fichiers",
     "LIBRARY_SIZE": "Taille de la médiathèques",
@@ -66,8 +66,8 @@
     "CONFIRM_ACTION_MESSAGE_2": "et l'activité de lecture associée"
   },
   "LIBRARY_INFO": {
-    "LIBRARY_STATS": "Statistiques de la médiathèques",
-    "LIBRARY_ACTIVITY": "Activité de la médiathèques"
+    "LIBRARY_STATS": "Statistiques de la médiathèque",
+    "LIBRARY_ACTIVITY": "Activité de la médiathèque"
   },
   "TAB_CONTROLS": {
     "OVERVIEW": "Vue d'ensemble",
@@ -143,7 +143,7 @@
     "SECOND": "Seconde",
     "SECONDS": "Secondes",
     "PLAYS": "Lectures",
-    "ITEMS": "Items"
+    "ITEMS": "Éléments"
   },
   "USERS_PAGE": {
     "ALL_USERS": "Tous les utilisateurs",
@@ -156,8 +156,8 @@
   },
   "STAT_PAGE": {
     "STATISTICS": "Statistiques",
-    "DAILY_PLAY_PER_LIBRARY": "Daily Play Count Per Library",
-    "PLAY_COUNT_BY": "Play Count By"
+    "DAILY_PLAY_PER_LIBRARY": "Nombre de lecture quotidiennes par médiathèque",
+    "PLAY_COUNT_BY": "Nombre de lecture par"
   },
   "SETTINGS_PAGE": {
     "SETTINGS": "Paramètres",
@@ -243,7 +243,7 @@
   "TITLE": "Titre",
   "VIEWS": "Views",
   "WATCH_TIME": "Temps de lecture",
-  "LAST_WATCHED": "Dernier vu",
+  "LAST_WATCHED": "Dernières lectures",
   "MEDIA": "Média",
   "SAVE": "Sauvegarder",
   "YES": "Oui ",
