@@ -10,6 +10,7 @@ const configClass = require("../classes/config");
 const { checkForUpdates } = require("../version-control");
 const JellyfinAPI = require("../classes/jellyfin-api");
 const { sendUpdate } = require("../ws");
+const moment = require("moment");
 
 const router = express.Router();
 const Jellyfin = new JellyfinAPI();
@@ -122,6 +123,94 @@ router.get("/getconfig", async (req, res) => {
     res.send(payload);
   } catch (error) {
     console.log(error);
+  }
+});
+
+router.get("/getRecentlyAdded", async (req, res) => {
+  try {
+    const { libraryid, limit = 10 } = req.query;
+
+    let recentlyAddedFronJellystat = await Jellyfin.getRecentlyAdded({ libraryid: libraryid });
+
+    let recentlyAddedFronJellystatMapped = recentlyAddedFronJellystat.map((item) => {
+      return {
+        Name: item.Name,
+        SeriesName: item.SeriesName,
+        Id: item.Id,
+        SeriesId: item.SeriesId || null,
+        SeasonId: item.SeasonId || null,
+        EpisodeId: item.Type === "Episode" ? item.Id : null,
+
+        SeasonNumber: item.ParentIndexNumber ?? null,
+        EpisodeNumber: item.IndexNumber ?? null,
+        PrimaryImageHash:
+          item.ImageTags &&
+          item.ImageTags.Primary &&
+          item.ImageBlurHashes &&
+          item.ImageBlurHashes.Primary &&
+          item.ImageBlurHashes.Primary[item.ImageTags["Primary"]]
+            ? item.ImageBlurHashes.Primary[item.ImageTags["Primary"]]
+            : null,
+
+        DateCreated: item.DateCreated ?? null,
+        Type: item.Type,
+      };
+    });
+
+    if (libraryid !== undefined) {
+      const { rows } = await db.query(
+        `SELECT i."Name", null "SeriesName", "Id", null "SeriesId", null "SeasonId", null "EpisodeId", null "SeasonNumber", null "EpisodeNumber",  "PrimaryImageHash",i."DateCreated", "Type"
+        FROM public.jf_library_items i
+        where i.archived=false
+          and i."ParentId"=$1
+      union
+      SELECT e."Name",  e."SeriesName",e."Id" , e."SeriesId", e."SeasonId", e."EpisodeId",  e."ParentIndexNumber" "SeasonNumber",  e."IndexNumber" "EpisodeNumber", e."PrimaryImageHash", e."DateCreated", e."Type"
+        FROM public.jf_library_episodes e
+        JOIN public.jf_library_items i
+        on i."Id"=e."SeriesId"
+        where e.archived=false
+        and i."ParentId"=$1
+      order by "DateCreated" desc
+      limit $2`,
+        [libraryid, limit]
+      );
+      if (rows[0].DateCreated !== undefined && rows[0].DateCreated !== null) {
+        let lastSynctedItemDate = moment(rows[0].DateCreated, "YYYY-MM-DD HH:mm:ss.SSSZ");
+
+        recentlyAddedFronJellystatMapped = recentlyAddedFronJellystatMapped.filter((item) =>
+          moment(item.DateCreated, "YYYY-MM-DD HH:mm:ss.SSSZ").isAfter(lastSynctedItemDate)
+        );
+      }
+
+      res.send([...recentlyAddedFronJellystatMapped, ...rows]);
+      return;
+    }
+    const { rows } = await db.query(
+      `SELECT i."Name", null "SeriesName", "Id", null "SeriesId", null "SeasonId", null "EpisodeId", null "SeasonNumber" , null "EpisodeNumber" ,  "PrimaryImageHash",i."DateCreated", "Type"
+      FROM public.jf_library_items i
+      where i.archived=false
+    union
+    SELECT e."Name",  e."SeriesName",e."Id" , e."SeriesId", e."SeasonId", e."EpisodeId",  e."ParentIndexNumber"  "SeasonNumber",  e."IndexNumber" "EpisodeNumber", e."PrimaryImageHash", e."DateCreated", e."Type"
+      FROM public.jf_library_episodes e
+      where e.archived=false
+    order by "DateCreated" desc
+    limit $1`,
+      [limit]
+    );
+
+    if (rows[0].DateCreated !== undefined && rows[0].DateCreated !== null) {
+      let lastSynctedItemDate = moment(rows[0].DateCreated, "YYYY-MM-DD HH:mm:ss.SSSZ");
+
+      recentlyAddedFronJellystatMapped = recentlyAddedFronJellystatMapped.filter((item) =>
+        moment(item.DateCreated, "YYYY-MM-DD HH:mm:ss.SSSZ").isAfter(lastSynctedItemDate)
+      );
+    }
+
+    res.send([...recentlyAddedFronJellystatMapped, ...rows]);
+    return;
+  } catch (error) {
+    res.status(503);
+    res.send(error);
   }
 });
 

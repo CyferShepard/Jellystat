@@ -418,6 +418,10 @@ async function removeOrphanedData() {
   await _sync.updateSingleFieldOnDB("jf_library_episodes", archived_items, "archived", true, "SeriesId");
   await _sync.updateSingleFieldOnDB("jf_library_episodes", archived_seasons, "archived", true, "SeasonId");
 
+  await db.query(`DELETE FROM public.jf_library_episodes
+  where "SeasonId" is null
+  and archived=false`);
+
   syncTask.loggedData.push({ color: "dodgerblue", Message: "Orphaned FileInfo/Episode/Season Removed." });
 
   syncTask.loggedData.push({ color: "Yellow", Message: "Sync Complete" });

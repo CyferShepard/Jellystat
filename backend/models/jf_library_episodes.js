@@ -20,6 +20,7 @@
         "SeasonId",
         "SeasonName",
         "SeriesName",
+        "PrimaryImageHash",
         "archived",
       ];
       
@@ -47,6 +48,7 @@
         SeasonId: item.SeasonId,
         SeasonName: item.SeasonName,
         SeriesName: item.SeriesName,
+        PrimaryImageHash:  item.ImageTags && item.ImageTags.Primary && item.ImageBlurHashes && item.ImageBlurHashes.Primary && item.ImageBlurHashes.Primary[item.ImageTags["Primary"]] ? item.ImageBlurHashes.Primary[item.ImageTags["Primary"]] : null,
         archived: false,
       });
 

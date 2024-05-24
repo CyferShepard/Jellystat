@@ -1,6 +1,6 @@
 export const languages = [
   {
-    id: "en-US",
+    id: "en-UK",
     description: "English",
   },
   {
