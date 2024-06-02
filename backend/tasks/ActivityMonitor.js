@@ -4,7 +4,6 @@ const pgp = require("pg-promise")();
 const moment = require("moment");
 const { columnsPlayback, mappingPlayback } = require("../models/jf_playback_activity");
 const { jf_activity_watchdog_columns, jf_activity_watchdog_mapping } = require("../models/jf_activity_watchdog");
-const { randomUUID } = require("crypto");
 const configClass = require("../classes/config");
 const JellyfinAPI = require("../classes/jellyfin-api");
 const { sendUpdate } = require("../ws");
@@ -71,6 +70,19 @@ async function ActivityMonitor(interval) {
           if (session && session.PlayState) {
             if (wdData.IsPaused != session.PlayState.IsPaused) {
               wdData.IsPaused = session.PlayState.IsPaused;
+
+              if (session.PlayState.IsPaused == true) {
+                let startTime = moment(wdData.ActivityDateInserted, "YYYY-MM-DD HH:mm:ss.SSSZ");
+                let lastPausedDate = moment(session.LastPausedDate, "YYYY-MM-DD HH:mm:ss.SSSZ");
+
+                let diffInSeconds = lastPausedDate.diff(startTime, "seconds");
+
+                wdData.PlaybackDuration = parseInt(wdData.PlaybackDuration) + diffInSeconds;
+
+                wdData.ActivityDateInserted = `'${moment(session.LastPausedDate).format(
+                  "YYYY-MM-DD HH:mm:ss.SSSZ"
+                )}'::timestamptz`;
+              }
               return true;
             }
           }
@@ -86,23 +98,7 @@ async function ActivityMonitor(interval) {
 
       //update wd state
       if (WatchdogDataToUpdate.length > 0) {
-        // console.log("Updated " + WatchdogDataToUpdate.length + " existing playback records");
-        const WatchdogDataUpdated = WatchdogDataToUpdate.map((obj) => {
-          let startTime = moment(obj.ActivityDateInserted, "YYYY-MM-DD HH:mm:ss.SSSZ");
-          let endTime = moment();
-
-          let diffInSeconds = endTime.diff(startTime, "seconds");
-
-          if (obj.IsPaused == true) {
-            obj.PlaybackDuration = parseInt(obj.PlaybackDuration) + diffInSeconds;
-          }
-
-          obj.ActivityDateInserted = `'${endTime.format("YYYY-MM-DD HH:mm:ss.SSSZ")}'::timestamptz`;
-
-          const { ...rest } = obj;
-
-          return { ...rest };
-        });
+        const WatchdogDataUpdated = WatchdogDataToUpdate;
 
         await (async () => {
           try {
