@@ -54,11 +54,8 @@ export default function Tasks() {
           },
         }
       )
-      .then(() => {
-        let taskstate = taskIntervals;
-        taskstate[taskName] = { Interval: Interval };
-        console.log(taskstate);
-        setTaskIntervals(taskstate);
+      .then((response) => {
+        setTaskIntervals(response.data);
       })
       .catch((error) => {
         console.log(error);
