@@ -22,7 +22,7 @@ const postgresUser = process.env.POSTGRES_USER;
 const postgresPassword = process.env.POSTGRES_PASSWORD;
 const postgresIp = process.env.POSTGRES_IP;
 const postgresPort = process.env.POSTGRES_PORT;
-const postgresDatabase = process.env.POSTGRES_DATABASE || 'jfstat';
+const postgresDatabase = process.env.POSTGRES_DB || 'jfstat';
 const backupfolder='backup-data';
 
 // Tables to back up

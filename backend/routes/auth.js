@@ -4,6 +4,8 @@ const db = require("../db");
 const jwt = require("jsonwebtoken");
 const configClass = require("../classes/config");
 const packageJson = require("../../package.json");
+const JellyfinAPI = require("../classes/jellyfin-api");
+const Jellyfin = new JellyfinAPI();
 
 const JWT_SECRET = process.env.JWT_SECRET;
 const JS_USER = process.env.JS_USER;
@@ -94,6 +96,42 @@ router.post("/configSetup", async (req, res) => {
       return;
     }
 
+    const urlRegex = new RegExp(
+      "^((http|https):\\/\\/)?" + // optional protocol
+        "((([a-zA-Z0-9][a-zA-Z0-9-]*[a-zA-Z0-9])\\.)+" + // subdomain
+        "([a-zA-Z0-9][a-zA-Z0-9-]*[a-zA-Z0-9])" + // domain name
+        "|([0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3}))" + // OR ip (v4) address
+        "(\\:[0-9]+)?$", // port
+      "i" // case-insensitive
+    );
+
+    const isValidUrl = (string) => urlRegex.test(string);
+
+    if (!isValidUrl(JF_HOST)) {
+      res.status(400);
+
+      res.send({
+        isValid: false,
+        errorMessage: "Invalid URL",
+      });
+      return;
+    }
+
+    var _url = JF_HOST;
+    _url = _url.replace(/\/web\/index\.html#!\/home\.html$/, "");
+    if (!/^https?:\/\//i.test(JF_HOST)) {
+      _url = "http://" + JF_HOST;
+    }
+    let test_url = _url.replace(/\/$/, "") + "/system/configuration";
+
+    const validation = await Jellyfin.validateSettings(test_url, JF_API_KEY);
+
+    if (validation.isValid === false) {
+      res.status(400);
+      res.send(validation.errorMessage);
+      return;
+    }
+
     const { rows: getConfig } = await db.query('SELECT * FROM app_config where "ID"=1');
 
     if (config.state != null && config.state < 2) {
@@ -102,7 +140,7 @@ router.post("/configSetup", async (req, res) => {
         query = 'INSERT INTO app_config ("ID","JF_HOST","JF_API_KEY","APP_USER","APP_PASSWORD") VALUES (1,$1,$2,null,null)';
       }
 
-      const { rows } = await db.query(query, [JF_HOST, JF_API_KEY]);
+      const { rows } = await db.query(query, [_url, JF_API_KEY]);
       res.send(rows);
     } else {
       res.sendStatus(500);

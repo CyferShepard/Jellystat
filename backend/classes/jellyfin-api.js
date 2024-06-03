@@ -21,25 +21,7 @@ class JellyfinAPI {
 
   #errorHandler(error, url) {
     if (error.response) {
-      switch (error.response.status) {
-        case 400:
-          console.log("[JELLYFIN-API]: 400 Bad Request");
-          break;
-        case 401:
-          console.log("[JELLYFIN-API]: 401 Unauthorized");
-          break;
-        case 403:
-          console.log("[JELLYFIN-API]: 403 Access Forbidden");
-          break;
-        case 404:
-          console.log(`[JELLYFIN-API]: 404 URL Not Found : ${error.request.path}`);
-          break;
-        case 503:
-          console.log(`[JELLYFIN-API]: 503 Service Unavailable : ${error.request.path}`);
-          break;
-        default:
-          console.log(`[JELLYFIN-API]: Unexpected status code: ${error.response.status}`);
-      }
+      console.log("[JELLYFIN-API]: " + this.#httpErrorMessageHandler(error));
     } else {
       console.log("[JELLYFIN-API]", {
         ErrorAt: this.#getErrorLineNumber(error),
@@ -49,6 +31,30 @@ class JellyfinAPI {
         // StackTrace: this.#getStackTrace(error),
       });
     }
+  }
+
+  #httpErrorMessageHandler(error) {
+    let message = "";
+    switch (error.response.status) {
+      case 400:
+        message = "400 Bad Request";
+        break;
+      case 401:
+        message = "401 Unauthorized";
+        break;
+      case 403:
+        message = "403 Access Forbidden";
+        break;
+      case 404:
+        message = `404 URL Not Found : ${error.request.path}`;
+        break;
+      case 503:
+        message = `503 Service Unavailable : ${error.request.path}`;
+        break;
+      default:
+        message = `Unexpected status code: ${error.response.status}`;
+    }
+    return message;
   }
 
   #getErrorLineNumber(error) {
@@ -430,7 +436,8 @@ class JellyfinAPI {
       this.#errorHandler(error);
       return {
         isValid: false,
-        errorMessage: error.message,
+        status: error.response.status ?? 0,
+        errorMessage: error.response != null ? this.#httpErrorMessageHandler(error) : error.message,
       };
     }
   }

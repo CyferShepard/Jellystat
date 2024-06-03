@@ -50,7 +50,7 @@ function Setup() {
     let data = result.data;
     console.log(result);
     console.log(data);
-    return { isValid: data.isValid, errorMessage: data.errorMessage };
+    return { isValid: data.isValid, errorMessage: data.errorMessage, status: data.status };
   }
 
   async function handleFormSubmit(event) {
@@ -60,7 +60,11 @@ function Setup() {
     let validation = await validateSettings(formValues.JF_HOST, formValues.JF_API_KEY);
 
     if (!validation.isValid) {
-      setsubmitButtonText(validation.errorMessage);
+      setsubmitButtonText(
+        validation.status == 401
+          ? i18next.t("ERROR_MESSAGES.UNAUTHORIZED").replace("{STATUS}", validation.status)
+          : validation.errorMessage
+      );
       setProcessing(false);
       return;
     }
@@ -89,7 +93,7 @@ function Setup() {
         } else if (error.response.status === 404) {
           errorMessage = i18next.t("ERROR_MESSAGES.INVALID_URL").replace("{STATUS}", error.response.status);
         } else {
-          errorMessage = `Error : ${error.response.status}`;
+          errorMessage = `Error : ${error.errorMessage ?? error.response.status}`;
         }
         console.log(error);
         setsubmitButtonText(errorMessage);

@@ -4,7 +4,7 @@ const _POSTGRES_USER = process.env.POSTGRES_USER;
 const _POSTGRES_PASSWORD = process.env.POSTGRES_PASSWORD;
 const _POSTGRES_IP = process.env.POSTGRES_IP;
 const _POSTGRES_PORT = process.env.POSTGRES_PORT;
-const _POSTGRES_DATABASE = process.env.POSTGRES_DATABASE || 'jfstat';
+const _POSTGRES_DATABASE = process.env.POSTGRES_DB || 'jfstat';
 
 const client = new Client({
   host: _POSTGRES_IP,
