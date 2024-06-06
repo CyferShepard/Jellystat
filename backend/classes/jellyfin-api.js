@@ -436,8 +436,13 @@ class JellyfinAPI {
       this.#errorHandler(error);
       return {
         isValid: false,
-        status: error.response.status ?? 0,
-        errorMessage: error.response != null ? this.#httpErrorMessageHandler(error) : error.message,
+        status: error?.response?.status ?? 0,
+        errorMessage:
+          error?.response != null
+            ? this.#httpErrorMessageHandler(error)
+            : error.code == "ENOTFOUND"
+            ? "Unable to connect. Please check the URL and your network connection."
+            : error.message,
       };
     }
   }

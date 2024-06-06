@@ -3,7 +3,6 @@ const express = require("express");
 const { axios } = require("../classes/axios");
 const configClass = require("../classes/config");
 const JellyfinAPI = require("../classes/jellyfin-api");
-const isUrlHttp = require("is-url-http");
 
 const Jellyfin = new JellyfinAPI();
 const router = express.Router();
@@ -180,8 +179,8 @@ router.post("/validateSettings", async (req, res) => {
   if (!/^https?:\/\//i.test(_url)) {
     _url = "http://" + _url;
   }
-  console.log(_url, isUrlHttp(_url));
-  if (!isUrlHttp(_url)) {
+  console.log(_url, isValidUrl(_url));
+  if (!isValidUrl(_url)) {
     res.status(400);
 
     res.send({
@@ -197,5 +196,14 @@ router.post("/validateSettings", async (req, res) => {
 
   res.send(validation);
 });
+
+function isValidUrl(string) {
+  try {
+    new URL(string);
+    return true;
+  } catch (err) {
+    return false;
+  }
+}
 
 module.exports = router;

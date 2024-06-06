@@ -4,7 +4,6 @@ const db = require("../db");
 const jwt = require("jsonwebtoken");
 const configClass = require("../classes/config");
 const packageJson = require("../../package.json");
-const isUrlHttp = require("is-url-http");
 const JellyfinAPI = require("../classes/jellyfin-api");
 const Jellyfin = new JellyfinAPI();
 
@@ -102,8 +101,8 @@ router.post("/configSetup", async (req, res) => {
     if (!/^https?:\/\//i.test(_url)) {
       _url = "http://" + _url;
     }
-    console.log(_url, isUrlHttp(_url));
-    if (!isUrlHttp(_url)) {
+    console.log(_url, isValidUrl(_url));
+    if (!isValidUrl(_url)) {
       res.status(400);
 
       res.send({
@@ -140,5 +139,14 @@ router.post("/configSetup", async (req, res) => {
     console.log(error);
   }
 });
+
+function isValidUrl(string) {
+  try {
+    new URL(string);
+    return true;
+  } catch (err) {
+    return false;
+  }
+}
 
 module.exports = router;
