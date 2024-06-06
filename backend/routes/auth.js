@@ -4,6 +4,7 @@ const db = require("../db");
 const jwt = require("jsonwebtoken");
 const configClass = require("../classes/config");
 const packageJson = require("../../package.json");
+const isUrlHttp = require("is-url-http");
 const JellyfinAPI = require("../classes/jellyfin-api");
 const Jellyfin = new JellyfinAPI();
 
@@ -96,18 +97,13 @@ router.post("/configSetup", async (req, res) => {
       return;
     }
 
-    const urlRegex = new RegExp(
-      "^((http|https):\\/\\/)?" + // optional protocol
-        "((([a-zA-Z0-9][a-zA-Z0-9-]*[a-zA-Z0-9])\\.)+" + // subdomain
-        "([a-zA-Z0-9][a-zA-Z0-9-]*[a-zA-Z0-9])" + // domain name
-        "|([0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3}))" + // OR ip (v4) address
-        "(\\:[0-9]+)?$", // port
-      "i" // case-insensitive
-    );
-
-    const isValidUrl = (string) => urlRegex.test(string);
-
-    if (!isValidUrl(JF_HOST)) {
+    var _url = JF_HOST;
+    _url = _url.replace(/\/web\/index\.html#!\/home\.html$/, "");
+    if (!/^https?:\/\//i.test(_url)) {
+      _url = "http://" + _url;
+    }
+    console.log(_url, isUrlHttp(_url));
+    if (!isUrlHttp(_url)) {
       res.status(400);
 
       res.send({
@@ -117,14 +113,9 @@ router.post("/configSetup", async (req, res) => {
       return;
     }
 
-    var _url = JF_HOST;
-    _url = _url.replace(/\/web\/index\.html#!\/home\.html$/, "");
-    if (!/^https?:\/\//i.test(JF_HOST)) {
-      _url = "http://" + JF_HOST;
-    }
-    let test_url = _url.replace(/\/$/, "") + "/system/configuration";
+    _url = _url.replace(/\/$/, "") + "/system/configuration";
 
-    const validation = await Jellyfin.validateSettings(test_url, JF_API_KEY);
+    const validation = await Jellyfin.validateSettings(_url, JF_API_KEY);
 
     if (validation.isValid === false) {
       res.status(400);

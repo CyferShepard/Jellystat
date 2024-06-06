@@ -3,6 +3,7 @@ const express = require("express");
 const { axios } = require("../classes/axios");
 const configClass = require("../classes/config");
 const JellyfinAPI = require("../classes/jellyfin-api");
+const isUrlHttp = require("is-url-http");
 
 const Jellyfin = new JellyfinAPI();
 const router = express.Router();
@@ -174,18 +175,13 @@ router.post("/validateSettings", async (req, res) => {
     return;
   }
 
-  const urlRegex = new RegExp(
-    "^((http|https):\\/\\/)?" + // optional protocol
-      "((([a-zA-Z0-9][a-zA-Z0-9-]*[a-zA-Z0-9])\\.)+" + // subdomain
-      "([a-zA-Z0-9][a-zA-Z0-9-]*[a-zA-Z0-9])" + // domain name
-      "|([0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3}))" + // OR ip (v4) address
-      "(\\:[0-9]+)?$", // port
-    "i" // case-insensitive
-  );
-
-  const isValidUrl = (string) => urlRegex.test(string);
-  console.log(url, isValidUrl(url));
-  if (!isValidUrl(url)) {
+  var _url = url;
+  _url = _url.replace(/\/web\/index\.html#!\/home\.html$/, "");
+  if (!/^https?:\/\//i.test(_url)) {
+    _url = "http://" + _url;
+  }
+  console.log(_url, isUrlHttp(_url));
+  if (!isUrlHttp(_url)) {
     res.status(400);
 
     res.send({
@@ -195,11 +191,6 @@ router.post("/validateSettings", async (req, res) => {
     return;
   }
 
-  var _url = url;
-  _url = _url.replace(/\/web\/index\.html#!\/home\.html$/, "");
-  if (!/^https?:\/\//i.test(url)) {
-    _url = "http://" + url;
-  }
   _url = _url.replace(/\/$/, "") + "/system/configuration";
 
   const validation = await Jellyfin.validateSettings(_url, apikey);
