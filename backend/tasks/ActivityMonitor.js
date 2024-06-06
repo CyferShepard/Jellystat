@@ -73,15 +73,13 @@ async function ActivityMonitor(interval) {
 
               if (session.PlayState.IsPaused == true) {
                 let startTime = moment(wdData.ActivityDateInserted, "YYYY-MM-DD HH:mm:ss.SSSZ");
-                let lastPausedDate = moment(session.LastPausedDate, "YYYY-MM-DD HH:mm:ss.SSSZ");
+                let lastPausedDate = moment(session.LastPausedDate);
 
                 let diffInSeconds = lastPausedDate.diff(startTime, "seconds");
 
                 wdData.PlaybackDuration = parseInt(wdData.PlaybackDuration) + diffInSeconds;
 
-                wdData.ActivityDateInserted = `'${moment(session.LastPausedDate).format(
-                  "YYYY-MM-DD HH:mm:ss.SSSZ"
-                )}'::timestamptz`;
+                wdData.ActivityDateInserted = `'${lastPausedDate.format("YYYY-MM-DD HH:mm:ss.SSSZ")}'::timestamptz`;
               }
               return true;
             }
