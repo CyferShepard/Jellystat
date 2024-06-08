@@ -79,7 +79,7 @@ async function ActivityMonitor(interval) {
 
                 wdData.PlaybackDuration = parseInt(wdData.PlaybackDuration) + diffInSeconds;
 
-                wdData.ActivityDateInserted = `'${lastPausedDate.format("YYYY-MM-DD HH:mm:ss.SSSZ")}'::timestamptz`;
+                wdData.ActivityDateInserted = `${lastPausedDate.format("YYYY-MM-DD HH:mm:ss.SSSZ")}`;
               }
               return true;
             }
@@ -96,34 +96,7 @@ async function ActivityMonitor(interval) {
 
       //update wd state
       if (WatchdogDataToUpdate.length > 0) {
-        const WatchdogDataUpdated = WatchdogDataToUpdate;
-
-        await (async () => {
-          try {
-            await db.query("BEGIN");
-            const cs = new pgp.helpers.ColumnSet([
-              "?Id",
-              "IsPaused",
-              { name: "PlaybackDuration", mod: ":raw" },
-              { name: "ActivityDateInserted", mod: ":raw" },
-            ]);
-
-            const updateQuery = pgp.helpers.update(WatchdogDataUpdated, cs, "jf_activity_watchdog") + ' WHERE v."Id" = t."Id"';
-            await db
-              .query(updateQuery)
-              .then((result) => {
-                // console.log('Update successful', result.rowCount, 'rows updated');
-              })
-              .catch((error) => {
-                console.error("Error updating rows", error);
-              });
-
-            await db.query("COMMIT");
-          } catch (error) {
-            await db.query("ROLLBACK");
-            console.log(error);
-          }
-        })();
+        await db.insertBulk("jf_activity_watchdog", WatchdogDataToUpdate, jf_activity_watchdog_columns);
       }
 
       //delete from db no longer in session data and insert into stats db
