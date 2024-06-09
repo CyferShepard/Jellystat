@@ -112,9 +112,9 @@ router.post("/configSetup", async (req, res) => {
       return;
     }
 
-    _url = _url.replace(/\/$/, "") + "/system/configuration";
+    const validation_url = _url.replace(/\/$/, "") + "/system/configuration";
 
-    const validation = await Jellyfin.validateSettings(_url, JF_API_KEY);
+    const validation = await Jellyfin.validateSettings(_url, validation_url);
 
     if (validation.isValid === false) {
       res.status(400);
