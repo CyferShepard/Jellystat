@@ -72,41 +72,8 @@ export default function SettingsConfig() {
     fetchAdmins();
   }, [token]);
 
-  async function validateSettings(_url, _apikey) {
-    let fallback = { isvalid: false, errorMessage: "" };
-    const result = await axios
-      .post(
-        "/proxy/validateSettings",
-        {
-          url: _url,
-          apikey: _apikey,
-        },
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json",
-          },
-        }
-      )
-      .catch((error) => {
-        console.log("Error Validating config:", error.response.data);
-        fallback.errorMessage = error.response.data?.errorMessage ?? error.response.data;
-      });
-
-    let data = result?.data ?? fallback;
-    return { isValid: data.isValid, errorMessage: data.errorMessage };
-  }
-
   async function handleFormSubmit(event) {
     event.preventDefault();
-    let validation = await validateSettings(formValues.JF_HOST, formValues.JF_API_KEY);
-    console.log(validation);
-
-    if (!validation.isValid) {
-      setisSubmitted("Failed");
-      setsubmissionMessage(validation.errorMessage);
-      return;
-    }
 
     setisSubmitted("");
     axios
@@ -122,9 +89,10 @@ export default function SettingsConfig() {
         setsubmissionMessage("Successfully updated configuration");
       })
       .catch((error) => {
-        console.log("Error updating config:", error);
+        let errorMessage = error.response.data.errorMessage;
+        console.log("Error updating config:", errorMessage);
         setisSubmitted("Failed");
-        setsubmissionMessage("Error Updating Configuration: ", error);
+        setsubmissionMessage(`Error Updating Configuration: ${errorMessage}`);
       });
   }
 

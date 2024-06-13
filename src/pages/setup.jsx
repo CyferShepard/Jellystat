@@ -37,37 +37,9 @@ function Setup() {
       });
   }
 
-  async function validateSettings(_url, _apikey) {
-    const result = await axios
-      .post("/proxy/validateSettings", {
-        url: _url,
-        apikey: _apikey,
-      })
-      .catch((error) => {
-        return error.response;
-      });
-
-    let data = result.data;
-    console.log(result);
-    console.log(data);
-    return { isValid: data.isValid, errorMessage: data.errorMessage, status: data.status };
-  }
-
   async function handleFormSubmit(event) {
     setProcessing(true);
     event.preventDefault();
-
-    let validation = await validateSettings(formValues.JF_HOST, formValues.JF_API_KEY);
-
-    if (!validation.isValid) {
-      setsubmitButtonText(
-        validation.status == 401
-          ? i18next.t("ERROR_MESSAGES.UNAUTHORIZED").replace("{STATUS}", validation.status)
-          : validation.errorMessage
-      );
-      setProcessing(false);
-      return;
-    }
 
     // Send a POST request to /api/setconfig/ with the updated configuration
     axios

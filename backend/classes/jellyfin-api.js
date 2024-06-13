@@ -421,29 +421,52 @@ class JellyfinAPI {
     }
   }
 
-  async validateSettings(url, apikey) {
+  #isValidUrl(string) {
     try {
-      const response = await axios.get(url, {
+      new URL(string);
+      return true;
+    } catch (err) {
+      return false;
+    }
+  }
+
+  async validateSettings(url, apikey) {
+    let result = { isValid: false, status: 400, errorMessage: "Invalid URL", url: url, cleanedUrl: "" };
+    try {
+      let _url = url.replace(/\/web\/index\.html#!\/home\.html$/, "");
+
+      _url = _url.replace(/\/$/, "");
+      if (!/^https?:\/\//i.test(_url)) {
+        _url = "http://" + _url;
+      }
+
+      result.cleanedUrl = _url;
+
+      console.log(_url, this.#isValidUrl(_url));
+      if (!this.#isValidUrl(_url)) {
+        return result;
+      }
+
+      const validation_url = _url.replace(/\/$/, "") + "/system/configuration";
+
+      const response = await axios.get(validation_url, {
         headers: {
           "X-MediaBrowser-Token": apikey,
         },
       });
-      return {
-        isValid: response.status === 200,
-        errorMessage: "",
-      };
+      result.isValid = response.status == 200;
+      return result;
     } catch (error) {
       this.#errorHandler(error);
-      return {
-        isValid: false,
-        status: error?.response?.status ?? 0,
-        errorMessage:
-          error?.response != null
-            ? this.#httpErrorMessageHandler(error)
-            : error.code == "ENOTFOUND"
-            ? "Unable to connect. Please check the URL and your network connection."
-            : error.message,
-      };
+      result.isValid = false;
+      result.status = error?.response?.status ?? 400;
+      result.errorMessage =
+        error?.response != null
+          ? this.#httpErrorMessageHandler(error)
+          : error.code == "ENOTFOUND"
+          ? "Unable to connect. Please check the URL and your network connection."
+          : error.message;
+      return result;
     }
   }
 }

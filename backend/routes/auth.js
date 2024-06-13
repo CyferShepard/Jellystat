@@ -96,29 +96,12 @@ router.post("/configSetup", async (req, res) => {
       return;
     }
 
-    var _url = JF_HOST;
-    _url = _url.replace(/\/web\/index\.html#!\/home\.html$/, "");
-    if (!/^https?:\/\//i.test(_url)) {
-      _url = "http://" + _url;
-    }
-    console.log(_url, isValidUrl(_url));
-    if (!isValidUrl(_url)) {
-      res.status(400);
+    var url = JF_HOST;
 
-      res.send({
-        isValid: false,
-        errorMessage: "Invalid URL",
-      });
-      return;
-    }
-
-    const validation_url = _url.replace(/\/$/, "") + "/system/configuration";
-
-    const validation = await Jellyfin.validateSettings(_url, validation_url);
-
+    const validation = await Jellyfin.validateSettings(url, JF_API_KEY);
     if (validation.isValid === false) {
-      res.status(400);
-      res.send(validation.errorMessage);
+      res.status(validation.status);
+      res.send(validation);
       return;
     }
 
@@ -130,7 +113,7 @@ router.post("/configSetup", async (req, res) => {
         query = 'INSERT INTO app_config ("ID","JF_HOST","JF_API_KEY","APP_USER","APP_PASSWORD") VALUES (1,$1,$2,null,null)';
       }
 
-      const { rows } = await db.query(query, [_url, JF_API_KEY]);
+      const { rows } = await db.query(query, [validation.cleanedUrl, JF_API_KEY]);
       res.send(rows);
     } else {
       res.sendStatus(500);
@@ -139,14 +122,5 @@ router.post("/configSetup", async (req, res) => {
     console.log(error);
   }
 });
-
-function isValidUrl(string) {
-  try {
-    new URL(string);
-    return true;
-  } catch (err) {
-    return false;
-  }
-}
 
 module.exports = router;

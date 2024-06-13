@@ -224,6 +224,15 @@ router.post("/setconfig", async (req, res) => {
       return;
     }
 
+    var url = JF_HOST;
+
+    const validation = await Jellyfin.validateSettings(url, JF_API_KEY);
+    if (validation.isValid === false) {
+      res.status(validation.status);
+      res.send(validation);
+      return;
+    }
+
     const { rows: getConfig } = await db.query('SELECT * FROM app_config where "ID"=1');
 
     let query = 'UPDATE app_config SET "JF_HOST"=$1, "JF_API_KEY"=$2 where "ID"=1';
@@ -231,7 +240,7 @@ router.post("/setconfig", async (req, res) => {
       query = 'INSERT INTO app_config ("ID","JF_HOST","JF_API_KEY","APP_USER","APP_PASSWORD") VALUES (1,$1,$2,null,null)';
     }
 
-    const { rows } = await db.query(query, [JF_HOST, JF_API_KEY]);
+    const { rows } = await db.query(query, [validation.cleanedUrl, JF_API_KEY]);
     res.send(rows);
   } catch (error) {
     console.log(error);

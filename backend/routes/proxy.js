@@ -174,36 +174,13 @@ router.post("/validateSettings", async (req, res) => {
     return;
   }
 
-  var _url = url;
-  _url = _url.replace(/\/web\/index\.html#!\/home\.html$/, "");
-  if (!/^https?:\/\//i.test(_url)) {
-    _url = "http://" + _url;
+  const validation = await Jellyfin.validateSettings(url, apikey);
+  if (validation.isValid === false) {
+    res.status(validation.status);
+    res.send(validation.errorMessage);
+  } else {
+    res.send(validation);
   }
-  console.log(_url, isValidUrl(_url));
-  if (!isValidUrl(_url)) {
-    res.status(400);
-
-    res.send({
-      isValid: false,
-      errorMessage: "Invalid URL",
-    });
-    return;
-  }
-
-  _url = _url.replace(/\/$/, "") + "/system/configuration";
-
-  const validation = await Jellyfin.validateSettings(_url, apikey);
-
-  res.send(validation);
 });
-
-function isValidUrl(string) {
-  try {
-    new URL(string);
-    return true;
-  } catch (err) {
-    return false;
-  }
-}
 
 module.exports = router;
