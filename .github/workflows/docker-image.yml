@@ -3,7 +3,7 @@ on:
   push:
     tags:
       - "v*.*.*"
-    branches: [ unstable ]
+    branches: [ unstable, main ]
 
 jobs:
   build:
