@@ -3,7 +3,7 @@ on:
   push:
     tags:
       - "v*.*.*"
-    branches: [ unstable, main ]
+    branches: [ unstable ]
 
 jobs:
   build:
@@ -44,7 +44,5 @@ jobs:
       with:
         context: .
         push: true
-        tags: |
-          ${{ github.ref == 'refs/heads/main' && 'latest' || steps.meta.outputs.tags }}
+        tags: ${{ steps.meta.outputs.tags }}
         platforms: linux/amd64,linux/arm64,linux/arm/v7
-        
