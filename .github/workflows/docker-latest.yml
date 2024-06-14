@@ -44,5 +44,5 @@ jobs:
         with:
           context: .
           push: true
-          tags: ${{ steps.meta.outputs.tags == 'main' && 'docker.io/cyfershepard/jellystat:latest' || format('docker.io/cyfershepard/jellystat:{0}', steps.meta.outputs.tags)}}
+          tags: "cyfershepard/jellystat:latest"
           platforms: linux/amd64,linux/arm64,linux/arm/v7
