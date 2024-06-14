@@ -1,8 +1,9 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import axios from "axios";
 import "../../css/globalstats.css";
 
 import WatchTimeStats from "./globalstats/watchtimestats";
+import { Trans } from "react-i18next";
 
 function LibraryGlobalStats(props) {
   const [dayStats, setDayStats] = useState({});
@@ -69,12 +70,12 @@ function LibraryGlobalStats(props) {
 
   return (
     <div>
-      <h1 className="my-3">Library Stats</h1>
+      <h1 className="my-3"><Trans i18nKey="LIBRARY_INFO.LIBRARY_STATS"/></h1>
       <div  className="global-stats-container">
-        <WatchTimeStats data={dayStats} heading={"Last 24 Hours"} />
-        <WatchTimeStats data={weekStats} heading={"Last 7 Days"} />
-        <WatchTimeStats data={monthStats} heading={"Last 30 Days"} />
-        <WatchTimeStats data={allStats} heading={"All Time"} />
+      <WatchTimeStats data={dayStats} heading={<Trans i18nKey="GLOBAL_STATS.LAST_24_HRS"/>} />
+        <WatchTimeStats data={weekStats} heading={<Trans i18nKey="GLOBAL_STATS.LAST_7_DAYS"/>} />
+        <WatchTimeStats data={monthStats} heading={<Trans i18nKey="GLOBAL_STATS.LAST_30_DAYS"/>} />
+        <WatchTimeStats data={allStats} heading={<Trans i18nKey="GLOBAL_STATS.ALL_TIME"/>} />
       </div>
     </div>
   );

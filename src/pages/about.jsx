@@ -1,7 +1,5 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import axios from "axios";
-// import  Button  from "react-bootstrap/Button";
-// import Card from 'react-bootstrap/Card';
 import Row from 'react-bootstrap/Row';
 import Col from 'react-bootstrap/Col';
 import Loading from "./components/general/loading";
@@ -9,6 +7,7 @@ import Loading from "./components/general/loading";
 
 import "./css/about.css";
 import { Card } from "react-bootstrap";
+import { Trans } from "react-i18next";
 
 export default function SettingsAbout() {
 
@@ -54,12 +53,12 @@ export default function SettingsAbout() {
 
     return (
       <div className="tasks">
-        <h1 className="py-3">About Jellystat</h1>
+        <h1 className="py-3"><Trans i18nKey={"ABOUT_PAGE.ABOUT_JELLYSTAT"}/></h1>
     <Card  className="about p-0" >
        <Card.Body >
             <Row>
                  <Col className="px-0">
-                  Version:
+                 <Trans i18nKey={"ABOUT_PAGE.VERSION"}/>:
                  </Col>
                  <Col>
                  {data.current_version}
@@ -67,7 +66,7 @@ export default function SettingsAbout() {
              </Row>
              <Row style={{color:(data.update_available ? "#00A4DC": "White")}}>
                  <Col className="px-0">
-                  Update Available:
+                 <Trans i18nKey={"ABOUT_PAGE.UPDATE_AVAILABLE"}/>:
                  </Col>
                  <Col>
                  {data.message}
@@ -76,7 +75,7 @@ export default function SettingsAbout() {
              <Row style={{height:'20px'}}></Row>
              <Row>
                  <Col className="px-0">
-                  Github:
+                 <Trans i18nKey={"ABOUT_PAGE.GITHUB"}/>:
                  </Col>
                  <Col>
                  <a href="https://github.com/CyferShepard/Jellystat" target="_blank" rel="noreferrer" > https://github.com/CyferShepard/Jellystat</a>

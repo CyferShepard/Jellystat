@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import axios from "axios";
 
 // import ItemCardInfo from "./LastWatched/last-watched-card";
@@ -8,6 +8,7 @@ import LastWatchedCard from "../general/last-watched-card";
 
 import Config from "../../../lib/config";
 import "../../css/users/user-details.css";
+import { Trans } from "react-i18next";
 
 function LibraryLastWatched(props) {
   const [data, setData] = useState();
@@ -61,7 +62,7 @@ function LibraryLastWatched(props) {
 
   return (
     <div className="last-played">
-        <h1 className="my-3">Last Watched</h1>
+        <h1 className="my-3"><Trans i18nKey="LAST_WATCHED"/></h1>
         <div className="last-played-container">
         {data.map((item) => (
                     <LastWatchedCard data={item} base_url={config.hostUrl} key={item.Id+item.SeasonNumber+item.EpisodeNumber}/>

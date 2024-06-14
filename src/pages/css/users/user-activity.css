@@ -1,0 +1,14 @@
+.Activity > div > div > .form-control {
+  color: white !important;
+  background-color: var(--secondary-background-color) !important;
+  border-color: var(--secondary-background-color) !important;
+}
+
+.Activity > div > div > .form-control::placeholder {
+  color: white !important;
+}
+
+.Activity > div > div > .form-control:focus {
+  box-shadow: none !important;
+  border-color: var(--primary-color) !important;
+}

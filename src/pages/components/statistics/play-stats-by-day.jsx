@@ -1,8 +1,9 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import axios from "axios";
 import Chart from "./chart";
 
 import "../../css/stats.css";
+import { Trans } from "react-i18next";
 
 function PlayStatsByDay(props) {
   const [stats, setStats] = useState();
@@ -53,16 +54,16 @@ function PlayStatsByDay(props) {
   if (stats.length === 0) {
     return (
       <div className="statistics-widget small">
-        <h1>Play Count By Day - Last {days} Days</h1>
+        <h1><Trans i18nKey={"STAT_PAGE.PLAY_COUNT_BY"}/> <Trans i18nKey={"UNITS.DAY"}/> - <Trans i18nKey={"LAST"}/> {days} <Trans i18nKey={`UNITS.DAY${days>1 ? 'S':''}`}/></h1>
 
-        <h1>No Stats to display</h1>
+        <h1><Trans i18nKey={"ERROR_MESSAGES.NO_STATS"}/></h1>
       </div>
     );
   }
 
   return (
     <div className="statistics-widget">
-      <h2 className="text-start my-2">Play Count By Day - Last {days} Days</h2>
+      <h2 className="text-start my-2"><Trans i18nKey={"STAT_PAGE.PLAY_COUNT_BY"}/> <Trans i18nKey={"UNITS.DAY"}/>  - <Trans i18nKey={"LAST"}/> {days} <Trans i18nKey={`UNITS.DAY${days>1 ? 'S':''}`}/></h2>
       <div className="graph small">
         <Chart libraries={libraries} stats={stats} />
       </div>

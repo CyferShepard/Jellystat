@@ -1,5 +1,5 @@
-@import 'pages/css/variables.module.css';
-@import 'pages/css/variables.module.css';
+@import "pages/css/variables.module.css";
+@import "pages/css/variables.module.css";
 main {
   margin-inline: 20px;
   /* width: 100%; */
@@ -142,4 +142,12 @@ h2 {
 .form-select option:hover {
   background-color: var(--primary-color) !important;
   color: white !important;
+}
+
+.bg-primary-1 {
+  background-color: var(--primary-color) !important;
+}
+
+.hide-tab-titles {
+  display: none !important;
 }

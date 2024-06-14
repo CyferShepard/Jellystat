@@ -16,6 +16,7 @@ import  Alert  from "react-bootstrap/Alert";
 
 
 import "../../css/settings/backups.css";
+import { Trans } from "react-i18next";
 
 const token = localStorage.getItem('token');
 
@@ -59,7 +60,7 @@ function CustomRow(key) {
   
         <TableCell className="">
           <div className="d-flex justify-content-center">
-          <Button variant="primary" onClick={()=>deleteKey(data.key)}>Delete</Button>
+          <Button variant="primary" onClick={()=>deleteKey(data.key)}><Trans i18nKey={"DELETE"}/></Button>
         </div>
 
         </TableCell>
@@ -147,7 +148,7 @@ async function handleFormSubmit(event) {
     
       return (
         <div>
-          <h1 className="my-2">API Keys</h1>
+          <h1 className="my-2"><Trans i18nKey={"SETTINGS_PAGE.API_KEYS"}/></h1>
             {showAlert && showAlert.visible && (
                 <Alert variant={showAlert.type} onClose={handleCloseAlert} dismissible>
                   <Alert.Heading>{showAlert.title}</Alert.Heading>
@@ -162,13 +163,13 @@ async function handleFormSubmit(event) {
           
           <Form.Group as={Row} className="mb-3" >
             <Form.Label column>
-              KEY NAME
+            <Trans i18nKey={"SETTINGS_PAGE.KEY_NAME"} style={{textTransform:"uppercase"}}/>
             </Form.Label>
             <Col sm="6" md="8">
               <Form.Control className="w-100"  id="name"  name="name" value={formValues.name || ""} onChange={handleFormChange}  placeholder="API Name" />
             </Col>
             <Col sm="4" md="2" className="mt-2 mt-sm-0">
-            <Button variant="outline-primary" type="submit" className="w-100"> Add Key </Button>
+            <Button variant="outline-primary" type="submit" className="w-100"><Trans i18nKey={"SETTINGS_PAGE.ADD_KEY"}/></Button>
             </Col>
 
           </Form.Group>
@@ -180,8 +181,8 @@ async function handleFormSubmit(event) {
                     <Table aria-label="collapsible table" >
                       <TableHead>
                         <TableRow>
-                          <TableCell>Name</TableCell>
-                          <TableCell>Key</TableCell>
+                          <TableCell><Trans i18nKey={"SETTINGS_PAGE.NAME"}/></TableCell>
+                          <TableCell><Trans i18nKey={"SETTINGS_PAGE.KEY"}/></TableCell>
                           <TableCell></TableCell>
                         </TableRow>
                       </TableHead>
@@ -190,7 +191,7 @@ async function handleFormSubmit(event) {
                           .map((apikey,index) => (
                             <CustomRow key={index} data={apikey} handleRowActionMessage={handleRowActionMessage}/>
                           ))}
-                          {keys.length===0 ? <tr><td colSpan="3" style={{ textAlign: "center", fontStyle: "italic" ,color:"grey"}}  className='py-2'>No Keys Found</td></tr> :''}
+                          {keys.length===0 ? <tr><td colSpan="3" style={{ textAlign: "center", fontStyle: "italic" ,color:"grey"}}  className='py-2'><Trans i18nKey={"ERROR_MESSAGES.NO_API_KEYS"}/></td></tr> :''}
 
                       </TableBody>
                     </Table>
@@ -202,21 +203,21 @@ async function handleFormSubmit(event) {
 
                 <ButtonGroup className="pagination-buttons">
                     <Button className="page-btn" onClick={()=>setPage(0)} disabled={page === 0}>
-                      First
+                    <Trans i18nKey={"TABLE_NAV_BUTTONS.FIRST"}/>
                     </Button>
 
                     <Button className="page-btn" onClick={handlePreviousPageClick}  disabled={page === 0}>
-                      Previous
+                    <Trans i18nKey={"TABLE_NAV_BUTTONS.PREVIOUS"}/>
                     </Button>
 
                     <div className="page-number d-flex align-items-center justify-content-center">{`${page *rowsPerPage + 1}-${Math.min((page * rowsPerPage+ 1 ) +  (rowsPerPage - 1),keys.length)} of ${keys.length}`}</div>
 
                     <Button className="page-btn" onClick={handleNextPageClick}  disabled={page >= Math.ceil(keys.length / rowsPerPage) - 1}>
-                      Next
+                    <Trans i18nKey={"TABLE_NAV_BUTTONS.NEXT"}/>
                     </Button>
 
                     <Button className="page-btn" onClick={()=>setPage(Math.ceil(keys.length / rowsPerPage) - 1)} disabled={page >= Math.ceil(keys.length / rowsPerPage) - 1}>
-                      Last
+                    <Trans i18nKey={"TABLE_NAV_BUTTONS.LAST"}/>
                     </Button>
                 </ButtonGroup>
             </div>       

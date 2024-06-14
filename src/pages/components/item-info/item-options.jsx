@@ -1,7 +1,9 @@
 
 import axios from "axios";
+import i18next from "i18next";
 import { useState } from "react";
 import { Container, Row,Col, Modal } from "react-bootstrap";
+import { Trans } from "react-i18next";
 import { useNavigate } from "react-router-dom";
 
 
@@ -9,7 +11,16 @@ function ItemOptions(props) {
 
   const token = localStorage.getItem('token');
   const [show, setShow] = useState(false);
-  const options=[{description:"Purge Cached Item",withActivity:false},{description:"Purge Cached Item and Playback Activity",withActivity:true}];
+  const options=[
+    {
+      description:i18next.t("PURGE_OPTIONS.PURGE_CACHE"),
+      withActivity:false
+    },
+    {
+      description: i18next.t("PURGE_OPTIONS.PURGE_CACHE_WITH_ACTIVITY"),
+      withActivity:true
+    }
+  ];
   const [selectedOption, setSelectedOption] = useState(options[0]);
   const navigate = useNavigate();
 
@@ -43,7 +54,7 @@ function ItemOptions(props) {
   return (
     <div className="Activity">
         <div className="Heading mb-3">
-            <h1>Archived Data Options</h1>
+            <h1><Trans i18nKey="ITEM_INFO.ARCHIVED_DATA_OPTIONS"/></h1>
         </div>
         <Container className="p-0 m-0">
             {options.map((option, index) => (
@@ -53,7 +64,7 @@ function ItemOptions(props) {
                     </Col>
 
                     <Col>
-                        <button className="btn btn-danger w-25" onClick={()=>{setSelectedOption(option);setShow(true);}}>Purge</button>
+                        <button className="btn btn-danger w-25" onClick={()=>{setSelectedOption(option);setShow(true);}}><Trans i18nKey="ITEM_INFO.PURGE"/></button>
                     </Col>
 
                 </Row>
@@ -62,17 +73,17 @@ function ItemOptions(props) {
 
             <Modal show={show} onHide={() =>{setShow(false);}}>
                 <Modal.Header closeButton>
-                  <Modal.Title>Confirm Action</Modal.Title>
+                  <Modal.Title><Trans i18nKey="ITEM_INFO.CONFIRM_ACTION"/></Modal.Title>
                 </Modal.Header>
                 <Modal.Body>
-                    <p>{"Are you sure you want to Purge this item"+(selectedOption.withActivity ? " and Associated Playback Activity?" : "?")}</p>
+                    <p>{i18next.t("ITEM_INFO.CONFIRM_ACTION_MESSAGE")+(selectedOption.withActivity ? ` ${i18next.t("ITEM_INFO.CONFIRM_ACTION_MESSAGE_2")}?` : "?")}</p>
                 </Modal.Body>
                 <Modal.Footer>
                   <button className="btn btn-danger" onClick={() => {execPurge(selectedOption.withActivity);}}>
-                      Purge
+                  <Trans i18nKey="ITEM_INFO.PURGE"/>
                   </button>
                   <button className="btn btn-primary" onClick={()=>{setShow(false);}}>
-                    Close
+                  <Trans i18nKey="CLOSE"/>
                   </button>
                 </Modal.Footer>
             </Modal>

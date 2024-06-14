@@ -7,7 +7,7 @@ module.exports = {
         user: process.env.POSTGRES_USER,
         password: process.env.POSTGRES_PASSWORD,
         port:process.env.POSTGRES_PORT,
-        database: 'jfstat',
+        database: process.env.POSTGRES_DB || 'jfstat',
         createDatabase: true,
       },
       migrations: {
@@ -34,7 +34,7 @@ module.exports = {
         user: process.env.DB_USER,
         password: process.env.DB_PASSWORD,
         port:process.env.POSTGRES_PORT,
-        database: "jfstat",
+        database: process.env.POSTGRES_DB || 'jfstat',
         createDatabase: true,
       },
       migrations: {

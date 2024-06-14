@@ -1,5 +1,3 @@
-import React from 'react'
-
 import './css/home.css'
 
 import Sessions from './components/sessions/sessions'

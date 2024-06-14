@@ -20,6 +20,7 @@ import IndeterminateCircleFillIcon from 'remixicon-react/IndeterminateCircleFill
 import "../../css/settings/backups.css";
 
 import TerminalComponent from "./TerminalComponent";
+import { Trans } from "react-i18next";
 
 const token = localStorage.getItem('token');
 
@@ -78,9 +79,9 @@ function formatDurationTime(seconds) {
           <IconButton
             aria-label="expand row"
             size="small"
-            onClick={() => {if(data.Log.length>0){setOpen(!open);}}}
+            onClick={() => {if(data.Log !== null && data.Log.length>0){setOpen(!open);}}}
             >
-              {!open ? <AddCircleFillIcon opacity={data.Log.length>0 ?1 : 0} cursor={data.Log.length>1 ? "pointer":"default"}/> : <IndeterminateCircleFillIcon />}
+              {!open ? <AddCircleFillIcon opacity={data.Log !== null && data.Log.length>0 ?1 : 0} cursor={data.Log !== null && data.Log.length>1 ? "pointer":"default"}/> : <IndeterminateCircleFillIcon />}
           </IconButton>
         </TableCell>
         <TableCell>{data.Name}</TableCell>
@@ -157,19 +158,19 @@ const handlePreviousPageClick = () => {
     
       return (
         <div>
-          <h1 className="my-2">Logs</h1>
+          <h1 className="my-2"><Trans i18nKey={"SETTINGS_PAGE.LOGS"}/></h1>
 
             <TableContainer className='rounded-2'>
                     <Table aria-label="collapsible table" >
                       <TableHead>
                         <TableRow>
                         <TableCell/>
-                          <TableCell>Name</TableCell>
-                          <TableCell>Type</TableCell>
-                          <TableCell>Date Created</TableCell>
-                          <TableCell>Duration</TableCell>
-                          <TableCell>Execution Type</TableCell>
-                          <TableCell>Result</TableCell>
+                          <TableCell><Trans i18nKey={"SETTINGS_PAGE.NAME"}/></TableCell>
+                          <TableCell><Trans i18nKey={"TYPE"}/></TableCell>
+                          <TableCell><Trans i18nKey={"DATE"}/></TableCell>
+                          <TableCell><Trans i18nKey={"SETTINGS_PAGE.DURATION"}/></TableCell>
+                          <TableCell><Trans i18nKey={"SETTINGS_PAGE.EXECUTION_TYPE"}/></TableCell>
+                          <TableCell><Trans i18nKey={"SETTINGS_PAGE.RESULTS"}/></TableCell>
                         </TableRow>
                       </TableHead>
                       <TableBody>
@@ -177,7 +178,7 @@ const handlePreviousPageClick = () => {
                           .map((log,index) => (
                             <Row key={index} data={log} />
                           ))}
-                          {data.length===0 ? <tr><td colSpan="7" style={{ textAlign: "center", fontStyle: "italic" ,color:"grey"}}  className='py-2'>No Logs Found</td></tr> :''}
+                          {data.length===0 ? <tr><td colSpan="7" style={{ textAlign: "center", fontStyle: "italic" ,color:"grey"}}  className='py-2'><Trans i18nKey={"ERROR_MESSAGES.NO_LOGS"}/></td></tr> :''}
 
                             
                       </TableBody>
@@ -190,21 +191,21 @@ const handlePreviousPageClick = () => {
 
                 <ButtonGroup className="pagination-buttons">
                     <Button className="page-btn" onClick={()=>setPage(0)} disabled={page === 0}>
-                      First
+                    <Trans i18nKey={"TABLE_NAV_BUTTONS.FIRST"}/>
                     </Button>
 
                     <Button className="page-btn" onClick={handlePreviousPageClick}  disabled={page === 0}>
-                      Previous
+                    <Trans i18nKey={"TABLE_NAV_BUTTONS.PREVIOUS"}/>
                     </Button>
 
                     <div className="page-number d-flex align-items-center justify-content-center">{`${page *rowsPerPage + 1}-${Math.min((page * rowsPerPage+ 1 ) +  (rowsPerPage - 1),data.length)} of ${data.length}`}</div>
 
                     <Button className="page-btn" onClick={handleNextPageClick}  disabled={page >= Math.ceil(data.length / rowsPerPage) - 1}>
-                      Next
+                    <Trans i18nKey={"TABLE_NAV_BUTTONS.NEXT"}/>
                     </Button>
 
                     <Button className="page-btn" onClick={()=>setPage(Math.ceil(data.length / rowsPerPage) - 1)} disabled={page >= Math.ceil(data.length / rowsPerPage) - 1}>
-                      Last
+                    <Trans i18nKey={"TABLE_NAV_BUTTONS.LAST"}/>
                     </Button>
                 </ButtonGroup>
             </div>       

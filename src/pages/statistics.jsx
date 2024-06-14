@@ -1,11 +1,11 @@
-import React, { useState } from "react";
+import { useState } from "react";
 
-// import './css/library/libraries.css';
 import "./css/stats.css";
 
 import DailyPlayStats from "./components/statistics/daily-play-count";
 import PlayStatsByDay from "./components/statistics/play-stats-by-day";
 import PlayStatsByHour from "./components/statistics/play-stats-by-hour";
+import { Trans } from "react-i18next";
 
 function Statistics() {
   const [days, setDays] = useState(20);
@@ -27,9 +27,9 @@ function Statistics() {
   return (
     <div className="watch-stats">
       <div className="Heading">
-        <h1>Statistics</h1>
+        <h1><Trans i18nKey={"STAT_PAGE.STATISTICS"}/></h1>
         <div className="date-range">
-          <div className="header">Last</div>
+          <div className="header"><Trans i18nKey={"LAST"}/></div>
           <div className="days">
             <input
               type="number"
@@ -39,7 +39,7 @@ function Statistics() {
               onKeyDown={handleKeyDown}
             />
           </div>
-          <div className="trailer">Days</div>
+          <div className="trailer"><Trans i18nKey={`UNITS.DAY${days>1 ? 'S':''}`}/></div>
         </div>
       </div>
       <div>

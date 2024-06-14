@@ -1,7 +1,8 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import axios from "axios";
 import Config from "../../../lib/config";
 import ItemStatComponent from "./ItemStatComponent";
+import { Trans } from "react-i18next";
 
 
 function MPSeries(props) {
@@ -66,7 +67,7 @@ function MPSeries(props) {
 
 
   return (
-    <ItemStatComponent  base_url={config.hostUrl} data={data} heading={"MOST POPULAR SERIES"} units={"Users"}/>
+    <ItemStatComponent  base_url={config.hostUrl} data={data} heading={<Trans i18nKey="STAT_CARDS.MOST_POPULAR_SERIES" />} units={<Trans i18nKey="USERS" />}/>
   );
 }
 

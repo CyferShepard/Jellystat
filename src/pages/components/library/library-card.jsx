@@ -1,4 +1,4 @@
-import React, {useState} from "react";
+import {useState} from "react";
 import { Link } from "react-router-dom";
 import "../../css/library/library-card.css";
 
@@ -10,6 +10,8 @@ import TvLineIcon from "remixicon-react/TvLineIcon";
 import FilmLineIcon from "remixicon-react/FilmLineIcon";
 import FileMusicLineIcon from "remixicon-react/FileMusicLineIcon";
 import CheckboxMultipleBlankLineIcon from "remixicon-react/CheckboxMultipleBlankLineIcon";
+import { Trans } from "react-i18next";
+import i18next from "i18next";
 
 function LibraryCard(props) {
   const [imageLoaded, setImageLoaded] = useState(true);
@@ -51,22 +53,28 @@ function LibraryCard(props) {
     const days = Math.floor(seconds / 86400); // 1 day = 86400 seconds
     const hours = Math.floor((seconds % 86400) / 3600); // 1 hour = 3600 seconds
     const minutes = Math.floor(((seconds % 86400) % 3600) / 60); // 1 minute = 60 seconds
+
+    const units = {
+      months: [i18next.t("UNITS.MONTH"), i18next.t("UNITS.MONTHS")],
+      days: [i18next.t("UNITS.DAY"), i18next.t("UNITS.DAYS")],
+      hours: [i18next.t("UNITS.HOUR"), i18next.t("UNITS.HOURS")],
+      minutes: [i18next.t("UNITS.MINUTE"), i18next.t("UNITS.MINUTES")]
+    };
     
     let formattedTime = '';
     if (days) {
-      formattedTime += `${days} day${days > 1 ? 's' : ''}`;
+      formattedTime += `${days} ${days > 1 ? units.days[1] : units.days[0]}`;
     }
     
     if (hours) {
-      formattedTime += ` ${hours} hour${hours > 1 ? 's' : ''}`;
+      formattedTime += ` ${hours} ${hours > 1 ?  units.hours[1] : units.hours[0]}`;
     }
     
-    if (minutes) {
-      formattedTime += ` ${minutes} minute${minutes > 1 ? 's' : ''}`;
+    if (minutes) {      formattedTime += ` ${minutes} ${minutes > 1 ?  units.minutes[1] : units.minutes[0]}`;
     }
     
     if (!days && !hours && !minutes) {
-      formattedTime = '0 minutes';
+      formattedTime =`0 ${units.minutes[1]}`;
     }
     
     return formattedTime;
@@ -80,33 +88,40 @@ function LibraryCard(props) {
     const minutes = Math.floor((seconds % 3600) / 60); // 1 minute = 60 seconds
   
     const timeComponents = [];
+
+    const units = {
+      months: [i18next.t("UNITS.MONTH"), i18next.t("UNITS.MONTHS")],
+      days: [i18next.t("UNITS.DAY"), i18next.t("UNITS.DAYS")],
+      hours: [i18next.t("UNITS.HOUR"), i18next.t("UNITS.HOURS")],
+      minutes: [i18next.t("UNITS.MINUTE"), i18next.t("UNITS.MINUTES")]
+    };
   
     if (months) {
-      timeComponents.push(`${months} Month${months > 1 ? 's' : ''}`);
+      timeComponents.push(`${months} ${months > 1 ? units.months[1] : units.months[0] }`);
     }
   
     if (days) {
-      timeComponents.push(`${days} day${days > 1 ? 's' : ''}`);
+      timeComponents.push(`${days} ${days > 1 ? units.days[1] : units.days[0]}`);
     }
   
     if (hours) {
-      timeComponents.push(`${hours} hour${hours > 1 ? 's' : ''}`);
+      timeComponents.push(`${hours} ${hours > 1 ? units.hours[1] : units.hours[0]}`);
     }
   
     if (!months && minutes) {
-      timeComponents.push(`${minutes} minute${minutes > 1 ? 's' : ''}`);
+      timeComponents.push(`${minutes} ${minutes > 1 ? units.minutes[1] : units.minutes[0]}`);
     }
   
-    const formattedTime = timeComponents.length > 0 ? timeComponents.join(' ') : '0 minutes';
+    const formattedTime = timeComponents.length > 0 ? timeComponents.join(' ') : `0 ${units.minutes[1]}`;
     return formattedTime;
   }
   
 
   function formatLastActivityTime(time) {
     const units = {
-      days: ['Day', 'Days'],
-      hours: ['Hour', 'Hours'],
-      minutes: ['Minute', 'Minutes']
+      days: [i18next.t("UNITS.DAY"), i18next.t("UNITS.DAYS")],
+      hours: [i18next.t("UNITS.HOUR"), i18next.t("UNITS.HOURS")],
+      minutes: [i18next.t("UNITS.MINUTE"), i18next.t("UNITS.MINUTES")]
     };
   
     let formattedTime = '';
@@ -118,7 +133,7 @@ function LibraryCard(props) {
       }
     }
   
-    return `${formattedTime}ago`;
+    return formattedTime;
   }
   
   return (
@@ -143,62 +158,62 @@ function LibraryCard(props) {
 
           <Card.Body className="library-card-details">
             <Row className="space-between-end card-row">
-              <Col className="card-label">Library</Col>
+              <Col className="card-label"><Trans i18nKey="LIBRARY_CARD.LIBRARY" /></Col>
               <Col className="text-end">{props.data.Name}</Col>
             </Row>
 
             <Row className="space-between-end card-row">
-              <Col className="card-label">Type</Col>
-              <Col className="text-end">{props.data.CollectionType==='tvshows' ? 'Series' : props.data.CollectionType==='movies'? "Movies" : props.data.CollectionType==='music'? "Music" : 'Mixed'}</Col>
+              <Col className="card-label"><Trans i18nKey="TYPE" /></Col>
+              <Col className="text-end">{props.data.CollectionType==='tvshows' ? <Trans i18nKey="SERIES" /> : props.data.CollectionType==='movies'? <Trans i18nKey="MOVIES" /> : props.data.CollectionType==='music'? <Trans i18nKey="MUSIC" /> : 'Mixed'}</Col>
             </Row>
 
             <Row className="space-between-end card-row">
-              <Col className="card-label">Total Time</Col>
+              <Col className="card-label"><Trans i18nKey="LIBRARY_CARD.TOTAL_TIME" /></Col>
               <Col className="text-end">{ticksToTimeString(props.data && props.data.total_play_time ? props.data.total_play_time:0)}</Col>
             </Row>
 
             <Row className="space-between-end card-row">
-              <Col className="card-label">Total Files</Col>
+              <Col className="card-label"><Trans i18nKey="LIBRARY_CARD.TOTAL_FILES" /></Col>
               <Col className="text-end">{props.metadata && props.metadata.files  ? props.metadata.files :0}</Col>
             </Row>
 
             <Row className="space-between-end card-row">
-              <Col className="card-label">Library Size</Col>
+              <Col className="card-label"><Trans i18nKey="LIBRARY_CARD.LIBRARY_SIZE" /></Col>
               <Col className="text-end">{formatFileSize(props.metadata && props.metadata.Size ? props.metadata.Size:0)}</Col>
             </Row>
 
             <Row className="space-between-end card-row">
-              <Col className="card-label">Total Plays</Col>
+              <Col className="card-label"><Trans i18nKey="TOTAL_PLAYS" /></Col>
               <Col className="text-end">{props.data.Plays}</Col>
             </Row>
 
             <Row className="space-between-end card-row">
-              <Col className="card-label">Total Playback</Col>
+              <Col className="card-label"><Trans i18nKey="LIBRARY_CARD.TOTAL_PLAYBACK" /></Col>
               <Col className="text-end">{formatTotalWatchTime(props.data.total_playback_duration)}</Col>
             </Row>
 
             <Row className="space-between-end card-row">
-              <Col className="card-label">Last Played</Col>
+              <Col className="card-label"><Trans i18nKey="LIBRARY_CARD.LAST_PLAYED" /></Col>
               <Col className="text-end">{props.data.ItemName || 'n/a'}</Col>
             </Row>
 
             <Row className="space-between-end card-row">
-              <Col className="card-label">Last Activity</Col>
-              <Col className="text-end">{props.data.LastActivity ? formatLastActivityTime(props.data.LastActivity) : 'never'}</Col>
+              <Col className="card-label"><Trans i18nKey="LIBRARY_CARD.LAST_ACTIVITY" /></Col>
+              <Col className="text-end">{props.data.LastActivity ?`${i18next.t("USERS_PAGE.AGO_ALT")} ${ formatLastActivityTime(props.data.LastActivity)} ${i18next.t("USERS_PAGE.AGO").toLocaleLowerCase()}` : i18next.t("ERROR_MESSAGES.NEVER")}</Col>
             </Row>
 
             <Row className="space-between-end card-row">
-              <Col className="card-label">{props.data.CollectionType==='tvshows' ? 'Series' : props.data.CollectionType==='movies'? "Movies" : props.data.CollectionType==='music'? "Songs" : 'Files'}</Col>
+              <Col className="card-label">{props.data.CollectionType==='tvshows' ? i18next.t("SERIES") : props.data.CollectionType==='movies'? i18next.t("MOVIES") : props.data.CollectionType==='music'? i18next.t("SONGS") : i18next.t("FILES")}</Col>
               <Col className="text-end">{props.data.Library_Count}</Col>
             </Row>
 
             <Row className="space-between-end card-row" style={{opacity:props.data.CollectionType==='tvshows' ? '1' :'0'}}>
-              <Col className="card-label">Seasons</Col>
+              <Col className="card-label"><Trans i18nKey="SEASONS" /></Col>
               <Col className="text-end">{props.data.CollectionType==='tvshows' ? props.data.Season_Count : ''}</Col>
             </Row>
 
             <Row className="space-between-end card-row" style={{opacity:props.data.CollectionType==='tvshows' ? '1' :'0'}}>
-              <Col className="card-label">Episodes</Col>
+              <Col className="card-label"><Trans i18nKey="EPISODES" /></Col>
               <Col className="text-end">{props.data.CollectionType==='tvshows' ? props.data.Episode_Count : ''}</Col>
             </Row>
             

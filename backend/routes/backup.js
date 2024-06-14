@@ -22,7 +22,7 @@ const postgresUser = process.env.POSTGRES_USER;
 const postgresPassword = process.env.POSTGRES_PASSWORD;
 const postgresIp = process.env.POSTGRES_IP;
 const postgresPort = process.env.POSTGRES_PORT;
-const postgresDatabase = process.env.POSTGRES_DATABASE || 'jfstat';
+const postgresDatabase = process.env.POSTGRES_DB || 'jfstat';
 const backupfolder='backup-data';
 
 // Tables to back up
@@ -65,7 +65,7 @@ async function backup(refLog) {
     console.error('No write permissions for the folder:', backuppath);
     refLog.logData.push({ color: "red", Message: "Backup Failed: No write permissions for the folder: "+backuppath });
     refLog.logData.push({ color: "red", Message: "Backup Failed with errors"});
-    logging.updateLog(refLog.uuid,refLog.loggedData,taskstate.FAILED);
+    Logging.updateLog(refLog.uuid,refLog.loggedData,taskstate.FAILED);
     await pool.end();
     return;
 
@@ -78,7 +78,7 @@ async function backup(refLog) {
   const stream = fs.createWriteStream(directoryPath, { flags: 'a' });
   stream.on('error', (error) => {
     refLog.logData.push({ color: "red", Message: "Backup Failed: "+error });
-    logging.updateLog(refLog.uuid,refLog.loggedData,taskstate.FAILED);
+    Logging.updateLog(refLog.uuid,refLog.loggedData,taskstate.FAILED);
     return;
   });
   const backup_data=[];
@@ -150,7 +150,7 @@ async function backup(refLog) {
   {
     console.log(error);
     refLog.logData.push({ color: "red", Message: "Backup Failed: "+error });
-    logging.updateLog(refLog.uuid,refLog.loggedData,taskstate.FAILED);
+    Logging.updateLog(refLog.uuid,refLog.loggedData,taskstate.FAILED);
   }
 
 

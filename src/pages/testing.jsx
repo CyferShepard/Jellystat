@@ -1,5 +1,4 @@
-import React from 'react';
-
+import {  toast } from 'react-toastify';
 
 import './css/library/libraries.css';
 
@@ -10,6 +9,7 @@ import './css/library/libraries.css';
 // import HomeStatisticCards from './components/HomeStatisticCards';
 // import Sessions from './components/sessions/sessions';
 import LibrarySelector from './library_selector';
+import { Button } from '@mui/material';
 
 
 
@@ -52,6 +52,10 @@ function Testing() {
     <div className='Activity'>
 
   <LibrarySelector/>
+  <Button variant="contained" color="primary" onClick={()=>toast.info('Test Info', {autoClose: 15000,})}>Test Toast Info</Button>
+  <Button variant="contained" color="success" onClick={()=>toast.success('Test Success', {autoClose: 15000,})}>Test Toast Success</Button>
+  <Button variant="contained" color="error"   onClick={()=>toast.error('Test Error', {autoClose: 15000,})}>Test Toast Error</Button>
+  <Button variant="contained" color="warning" onClick={()=>toast.warn('Test Warn', {autoClose: 15000,})}>Test Toast Warn</Button>
 
     </div>
 

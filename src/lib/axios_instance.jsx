@@ -1,8 +1,5 @@
-import Axios from 'axios';
-import { setupCache } from 'axios-cache-interceptor';
+import Axios from "axios";
 
-const axios = setupCache(Axios); 
-
-
+const axios = Axios.create();
 
 export default axios;

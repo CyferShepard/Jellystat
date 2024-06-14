@@ -30,7 +30,17 @@ router.post("/getMostViewedByType", async (req, res) => {
     if(!valid_types.includes(type))
     {
       res.status(503);
-      return res.send('Invalid Type Value');
+      return res.send(`Invalid Type Value.\nValid Types: ${JSON.stringify(valid_types)}`);
+    }
+    if(isNaN(parseFloat(days)))
+    {
+      res.status(503);
+      return res.send(`Days needs to be a number.`);
+    }
+    if(Number(days)<0)
+    {
+      res.status(503);
+      return res.send(`Days cannot be less than 0`);
     }
   
 
@@ -219,9 +229,6 @@ router.post("/getGlobalLibraryStats", async (req, res) => {
   }
 });
 
-
-
-
 router.get("/getLibraryCardStats", async (req, res) => {
   try {
     const { rows } = await db.query("select * from js_library_stats_overview");
@@ -231,6 +238,28 @@ router.get("/getLibraryCardStats", async (req, res) => {
     res.send(error);
   }
 });
+
+router.post("/getLibraryCardStats", async (req, res) => {
+  try {
+    const {libraryid } = req.body;
+    if(libraryid === undefined)
+    {
+      res.status(503);
+      return res.send('Invalid Library Id');
+    }
+
+    const { rows } = await db.query(
+      `select * from js_library_stats_overview where "Id"=$1`, [libraryid]
+    );
+    res.send(rows[0]);
+  } catch (error) {
+    console.log(error);
+    res.status(503);
+    res.send(error);
+  }
+});
+
+
 
 router.get("/getLibraryMetadata", async (req, res) => {
   try {

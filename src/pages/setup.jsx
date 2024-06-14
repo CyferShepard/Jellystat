@@ -1,31 +1,31 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import axios from "axios";
 import Config from "../lib/config";
-import Form from 'react-bootstrap/Form';
-import Button from 'react-bootstrap/Button';
-import { InputGroup,Row } from "react-bootstrap";
+import Form from "react-bootstrap/Form";
+import Button from "react-bootstrap/Button";
+import { InputGroup, Row } from "react-bootstrap";
 
-import EyeFillIcon from 'remixicon-react/EyeFillIcon';
-import EyeOffFillIcon from 'remixicon-react/EyeOffFillIcon';
-import logo_dark from './images/icon-b-512.png';
+import EyeFillIcon from "remixicon-react/EyeFillIcon";
+import EyeOffFillIcon from "remixicon-react/EyeOffFillIcon";
+import logo_dark from "./images/icon-b-512.png";
 
 import "./css/setup.css";
-const token = localStorage.getItem('token');
-
+import i18next from "i18next";
+import { Trans } from "react-i18next";
+const token = localStorage.getItem("token");
 
 function Setup() {
   const [config, setConfig] = useState(null);
   const [formValues, setFormValues] = useState({});
   const [processing, setProcessing] = useState(false);
-  const [submitButtonText, setsubmitButtonText] = useState("Save Jellyfin Details");
+  const [submitButtonText, setsubmitButtonText] = useState(i18next.t("SAVE_JELLYFIN_DETAILS"));
   const [showPassword, setShowPassword] = useState(false);
 
   function handleFormChange(event) {
     setFormValues({ ...formValues, [event.target.name]: event.target.value });
   }
   async function beginSync() {
-
-      await axios
+    await axios
       .get("/sync/beginSync", {
         headers: {
           Authorization: `Bearer ${config.token}`,
@@ -33,79 +33,39 @@ function Setup() {
         },
       })
       .catch((error) => {
-         console.log(error);
+        console.log(error);
       });
-      
-  }
-
-  async function validateSettings(_url, _apikey) {
-    const result = await axios
-    .post("/api/validateSettings", {
-      url:_url,
-      apikey: _apikey
-
-    }, {
-        headers: {
-        Authorization: `Bearer ${token}`,
-        "Content-Type": "application/json",
-        },
-      });
-
-    let data=result.data;
-    return { isValid:data.isValid, errorMessage:data.errorMessage} ;
   }
 
   async function handleFormSubmit(event) {
     setProcessing(true);
     event.preventDefault();
 
-    let validation = await validateSettings(
-      formValues.JF_HOST,
-      formValues.JF_API_KEY
-    );
-
-    if (!validation.isValid) {
-      setsubmitButtonText(validation.errorMessage);
-      setProcessing(false);
-      return;
-    }
-
     // Send a POST request to /api/setconfig/ with the updated configuration
     axios
-      .post("/api/setconfig/", formValues, {
-        headers: {
-          Authorization: `Bearer ${config.token}`,
-          "Content-Type": "application/json",
-        },
-      })
+      .post("/auth/configSetup/", formValues)
       .then(async () => {
-        setsubmitButtonText("Settings Saved");
+        setsubmitButtonText(i18next.t("SETTINGS_SAVED"));
         setProcessing(false);
         setTimeout(async () => {
-
           setTimeout(async () => {
             beginSync();
             window.location.href = "/";
-           
           }, 1000);
-         
         }, 1000);
-       
-        
+
         return;
       })
       .catch((error) => {
         let errorMessage = "";
         if (error.code === "ERR_NETWORK") {
-          errorMessage = `Unable to connect to Jellyfin Server`;
+          errorMessage = i18next.t("ERROR_MESSAGES.NETWORK_ERROR");
         } else if (error.response.status === 401) {
-          errorMessage = `Error ${error.response.status} Unauthorized`;
+          errorMessage = i18next.t("ERROR_MESSAGES.INVALID_LOGIN");
         } else if (error.response.status === 404) {
-
-          errorMessage = `Error ${error.response.status}: The requested URL was not found.`;
+          errorMessage = i18next.t("ERROR_MESSAGES.INVALID_URL").replace("{STATUS}", error.response.status);
         } else {
-
-          errorMessage = `Error : ${error.response.status}`;
+          errorMessage = `Error : ${error.errorMessage ?? error.response.status}`;
         }
         console.log(error);
         setsubmitButtonText(errorMessage);
@@ -133,38 +93,48 @@ function Setup() {
   return (
     <section>
       <div className="form-box d-flex flex-column">
-      <img src={logo_dark} style={{height:"100px"}} className="px-2" alt=''/>
-       <h1>Jellystat</h1>
-       <span className="fts-text">First Time Setup Step 2 of 2</span>
+        <img src={logo_dark} style={{ height: "100px" }} className="px-2" alt="" />
+        <h1>
+          <Trans i18nKey={"JELLYSTAT"} />
+        </h1>
+        <span className="fts-text">{i18next.t("FT_SETUP_PROGRESS").replace("{STEP}", "2").replace("{TOTAL}", "2")}</span>
 
         <Form onSubmit={handleFormSubmit} className="mt-5">
-          <Form.Group as={Row} className="inputbox" >
+          <Form.Group as={Row} className="inputbox">
+            <Form.Control
+              id="JF_HOST"
+              name="JF_HOST"
+              value={formValues.JF_HOST || ""}
+              onChange={handleFormChange}
+              placeholder=" "
+            />
 
-
-              <Form.Control  id="JF_HOST"  name="JF_HOST" value={formValues.JF_HOST || ""} onChange={handleFormChange} placeholder=" "/>
-
-            <Form.Label column>
-              URL
-            </Form.Label>
+            <Form.Label column>URL</Form.Label>
           </Form.Group>
 
-          <Form.Group as={Row} className="inputbox" >
-
-            <InputGroup >
-              <Form.Control className="px-0"  id="JF_API_KEY"  name="JF_API_KEY" value={formValues.JF_API_KEY || ""} onChange={handleFormChange} type={showPassword ? "text" : "password"} placeholder=" " />
-              <Button className="login-show-password" type="button" onClick={() => setShowPassword(!showPassword)}>{showPassword?<EyeFillIcon/>:<EyeOffFillIcon/>}</Button>
-              <Form.Label column >
-              API Key
-            </Form.Label>
+          <Form.Group as={Row} className="inputbox">
+            <InputGroup>
+              <Form.Control
+                className="px-0"
+                id="JF_API_KEY"
+                name="JF_API_KEY"
+                value={formValues.JF_API_KEY || ""}
+                onChange={handleFormChange}
+                type={showPassword ? "text" : "password"}
+                placeholder=" "
+              />
+              <Button className="login-show-password" type="button" onClick={() => setShowPassword(!showPassword)}>
+                {showPassword ? <EyeFillIcon /> : <EyeOffFillIcon />}
+              </Button>
+              <Form.Label column>
+                <Trans i18nKey={"SETTINGS_PAGE.API_KEY"} />
+              </Form.Label>
             </InputGroup>
-
           </Form.Group>
-
 
           <Button type="submit" className="setup-button">
-            {processing ? "Validating..." : submitButtonText}
+            {processing ? `${i18next.t("VALIDATING")}...` : submitButtonText}
           </Button>
-
         </Form>
       </div>
     </section>

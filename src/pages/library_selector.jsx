@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import axios from "axios";
 import Config from "../lib/config";
 
@@ -9,6 +9,7 @@ import ErrorBoundary from "./components/general/ErrorBoundary";
 import InformationLineIcon from "remixicon-react/InformationLineIcon";
 
 import { Tooltip } from "@mui/material";
+import { Trans } from "react-i18next";
 
 
 function LibrarySelector() {
@@ -64,7 +65,7 @@ function LibrarySelector() {
 
   return (
     <div className="libraries">
-    <h1 className="py-4">Select Libraries to Import  <Tooltip title={"Activity for Items within these libraries are still Tracked - Even when not imported."}><span> <InformationLineIcon/></span></Tooltip></h1>
+    <h1 className="py-4"><Trans i18nKey={"SETTINGS_PAGE.SELECT_LIBRARIES_TO_IMPORT"}/>  <Tooltip title={<Trans i18nKey={"SETTINGS_PAGE.SELECT_LIBRARIES_TO_IMPORT_TOOLTIP"}/>}><span> <InformationLineIcon/></span></Tooltip></h1>
 
       <div xs={1} md={2} lg={4} className="g-0 libraries-container">
       {data &&

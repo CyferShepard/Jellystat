@@ -1,146 +1,126 @@
 const express = require("express");
-const CryptoJS  = require('crypto-js');
+const CryptoJS = require("crypto-js");
 const db = require("../db");
-const jwt = require('jsonwebtoken');
+const jwt = require("jsonwebtoken");
 const configClass = require("../classes/config");
-const packageJson = require('../../package.json');
+const packageJson = require("../../package.json");
+const JellyfinAPI = require("../classes/jellyfin-api");
+const Jellyfin = new JellyfinAPI();
 
 const JWT_SECRET = process.env.JWT_SECRET;
-const JS_USER=process.env.JS_USER;
+const JS_USER = process.env.JS_USER;
 const JS_PASSWORD = process.env.JS_PASSWORD;
 if (JWT_SECRET === undefined) {
-  console.log('JWT Secret cannot be undefined');
+  console.log("JWT Secret cannot be undefined");
   process.exit(1); // end the program with error status code
 }
 
 const router = express.Router();
 
-async function getConfigState()
-{
-  let state=0;
-  try{
-    const { rows : Configured } = await db.query(`SELECT * FROM app_config`);
+router.post("/login", async (req, res) => {
+  try {
+    const { username, password } = req.body;
 
-    //state 0 = not configured
-    //state 1 = configured and user set
-    //state 2 = configured and user and api key set
+    const query = 'SELECT * FROM app_config WHERE ("APP_USER" = $1 AND "APP_PASSWORD" = $2) OR "REQUIRE_LOGIN" = false';
+    const values = [username, password];
+    const { rows: login } = await db.query(query, values);
 
-    if(Configured.length>0)
-    {
-      if(Configured[0].APP_USER===null)//safety check if user is null still return state 0
-      {
-        return state;
-      }
+    if (login.length > 0 || (username === JS_USER && password === CryptoJS.SHA3(JS_PASSWORD).toString())) {
+      const user = { id: 1, username: username };
 
-      if(Configured[0].APP_USER!==null && Configured[0].JF_API_KEY===null) //check if user is configured but API is not configured then return state 1
-      {
-        state=1;
-        return state; 
-      }
-      
-
-      if(Configured[0].APP_USER!==null && Configured[0].JF_API_KEY!==null) //check if user is configured and API is configured then return state 2
-      {
-
-        state=2
-        return state;
-      }
-    }else{
-      return state;
-    }
- 
-  }catch(error)
-  {
-    return state;
-  }
-}
-
-
-router.post('/login', async (req, res) => {
-    try{
-      const { username, password } = req.body;
-        
-      const query = 'SELECT * FROM app_config WHERE ("APP_USER" = $1 AND "APP_PASSWORD" = $2) OR "REQUIRE_LOGIN" = false';
-      const values = [username, password];
-      const { rows: login } = await db.query(query, values);
-
-
-      if(login.length>0 || (username===JS_USER && password===CryptoJS.SHA3(JS_PASSWORD).toString()))
-      {
-        const user = { id: 1, username: username };
-  
-          jwt.sign({ user }, JWT_SECRET, (err, token) => {
-            if (err) {
-              console.log(err);
-              res.sendStatus(500);
-            } else {
-              res.json({ token }); 
-            }
-          });
-      }else{
-        res.sendStatus(401);
-      }
-   
-    }catch(error)
-    {
-      console.log(error);
-    }
-  });
-  
-  router.get('/isConfigured', async (req, res) => {
-
-    const state=await getConfigState();
-    res.json({ state:state , version:packageJson.version}); 
-    
-    
-  });
-
-  router.post('/createuser', async (req, res) => {
-  
-  
-    try{
-      const { username, password } = req.body;
-      const configState=await getConfigState();
-  
-      if(configState<2)
-      {
-        const user = { id: 1, username: username };
-
-        const hasConfig=await new configClass().getConfig();
-        
-        let query='INSERT INTO app_config ("APP_USER","APP_PASSWORD") VALUES ($1,$2)';
-        if(!hasConfig.error)
-        {
-            query='UPDATE app_config SET  "APP_USER"=$1, "APP_PASSWORD"=$2';
+      jwt.sign({ user }, JWT_SECRET, (err, token) => {
+        if (err) {
+          console.log(err);
+          res.sendStatus(500);
+        } else {
+          res.json({ token });
         }
-
-        console.log(query);
-      
-        await db.query(
-          query,
-          [username, password]
-        );
-  
-          jwt.sign({ user }, JWT_SECRET, (err, token) => {
-            if (err) {
-              console.log(err);
-              res.sendStatus(500);
-            } else {
-              res.json({ token }); 
-            }
-          });
-      }else{
-        res.sendStatus(403);
-      }
-   
-    }catch(error)
-    {
-      console.log(error);
+      });
+    } else {
+      res.sendStatus(401);
     }
-  
-  
-  
-   
-  });
+  } catch (error) {
+    console.log(error);
+  }
+});
+
+router.get("/isConfigured", async (req, res) => {
+  try {
+    const config = await new configClass().getConfig();
+    res.json({ state: config.state, version: packageJson.version });
+  } catch (error) {
+    console.log(error);
+    res.sendStatus(500);
+  }
+});
+
+router.post("/createuser", async (req, res) => {
+  try {
+    const { username, password } = req.body;
+    const config = await new configClass().getConfig();
+
+    if (config.state != null && config.state < 2) {
+      const user = { id: 1, username: username };
+
+      let query = 'INSERT INTO app_config ("ID","APP_USER","APP_PASSWORD") VALUES (1,$1,$2)';
+      if (config.state > 0) {
+        query = 'UPDATE app_config SET  "APP_USER"=$1, "APP_PASSWORD"=$2';
+      }
+
+      await db.query(query, [username, password]);
+
+      jwt.sign({ user }, JWT_SECRET, (err, token) => {
+        if (err) {
+          console.log(err);
+          res.sendStatus(500);
+        } else {
+          res.json({ token });
+        }
+      });
+    } else {
+      res.sendStatus(403);
+    }
+  } catch (error) {
+    console.log(error);
+  }
+});
+
+router.post("/configSetup", async (req, res) => {
+  try {
+    const { JF_HOST, JF_API_KEY } = req.body;
+    const config = await new configClass().getConfig();
+
+    if (JF_HOST === undefined && JF_API_KEY === undefined) {
+      res.status(400);
+      res.send("JF_HOST and JF_API_KEY are required for configuration");
+      return;
+    }
+
+    var url = JF_HOST;
+
+    const validation = await Jellyfin.validateSettings(url, JF_API_KEY);
+    if (validation.isValid === false) {
+      res.status(validation.status);
+      res.send(validation);
+      return;
+    }
+
+    const { rows: getConfig } = await db.query('SELECT * FROM app_config where "ID"=1');
+
+    if (config.state != null && config.state < 2) {
+      let query = 'UPDATE app_config SET "JF_HOST"=$1, "JF_API_KEY"=$2 where "ID"=1';
+      if (getConfig.length === 0) {
+        query = 'INSERT INTO app_config ("ID","JF_HOST","JF_API_KEY","APP_USER","APP_PASSWORD") VALUES (1,$1,$2,null,null)';
+      }
+
+      const { rows } = await db.query(query, [validation.cleanedUrl, JF_API_KEY]);
+      res.send(rows);
+    } else {
+      res.sendStatus(500);
+    }
+  } catch (error) {
+    console.log(error);
+  }
+});
 
 module.exports = router;

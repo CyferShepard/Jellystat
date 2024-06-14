@@ -1,7 +1,4 @@
-import React, { useState } from "react";
-
-
-
+import { useState } from "react";
 
 import MVLibraries from "./statCards/mv_libraries";
 import MVMovies from "./statCards/mv_movies";
@@ -14,6 +11,7 @@ import MVMusic from "./statCards/mv_music";
 import MPMusic from "./statCards/mp_music";
 
 import "../css/statCard.css";
+import { Trans } from "react-i18next";
 
 function HomeStatisticCards() {
   const [days, setDays] = useState(30);
@@ -34,9 +32,9 @@ function HomeStatisticCards() {
   return (
     <div className="watch-stats">
       <div className="Heading my-3">
-        <h1>Watch Statistics</h1>
+        <h1><Trans i18nKey="HOME_PAGE.WATCH_STATISTIC" /></h1>
         <div className="date-range">
-          <div className="header">Last</div>
+          <div className="header"><Trans i18nKey="LAST" /></div>
           <div className="days">
             <input
               type="number"
@@ -46,7 +44,7 @@ function HomeStatisticCards() {
               onKeyDown={handleKeyDown}
             />
           </div>
-          <div className="trailer">Days</div>
+          <div className="trailer"><Trans i18nKey="UNITS.DAYS" /></div>
         </div>
 
         

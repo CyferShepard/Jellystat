@@ -1,85 +1,85 @@
 // import logo from './logo.svg';
-import './App.css';
-import React, { useState, useEffect } from 'react';
-import { Routes, Route } from 'react-router-dom';
-import axios from 'axios';
+import "./App.css";
+import React, { useState, useEffect } from "react";
+import { Routes, Route } from "react-router-dom";
+import axios from "axios";
 
-import socket from './socket';
-import { ToastContainer, toast } from 'react-toastify';
-import 'react-toastify/dist/ReactToastify.css';
+import socket from "./socket";
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
-import Config from './lib/config';
+import Config from "./lib/config";
 
-import Loading from './pages/components/general/loading';
+import Loading from "./pages/components/general/loading";
 
-import Signup from './pages/signup';
-import Setup from './pages/setup';
-import Login from './pages/login';
+import Signup from "./pages/signup";
+import Setup from "./pages/setup";
+import Login from "./pages/login";
 
-import Navbar from './pages/components/general/navbar';
-import Home from './pages/home';
-import Settings from './pages/settings';
-import Users from './pages/users';
-import UserInfo from './pages/components/user-info';
-import Libraries from './pages/libraries';
-import LibraryInfo from './pages/components/library-info';
-import ItemInfo from './pages/components/item-info';
-import ErrorPage from './pages/components/general/error';
-import About from './pages/about';
+import Navbar from "./pages/components/general/navbar";
+import Home from "./pages/home";
+import Settings from "./pages/settings";
+import Users from "./pages/users";
+import UserInfo from "./pages/components/user-info";
+import Libraries from "./pages/libraries";
+import LibraryInfo from "./pages/components/library-info";
+import ItemInfo from "./pages/components/item-info";
+import ErrorPage from "./pages/components/general/error";
+import About from "./pages/about";
 
-import Testing from './pages/testing';
-import Activity from './pages/activity';
-import Statistics from './pages/statistics';
+import Testing from "./pages/testing";
+import Activity from "./pages/activity";
+import Statistics from "./pages/statistics";
+import { t } from "i18next";
 
 function App() {
   const [setupState, setSetupState] = useState(0);
   const [config, setConfig] = useState(null);
   const [loading, setLoading] = useState(true);
   const [errorFlag, seterrorFlag] = useState(false);
-  const token = localStorage.getItem('token');
+  const token = localStorage.getItem("token");
 
   const wsListeners = [
-    { task: 'PlaybackSyncTask', ref: React.useRef(null) },
-    { task: 'PartialSyncTask', ref: React.useRef(null) },
-    { task: 'FullSyncTask', ref: React.useRef(null) },
-    { task: 'BackupTask', ref: React.useRef(null) },
-    { task: 'TaskError', ref: React.useRef(null) },
-    { task: 'GeneralAlert', ref: React.useRef(null) },
+    { task: "PlaybackSyncTask", ref: React.useRef(null) },
+    { task: "PartialSyncTask", ref: React.useRef(null) },
+    { task: "FullSyncTask", ref: React.useRef(null) },
+    { task: "BackupTask", ref: React.useRef(null) },
+    { task: "TaskError", ref: React.useRef(null) },
+    { task: "GeneralAlert", ref: React.useRef(null) },
   ];
 
   useEffect(() => {
     wsListeners.forEach((listener) => {
       socket.on(listener.task, (message) => {
-        if (message && (message.type === 'Start')) {
+        if (message && message.type === "Start") {
           listener.ref.current = toast.info(message?.message || message, {
             autoClose: 15000,
           });
-        } else
-        if (message && (message.type === 'Success' &&  !listener.ref.current)) {
+        } else if (message && message.type === "Success" && !listener.ref.current) {
           listener.ref.current = toast.success(message?.message || message, {
             autoClose: 15000,
           });
-        } else if (message && (message.type === 'Error' &&  !listener.ref.current)) {
+        } else if (message && message.type === "Error" && !listener.ref.current) {
           listener.ref.current = toast.error(message?.message || message, {
             autoClose: 15000,
           });
-        }else if (message && (message.type === 'Update' &&  !listener.ref.current)) {
+        } else if (message && message.type === "Update" && !listener.ref.current) {
           listener.ref.current = toast.info(message?.message || message, {
             autoClose: 15000,
           });
-        } else if (message && message.type === 'Update') {
+        } else if (message && message.type === "Update") {
           toast.update(listener.ref.current, {
             render: message?.message || message,
             type: toast.TYPE.INFO,
             autoClose: 15000,
           });
-        } else if (message && message.type === 'Error') {
+        } else if (message && message.type === "Error") {
           toast.update(listener.ref.current, {
             render: message?.message || message,
             type: toast.TYPE.ERROR,
             autoClose: 5000,
           });
-        } else if (message && message.type === 'Success') {
+        } else if (message && message.type === "Success") {
           toast.update(listener.ref.current, {
             render: message?.message || message,
             type: toast.TYPE.SUCCESS,
@@ -103,7 +103,10 @@ function App() {
         if (!newConfig.response) {
           setConfig(newConfig);
         } else {
-          if (newConfig.response.status !== 403) {
+          if (newConfig.response.status === 403 || newConfig.response.status === 401) {
+            localStorage.clear();
+            window.location.reload();
+          } else if (newConfig.response.status !== 403) {
             seterrorFlag(true);
           }
         }
@@ -116,7 +119,7 @@ function App() {
     if (setupState === 0) {
       setLoading(false);
       axios
-        .get('/auth/isConfigured')
+        .get("/auth/isConfigured")
         .then(async (response) => {
           if (response.status === 200) {
             setSetupState(response.data.state);
@@ -128,25 +131,21 @@ function App() {
         });
     }
 
-    if (!config && setupState >= 1) {
+    if (!config && setupState >= 1 && token !== undefined && token !== null) {
       fetchConfig();
     }
-  }, [config, setupState]);
+  }, [config, setupState, token]);
 
   if (loading) {
     return <Loading />;
   }
 
   if (errorFlag) {
-    return (
-      <ErrorPage message={'Error: Unable to connect to Jellystat Backend'} />
-    );
+    return <ErrorPage message={"Error: Unable to connect to Jellystat Backend"} />;
   }
 
-  if (!config && setupState === 2) {
-    if (token === undefined || token === null || !config) {
-      return <Login />;
-    }
+  if (!config && setupState === 2 && (token === undefined || token === null)) {
+    return <Login />;
   }
 
   if (setupState === 0) {
@@ -158,32 +157,26 @@ function App() {
 
   if (config && setupState === 2 && token !== null) {
     return (
-      <div className='App'>
-        <div className='d-flex flex-column flex-md-row'>
+      <div className="App">
+        <div className="d-flex flex-column flex-md-row">
           <Navbar />
-          <main className='w-md-100'>
+          <main className="w-md-100">
             <Routes>
-              <Route path='/' element={<Home />} />
-              <Route path='/settings' element={<Settings />} />
-              <Route path='/users' element={<Users />} />
-              <Route path='/users/:UserId' element={<UserInfo />} />
-              <Route path='/libraries' element={<Libraries />} />
-              <Route path='/libraries/:LibraryId' element={<LibraryInfo />} />
-              <Route path='/libraries/item/:Id' element={<ItemInfo />} />
-              <Route path='/statistics' element={<Statistics />} />
-              <Route path='/activity' element={<Activity />} />
-              <Route path='/testing' element={<Testing />} />
-              <Route path='/about' element={<About />} />
+              <Route path="/" element={<Home />} />
+              <Route path="/settings" element={<Settings />} />
+              <Route path="/users" element={<Users />} />
+              <Route path="/users/:UserId" element={<UserInfo />} />
+              <Route path="/libraries" element={<Libraries />} />
+              <Route path="/libraries/:LibraryId" element={<LibraryInfo />} />
+              <Route path="/libraries/item/:Id" element={<ItemInfo />} />
+              <Route path="/statistics" element={<Statistics />} />
+              <Route path="/activity" element={<Activity />} />
+              <Route path="/testing" element={<Testing />} />
+              <Route path="/about" element={<About />} />
             </Routes>
           </main>
         </div>
-        <ToastContainer
-          theme='dark'
-          position='bottom-right'
-          limit={5}
-          pauseOnFocusLoss={false}
-          hideProgressBar
-        />
+        <ToastContainer theme="dark" position="bottom-right" limit={5} pauseOnFocusLoss={false} hideProgressBar />
       </div>
     );
   }
