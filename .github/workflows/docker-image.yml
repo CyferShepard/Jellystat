@@ -44,11 +44,7 @@ jobs:
       with:
         context: .
         push: true
-        tags: ${{ steps.meta.outputs.tags }}
+        tags: |
+          ${{ github.ref == 'refs/heads/main' && 'latest' || steps.meta.outputs.tags }}
         platforms: linux/amd64,linux/arm64,linux/arm/v7
         
-    - name: Tag image as latest if on main branch
-      if: github.ref == 'refs/heads/main'
-      run: |
-        docker tag cyfershepard/jellystat:main cyfershepard/jellystat:latest
-        docker push cyfershepard/jellystat:latest
