@@ -46,3 +46,9 @@ jobs:
         push: true
         tags: ${{ steps.meta.outputs.tags }}
         platforms: linux/amd64,linux/arm64,linux/arm/v7
+        
+    - name: Tag image as latest if on main branch
+      if: github.ref == 'refs/heads/main'
+      run: |
+        docker tag ${{ steps.build-image.outputs.tags }} ${{ github.repository }}:latest
+        docker push ${{ github.repository }}:latest
