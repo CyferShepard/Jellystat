@@ -50,6 +50,5 @@ jobs:
     - name: Tag image as latest if on main branch
       if: github.ref == 'refs/heads/main'
       run: |
-        IMAGE_NAME=$(echo ${{ steps.meta.outputs.tags }} | cut -d, -f1)
-        docker tag $IMAGE_NAME ${{ github.repository }}:latest
-        docker push ${{ github.repository }}:latest
+        docker tag cyfershepard/jellystat:main cyfershepard/jellystat:latest
+        docker push cyfershepard/jellystat:latest
