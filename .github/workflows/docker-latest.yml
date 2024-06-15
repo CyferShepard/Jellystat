@@ -44,5 +44,7 @@ jobs:
         with:
           context: .
           push: true
-          tags: "cyfershepard/jellystat:latest"
+          tags: |
+            cyfershepard/jellystat:latest
+            ${{ steps.meta.outputs.tags }}
           platforms: linux/amd64,linux/arm64,linux/arm/v7
