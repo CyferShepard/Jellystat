@@ -367,8 +367,14 @@ class JellyfinAPI {
         },
       });
       let result = response.data && Array.isArray(response.data) ? response.data : [];
+
       if (result.length > 0) {
-        result = result.filter((session) => session.NowPlayingItem !== undefined && session.NowPlayingItem.Type != "Trailer");
+        result = result.filter(
+          (session) =>
+            session.NowPlayingItem !== undefined &&
+            session.NowPlayingItem.Type != "Trailer" &&
+            session.NowPlayingItem.ProviderIds["prerolls.video"] == undefined
+        );
       }
       return result;
     } catch (error) {
