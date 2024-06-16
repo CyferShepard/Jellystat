@@ -30,6 +30,12 @@ jobs:
             type=semver,pattern={{major}}.{{minor}}
             type=semver,pattern={{major}}
 
+      - name: Read version from package.json
+        id: get_version
+        run: |
+          VERSION=$(node -p "require('./package.json').version")
+          echo "VERSION=$VERSION" >> $GITHUB_ENV
+          
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v3
 
@@ -44,5 +50,7 @@ jobs:
         with:
           context: .
           push: true
-          tags: "cyfershepard/jellystat:latest"
+          tags: |
+            cyfershepard/jellystat:latest
+            cyfershepard/jellystat:${{ env.VERSION }}
           platforms: linux/amd64,linux/arm64,linux/arm/v7
