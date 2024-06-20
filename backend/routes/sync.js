@@ -7,7 +7,7 @@ const { randomUUID } = require("crypto");
 
 const { sendUpdate } = require("../ws");
 
-const logging = require("./logging");
+const logging = require("../classes/logging");
 const taskName = require("../logging/taskName");
 const triggertype = require("../logging/triggertype");
 

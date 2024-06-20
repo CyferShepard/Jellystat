@@ -21,8 +21,8 @@ const apiRouter = require("./routes/api");
 const proxyRouter = require("./routes/proxy");
 const { router: syncRouter } = require("./routes/sync");
 const statsRouter = require("./routes/stats");
-const { router: backupRouter } = require("./routes/backup");
-const { router: logRouter } = require("./routes/logging");
+const backupRouter = require("./routes/backup");
+const logRouter = require("./routes/logging");
 const utilsRouter = require("./routes/utils");
 
 // tasks

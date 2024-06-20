@@ -1,5 +1,5 @@
 const db = require("../db");
-const Logging = require("../routes/logging");
+const Logging = require("../classes/logging");
 const configClass =require("../classes/config");
 
 const backup = require("../routes/backup");
