@@ -226,7 +226,7 @@ function ItemInfo() {
                   </h1>
                   <Link
                     className="px-2"
-                    to={config.hostUrl + "/web/index.html#!/details?id=" + (data.EpisodeId || data.Id)}
+                    to={config.hostUrl + `/web/index.html#!/${config.IS_JELLYFIN?  "details" : "item"}?id=` + (data.EpisodeId || data.Id) + (config.settings.ServerID ? "&serverId=" + config.settings.ServerID : "")}
                     title={i18next.t("ITEM_INFO.OPEN_IN_JELLYFIN")}
                     target="_blank"
                   >

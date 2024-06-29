@@ -4,8 +4,7 @@ const db = require("../db");
 const jwt = require("jsonwebtoken");
 const configClass = require("../classes/config");
 const packageJson = require("../../package.json");
-const JellyfinAPI = require("../classes/jellyfin-api");
-const Jellyfin = new JellyfinAPI();
+const API = require("../classes/api-loader");
 
 const JWT_SECRET = process.env.JWT_SECRET;
 const JS_USER = process.env.JS_USER;
@@ -98,7 +97,7 @@ router.post("/configSetup", async (req, res) => {
 
     var url = JF_HOST;
 
-    const validation = await Jellyfin.validateSettings(url, JF_API_KEY);
+    const validation = await API.validateSettings(url, JF_API_KEY);
     if (validation.isValid === false) {
       res.status(validation.status);
       res.send(validation);
@@ -114,6 +113,22 @@ router.post("/configSetup", async (req, res) => {
       }
 
       const { rows } = await db.query(query, [validation.cleanedUrl, JF_API_KEY]);
+
+      const systemInfo = await API.systemInfo();
+
+      if (systemInfo && systemInfo != {}) {
+        const settingsjson = await db.query('SELECT settings FROM app_config where "ID"=1').then((res) => res.rows);
+
+        if (settingsjson.length > 0) {
+          const settings = settingsjson[0].settings || {};
+
+          settings.Tasks = systemInfo?.Id || null;
+
+          let query = 'UPDATE app_config SET settings=$1 where "ID"=1';
+
+          await db.query(query, [settings]);
+        }
+      }
       res.send(rows);
     } else {
       res.sendStatus(500);

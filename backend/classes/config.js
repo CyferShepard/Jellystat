@@ -20,6 +20,7 @@ class Config {
         settings: config[0].settings,
         api_keys: config[0].api_keys,
         state: state,
+        IS_JELLYFIN: (process.env.IS_EMBY_API || "false").toLowerCase() === "false",
       };
     } catch (error) {
       return { error: "Config Details Not Found" };

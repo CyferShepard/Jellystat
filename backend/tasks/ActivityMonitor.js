@@ -5,11 +5,11 @@ const moment = require("moment");
 const { columnsPlayback, mappingPlayback } = require("../models/jf_playback_activity");
 const { jf_activity_watchdog_columns, jf_activity_watchdog_mapping } = require("../models/jf_activity_watchdog");
 const configClass = require("../classes/config");
-const JellyfinAPI = require("../classes/jellyfin-api");
+const API = require("../classes/api-loader");
 const { sendUpdate } = require("../ws");
 
 async function ActivityMonitor(interval) {
-  const Jellyfin = new JellyfinAPI();
+
   // console.log("Activity Interval: " + interval);
 
   setInterval(async () => {
@@ -20,7 +20,7 @@ async function ActivityMonitor(interval) {
         return;
       }
       const ExcludedUsers = config.settings?.ExcludedUsers || [];
-      const apiSessionData = await Jellyfin.getSessions();
+      const apiSessionData = await API.getSessions();
       const SessionData = apiSessionData.filter((row) => row.NowPlayingItem !== undefined && !ExcludedUsers.includes(row.UserId));
       sendUpdate("sessions", apiSessionData);
       /////get data from jf_activity_monitor
@@ -191,7 +191,7 @@ async function ActivityMonitor(interval) {
       ///////////////////////////
     } catch (error) {
       if (error?.code === "ECONNREFUSED") {
-        console.error("Error: Unable to connect to Jellyfin");
+        console.error("Error: Unable to connect to API");//TO-DO Change this to correct API name
       } else if (error?.code === "ERR_BAD_RESPONSE") {
         console.warn(error.response?.data);
       } else {

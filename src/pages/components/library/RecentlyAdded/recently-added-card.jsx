@@ -3,6 +3,7 @@ import { Blurhash } from "react-blurhash";
 import { Link } from "react-router-dom";
 
 import "../../../css/lastplayed.css";
+import { Trans } from "react-i18next";
 
 function RecentlyAddedCard(props) {
   const [loaded, setLoaded] = useState(false);
@@ -21,7 +22,7 @@ function RecentlyAddedCard(props) {
 
   return (
     <div className="last-card">
-      <Link to={`/libraries/item/${props.data.EpisodeId ?? props.data.Id}`}>
+      <Link to={`/libraries/item/${(props.data.NewEpisodeCount != undefined ? props.data.SeasonId : props.data.EpisodeId)  ?? props.data.Id}`}>
         <div className="last-card-banner">
           {loaded ? null : props.data.PrimaryImageHash ? (
             <Blurhash hash={props.data.PrimaryImageHash} width={"100%"} height={"100%"} className="rounded-3 overflow-hidden" />
@@ -47,19 +48,29 @@ function RecentlyAddedCard(props) {
         <div className="last-item-name">
           <Link to={`/libraries/item/${props.data.SeriesId ?? props.data.Id}`}>{props.data.SeriesName ?? props.data.Name}</Link>
         </div>
-        {props.data.Type === "Episode" ? (
+        {props.data.Type === "Episode" && props.data.NewEpisodeCount == undefined && (
           <div className="last-item-episode">
             <Link to={`/libraries/item/${props.data.EpisodeId}`}>{props.data.Name}</Link>
           </div>
-        ) : null}
+        )}
       </div>
 
-      {props.data.SeasonNumber ? (
+      {props.data.SeasonNumber && props.data.NewEpisodeCount == undefined && (
         <div className="last-item-episode number">
           S{props.data.SeasonNumber} - E{props.data.EpisodeNumber}
         </div>
-      ) : (
-        <></>
+      )}
+
+      {props.data.SeasonNumber && props.data.NewEpisodeCount != undefined && (
+        <div className="last-item-episode number pt-0 pb-1">
+          <Trans i18nKey="SEASON" /> {props.data.SeasonNumber}
+        </div>
+      )}
+
+      {props.data.NewEpisodeCount && (
+        <div className="last-item-episode number pt-0">
+          {props.data.NewEpisodeCount} <Trans i18nKey="EPISODES" />
+        </div>
       )}
     </div>
   );

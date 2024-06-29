@@ -51,6 +51,22 @@ app.set("trust proxy", 1);
 app.disable("x-powered-by");
 app.use(compression());
 
+function typeInferenceMiddleware(req, res, next) {
+  Object.keys(req.query).forEach((key) => {
+    const value = req.query[key];
+    if (value.toLowerCase() === "true" || value.toLowerCase() === "false") {
+      // Convert to boolean
+      req.query[key] = value.toLowerCase() === "true";
+    } else if (!isNaN(value) && value.trim() !== "") {
+      // Convert to number if it's a valid number
+      req.query[key] = +value;
+    }
+  });
+  next();
+}
+
+app.use(typeInferenceMiddleware);
+
 // initiate routes
 app.use("/auth", authRouter, () => {
   /*  #swagger.tags = ['Auth'] */

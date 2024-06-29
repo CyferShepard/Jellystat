@@ -75,7 +75,7 @@ function LastWatchedCard(props) {
       <div className="last-item-details">
         <div className="last-last-played">{`${i18next.t("USERS_PAGE.AGO_ALT")} ${formatTime(props.data.LastPlayed)} ${i18next.t("USERS_PAGE.AGO").toLocaleLowerCase()}`}</div>
 
-        <div className="pb-2">
+        <div className="pb-2">1
           <Link to={`/users/${props.data.UserId}`}>{props.data.UserName}</Link>
         </div>
 

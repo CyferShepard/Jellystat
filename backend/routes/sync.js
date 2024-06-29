@@ -12,8 +12,8 @@ const taskName = require("../logging/taskName");
 const triggertype = require("../logging/triggertype");
 
 const configClass = require("../classes/config");
-const JellyfinAPI = require("../classes/jellyfin-api");
-const Jellyfin = new JellyfinAPI();
+const API = require("../classes/api-loader");
+
 
 const router = express.Router();
 
@@ -86,7 +86,7 @@ async function syncUserData() {
 
   const _sync = new sync();
 
-  const data = await Jellyfin.getUsers();
+  const data = await API.getUsers();
 
   const existingIds = await _sync.getExistingIDsforTable("jf_users"); // get existing user Ids from the db
 
@@ -494,10 +494,10 @@ async function syncPlaybackPluginData() {
   PlaybacksyncTask.loggedData.push({ color: "lawngreen", Message: "Syncing..." });
 
   //Playback Reporting Plugin Check
-  const installed_plugins = await Jellyfin.getInstalledPlugins();
+  const installed_plugins = await API.getInstalledPlugins();
 
   const hasPlaybackReportingPlugin = installed_plugins.filter(
-    (plugins) => plugins?.ConfigurationFileName === "Jellyfin.Plugin.PlaybackReporting.xml"
+    (plugins) => plugins?.ConfigurationFileName === "Jellyfin.Plugin.PlaybackReporting.xml"//TO-DO Change this to the correct plugin name
   );
 
   if (!hasPlaybackReportingPlugin || hasPlaybackReportingPlugin.length === 0) {
@@ -538,7 +538,7 @@ async function syncPlaybackPluginData() {
     PlaybacksyncTask.loggedData.push({ color: "dodgerblue", Message: "Query built. Executing." });
     //
 
-    const PlaybackData = await Jellyfin.StatsSubmitCustomQuery(query);
+    const PlaybackData = await API.StatsSubmitCustomQuery(query);
 
     let DataToInsert = await PlaybackData.map(mappingPlaybackReporting);
 
@@ -589,7 +589,7 @@ async function fullSync(triggertype) {
       return;
     }
 
-    let libraries = await Jellyfin.getLibraries();
+    let libraries = await API.getLibraries();
     if (libraries.length === 0) {
       syncTask.loggedData.push({ Message: "Error: No Libararies found to sync." });
       await logging.updateLog(syncTask.uuid, syncTask.loggedData, taskstate.FAILED);
@@ -616,7 +616,7 @@ async function fullSync(triggertype) {
         message: wsMessage,
       });
 
-      let libraryItems = await Jellyfin.getItemsFromParentId({
+      let libraryItems = await API.getItemsFromParentId({
         id: item.Id,
         ws: sendUpdate,
         syncTask: syncTask,
@@ -697,7 +697,7 @@ async function partialSync(triggertype) {
       return;
     }
 
-    const libraries = await Jellyfin.getLibraries();
+    const libraries = await API.getLibraries();
 
     if (libraries.length === 0) {
       syncTask.loggedData.push({ Message: "Error: No Libararies found to sync." });
@@ -720,7 +720,7 @@ async function partialSync(triggertype) {
         type: "Update",
         message: "Fetching Data for Library : " + library.Name + ` (${i + 1}/${filtered_libraries.length})`,
       });
-      let recentlyAddedForLibrary = await Jellyfin.getRecentlyAdded({ libraryid: library.Id, limit: 10 });
+      let recentlyAddedForLibrary = await API.getRecentlyAdded({ libraryid: library.Id, limit: 10 });
 
       sendUpdate(syncTask.wsKey, { type: "Update", message: "Mapping Data for Library : " + library.Name });
       const libraryItemsWithParent = recentlyAddedForLibrary.map((items) => ({
@@ -734,7 +734,7 @@ async function partialSync(triggertype) {
     const library_items = data.filter((item) => ["Movie", "Audio", "Series"].includes(item.Type));
 
     for (const item of library_items.filter((item) => item.Type === "Series")) {
-      let dataForShow = await Jellyfin.getItemsFromParentId({ id: item.Id });
+      let dataForShow = await API.getItemsFromParentId({ id: item.Id });
       const seasons_and_episodes_for_show = dataForShow.filter((item) => ["Season", "Episode"].includes(item.Type));
       data.push(...seasons_and_episodes_for_show);
     }
@@ -860,14 +860,14 @@ router.post("/fetchItem", async (req, res) => {
       return;
     }
 
-    const libraries = await Jellyfin.getLibraries();
+    const libraries = await API.getLibraries();
 
     const item = [];
 
     for (let i = 0; i < libraries.length; i++) {
       const library = libraries[i];
 
-      let libraryItems = await Jellyfin.getItemsFromParentId({ id: library.Id, itemid: itemId });
+      let libraryItems = await API.getItemsFromParentId({ id: library.Id, itemid: itemId });
 
       if (libraryItems.length > 0) {
         const libraryItemsWithParent = libraryItems.map((items) => ({

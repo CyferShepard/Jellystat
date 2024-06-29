@@ -1,7 +1,7 @@
 const configClass = require("./config");
 const { axios } = require("./axios");
 
-class JellyfinAPI {
+class EmbyAPI {
   constructor() {
     this.config = null;
     this.configReady = false;
@@ -21,9 +21,9 @@ class JellyfinAPI {
 
   #errorHandler(error, url) {
     if (error.response) {
-      console.log("[JELLYFIN-API]: " + this.#httpErrorMessageHandler(error));
+      console.log("[EMBY-API]: " + this.#httpErrorMessageHandler(error));
     } else {
-      console.log("[JELLYFIN-API]", {
+      console.log("[EMBY-API]", {
         ErrorAt: this.#getErrorLineNumber(error),
         ErrorLines: this.#getErrorLineNumbers(error),
         Message: error.message,
@@ -446,6 +446,10 @@ class JellyfinAPI {
         _url = "http://" + _url;
       }
 
+      if (!url.includes("/emby")) {
+        _url = _url + "/emby";
+      }
+
       result.cleanedUrl = _url;
 
       console.log(_url, this.#isValidUrl(_url));
@@ -496,4 +500,4 @@ class JellyfinAPI {
   }
 }
 
-module.exports = JellyfinAPI;
+module.exports = EmbyAPI;

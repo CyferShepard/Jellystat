@@ -8,12 +8,11 @@ const { randomUUID } = require("crypto");
 const { axios } = require("../classes/axios");
 const configClass = require("../classes/config");
 const { checkForUpdates } = require("../version-control");
-const JellyfinAPI = require("../classes/jellyfin-api");
+const API = require("../classes/api-loader");
 const { sendUpdate } = require("../ws");
 const moment = require("moment");
 
 const router = express.Router();
-const Jellyfin = new JellyfinAPI();
 
 //Functions
 function groupActivity(rows) {
@@ -45,6 +44,29 @@ function groupActivity(rows) {
     }
   });
   return groupedResults;
+}
+
+function groupRecentlyAdded(rows) {
+  const groupedResults = {};
+  rows.forEach((row) => {
+    if (row.Type != "Movie") {
+      const key = row.SeriesId + row.SeasonId;
+      if (groupedResults[key]) {
+        groupedResults[key].NewEpisodeCount++;
+      } else {
+        groupedResults[key] = { ...row };
+        if (row.Type != "Series" && row.Type != "Movie") {
+          groupedResults[key].NewEpisodeCount = 1;
+        }
+      }
+    } else {
+      groupedResults[row.Id] = {
+        ...row,
+      };
+    }
+  });
+
+  return Object.values(groupedResults);
 }
 
 async function purgeLibraryItems(id, withActivity, purgeAll = false) {
@@ -118,6 +140,7 @@ router.get("/getconfig", async (req, res) => {
       APP_USER: config.APP_USER,
       settings: config.settings,
       REQUIRE_LOGIN: config.REQUIRE_LOGIN,
+      IS_JELLYFIN: config.IS_JELLYFIN,
     };
 
     res.send(payload);
@@ -128,9 +151,9 @@ router.get("/getconfig", async (req, res) => {
 
 router.get("/getRecentlyAdded", async (req, res) => {
   try {
-    const { libraryid, limit = 10 } = req.query;
+    const { libraryid, limit = 50, GroupResults = true } = req.query;
 
-    let recentlyAddedFronJellystat = await Jellyfin.getRecentlyAdded({ libraryid: libraryid });
+    let recentlyAddedFronJellystat = await API.getRecentlyAdded({ libraryid: libraryid });
 
     let recentlyAddedFronJellystatMapped = recentlyAddedFronJellystat.map((item) => {
       return {
@@ -206,7 +229,14 @@ router.get("/getRecentlyAdded", async (req, res) => {
       );
     }
 
-    res.send([...recentlyAddedFronJellystatMapped, ...rows]);
+    let recentlyAdded = [...recentlyAddedFronJellystatMapped, ...rows];
+    recentlyAdded = recentlyAdded.filter((item) => item.Type !== "Series");
+
+    if (GroupResults == true) {
+      recentlyAdded = groupRecentlyAdded(recentlyAdded);
+    }
+
+    res.send(recentlyAdded);
     return;
   } catch (error) {
     res.status(503);
@@ -226,7 +256,7 @@ router.post("/setconfig", async (req, res) => {
 
     var url = JF_HOST;
 
-    const validation = await Jellyfin.validateSettings(url, JF_API_KEY);
+    const validation = await API.validateSettings(url, JF_API_KEY);
     if (validation.isValid === false) {
       res.status(validation.status);
       res.send(validation);
@@ -241,6 +271,22 @@ router.post("/setconfig", async (req, res) => {
     }
 
     const { rows } = await db.query(query, [validation.cleanedUrl, JF_API_KEY]);
+
+    const systemInfo = await API.systemInfo();
+
+    if (systemInfo && systemInfo != {}) {
+      const settingsjson = await db.query('SELECT settings FROM app_config where "ID"=1').then((res) => res.rows);
+
+      if (settingsjson.length > 0) {
+        const settings = settingsjson[0].settings || {};
+
+        settings.ServerID = systemInfo?.Id || null;
+
+        let query = 'UPDATE app_config SET settings=$1 where "ID"=1';
+
+        await db.query(query, [settings]);
+      }
+    }
     res.send(rows);
   } catch (error) {
     console.log(error);
@@ -400,7 +446,7 @@ router.get("/TrackedLibraries", async (req, res) => {
   }
 
   try {
-    const libraries = await Jellyfin.getLibraries();
+    const libraries = await API.getLibraries();
 
     const ExcludedLibraries = config.settings?.ExcludedLibraries || [];
 

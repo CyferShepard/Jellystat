@@ -54,7 +54,7 @@ function Login() {
       .then(async (response) => {
         localStorage.setItem("token", response.data.token);
         setProcessing(false);
-        if (JS_USERNAME) {
+        if (JS_USERNAME || response.data.token) {
           setsubmitButtonText(i18next.t("SUCCESS"));
           window.location.reload();
           return;

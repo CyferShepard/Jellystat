@@ -8,8 +8,8 @@ async function Config() {
         Authorization: `Bearer ${token}`,
       },
     });
-    const { JF_HOST,  APP_USER,REQUIRE_LOGIN, settings } = response.data;
-      return { hostUrl: JF_HOST, username: APP_USER, token:token, requireLogin:REQUIRE_LOGIN, settings:settings };
+    const { JF_HOST,  APP_USER,REQUIRE_LOGIN, settings, IS_JELLYFIN } = response.data;
+      return { hostUrl: JF_HOST, username: APP_USER, token:token, requireLogin:REQUIRE_LOGIN, settings:settings, IS_JELLYFIN:IS_JELLYFIN };
 
   } catch (error) {
     // console.log(error);
