@@ -109,10 +109,10 @@ async function insertBulk(table_name, data, columns) {
   try {
     await client.query("BEGIN");
     const update_query = update_query_map.find((query) => query.table === table_name).query;
-    await client.query("COMMIT");
     const cs = new pgp.helpers.ColumnSet(columns, { table: table_name });
     const query = pgp.helpers.insert(data, cs) + update_query; // Update the column names accordingly
     await client.query(query);
+    await client.query("COMMIT");
   } catch (error) {
     await client.query("ROLLBACK");
     message = "" + error;
