@@ -284,7 +284,8 @@ export default function ActivityTable(props) {
     enableGlobalFilter: false,
     enableBottomToolbar: false,
     enableRowSelection: (row) => row.original.Id,
-    enableSubRowSelection: true,
+    enableMultiRowSelection: true,
+    enableBatchRowSelection: true,
     onRowSelectionChange: setRowSelection,
     positionToolbarAlertBanner: "bottom",
     renderTopToolbarCustomActions: () => {

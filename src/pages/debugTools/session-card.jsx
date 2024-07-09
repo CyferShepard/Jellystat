@@ -1,5 +1,5 @@
 /* eslint-disable react/prop-types */
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import Card from "react-bootstrap/Card";
 import Row from "react-bootstrap/Row";
@@ -10,10 +10,10 @@ import AccountCircleFillIcon from "remixicon-react/AccountCircleFillIcon";
 import PlayFillIcon from "remixicon-react/PlayFillIcon";
 import PauseFillIcon from "remixicon-react/PauseFillIcon";
 
-import { clientData } from "../../../lib/devices";
+import { clientData } from "../../lib/devices";
 import Tooltip from "@mui/material/Tooltip";
-import IpInfoModal from "../ip-info";
-import { Trans } from "react-i18next";
+import IpInfoModal from "../components/ip-info";
+import "./sessionCard.css";
 
 function ticksToTimeString(ticks) {
   // Convert ticks to seconds
@@ -79,6 +79,11 @@ function SessionCard(props) {
 
   const [ipModalVisible, setIPModalVisible] = React.useState(false);
   const [ipAddressLookup, setIPAddressLookup] = React.useState();
+  const [isJsonVisible, setIsJsonVisible] = useState(false);
+
+  const toggleJsonVisibility = () => {
+    setIsJsonVisible(!isJsonVisible);
+  };
 
   const isRemoteSession = (ipAddress) => {
     ipv4Regex.lastIndex = 0;
@@ -166,16 +171,9 @@ function SessionCard(props) {
                         {isRemoteSession(props.data.session.RemoteEndPoint) &&
                         import.meta.env.JS_GEOLITE_ACCOUNT_ID &&
                         import.meta.env.JS_GEOLITE_LICENSE_KEY ? (
-                          <Link
-                            className="text-decoration-none text-white"
-                            onClick={() => showIPDataModal(props.data.session.RemoteEndPoint)}
-                          >
-                            <Trans i18nKey="ACTIVITY_TABLE.IP_ADDRESS" />: {props.data.session.RemoteEndPoint}
-                          </Link>
+                          <Card.Text></Card.Text>
                         ) : (
-                          <span>
-                            <Trans i18nKey="ACTIVITY_TABLE.IP_ADDRESS" />: {props.data.session.RemoteEndPoint}
-                          </span>
+                          <span>IP Address: {props.data.session.RemoteEndPoint}</span>
                         )}
                       </Col>
                     </Row>
@@ -301,6 +299,16 @@ function SessionCard(props) {
             </div>
           </Col>
         </Row>
+      </div>
+      <div>
+        <button className="btn btn-primary w-100 p-0 m-0" onClick={toggleJsonVisibility}>
+          Toggle JSON View
+        </button>
+        {isJsonVisible && (
+          <div className="json-data-container">
+            <pre>{JSON.stringify(props, null, 2)}</pre>
+          </div>
+        )}
       </div>
     </Card>
   );

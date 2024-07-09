@@ -11,6 +11,7 @@ import "../../css/library/media-items.css";
 import "../../css/width_breakpoint_css.css";
 import "../../css/radius_breakpoint_css.css";
 import { Trans } from "react-i18next";
+import Loading from "../general/loading";
 
 function LibraryItems(props) {
   const [data, setData] = useState();
@@ -92,7 +93,7 @@ function LibraryItems(props) {
   }
 
   if (!data || !config) {
-    return <></>;
+    return <Loading />;
   }
 
   return (

@@ -1,12 +1,17 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { Blurhash } from "react-blurhash";
 import { Link } from "react-router-dom";
 
 import "../../../css/lastplayed.css";
 import { Trans } from "react-i18next";
+import TvLineIcon from "remixicon-react/TvLineIcon";
+import FilmLineIcon from "remixicon-react/FilmLineIcon";
+import FileMusicLineIcon from "remixicon-react/FileMusicLineIcon";
+import CheckboxMultipleBlankLineIcon from "remixicon-react/CheckboxMultipleBlankLineIcon";
 
 function RecentlyAddedCard(props) {
   const [loaded, setLoaded] = useState(false);
+  const [fallback, setFallback] = useState(false);
   const twelve_hr = JSON.parse(localStorage.getItem("12hr"));
   const localization = localStorage.getItem("i18nextLng");
 
@@ -20,13 +25,34 @@ function RecentlyAddedCard(props) {
     hour12: twelve_hr,
   };
 
+  const SeriesIcon = <TvLineIcon size={"75%"} />;
+  const MovieIcon = <FilmLineIcon size={"75%"} />;
+  const MusicIcon = <FileMusicLineIcon size={"75%"} />;
+  const MixedIcon = <CheckboxMultipleBlankLineIcon size={"75%"} />;
+
+  const currentLibraryDefaultIcon =
+    props.data.Type === "Movie"
+      ? MovieIcon
+      : props.data.Type === "Episode"
+      ? SeriesIcon
+      : props.data.Type === "Audio"
+      ? MusicIcon
+      : MixedIcon;
+
   return (
     <div className="last-card">
-      <Link to={`/libraries/item/${(props.data.NewEpisodeCount != undefined ? props.data.SeasonId : props.data.EpisodeId)  ?? props.data.Id}`}>
-        <div className="last-card-banner">
-          {loaded ? null : props.data.PrimaryImageHash ? (
-            <Blurhash hash={props.data.PrimaryImageHash} width={"100%"} height={"100%"} className="rounded-3 overflow-hidden" />
-          ) : null}
+      <Link
+        to={`/libraries/item/${
+          (props.data.NewEpisodeCount != undefined ? props.data.SeasonId : props.data.EpisodeId) ?? props.data.Id
+        }`}
+      >
+        <div
+          className={
+            (props.data.Type === "Audio" ? "last-card-banner audio" : "last-card-banner") +
+            "  d-flex justify-content-center align-items-center"
+          }
+        >
+          {fallback ? currentLibraryDefaultIcon : null}
           <img
             src={`${
               "/proxy/Items/Images/Primary?id=" +
@@ -35,6 +61,7 @@ function RecentlyAddedCard(props) {
             }`}
             alt=""
             onLoad={() => setLoaded(true)}
+            onError={() => setFallback(true)}
             style={loaded ? {} : { display: "none" }}
           />
         </div>

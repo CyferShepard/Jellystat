@@ -27,10 +27,9 @@ import ItemInfo from "./pages/components/item-info";
 import ErrorPage from "./pages/components/general/error";
 import About from "./pages/about";
 
-import Testing from "./pages/testing";
+import TestingRoutes from "./pages/testing";
 import Activity from "./pages/activity";
 import Statistics from "./pages/statistics";
-import { t } from "i18next";
 
 function App() {
   const [setupState, setSetupState] = useState(0);
@@ -171,8 +170,8 @@ function App() {
               <Route path="/libraries/item/:Id" element={<ItemInfo />} />
               <Route path="/statistics" element={<Statistics />} />
               <Route path="/activity" element={<Activity />} />
-              <Route path="/testing" element={<Testing />} />
               <Route path="/about" element={<About />} />
+              <Route path="/testing/*" element={<TestingRoutes />} />
             </Routes>
           </main>
         </div>
