@@ -42,7 +42,7 @@ export default function SettingsConfig() {
   }
 
   useEffect(() => {
-    Config()
+    Config.getConfig()
       .then((config) => {
         setFormValues({ JF_HOST: config.hostUrl });
         setConfig(config);
@@ -94,6 +94,7 @@ export default function SettingsConfig() {
         setisSubmitted("Failed");
         setsubmissionMessage(`Error Updating Configuration: ${errorMessage}`);
       });
+      Config.setConfig();
   }
 
   function handleFormChange(event) {
@@ -129,6 +130,7 @@ export default function SettingsConfig() {
         setisSubmitted("Failed");
         setsubmissionMessage("Error Updating Configuration: ", error);
       });
+      Config.setConfig();
   }
 
   function updateLanguage(event) {

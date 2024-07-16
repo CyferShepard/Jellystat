@@ -11,7 +11,6 @@ import InformationLineIcon from "remixicon-react/InformationLineIcon";
 import { Tooltip } from "@mui/material";
 import { Trans } from "react-i18next";
 
-
 function LibrarySelector() {
   const [data, setData] = useState();
   const [config, setConfig] = useState(null);
@@ -19,7 +18,7 @@ function LibrarySelector() {
   useEffect(() => {
     const fetchConfig = async () => {
       try {
-        const newConfig = await Config();
+        const newConfig = await Config.getConfig();
         setConfig(newConfig);
       } catch (error) {
         if (error.code === "ERR_NETWORK") {
@@ -29,8 +28,7 @@ function LibrarySelector() {
     };
 
     const fetchLibraries = () => {
-      if(config)
-      {
+      if (config) {
         const url = `/api/TrackedLibraries`;
         axios
           .get(url, {
@@ -45,10 +43,8 @@ function LibrarySelector() {
           .catch((error) => {
             console.log(error);
           });
-
       }
     };
-
 
     if (!config) {
       fetchConfig();
@@ -57,7 +53,7 @@ function LibrarySelector() {
     fetchLibraries();
     const intervalId = setInterval(fetchLibraries, 60000 * 60);
     return () => clearInterval(intervalId);
-  }, [ config]);
+  }, [config]);
 
   if (!data) {
     return <Loading />;
@@ -65,18 +61,24 @@ function LibrarySelector() {
 
   return (
     <div className="libraries">
-    <h1 className="py-4"><Trans i18nKey={"SETTINGS_PAGE.SELECT_LIBRARIES_TO_IMPORT"}/>  <Tooltip title={<Trans i18nKey={"SETTINGS_PAGE.SELECT_LIBRARIES_TO_IMPORT_TOOLTIP"}/>}><span> <InformationLineIcon/></span></Tooltip></h1>
+      <h1 className="py-4">
+        <Trans i18nKey={"SETTINGS_PAGE.SELECT_LIBRARIES_TO_IMPORT"} />{" "}
+        <Tooltip title={<Trans i18nKey={"SETTINGS_PAGE.SELECT_LIBRARIES_TO_IMPORT_TOOLTIP"} />}>
+          <span>
+            {" "}
+            <InformationLineIcon />
+          </span>
+        </Tooltip>
+      </h1>
 
       <div xs={1} md={2} lg={4} className="g-0 libraries-container">
-      {data &&
+        {data &&
           data.map((item) => (
-                <ErrorBoundary key={item.Id} >
-                  <SelectionCard data={item}  base_url={config.hostUrl}/>
-                </ErrorBoundary>
-
-            ))}
+            <ErrorBoundary key={item.Id}>
+              <SelectionCard data={item} base_url={config.hostUrl} />
+            </ErrorBoundary>
+          ))}
       </div>
-      
     </div>
   );
 }

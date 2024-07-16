@@ -20,7 +20,7 @@ function Activity() {
   useEffect(() => {
     const fetchConfig = async () => {
       try {
-        const newConfig = await Config();
+        const newConfig = await Config.getConfig();
         setConfig(newConfig);
       } catch (error) {
         if (error.code === "ERR_NETWORK") {
@@ -116,7 +116,7 @@ function Activity() {
           </div>
           <FormControl
             type="text"
-            placeholder= {i18next.t("SEARCH")}
+            placeholder={i18next.t("SEARCH")}
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             className="ms-md-3 my-3 w-sm-100 w-md-75"

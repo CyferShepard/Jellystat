@@ -98,7 +98,7 @@ function App() {
   useEffect(() => {
     const fetchConfig = async () => {
       try {
-        const newConfig = await Config();
+        const newConfig = await Config.getConfig();
         if (!newConfig.response) {
           setConfig(newConfig);
         } else {

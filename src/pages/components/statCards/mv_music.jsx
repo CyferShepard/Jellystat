@@ -14,7 +14,7 @@ function MVMovies(props) {
   useEffect(() => {
     const fetchConfig = async () => {
       try {
-        const newConfig = await Config();
+        const newConfig = await Config.getConfig();
         setConfig(newConfig);
       } catch (error) {
         if (error.code === "ERR_NETWORK") {

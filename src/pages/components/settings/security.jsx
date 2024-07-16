@@ -31,7 +31,7 @@ export default function SettingsConfig() {
   useEffect(() => {
     const fetchConfig = async () => {
       try {
-        const newConfig = await Config();
+        const newConfig = await Config.getConfig();
         setuse_password(newConfig.requireLogin);
         setFormValues({ JS_USERNAME: newConfig.username });
       } catch (error) {
@@ -84,6 +84,7 @@ export default function SettingsConfig() {
         }
       )
       .then((data) => {
+        Config.setConfig();
         setuse_password(requireLogin);
       })
       .catch((error) => {
@@ -126,6 +127,7 @@ export default function SettingsConfig() {
     // let result = await updatePassword(hashedOldPassword, hashedNewPassword);
     let result = await updateUser(username, hashedOldPassword, hashedNewPassword);
 
+    Config.setConfig();
     if (result.isValid) {
       setisSubmitted("Success");
       setsubmissionMessage(i18next.t("PASSWORD_UPDATE_SUCCESS"));

@@ -206,7 +206,11 @@ function Row(row) {
         <TableCell>{data.TotalPlays}</TableCell>
         <TableCell>{formatTotalWatchTime(data.TotalWatchTime) || `0 ${i18next.t("UNITS.MINUTES")}`}</TableCell>
         <TableCell style={{ textTransform: data.LastSeen ? "none" : "lowercase" }}>
-          {data.LastSeen ?  `${i18next.t("USERS_PAGE.AGO_ALT")} ${formatLastSeenTime(data.LastSeen)} ${i18next.t("USERS_PAGE.AGO").toLocaleLowerCase()}` : i18next.t("ERROR_MESSAGES.NEVER")}
+          {data.LastSeen
+            ? `${i18next.t("USERS_PAGE.AGO_ALT")} ${formatLastSeenTime(data.LastSeen)} ${i18next
+                .t("USERS_PAGE.AGO")
+                .toLocaleLowerCase()}`
+            : i18next.t("ERROR_MESSAGES.NEVER")}
         </TableCell>
       </TableRow>
     </React.Fragment>
@@ -227,7 +231,7 @@ function Users() {
   useEffect(() => {
     const fetchConfig = async () => {
       try {
-        const newConfig = await Config();
+        const newConfig = await Config.getConfig();
         setConfig(newConfig);
       } catch (error) {
         if (error.code === "ERR_NETWORK") {
@@ -431,7 +435,7 @@ function Users() {
           </div>
           <FormControl
             type="text"
-            placeholder= {i18next.t("SEARCH")}
+            placeholder={i18next.t("SEARCH")}
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             className="ms-md-3 my-3 w-sm-100 w-md-75"
