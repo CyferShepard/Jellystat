@@ -175,6 +175,19 @@ class EmbyAPI {
     }
     try {
       let url = `${this.config.JF_HOST}/Items?ParentId=${id}`;
+
+      let userid;
+      if (!userid || userid == null) {
+        await new configClass().getPreferedAdmin().then(async (adminid) => {
+          if (!adminid || adminid == null) {
+            userid = (await this.getAdmins())[0].Id;
+          } else {
+            userid = adminid;
+          }
+        });
+      }
+      url += `&userId=${userid}`;
+
       if (itemid && itemid != null) {
         url += `&Ids=${itemid}`;
       }

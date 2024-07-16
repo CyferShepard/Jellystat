@@ -769,7 +769,7 @@ router.post("/getEpisodes", async (req, res) => {
     }
 
     const { rows } = await db.query(
-      `SELECT e.*, i."PrimaryImageHash" FROM jf_library_episodes e left join jf_library_items i on i."Id"=e."SeriesId" where "SeasonId"=$1`,
+      `SELECT e.*, i."PrimaryImageHash", ii."Size" FROM jf_library_episodes e left join jf_library_items i on i."Id"=e."SeriesId" join jf_item_info ii on ii."Id"=e."EpisodeId" where "SeasonId"=$1`,
       [Id]
     );
     res.send(rows);
