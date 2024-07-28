@@ -1,0 +1,3 @@
+{
+  "ignore": ["backend/backup-data", "*.json"]
+}

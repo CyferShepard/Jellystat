@@ -190,10 +190,10 @@ class JellyfinAPI {
         url += `&Ids=${itemid}`;
       }
 
-      let startIndex = params && params.startIndex ? params.startIndex : 0;
-      let increment = params && params.increment ? params.increment : 200;
+      let startIndex = params && params.startIndex !== undefined ? params.startIndex : 0;
+      let increment = params && params.increment !== undefined ? params.increment : 200;
       let recursive = params && params.recursive !== undefined ? params.recursive : true;
-      let total = 200;
+      let total = startIndex + increment;
 
       let AllItems = [];
       while (startIndex < total || total === undefined) {
@@ -208,6 +208,8 @@ class JellyfinAPI {
             limit: increment,
             isMissing: false,
             excludeLocationTypes: "Virtual",
+            sortBy: "DateCreated",
+            sortOrder: "Descending",
           },
         });
 
@@ -218,11 +220,15 @@ class JellyfinAPI {
 
         AllItems.push(...result);
 
-        if (response.data.TotalRecordCount === undefined) {
-          break;
-        }
         if (ws && syncTask && wsMessage) {
-          ws(syncTask.wsKey, { type: "Update", message: `${wsMessage} - ${((startIndex / total) * 100).toFixed(2)}%` });
+          ws(syncTask.wsKey, {
+            type: "Update",
+            message: `${wsMessage} - ${((Math.min(startIndex, total) / total) * 100).toFixed(2)}%`,
+          });
+        }
+
+        if (response.data.TotalRecordCount === undefined || (params && params.startIndex !== undefined)) {
+          break;
         }
 
         await this.#delay(10);
