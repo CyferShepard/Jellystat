@@ -153,9 +153,12 @@ router.get("/getRecentlyAdded", async (req, res) => {
   try {
     const { libraryid, limit = 50, GroupResults = true } = req.query;
 
-    let recentlyAddedFronJellystat = await API.getRecentlyAdded({ libraryid: libraryid });
+    const config = await new configClass().getConfig();
+    const excluded_libraries = config.settings.ExcludedLibraries || [];
 
-    let recentlyAddedFronJellystatMapped = recentlyAddedFronJellystat.map((item) => {
+    let recentlyAddedFromJellystat = await API.getRecentlyAdded({ libraryid: libraryid });
+
+    let recentlyAddedFromJellystatMapped = recentlyAddedFromJellystat.map((item) => {
       return {
         Name: item.Name,
         SeriesName: item.SeriesName,
@@ -182,12 +185,12 @@ router.get("/getRecentlyAdded", async (req, res) => {
 
     if (libraryid !== undefined) {
       const { rows } = await db.query(
-        `SELECT i."Name", null "SeriesName", "Id", null "SeriesId", null "SeasonId", null "EpisodeId", null "SeasonNumber", null "EpisodeNumber",  "PrimaryImageHash",i."DateCreated", "Type"
+        `SELECT i."Name", null "SeriesName", "Id", null "SeriesId", null "SeasonId", null "EpisodeId", null "SeasonNumber", null "EpisodeNumber",  "PrimaryImageHash",i."DateCreated", "Type", i."ParentId"
         FROM public.jf_library_items i
         where i.archived=false
           and i."ParentId"=$1
       union
-      SELECT e."Name",  e."SeriesName",e."Id" , e."SeriesId", e."SeasonId", e."EpisodeId",  e."ParentIndexNumber" "SeasonNumber",  e."IndexNumber" "EpisodeNumber", e."PrimaryImageHash", e."DateCreated", e."Type"
+      SELECT e."Name",  e."SeriesName",e."Id" , e."SeriesId", e."SeasonId", e."EpisodeId",  e."ParentIndexNumber" "SeasonNumber",  e."IndexNumber" "EpisodeNumber", e."PrimaryImageHash", e."DateCreated", e."Type", i."ParentId"
         FROM public.jf_library_episodes e
         JOIN public.jf_library_items i
         on i."Id"=e."SeriesId"
@@ -200,21 +203,25 @@ router.get("/getRecentlyAdded", async (req, res) => {
       if (rows[0].DateCreated !== undefined && rows[0].DateCreated !== null) {
         let lastSynctedItemDate = moment(rows[0].DateCreated, "YYYY-MM-DD HH:mm:ss.SSSZ");
 
-        recentlyAddedFronJellystatMapped = recentlyAddedFronJellystatMapped.filter((item) =>
+        recentlyAddedFromJellystatMapped = recentlyAddedFromJellystatMapped.filter((item) =>
           moment(item.DateCreated, "YYYY-MM-DD HH:mm:ss.SSSZ").isAfter(lastSynctedItemDate)
         );
       }
 
-      res.send([...recentlyAddedFronJellystatMapped, ...rows]);
+      const filteredDbRows = rows.filter((item) => !excluded_libraries.includes(item.ParentId));
+
+      res.send([...recentlyAddedFromJellystatMapped, ...filteredDbRows]);
       return;
     }
     const { rows } = await db.query(
-      `SELECT i."Name", null "SeriesName", "Id", null "SeriesId", null "SeasonId", null "EpisodeId", null "SeasonNumber" , null "EpisodeNumber" ,  "PrimaryImageHash",i."DateCreated", "Type"
+      `SELECT i."Name", null "SeriesName", "Id", null "SeriesId", null "SeasonId", null "EpisodeId", null "SeasonNumber" , null "EpisodeNumber" ,  "PrimaryImageHash",i."DateCreated", "Type", i."ParentId"
       FROM public.jf_library_items i
       where i.archived=false
     union
-    SELECT e."Name",  e."SeriesName",e."Id" , e."SeriesId", e."SeasonId", e."EpisodeId",  e."ParentIndexNumber"  "SeasonNumber",  e."IndexNumber" "EpisodeNumber", e."PrimaryImageHash", e."DateCreated", e."Type"
+    SELECT e."Name",  e."SeriesName",e."Id" , e."SeriesId", e."SeasonId", e."EpisodeId",  e."ParentIndexNumber"  "SeasonNumber",  e."IndexNumber" "EpisodeNumber", e."PrimaryImageHash", e."DateCreated", e."Type", i."ParentId"
       FROM public.jf_library_episodes e
+       JOIN public.jf_library_items i
+        on i."Id"=e."SeriesId"
       where e.archived=false
     order by "DateCreated" desc
     limit $1`,
@@ -224,12 +231,14 @@ router.get("/getRecentlyAdded", async (req, res) => {
     if (rows[0].DateCreated !== undefined && rows[0].DateCreated !== null) {
       let lastSynctedItemDate = moment(rows[0].DateCreated, "YYYY-MM-DD HH:mm:ss.SSSZ");
 
-      recentlyAddedFronJellystatMapped = recentlyAddedFronJellystatMapped.filter((item) =>
+      recentlyAddedFromJellystatMapped = recentlyAddedFromJellystatMapped.filter((item) =>
         moment(item.DateCreated, "YYYY-MM-DD HH:mm:ss.SSSZ").isAfter(lastSynctedItemDate)
       );
     }
 
-    let recentlyAdded = [...recentlyAddedFronJellystatMapped, ...rows];
+    const filteredDbRows = rows.filter((item) => !excluded_libraries.includes(item.ParentId));
+
+    let recentlyAdded = [...recentlyAddedFromJellystatMapped, ...filteredDbRows];
     recentlyAdded = recentlyAdded.filter((item) => item.Type !== "Series");
 
     if (GroupResults == true) {
