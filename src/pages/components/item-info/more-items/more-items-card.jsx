@@ -56,7 +56,8 @@ function MoreItemCards(props) {
         >
           {((props.data.ImageBlurHashes && props.data.ImageBlurHashes != null) ||
             (props.data.PrimaryImageHash && props.data.PrimaryImageHash != null)) &&
-          !loaded ? (
+          !loaded &&
+          !fallback ? (
             <Blurhash
               hash={props.data.PrimaryImageHash || props.data.ImageBlurHashes.Primary[props.data.ImageTags.Primary]}
               width={"100%"}
@@ -68,7 +69,23 @@ function MoreItemCards(props) {
           {!props.data.archived ? (
             fallback ? (
               Id == undefined ? (
-                currentLibraryDefaultIcon
+                <div
+                  className="d-flex flex-column justify-content-center align-items-center position-relative"
+                  style={{ height: "100%", width: "200px" }}
+                >
+                  {props.data.PrimaryImageHash && props.data.PrimaryImageHash != null ? (
+                    <Blurhash
+                      hash={props.data.PrimaryImageHash}
+                      width={"100%"}
+                      height={"100%"}
+                      className="rounded-top-3 overflow-hidden position-absolute"
+                      style={{ display: "block" }}
+                    />
+                  ) : null}
+                  <div className="d-flex flex-column justify-content-center align-items-center position-absolute">
+                    {currentLibraryDefaultIcon}
+                  </div>
+                </div>
               ) : (
                 <img
                   src={`${"/proxy/Items/Images/Primary?id=" + Id + "&fillHeight=320&fillWidth=213&quality=50"}`}
@@ -95,15 +112,15 @@ function MoreItemCards(props) {
           ) : (
             <div
               className="d-flex flex-column justify-content-center align-items-center position-relative"
-              style={{ height: "100%" }}
+              style={{ height: "100%", width: "200px" }}
             >
-              {(props.data.ImageBlurHashes && props.data.ImageBlurHashes != null) ||
-              (props.data.PrimaryImageHash && props.data.PrimaryImageHash != null) ? (
+              {props.data.PrimaryImageHash && props.data.PrimaryImageHash != null ? (
                 <Blurhash
-                  hash={props.data.PrimaryImageHash || props.data.ImageBlurHashes.Primary[props.data.ImageTags.Primary]}
+                  hash={props.data.PrimaryImageHash}
                   width={"100%"}
                   height={"100%"}
                   className="rounded-top-3 overflow-hidden position-absolute"
+                  style={{ display: "block" }}
                 />
               ) : null}
               <div className="d-flex flex-column justify-content-center align-items-center position-absolute">
