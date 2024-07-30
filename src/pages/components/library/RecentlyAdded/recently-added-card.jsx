@@ -52,7 +52,25 @@ function RecentlyAddedCard(props) {
             "  d-flex justify-content-center align-items-center"
           }
         >
-          {fallback ? currentLibraryDefaultIcon : null}
+          {fallback ? (
+            <div
+              className="d-flex flex-column justify-content-center align-items-center position-relative"
+              style={{ height: "100%", width: "200px" }}
+            >
+              {props.data.PrimaryImageHash && props.data.PrimaryImageHash != null ? (
+                <Blurhash
+                  hash={props.data.PrimaryImageHash}
+                  width={"100%"}
+                  height={"100%"}
+                  className="rounded-top-3 overflow-hidden position-absolute"
+                  style={{ display: "block" }}
+                />
+              ) : null}
+              <div className="d-flex flex-column justify-content-center align-items-center position-absolute">
+                {currentLibraryDefaultIcon}
+              </div>
+            </div>
+          ) : null}
           <img
             src={`${
               "/proxy/Items/Images/Primary?id=" +

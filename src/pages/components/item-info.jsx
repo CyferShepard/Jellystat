@@ -22,6 +22,10 @@ import Loading from "./general/loading";
 import ItemOptions from "./item-info/item-options";
 import { Trans } from "react-i18next";
 import i18next from "i18next";
+import TvLineIcon from "remixicon-react/TvLineIcon";
+import FilmLineIcon from "remixicon-react/FilmLineIcon";
+import FileMusicLineIcon from "remixicon-react/FileMusicLineIcon";
+import CheckboxMultipleBlankLineIcon from "remixicon-react/CheckboxMultipleBlankLineIcon";
 
 function ItemInfo() {
   const { Id } = useParams();
@@ -31,6 +35,15 @@ function ItemInfo() {
   const [activeTab, setActiveTab] = useState("tabOverview");
 
   const [loaded, setLoaded] = useState(false);
+  const [fallback, setFallback] = useState(false);
+
+  const SeriesIcon = <TvLineIcon size={"50%"} />;
+  const MovieIcon = <FilmLineIcon size={"50%"} />;
+  const MusicIcon = <FileMusicLineIcon size={"50%"} />;
+  const MixedIcon = <CheckboxMultipleBlankLineIcon size={"50%"} />;
+
+  const currentLibraryDefaultIcon =
+    data?.Type === "Movie" ? MovieIcon : data?.Type === "Episode" ? SeriesIcon : data?.Type === "Audio" ? MusicIcon : MixedIcon;
 
   function formatFileSize(sizeInBytes) {
     const sizeInMB = sizeInBytes / 1048576; // 1 MB = 1048576 bytes
@@ -168,14 +181,28 @@ function ItemInfo() {
           <Row>
             <Col className="col-auto my-4 my-md-0 item-banner-image">
               {!data.archived && data.PrimaryImageHash && data.PrimaryImageHash != null && !loaded ? (
-                <Blurhash
-                  hash={data.PrimaryImageHash}
-                  width={"200px"}
-                  height={"300px"}
-                  className="rounded-3 overflow-hidden"
-                  style={{ display: "block" }}
-                />
+                <div
+                  className="d-flex flex-column justify-content-center align-items-center position-relative"
+                  style={{ height: "100%", width: "200px" }}
+                >
+                  {data.PrimaryImageHash && data.PrimaryImageHash != null ? (
+                    <Blurhash
+                      hash={data.PrimaryImageHash}
+                      width={"100%"}
+                      height={"100%"}
+                      className="rounded-top-3 overflow-hidden position-absolute"
+                      style={{ display: "block" }}
+                    />
+                  ) : null}
+
+                  {fallback ? (
+                    <div className="d-flex flex-column justify-content-center align-items-center position-absolute">
+                      {currentLibraryDefaultIcon}
+                    </div>
+                  ) : null}
+                </div>
               ) : null}
+
               {!data.archived ? (
                 <img
                   className="item-image"
@@ -189,6 +216,7 @@ function ItemInfo() {
                     display: loaded ? "block" : "none",
                   }}
                   onLoad={() => setLoaded(true)}
+                  onError={() => setFallback(true)}
                 />
               ) : (
                 <div
