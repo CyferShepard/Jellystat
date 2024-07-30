@@ -190,7 +190,7 @@ function ItemInfo() {
                       hash={data.PrimaryImageHash}
                       width={"100%"}
                       height={"100%"}
-                      className="rounded-top-3 overflow-hidden position-absolute"
+                      className="rounded-3 overflow-hidden position-absolute"
                       style={{ display: "block" }}
                     />
                   ) : null}
