@@ -45,6 +45,7 @@ function Setup() {
     axios
       .post("/auth/configSetup/", formValues)
       .then(async () => {
+        await Config.setConfig();
         setsubmitButtonText(i18next.t("SETTINGS_SAVED"));
         setProcessing(false);
         setTimeout(async () => {

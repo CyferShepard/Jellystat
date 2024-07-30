@@ -10,6 +10,7 @@ import { Trans } from "react-i18next";
 export default function Navbar() {
   const handleLogout = () => {
     localStorage.removeItem("token");
+    localStorage.removeItem("config");
     window.location.reload();
   };
 

@@ -55,6 +55,7 @@ function Login() {
         localStorage.setItem("token", response.data.token);
         setProcessing(false);
         if (JS_USERNAME || response.data.token) {
+          await Config.setConfig();
           setsubmitButtonText(i18next.t("SUCCESS"));
           window.location.reload();
           return;
@@ -80,7 +81,7 @@ function Login() {
   useEffect(() => {
     const fetchConfig = async () => {
       try {
-        const newConfig = await Config.getConfig();
+        const newConfig = await Config.setConfig();
         setConfig(newConfig);
       } catch (error) {
         if (error.code === "ERR_NETWORK") {
