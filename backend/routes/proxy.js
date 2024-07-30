@@ -16,6 +16,9 @@ router.get("/web/assets/img/devices/", async (req, res) => {
   }
 
   let url = `${config.JF_HOST}/web/assets/img/devices/${devicename}.svg`;
+  if (config.IS_JELLYFIN == false) {
+    url = `https://raw.githubusercontent.com/MediaBrowser/Emby.Resources/master/images/devices/${devicename}.png`;
+  }
 
   axios
     .get(url, {
