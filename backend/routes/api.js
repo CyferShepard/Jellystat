@@ -149,6 +149,16 @@ router.get("/getconfig", async (req, res) => {
   }
 });
 
+router.get("/getLibraries", async (req, res) => {
+  try {
+    const libraries = await db.query("SELECT * FROM jf_libraries").then((res) => res.rows);
+    res.send(libraries);
+  } catch (error) {
+    res.status(503);
+    res.send(error);
+  }
+});
+
 router.get("/getRecentlyAdded", async (req, res) => {
   try {
     const { libraryid, limit = 50, GroupResults = true } = req.query;
@@ -940,11 +950,13 @@ router.delete("/libraryItems/purge", async (req, res) => {
 router.get("/getHistory", async (req, res) => {
   try {
     const { rows } = await db.query(`
-    SELECT a.*, e."IndexNumber" "EpisodeNumber",e."ParentIndexNumber" "SeasonNumber" 
+    SELECT a.*, e."IndexNumber" "EpisodeNumber",e."ParentIndexNumber" "SeasonNumber" , i."ParentId"
     FROM jf_playback_activity a
     left join jf_library_episodes e
     on a."EpisodeId"=e."EpisodeId"
     and a."SeasonId"=e."SeasonId"
+    left join jf_library_items i
+    on i."Id"=a."NowPlayingItemId" or e."SeriesId"=i."Id"
      order by a."ActivityDateInserted" desc`);
 
     const groupedResults = groupActivity(rows);

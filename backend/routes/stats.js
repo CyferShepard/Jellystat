@@ -365,10 +365,11 @@ router.post("/getLibraryItemsPlayMethodStats", async (req, res) => {
 
 router.post("/getPlaybackMethodStats", async (req, res) => {
   try {
-    const { days } = req.body;
-    let _days = days;
-    if (days === undefined) {
-      _days = 30;
+    const { days = 30 } = req.body;
+
+    if (days < 0) {
+      res.status(503);
+      return res.send("Days cannot be less than 0");
     }
 
     const { rows } = await db.query(
@@ -376,8 +377,9 @@ router.post("/getPlaybackMethodStats", async (req, res) => {
       from jf_playback_activity a
       WHERE a."ActivityDateInserted" BETWEEN CURRENT_DATE - MAKE_INTERVAL(days => $1) AND NOW()
 		  Group by a."PlayMethod"
+      ORDER BY (count(*)) DESC;
       `,
-      [_days]
+      [days - 1]
     );
 
     res.send(rows);
