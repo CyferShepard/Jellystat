@@ -11,6 +11,7 @@ function LibraryActivity(props) {
   const token = localStorage.getItem("token");
   const [itemCount, setItemCount] = useState(10);
   const [searchQuery, setSearchQuery] = useState("");
+  const [streamTypeFilter, setStreamTypeFilter] = useState("All");
 
   useEffect(() => {
     const fetchData = async () => {
@@ -55,6 +56,8 @@ function LibraryActivity(props) {
     );
   }
 
+  filteredData = filteredData.filter((item) => (streamTypeFilter == "All" ? true : item.PlayMethod === streamTypeFilter));
+
   return (
     <div className="Activity">
       <div className="d-md-flex justify-content-between">
@@ -63,8 +66,31 @@ function LibraryActivity(props) {
         </h1>
 
         <div className="d-flex flex-column flex-md-row">
-          <div className="d-flex flex-row w-100">
-            <div className="d-flex flex-col my-md-3 rounded-0 rounded-start  align-items-center px-2 bg-primary-1">
+          <div className="d-flex flex-row w-100 ms-md-3 w-sm-100 w-md-75 mb-3 my-md-3">
+            <div className="d-flex flex-col rounded-0 rounded-start  align-items-center px-2 bg-primary-1">
+              <Trans i18nKey="TYPE" />
+            </div>
+            <FormSelect
+              onChange={(event) => {
+                setStreamTypeFilter(event.target.value);
+              }}
+              value={streamTypeFilter}
+              className="w-md-75 rounded-0 rounded-end"
+            >
+              <option value="All">
+                <Trans i18nKey="ALL" />
+              </option>
+              <option value="Transcode">
+                <Trans i18nKey="TRANSCODE" />
+              </option>
+              <option value="DirectPlay">
+                <Trans i18nKey="DIRECT" />
+              </option>
+            </FormSelect>
+          </div>
+
+          <div className="d-flex flex-row w-100 ms-md-3 w-sm-100 w-md-75  ms-md-3">
+            <div className="d-flex flex-col rounded-0 rounded-start  align-items-center px-2 bg-primary-1 my-md-3">
               <Trans i18nKey="UNITS.ITEMS" />
             </div>
             <FormSelect
@@ -82,7 +108,7 @@ function LibraryActivity(props) {
           </div>
           <FormControl
             type="text"
-            placeholder= {i18next.t("SEARCH")}
+            placeholder={i18next.t("SEARCH")}
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             className="ms-md-3 my-3 w-sm-100 w-md-75"
