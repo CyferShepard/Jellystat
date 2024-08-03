@@ -1043,11 +1043,13 @@ router.post("/getUserHistory", async (req, res) => {
     }
 
     const { rows } = await db.query(
-      `select a.*, e."IndexNumber" "EpisodeNumber",e."ParentIndexNumber" "SeasonNumber" 
+      `select a.*, e."IndexNumber" "EpisodeNumber",e."ParentIndexNumber" "SeasonNumber" , i."ParentId"
       from jf_playback_activity a
       left join jf_library_episodes e
       on a."EpisodeId"=e."EpisodeId"
       and a."SeasonId"=e."SeasonId"
+      left join jf_library_items i
+    on i."Id"=a."NowPlayingItemId" or e."SeriesId"=i."Id"
       where a."UserId"=$1;`,
       [userid]
     );
