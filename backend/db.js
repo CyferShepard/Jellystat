@@ -28,7 +28,7 @@ pool.on("error", (err, client) => {
   //process.exit(-1);
 });
 
-async function deleteBulk(table_name, data) {
+async function deleteBulk(table_name, data, pkName) {
   const client = await pool.connect();
   let result = "SUCCESS";
   let message = "";
@@ -37,7 +37,7 @@ async function deleteBulk(table_name, data) {
 
     if (data && data.length !== 0) {
       const deleteQuery = {
-        text: `DELETE FROM ${table_name} WHERE "Id" IN (${pgp.as.csv(data)})`,
+        text: `DELETE FROM ${table_name} WHERE "${pkName ?? "Id"}" IN (${pgp.as.csv(data)})`,
       };
       //  console.log(deleteQuery);
       await client.query(deleteQuery);
