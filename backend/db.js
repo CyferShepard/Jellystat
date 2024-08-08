@@ -149,10 +149,24 @@ async function query(text, params) {
   }
 }
 
+async function querySingle(sql, params) {
+  try {
+    const { rows: results } = await query(sql, params);
+    if (results.length > 0) {
+      return results[0];
+    } else {
+      return null;
+    }
+  } catch (error) {
+    throw error;
+  }
+}
+
 module.exports = {
   query: query,
   deleteBulk: deleteBulk,
   insertBulk: insertBulk,
   updateSingleFieldBulk: updateSingleFieldBulk,
+  querySingle: querySingle,
   // initDB: initDB,
 };
