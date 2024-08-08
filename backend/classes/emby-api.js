@@ -130,6 +130,7 @@ class EmbyAPI {
       let url = `${this.config.JF_HOST}/Items?ids=${ids}`;
       let startIndex = params && params.startIndex ? params.startIndex : 0;
       let increment = params && params.increment ? params.increment : 200;
+      let limit = params && params.limit !== undefined ? params.limit : increment;
       let recursive = params && params.recursive !== undefined ? params.recursive : true;
       let total = 200;
 
@@ -143,7 +144,7 @@ class EmbyAPI {
             fields: "MediaSources,DateCreated",
             startIndex: startIndex,
             recursive: recursive,
-            limit: increment,
+            limit: limit,
             isMissing: false,
             excludeLocationTypes: "Virtual",
           },
@@ -155,7 +156,7 @@ class EmbyAPI {
         const result = response?.data?.Items || [];
 
         final_response.push(...result);
-        if (response.data.TotalRecordCount === undefined) {
+        if (response.data.TotalRecordCount === undefined || final_response.length >= limit) {
           break;
         }
 
@@ -195,6 +196,7 @@ class EmbyAPI {
       let startIndex = params && params.startIndex !== undefined ? params.startIndex : 0;
       let increment = params && params.increment !== undefined ? params.increment : 200;
       let recursive = params && params.recursive !== undefined ? params.recursive : true;
+      let limit = params && params.limit !== undefined ? params.limit : increment;
       let total = startIndex + increment;
 
       let AllItems = [];
@@ -207,7 +209,7 @@ class EmbyAPI {
             fields: "MediaSources,DateCreated",
             startIndex: startIndex,
             recursive: recursive,
-            limit: increment,
+            limit: limit,
             isMissing: false,
             excludeLocationTypes: "Virtual",
             sortBy: "DateCreated",
@@ -229,7 +231,11 @@ class EmbyAPI {
           });
         }
 
-        if (response.data.TotalRecordCount === undefined || (params && params.startIndex !== undefined)) {
+        if (
+          response.data.TotalRecordCount === undefined ||
+          (params && params.startIndex !== undefined) ||
+          AllItems.length >= limit
+        ) {
           break;
         }
 

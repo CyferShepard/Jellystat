@@ -1034,12 +1034,12 @@ router.post("/fetchItem", async (req, res) => {
 
     const libraries = await API.getLibraries();
 
-    const item = [];
+    let item = [];
 
     for (let i = 0; i < libraries.length; i++) {
       const library = libraries[i];
 
-      let libraryItems = await API.getItemsFromParentId({ id: library.Id, itemid: itemId });
+      let libraryItems = await API.getItemsFromParentId({ id: library.Id, itemid: itemId, params: { limit: 1 } });
 
       if (libraryItems.length > 0) {
         const libraryItemsWithParent = libraryItems.map((items) => ({
@@ -1049,6 +1049,8 @@ router.post("/fetchItem", async (req, res) => {
         item.push(...libraryItemsWithParent);
       }
     }
+
+    item = item.filter((item) => item.Id === itemId);
     if (item.length === 0) {
       res.status(404);
       res.send({ error: "Error: Item not found in library" });
@@ -1067,13 +1069,13 @@ router.post("/fetchItem", async (req, res) => {
         return jf_library_items_mapping(item);
       }
     });
-    let itemInfoToInsert = await item
-      .map((item) =>
-        item.MediaSources.map((iteminfo) => jf_item_info_mapping(iteminfo, item.Type == "Episode" ? "Episode" : "Item"))
-      )
-      .flat();
 
     if (itemToInsert.length !== 0) {
+      let itemInfoToInsert = await item
+        .map((item) =>
+          item.MediaSources.map((iteminfo) => jf_item_info_mapping(iteminfo, item.Type == "Episode" ? "Episode" : "Item"))
+        )
+        .flat();
       let result = await db.insertBulk(
         insertTable,
         itemToInsert,
