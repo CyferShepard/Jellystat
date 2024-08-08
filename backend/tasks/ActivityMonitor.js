@@ -135,7 +135,7 @@ async function ActivityMonitor(interval) {
       let WatchdogDataToInsert = await getSessionsNotInWatchDog(SessionData, WatchdogData);
       let WatchdogDataToUpdate = await getSessionsInWatchDog(SessionData, WatchdogData);
       let dataToRemove = await getWatchDogNotInSessions(SessionData, WatchdogData);
-      console.clear();
+      // console.clear();
 
       // console.log("New Data: ", WatchdogDataToInsert.length);
       // console.log("Existing Data: ", WatchdogDataToUpdate.length);
