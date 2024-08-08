@@ -35,6 +35,8 @@ async function getSessionsInWatchDog(SessionData, WatchdogData) {
           wdData.PlaybackDuration = parseInt(wdData.PlaybackDuration) + diffInSeconds;
 
           wdData.ActivityDateInserted = `${lastPausedDate.format("YYYY-MM-DD HH:mm:ss.SSSZ")}`;
+        } else {
+          wdData.ActivityDateInserted = moment().format("YYYY-MM-DD HH:mm:ss.SSSZ");
         }
         return true;
       }
