@@ -14,6 +14,12 @@ import { initReactI18next } from "react-i18next";
 
 import Loading from "./pages/components/general/loading.jsx";
 
+const baseUrl = import.meta.env.JS_BASE_URL ?? "/";
+
+if (window.location.pathname !== baseUrl) {
+  window.location.assign(baseUrl);
+}
+
 i18n
   .use(Backend)
   .use(LanguageDetector)
