@@ -13,10 +13,13 @@ import LanguageDetector from "i18next-browser-languagedetector";
 import { initReactI18next } from "react-i18next";
 
 import Loading from "./pages/components/general/loading.jsx";
+import routes from "./routes.jsx";
 
 const baseUrl = import.meta.env.JS_BASE_URL ?? "/";
+const validBaseUrls = [...new Set([baseUrl, ...routes.map((route) => "/" + route.path.split("/")[1])])];
+const locationBase = "/" + window.location.pathname.split("/")[1];
 
-if (window.location.pathname !== baseUrl) {
+if (!validBaseUrls.includes(locationBase)) {
   window.location.assign(baseUrl);
 }
 

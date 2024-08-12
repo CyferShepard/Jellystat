@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import axios from "axios";
 
 import RecentlyAddedCard from "./RecentlyAdded/recently-added-card";
@@ -19,8 +19,6 @@ function RecentlyAdded(props) {
         if (props.LibraryId) {
           url += `&libraryid=${props.LibraryId}`;
         }
-
-        console.log(url);
 
         const itemData = await axios.get(url, {
           headers: {
