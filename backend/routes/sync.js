@@ -1020,7 +1020,7 @@ router.post("/fetchItem", async (req, res) => {
       return;
     }
 
-    const { itemId } = req.body;
+    const { itemId, ParentId, insert = true } = req.body;
     if (itemId === undefined) {
       res.status(400);
       res.send("The itemId field is required.");
@@ -1032,14 +1032,18 @@ router.post("/fetchItem", async (req, res) => {
       return;
     }
 
-    const libraries = await API.getLibraries();
+    const libraries = ParentId ? [{ Id: ParentId }] : await API.getLibraries();
 
     let item = [];
 
     for (let i = 0; i < libraries.length; i++) {
       const library = libraries[i];
 
-      let libraryItems = await API.getItemsFromParentId({ id: library.Id, itemid: itemId, params: { limit: 1 } });
+      let libraryItems = await API.getItemsFromParentId({
+        id: library.Id,
+        itemid: itemId,
+        params: { limit: itemId.length ?? 1 },
+      });
 
       if (libraryItems.length > 0) {
         const libraryItemsWithParent = libraryItems.map((items) => ({
@@ -1050,56 +1054,65 @@ router.post("/fetchItem", async (req, res) => {
       }
     }
 
-    item = item.filter((item) => item.Id === itemId);
+    item = item.filter((item) => (Array.isArray(itemId) ? itemId.includes(item.Id) : item.Id === itemId));
     if (item.length === 0) {
       res.status(404);
       res.send({ error: "Error: Item not found in library" });
       return;
     }
 
-    let insertTable = "jf_library_items";
-    let itemToInsert = await item.map((item) => {
-      if (item.Type === "Episode") {
-        insertTable = "jf_library_episodes";
-        return jf_library_episodes_mapping(item);
-      } else if (item.Type === "Season") {
-        insertTable = "jf_library_seasons";
-        return jf_library_seasons_mapping(item);
-      } else {
-        return jf_library_items_mapping(item);
-      }
-    });
+    if (insert) {
+      let insertTable = "jf_library_items";
+      let itemToInsert = await item.map((item) => {
+        if (item.Type === "Episode") {
+          insertTable = "jf_library_episodes";
+          return jf_library_episodes_mapping(item);
+        } else if (item.Type === "Season") {
+          insertTable = "jf_library_seasons";
+          return jf_library_seasons_mapping(item);
+        } else {
+          return jf_library_items_mapping(item);
+        }
+      });
 
-    if (itemToInsert.length !== 0) {
-      let itemInfoToInsert = await item
-        .map((item) =>
-          item.MediaSources.map((iteminfo) => jf_item_info_mapping(iteminfo, item.Type == "Episode" ? "Episode" : "Item"))
-        )
-        .flat();
-      let result = await db.insertBulk(
-        insertTable,
-        itemToInsert,
-        insertTable == "jf_library_items"
-          ? jf_library_items_columns
-          : insertTable == "jf_library_seasons"
-          ? jf_library_seasons_columns
-          : jf_library_episodes_columns
-      );
-      if (result.Result === "SUCCESS") {
-        let result_info = await db.insertBulk("jf_item_info", itemInfoToInsert, jf_item_info_columns);
-        if (result_info.Result === "SUCCESS") {
-          res.send("Item Synced");
+      if (itemToInsert.length !== 0) {
+        let itemInfoToInsert = await item
+          .map((iteminfo) =>
+            iteminfo.MediaSources ? jf_item_info_mapping(iteminfo, iteminfo.Type == "Episode" ? "Episode" : "Item") : []
+          )
+
+          .flat();
+        let result = await db.insertBulk(
+          insertTable,
+          itemToInsert,
+          insertTable == "jf_library_items"
+            ? jf_library_items_columns
+            : insertTable == "jf_library_seasons"
+            ? jf_library_seasons_columns
+            : jf_library_episodes_columns
+        );
+        if (result.Result === "SUCCESS") {
+          if (itemInfoToInsert.length !== 0) {
+            let result_info = await db.insertBulk("jf_item_info", itemInfoToInsert, jf_item_info_columns);
+            if (result_info.Result === "SUCCESS") {
+              res.send("Item Synced");
+            } else {
+              res.status(500);
+              res.send("Unable to insert Item Info: " + result_info.message);
+            }
+          } else {
+            res.send("Item Synced");
+          }
         } else {
           res.status(500);
-          res.send("Unable to insert Item Info: " + result_info.message);
+          res.send("Unable to insert Item: " + result.message);
         }
       } else {
-        res.status(500);
-        res.send("Unable to insert Item: " + result.message);
+        res.status(404);
+        res.send("Unable to find Item");
       }
     } else {
-      res.status(404);
-      res.send("Unable to find Item");
+      res.send(item);
     }
   } catch (error) {
     console.log(error);
