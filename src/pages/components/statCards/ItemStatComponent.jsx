@@ -108,11 +108,17 @@ function ItemStatComponent(props) {
                           </Tooltip>
                         </Link>
                       ) : !item.Client && props.icon ? (
-                        <Link to={`/libraries/${item.Id}`} className="item-name">
+                        item.Id ? (
+                          <Link to={`/libraries/${item.Id}`} className="item-name">
+                            <Tooltip title={item.Name}>
+                              <Card.Text>{item.Name}</Card.Text>
+                            </Tooltip>
+                          </Link>
+                        ) : (
                           <Tooltip title={item.Name}>
                             <Card.Text>{item.Name}</Card.Text>
                           </Tooltip>
-                        </Link>
+                        )
                       ) : (
                         <Tooltip title={item.Client}>
                           <Card.Text>{item.Client}</Card.Text>
