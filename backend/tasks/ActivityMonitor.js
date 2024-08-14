@@ -16,7 +16,7 @@ async function getSessionsInWatchDog(SessionData, WatchdogData) {
         sessionData.NowPlayingItem.SeriesId != undefined ? wdData.EpisodeId === sessionData.NowPlayingItem.Id : true;
 
       let matchingSessionFound =
-        wdData.Id === sessionData.Id &&
+        // wdData.Id === sessionData.Id &&
         wdData.UserId === sessionData.UserId &&
         wdData.DeviceId === sessionData.DeviceId &&
         wdData.NowPlayingItemId === NowPlayingItemId &&
@@ -57,7 +57,7 @@ async function getSessionsNotInWatchDog(SessionData, WatchdogData) {
         sessionData.NowPlayingItem.SeriesId != undefined ? wdData.EpisodeId === sessionData.NowPlayingItem.Id : true;
 
       let matchingSessionFound =
-        wdData.Id === sessionData.Id &&
+        // wdData.Id === sessionData.Id &&
         wdData.UserId === sessionData.UserId &&
         wdData.DeviceId === sessionData.DeviceId &&
         wdData.NowPlayingItemId === NowPlayingItemId &&
@@ -80,11 +80,13 @@ function getWatchDogNotInSessions(SessionData, WatchdogData) {
         sessionData.NowPlayingItem.SeriesId != undefined ? wdData.EpisodeId === sessionData.NowPlayingItem.Id : true;
 
       let noMatchingSessionFound = !(
-        wdData.Id === sessionData.Id &&
-        wdData.UserId === sessionData.UserId &&
-        wdData.DeviceId === sessionData.DeviceId &&
-        wdData.NowPlayingItemId === NowPlayingItemId &&
-        matchesEpisodeId
+        // wdData.Id === sessionData.Id &&
+        (
+          wdData.UserId === sessionData.UserId &&
+          wdData.DeviceId === sessionData.DeviceId &&
+          wdData.NowPlayingItemId === NowPlayingItemId &&
+          matchesEpisodeId
+        )
       );
       return noMatchingSessionFound;
     });
