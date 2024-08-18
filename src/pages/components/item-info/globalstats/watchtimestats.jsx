@@ -6,9 +6,9 @@ function WatchTimeStats(props) {
 
   function formatTime(totalSeconds, numberClassName, labelClassName) {
     const units = [
-      { label: i18next.t("UNITS.DAY"), seconds: 86400 },
-      { label: i18next.t("UNITS.HOUR"), seconds: 3600 },
-      { label: i18next.t("UNITS.MINUTE"), seconds: 60 },
+      { label: [i18next.t("UNITS.DAY"),i18next.t("UNITS.DAYS")], seconds: 86400 },
+      { label: [i18next.t("UNITS.HOUR"),i18next.t("UNITS.HOURS")], seconds: 3600 },
+      { label: [i18next.t("UNITS.MINUTE"),i18next.t("UNITS.MINUTES")], seconds: 60 },
     ];
   
     const parts = units.reduce((result, { label, seconds }) => {
@@ -17,7 +17,7 @@ function WatchTimeStats(props) {
         const formattedValue = <p className={numberClassName}>{value}</p>;
         const formattedLabel = (
           <span className={labelClassName}>
-            {value === 1 ? label : i18next.t(`UNITS.${label.toUpperCase()}S`) }
+            {value === 1 ? label[0] : label[1] }
           </span>
         );
         result.push(
