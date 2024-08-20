@@ -11,7 +11,7 @@
     "LOGOUT": "Déconnexion"
   },
   "HOME_PAGE": {
-    "SESSIONS": "Lectures",
+    "SESSIONS": "Lecture(s)",
     "RECENTLY_ADDED": "Récemment ajouté",
     "WATCH_STATISTIC": "Statistiques de lecture",
     "LIBRARY_OVERVIEW": "Vue d'ensemble des médiathèques"
@@ -28,7 +28,8 @@
     "MOST_POPULAR_MUSIC": "MUSIQUE LES PLUS POPULAIRES",
     "MOST_VIEWED_LIBRARIES": "MÉDIATHÈQUES LES PLUS CONSULTÉES",
     "MOST_USED_CLIENTS": "CLIENTS LES PLUS UTILISÉS",
-    "MOST_ACTIVE_USERS": "UTILISATEURS LES PLUS ACTIFS"
+    "MOST_ACTIVE_USERS": "UTILISATEURS LES PLUS ACTIFS",
+    "CONCURRENT_STREAMS": "CONCURRENT STREAMS"
   },
   "LIBRARY_OVERVIEW": {
     "MOVIE_LIBRARIES": "MÉDIATHÈQUES DE FILMS",
@@ -51,7 +52,7 @@
     "LAST_7_DAYS": "7 derniers jours",
     "LAST_30_DAYS": "30 derniers jours",
     "ALL_TIME": "Tout le temps",
-    "ITEM_STATS": "Item Stats"
+    "ITEM_STATS": "Statistiques du média"
   },
   "ITEM_INFO": {
     "FILE_PATH": "Chemin du fichier",
@@ -143,7 +144,8 @@
     "SECOND": "Seconde",
     "SECONDS": "Secondes",
     "PLAYS": "Lectures",
-    "ITEMS": "Éléments"
+    "ITEMS": "Éléments",
+    "STREAMS": "Streams"
   },
   "USERS_PAGE": {
     "ALL_USERS": "Tous les utilisateurs",
@@ -161,6 +163,8 @@
   },
   "SETTINGS_PAGE": {
     "SETTINGS": "Paramètres",
+    "LANGUAGE": "Language",
+    "SELECT_AN_ADMIN": "Select a Preferred Admin",
     "LIBRARY_SETTINGS": "Paramètres des médiathèques",
     "BACKUP": "Sauvegarde",
     "BACKUPS": "Sauvegardes",
@@ -291,5 +295,5 @@
   "LONGITUDE": "Longitude",
   "TIMEZONE": "Fuseau horaire",
   "POSTCODE": "Code postal",
-  "X_ROWS_SELECTED": "{ROWS} Lignes sélectionnées"
+  "X_ROWS_SELECTED": "{ROWS} Ligne(s) sélectionnée(s)"
 }
