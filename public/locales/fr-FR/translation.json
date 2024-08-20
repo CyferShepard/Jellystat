@@ -29,7 +29,7 @@
     "MOST_VIEWED_LIBRARIES": "MÉDIATHÈQUES LES PLUS CONSULTÉES",
     "MOST_USED_CLIENTS": "CLIENTS LES PLUS UTILISÉS",
     "MOST_ACTIVE_USERS": "UTILISATEURS LES PLUS ACTIFS",
-    "CONCURRENT_STREAMS": "CONCURRENT STREAMS"
+    "CONCURRENT_STREAMS": "DIFFÉRENTS FLUX"
   },
   "LIBRARY_OVERVIEW": {
     "MOVIE_LIBRARIES": "MÉDIATHÈQUES DE FILMS",
@@ -145,7 +145,7 @@
     "SECONDS": "Secondes",
     "PLAYS": "Lectures",
     "ITEMS": "Éléments",
-    "STREAMS": "Streams"
+    "STREAMS": "Flux"
   },
   "USERS_PAGE": {
     "ALL_USERS": "Tous les utilisateurs",
@@ -274,7 +274,7 @@
   "STREAM_DETAILS": "Détails du flux",
   "SOURCE_DETAILS": "Détails de la source",
   "DIRECT": "Direct",
-  "TRANSCODE": "Transcode",
+  "TRANSCODE": "Transcodage",
   "USERNAME": "Nom d'utilisateur",
   "PASSWORD": "Mot de passe",
   "LOGIN": "Connexion",
