@@ -67,7 +67,7 @@ export default function BackupTables() {
               table={table.name}
               variant={table.Excluded ? "danger" : "primary"}
               onClick={() => toggleTable(table.value)}
-              className="me-2"
+              className="me-2 mb-2"
             >
               {table.name}
             </Button>
