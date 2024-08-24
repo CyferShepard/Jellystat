@@ -1,11 +1,13 @@
 const { Pool } = require("pg");
 const fs = require("fs");
 const path = require("path");
+const configClass = require("./config");
 
 const moment = require("moment");
 const Logging = require("./logging");
 
 const taskstate = require("../logging/taskstate");
+const { tables } = require("../global/backup_tables");
 
 // Database connection parameters
 const postgresUser = process.env.POSTGRES_USER;
@@ -14,18 +16,6 @@ const postgresIp = process.env.POSTGRES_IP;
 const postgresPort = process.env.POSTGRES_PORT;
 const postgresDatabase = process.env.POSTGRES_DB || "jfstat";
 const backupfolder = "backup-data";
-
-// Tables to back up
-const tables = [
-  "jf_libraries",
-  "jf_library_items",
-  "jf_library_seasons",
-  "jf_library_episodes",
-  "jf_users",
-  "jf_playback_activity",
-  "jf_playback_reporting_plugin_data",
-  "jf_item_info",
-];
 
 function checkFolderWritePermission(folderPath) {
   try {
@@ -39,6 +29,15 @@ function checkFolderWritePermission(folderPath) {
 }
 // Backup function
 async function backup(refLog) {
+  const config = await new configClass().getConfig();
+
+  if (config.error) {
+    refLog.logData.push({ color: "red", Message: "Backup Failed: Failed to get config" });
+    refLog.logData.push({ color: "red", Message: "Backup Failed with errors" });
+    Logging.updateLog(refLog.uuid, refLog.logData, taskstate.FAILED);
+    return;
+  }
+
   refLog.logData.push({ color: "lawngreen", Message: "Starting Backup" });
   const pool = new Pool({
     user: postgresUser,
@@ -62,30 +61,41 @@ async function backup(refLog) {
       console.error("No write permissions for the folder:", backuppath);
       refLog.logData.push({ color: "red", Message: "Backup Failed: No write permissions for the folder: " + backuppath });
       refLog.logData.push({ color: "red", Message: "Backup Failed with errors" });
-      Logging.updateLog(refLog.uuid, refLog.loggedData, taskstate.FAILED);
+      Logging.updateLog(refLog.uuid, refLog.logData, taskstate.FAILED);
+      await pool.end();
+      return;
+    }
+
+    const ExcludedTables = config.settings?.ExcludedTables || [];
+
+    let filteredTables = tables.filter((table) => !ExcludedTables.includes(table.value));
+
+    if (filteredTables.length === 0) {
+      refLog.logData.push({ color: "red", Message: "Backup Failed: No tables to backup" });
+      refLog.logData.push({ color: "red", Message: "Backup Failed with errors" });
+      Logging.updateLog(refLog.uuid, refLog.logData, taskstate.FAILED);
       await pool.end();
       return;
     }
 
     // const backupPath = `../backup-data/backup_${now.format('yyyy-MM-DD HH-mm-ss')}.json`;
     const directoryPath = path.join(__dirname, "..", backupfolder, `backup_${now.format("yyyy-MM-DD HH-mm-ss")}.json`);
-
+    refLog.logData.push({ color: "yellow", Message: "Begin Backup " + directoryPath });
     const stream = fs.createWriteStream(directoryPath, { flags: "a" });
     stream.on("error", (error) => {
       refLog.logData.push({ color: "red", Message: "Backup Failed: " + error });
-      Logging.updateLog(refLog.uuid, refLog.loggedData, taskstate.FAILED);
+      Logging.updateLog(refLog.uuid, refLog.logData, taskstate.FAILED);
       return;
     });
     const backup_data = [];
 
-    refLog.logData.push({ color: "yellow", Message: "Begin Backup " + directoryPath });
-    for (let table of tables) {
-      const query = `SELECT * FROM ${table}`;
+    for (let table of filteredTables) {
+      const query = `SELECT * FROM ${table.value}`;
 
       const { rows } = await pool.query(query);
-      refLog.logData.push({ color: "dodgerblue", Message: `Saving ${rows.length} rows for table ${table}` });
+      refLog.logData.push({ color: "dodgerblue", Message: `Saving ${rows.length} rows for table ${table.value}` });
 
-      backup_data.push({ [table]: rows });
+      backup_data.push({ [table.value]: rows });
     }
 
     await stream.write(JSON.stringify(backup_data));
@@ -142,7 +152,7 @@ async function backup(refLog) {
   } catch (error) {
     console.log(error);
     refLog.logData.push({ color: "red", Message: "Backup Failed: " + error });
-    Logging.updateLog(refLog.uuid, refLog.loggedData, taskstate.FAILED);
+    Logging.updateLog(refLog.uuid, refLog.logData, taskstate.FAILED);
   }
 
   await pool.end();

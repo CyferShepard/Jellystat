@@ -11,6 +11,7 @@ const { checkForUpdates } = require("../version-control");
 const API = require("../classes/api-loader");
 const { sendUpdate } = require("../ws");
 const moment = require("moment");
+const { tables } = require("../global/backup_tables");
 
 const router = express.Router();
 
@@ -962,6 +963,65 @@ router.delete("/libraryItems/purge", async (req, res) => {
 
     res.status(503);
     res.send(error);
+  }
+});
+
+router.get("/getBackupTables", async (req, res) => {
+  try {
+    const config = await new configClass().getConfig();
+    const excluded_tables = config.settings.ExcludedTables || [];
+
+    let backupTables = tables.map((table) => {
+      return {
+        ...table,
+        Excluded: excluded_tables.includes(table.value),
+      };
+    });
+
+    res.send(backupTables);
+    return;
+  } catch (error) {
+    res.status(503);
+    res.send(error);
+  }
+});
+
+router.post("/setExcludedBackupTable", async (req, res) => {
+  const { table } = req.body;
+  if (table === undefined || tables.map((item) => item.value).indexOf(table) === -1) {
+    res.status(400);
+    res.send("Invalid table provided");
+    return;
+  }
+
+  const settingsjson = await db.query('SELECT settings FROM app_config where "ID"=1').then((res) => res.rows);
+
+  if (settingsjson.length > 0) {
+    const settings = settingsjson[0].settings || {};
+
+    let excludedTables = settings.ExcludedTables || [];
+    if (excludedTables.includes(table)) {
+      excludedTables = excludedTables.filter((item) => item !== table);
+    } else {
+      excludedTables.push(table);
+    }
+    settings.ExcludedTables = excludedTables;
+
+    let query = 'UPDATE app_config SET settings=$1 where "ID"=1';
+
+    await db.query(query, [settings]);
+
+    let backupTables = tables.map((table) => {
+      return {
+        ...table,
+        Excluded: settings.ExcludedTables.includes(table.value),
+      };
+    });
+
+    res.send(backupTables);
+  } else {
+    res.status(404);
+    res.send("Settings not found");
   }
 });
 

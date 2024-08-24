@@ -122,7 +122,7 @@ router.get("/beginBackup", async (req, res) => {
 
     const uuid = randomUUID();
     let refLog = { logData: [], uuid: uuid };
-    Logging.insertLog(uuid, triggertype.Manual, taskName.backup);
+    await Logging.insertLog(uuid, triggertype.Manual, taskName.backup);
     await backup(refLog);
     Logging.updateLog(uuid, refLog.logData, taskstate.SUCCESS);
     res.send("Backup completed successfully");

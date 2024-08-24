@@ -2,7 +2,6 @@ import {Tabs, Tab } from 'react-bootstrap';
 
 import SettingsConfig from "./components/settings/settingsConfig";
 import Tasks from "./components/settings/Tasks";
-import BackupFiles from "./components/settings/backupfiles";
 import SecuritySettings from "./components/settings/security";
 import ApiKeys from "./components/settings/apiKeys";
 import LibrarySelector from "./library_selector";
@@ -14,6 +13,7 @@ import Logs from "./components/settings/logs";
 
 import "./css/settings/settings.css";
 import { Trans } from "react-i18next";
+import BackupPage from './components/settings/backup_page';
 
 export default function Settings() {
 
@@ -37,7 +37,7 @@ export default function Settings() {
           </Tab>
 
           <Tab eventKey="tabBackup" className='bg-transparent  my-2'  title={<Trans i18nKey={"SETTINGS_PAGE.BACKUP"}/>}  style={{minHeight:'500px'}}>
-          <BackupFiles/>
+          <BackupPage/>
           </Tab>
 
           <Tab eventKey="tabLogs" className='bg-transparent  my-2'  title={<Trans i18nKey={"SETTINGS_PAGE.LOGS"}/>}  style={{minHeight:'500px'}}>
