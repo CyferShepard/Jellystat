@@ -6,6 +6,7 @@ const { jf_activity_watchdog_columns, jf_activity_watchdog_mapping } = require("
 const configClass = require("../classes/config");
 const API = require("../classes/api-loader");
 const { sendUpdate } = require("../ws");
+const { isNumber } = require("@mui/x-data-grid/internals");
 
 async function getSessionsInWatchDog(SessionData, WatchdogData) {
   let existingData = await WatchdogData.filter((wdData) => {
@@ -187,14 +188,21 @@ async function ActivityMonitor(interval) {
       //for each item in playbackToInsert, check if it exists in the recent playback activity and update accordingly. insert new row if updating existing exceeds the runtime
       if (playbackToInsert.length > 0 && ExistingRecords.length > 0) {
         ExistingDataToUpdate = playbackToInsert.filter((playbackData) => {
-          const existingrow = ExistingRecords.find(
-            (existing) =>
+          const existingrow = ExistingRecords.find((existing) => {
+            let newDurationWithingRunTime = true;
+
+            if (existing.RunTimeTicks != undefined && isNumber(existing.RunTimeTicks)) {
+              newDurationWithingRunTime =
+                (Number(existing.PlaybackDuration) + Number(playbackData.PlaybackDuration)) * 10000000 <=
+                Number(existing.RunTimeTicks);
+            }
+            return (
               existing.NowPlayingItemId === playbackData.NowPlayingItemId &&
               existing.EpisodeId === playbackData.EpisodeId &&
               existing.UserId === playbackData.UserId &&
-              (Number(existing.PlaybackDuration) + Number(playbackData.PlaybackDuration)) * 10000000 <=
-                Number(existing.RunTimeTicks)
-          );
+              newDurationWithingRunTime
+            );
+          });
 
           if (existingrow) {
             playbackData.Id = existingrow.Id;
