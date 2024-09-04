@@ -51,7 +51,7 @@ async function getSessionsInWatchDog(SessionData, WatchdogData) {
 async function getSessionsNotInWatchDog(SessionData, WatchdogData) {
   let newData = await SessionData.filter((sessionData) => {
     if (WatchdogData.length === 0) return true;
-    return WatchdogData.some((wdData) => {
+    return !WatchdogData.some((wdData) => {
       let NowPlayingItemId = sessionData.NowPlayingItem.SeriesId || sessionData.NowPlayingItem.Id;
 
       let matchesEpisodeId =
@@ -64,7 +64,7 @@ async function getSessionsNotInWatchDog(SessionData, WatchdogData) {
         wdData.NowPlayingItemId === NowPlayingItemId &&
         matchesEpisodeId;
 
-      return !matchingSessionFound;
+      return matchingSessionFound;
     });
   }).map(jf_activity_watchdog_mapping);
 
@@ -74,21 +74,18 @@ async function getSessionsNotInWatchDog(SessionData, WatchdogData) {
 function getWatchDogNotInSessions(SessionData, WatchdogData) {
   let removedData = WatchdogData.filter((wdData) => {
     if (SessionData.length === 0) return true;
-    return SessionData.some((sessionData) => {
+    return !SessionData.some((sessionData) => {
       let NowPlayingItemId = sessionData.NowPlayingItem.SeriesId || sessionData.NowPlayingItem.Id;
 
       let matchesEpisodeId =
         sessionData.NowPlayingItem.SeriesId != undefined ? wdData.EpisodeId === sessionData.NowPlayingItem.Id : true;
 
-      let noMatchingSessionFound = !(
+      let noMatchingSessionFound =
         // wdData.Id === sessionData.Id &&
-        (
-          wdData.UserId === sessionData.UserId &&
-          wdData.DeviceId === sessionData.DeviceId &&
-          wdData.NowPlayingItemId === NowPlayingItemId &&
-          matchesEpisodeId
-        )
-      );
+        wdData.UserId === sessionData.UserId &&
+        wdData.DeviceId === sessionData.DeviceId &&
+        wdData.NowPlayingItemId === NowPlayingItemId &&
+        matchesEpisodeId;
       return noMatchingSessionFound;
     });
   });
@@ -140,11 +137,6 @@ async function ActivityMonitor(interval) {
       let WatchdogDataToInsert = await getSessionsNotInWatchDog(SessionData, WatchdogData);
       let WatchdogDataToUpdate = await getSessionsInWatchDog(SessionData, WatchdogData);
       let dataToRemove = await getWatchDogNotInSessions(SessionData, WatchdogData);
-      // console.clear();
-
-      // console.log("New Data: ", WatchdogDataToInsert.length);
-      // console.log("Existing Data: ", WatchdogDataToUpdate.length);
-      // console.log("Removed Data: ", dataToRemove.length);
 
       /////////////////
 
@@ -154,11 +146,13 @@ async function ActivityMonitor(interval) {
         //insert new rows where not existing items
         // console.log("Inserted " + WatchdogDataToInsert.length + " wd playback records");
         db.insertBulk("jf_activity_watchdog", WatchdogDataToInsert, jf_activity_watchdog_columns);
+        console.log("New Data Inserted: ", WatchdogDataToInsert.length);
       }
 
       //update wd state
       if (WatchdogDataToUpdate.length > 0) {
         await db.insertBulk("jf_activity_watchdog", WatchdogDataToUpdate, jf_activity_watchdog_columns);
+        console.log("Existing Data Updated: ", WatchdogDataToUpdate.length);
       }
 
       //delete from db no longer in session data and insert into stats db
@@ -229,9 +223,11 @@ async function ActivityMonitor(interval) {
 
       if (toDeleteIds.length > 0) {
         await db.deleteBulk("jf_activity_watchdog", toDeleteIds, "ActivityId");
+        console.log("Removed Data from WD Count: ", dataToRemove.length);
       }
       if (playbackToInsert.length > 0) {
         await db.insertBulk("jf_playback_activity", playbackToInsert, columnsPlayback);
+        console.log("Activity inserted/updated Count: ", playbackToInsert.length);
         // console.log("Inserted " + playbackToInsert.length + " new playback records");
       }
 
