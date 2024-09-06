@@ -31,6 +31,7 @@ const tasks = require("./tasks/tasks");
 
 // websocket
 const { setupWebSocketServer } = require("./ws");
+const writeEnvVariables = require("./classes/env");
 
 const app = express();
 const db = knex(knexConfig.development);
@@ -97,10 +98,12 @@ app.use("/utils", authenticate, utilsRouter, () => {
 app.use("/swagger", swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 
 // for deployment of static page
-const root = path.join(__dirname, "..", "dist");
-app.use(express.static(root));
-app.get("*", (req, res) => {
-  res.sendFile(path.join(__dirname, "..", "dist", "index.html"));
+writeEnvVariables().then(() => {
+  const root = path.join(__dirname, "..", "dist");
+  app.use(express.static(root));
+  app.get("*", (req, res) => {
+    res.sendFile(path.join(__dirname, "..", "dist", "index.html"));
+  });
 });
 
 // JWT middleware

@@ -15,7 +15,7 @@ import { initReactI18next } from "react-i18next";
 import Loading from "./pages/components/general/loading.jsx";
 import routes from "./routes.jsx";
 
-const baseUrl = import.meta.env.JS_BASE_URL ?? "/";
+const baseUrl = window.env.JS_BASE_URL ?? import.meta.env.JS_BASE_URL ?? "/";
 let validBaseUrls = [...new Set([baseUrl, ...routes.map((route) => "/" + route.path.split("/")[1])])];
 if (baseUrl != "/") {
   validBaseUrls = validBaseUrls.filter((url) => url != "/");
@@ -47,7 +47,7 @@ i18n
     ReactDOM.createRoot(document.getElementById("root")).render(
       <React.StrictMode>
         <Suspense fallback={<Loading />} />
-        <BrowserRouter basename={import.meta.env.JS_BASE_URL ?? "/"}>
+        <BrowserRouter basename={baseUrl}>
           <App />
         </BrowserRouter>
       </React.StrictMode>

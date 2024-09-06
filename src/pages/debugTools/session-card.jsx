@@ -169,8 +169,8 @@ function SessionCard(props) {
                     <Row>
                       <Col className="col-auto ellipse">
                         {isRemoteSession(props.data.session.RemoteEndPoint) &&
-                        import.meta.env.JS_GEOLITE_ACCOUNT_ID &&
-                        import.meta.env.JS_GEOLITE_LICENSE_KEY ? (
+                        (window.env.JS_GEOLITE_ACCOUNT_ID ?? import.meta.env.JS_GEOLITE_ACCOUNT_ID) &&
+                        (window.env.JS_GEOLITE_LICENSE_KEY ?? import.meta.env.JS_GEOLITE_LICENSE_KEY) ? (
                           <Card.Text></Card.Text>
                         ) : (
                           <span>IP Address: {props.data.session.RemoteEndPoint}</span>
