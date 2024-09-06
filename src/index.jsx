@@ -16,8 +16,13 @@ import Loading from "./pages/components/general/loading.jsx";
 import routes from "./routes.jsx";
 
 const baseUrl = import.meta.env.JS_BASE_URL ?? "/";
-const validBaseUrls = [...new Set([baseUrl, ...routes.map((route) => "/" + route.path.split("/")[1])])];
+let validBaseUrls = [...new Set([baseUrl, ...routes.map((route) => "/" + route.path.split("/")[1])])];
+if (baseUrl != "/") {
+  validBaseUrls = validBaseUrls.filter((url) => url != "/");
+}
 const locationBase = "/" + window.location.pathname.split("/")[1];
+console.log("Base URL: ", baseUrl);
+console.log("Valid Base URLs: ", validBaseUrls);
 
 if (!validBaseUrls.includes(locationBase)) {
   window.location.assign(baseUrl);
