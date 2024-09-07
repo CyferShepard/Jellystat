@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import axios from "axios";
+import axios from "../../../lib/axios_instance";
 import { Form, DropdownButton, Dropdown, ButtonGroup, Button } from "react-bootstrap";
 
 import Table from "@mui/material/Table";

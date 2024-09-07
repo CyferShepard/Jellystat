@@ -1,5 +1,5 @@
 
-import axios from "axios";
+import axios from "../../../lib/axios_instance";
 import i18next from "i18next";
 import { useState } from "react";
 import { Container, Row,Col, Modal } from "react-bootstrap";

@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import axios from "axios";
+import axios from "../../../lib/axios_instance";
 import ActivityTable from "../activity/activity-table";
 import { Trans } from "react-i18next";
 import { Button, FormControl, FormSelect, Modal } from "react-bootstrap";

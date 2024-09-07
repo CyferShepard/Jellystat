@@ -1,4 +1,4 @@
-import axios from "axios";
+import axios from "../lib/axios_instance";
 
 class Config {
   async fetchConfig() {

@@ -1,8 +1,5 @@
 import { useState, useEffect } from "react";
-import axios from "axios";
-
-// import ItemCardInfo from "./LastWatched/last-watched-card";
-
+import axios from "../../../lib/axios_instance";
 import LastWatchedCard from "../general/last-watched-card";
 
 

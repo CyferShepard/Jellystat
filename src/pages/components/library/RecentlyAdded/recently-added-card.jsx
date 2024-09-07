@@ -8,6 +8,7 @@ import TvLineIcon from "remixicon-react/TvLineIcon";
 import FilmLineIcon from "remixicon-react/FilmLineIcon";
 import FileMusicLineIcon from "remixicon-react/FileMusicLineIcon";
 import CheckboxMultipleBlankLineIcon from "remixicon-react/CheckboxMultipleBlankLineIcon";
+import baseUrl from "../../../../lib/baseurl";
 
 function RecentlyAddedCard(props) {
   const [loaded, setLoaded] = useState(false);
@@ -73,7 +74,7 @@ function RecentlyAddedCard(props) {
           ) : null}
           <img
             src={`${
-              "/proxy/Items/Images/Primary?id=" +
+              baseUrl+"/proxy/Items/Images/Primary?id=" +
               (props.data.Type === "Episode" ? props.data.SeriesId : props.data.Id) +
               "&fillHeight=320&fillWidth=213&quality=50"
             }`}

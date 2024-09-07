@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from "react";
-import axios from "axios";
+import { useState, useEffect } from "react";
+import axios from "../../../lib/axios_instance";
 import "../../css/globalstats.css";
 
 import WatchTimeStats from "./globalstats/watchtimestats";

@@ -12,6 +12,7 @@ import FileMusicLineIcon from "remixicon-react/FileMusicLineIcon";
 import CheckboxMultipleBlankLineIcon from "remixicon-react/CheckboxMultipleBlankLineIcon";
 import { Trans } from "react-i18next";
 import i18next from "i18next";
+import baseUrl from "../../../lib/baseurl";
 
 function LibraryCard(props) {
   const [imageLoaded, setImageLoaded] = useState(true);
@@ -146,7 +147,7 @@ function LibraryCard(props) {
                <Card.Img
                variant="top"
                className="library-card-banner library-card-banner-hover"
-               src={"/proxy/Items/Images/Primary?id=" + props.data.Id + "&fillWidth=800&quality=50"}
+               src={baseUrl+"/proxy/Items/Images/Primary?id=" + props.data.Id + "&fillWidth=800&quality=50"}
                onError={() =>setImageLoaded(false)}
                />
                :

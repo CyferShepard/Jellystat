@@ -6,6 +6,7 @@ import ArchiveDrawerFillIcon from "remixicon-react/ArchiveDrawerFillIcon";
 import "../../css/lastplayed.css";
 import { Trans } from "react-i18next";
 import i18next from "i18next";
+import baseUrl from "../../../lib/baseurl";
 
 function formatTime(time) {
   const units = {
@@ -42,7 +43,7 @@ function LastWatchedCard(props) {
           ) : null}
           {!props.data.archived ? (
             <img
-              src={`${"/proxy/Items/Images/Primary?id=" + props.data.Id + "&fillHeight=320&fillWidth=213&quality=50"}`}
+              src={`${baseUrl+"/proxy/Items/Images/Primary?id=" + props.data.Id + "&fillHeight=320&fillWidth=213&quality=50"}`}
               alt=""
               onLoad={() => setLoaded(true)}
               style={loaded ? { display: "block" } : { display: "none" }}

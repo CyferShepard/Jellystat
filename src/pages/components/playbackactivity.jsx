@@ -1,8 +1,5 @@
-import React, { useState, useEffect } from "react";
-import axios from "axios";
-// import Config from "../lib/config";
-
-// import AccountCircleFillIcon from "remixicon-react/AccountCircleFillIcon";
+import  { useState, useEffect } from "react";
+import axios from "../../lib/axios_instance";
 
 import "../css/users/users.css";
 

@@ -2,9 +2,11 @@ const fs = require("fs");
 const path = require("path");
 
 async function writeEnvVariables() {
+  //Define sensitive variables that should not be exposed
+  const excludedVariables = ["JS_GEOLITE_LICENSE_KEY", "JS_USER", "JS_PASSWORD"];
   // Fetch environment variables that start with JS_
   const envVariables = Object.keys(process.env).reduce((acc, key) => {
-    if (key.startsWith("JS_")) {
+    if (key.startsWith("JS_") && !excludedVariables.includes(key)) {
       acc[key] = process.env[key];
     }
     return acc;

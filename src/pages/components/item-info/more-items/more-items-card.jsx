@@ -9,6 +9,7 @@ import TvLineIcon from "remixicon-react/TvLineIcon";
 import FilmLineIcon from "remixicon-react/FilmLineIcon";
 import FileMusicLineIcon from "remixicon-react/FileMusicLineIcon";
 import CheckboxMultipleBlankLineIcon from "remixicon-react/CheckboxMultipleBlankLineIcon";
+import baseUrl from "../../../../lib/baseurl";
 
 function MoreItemCards(props) {
   const { Id } = useParams();
@@ -88,7 +89,7 @@ function MoreItemCards(props) {
                 </div>
               ) : (
                 <img
-                  src={`${"/proxy/Items/Images/Primary?id=" + Id + "&fillHeight=320&fillWidth=213&quality=50"}`}
+                  src={`${baseUrl+"/proxy/Items/Images/Primary?id=" + Id + "&fillHeight=320&fillWidth=213&quality=50"}`}
                   alt=""
                   onLoad={() => setLoaded(true)}
                   style={loaded ? { display: "block" } : { display: "none" }}
@@ -96,7 +97,7 @@ function MoreItemCards(props) {
               )
             ) : (
               <img
-                src={`${
+                src={`${baseUrl+
                   "/proxy/Items/Images/Primary?id=" +
                   (props.data.Type === "Episode" ? props.data.EpisodeId : props.data.Id) +
                   (props.data.Type === "Audio"

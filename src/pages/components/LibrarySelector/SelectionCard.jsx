@@ -1,5 +1,5 @@
 import {useState} from "react";
-import axios from "axios";
+import axios from "../../../lib/axios_instance";
 import "../../css/library/library-card.css";
 
 import { Form  ,Card,Row,Col } from 'react-bootstrap';
@@ -9,6 +9,7 @@ import FilmLineIcon from "remixicon-react/FilmLineIcon";
 import FileMusicLineIcon from "remixicon-react/FileMusicLineIcon";
 import CheckboxMultipleBlankLineIcon from "remixicon-react/CheckboxMultipleBlankLineIcon";
 import { Trans } from "react-i18next";
+import baseUrl from "../../../lib/baseurl";
 
 function SelectionCard(props) {
   const [imageLoaded, setImageLoaded] = useState(true);
@@ -54,7 +55,7 @@ function SelectionCard(props) {
                <Card.Img
                variant="top"
                className="library-card-banner default_library_image"
-               src={"/proxy/Items/Images/Primary?id=" + props.data.Id + "&fillWidth=800&quality=50"}
+               src={baseUrl+"/proxy/Items/Images/Primary?id=" + props.data.Id + "&fillWidth=800&quality=50"}
                onError={() =>setImageLoaded(false)}
                />
                :

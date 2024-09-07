@@ -1,6 +1,6 @@
 import { useParams } from "react-router-dom";
 import { useState, useEffect } from "react";
-import axios from "axios";
+import axios from "../../lib/axios_instance";
 import AccountCircleFillIcon from "remixicon-react/AccountCircleFillIcon";
 import Config from "../../lib/config";
 import { Tabs, Tab, Button, ButtonGroup } from "react-bootstrap";
@@ -10,6 +10,7 @@ import LastPlayed from "./user-info/lastplayed";
 import UserActivity from "./user-info/user-activity";
 import "../css/users/user-details.css";
 import { Trans } from "react-i18next";
+import baseUrl from "../../lib/baseurl";
 
 function UserInfo() {
   const { UserId } = useParams();
@@ -76,7 +77,7 @@ function UserInfo() {
           ) : (
             <img
               className="user-image"
-              src={"/proxy/Users/Images/Primary?id=" + UserId + "&quality=100"}
+              src={baseUrl+"/proxy/Users/Images/Primary?id=" + UserId + "&quality=100"}
               onError={handleImageError}
               alt=""
             ></img>

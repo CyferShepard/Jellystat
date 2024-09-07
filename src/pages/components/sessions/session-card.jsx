@@ -14,6 +14,7 @@ import { clientData } from "../../../lib/devices";
 import Tooltip from "@mui/material/Tooltip";
 import IpInfoModal from "../ip-info";
 import { Trans } from "react-i18next";
+import baseUrl from "../../../lib/baseurl";
 
 function ticksToTimeString(ticks) {
   // Convert ticks to seconds
@@ -112,7 +113,7 @@ function SessionCard(props) {
                   : "stat-card-image rounded-0 rounded-start"
               }
               src={
-                "/proxy/Items/Images/Primary?id=" +
+                baseUrl+"/proxy/Items/Images/Primary?id=" +
                 (props.data.session.NowPlayingItem.SeriesId
                   ? props.data.session.NowPlayingItem.SeriesId
                   : props.data.session.NowPlayingItem.Id) +
@@ -164,8 +165,7 @@ function SessionCard(props) {
                     <Row>
                       <Col className="col-auto ellipse">
                         {isRemoteSession(props.data.session.RemoteEndPoint) &&
-                        (window.env.JS_GEOLITE_ACCOUNT_ID ?? import.meta.env.JS_GEOLITE_ACCOUNT_ID) &&
-                        (window.env.JS_GEOLITE_LICENSE_KEY ?? import.meta.env.JS_GEOLITE_LICENSE_KEY) ? (
+                        (window.env.JS_GEOLITE_ACCOUNT_ID ?? import.meta.env.JS_GEOLITE_ACCOUNT_ID)  ? (
                           <Link
                             className="text-decoration-none text-white"
                             onClick={() => showIPDataModal(props.data.session.RemoteEndPoint)}
@@ -185,7 +185,7 @@ function SessionCard(props) {
                     <img
                       className="card-device-image"
                       src={
-                        "/proxy/web/assets/img/devices/?devicename=" +
+                        baseUrl+"/proxy/web/assets/img/devices/?devicename=" +
                         (props.data.session.Client.toLowerCase() === "jellyfin mobile (ios)" &&
                         props.data.session.DeviceName.toLowerCase() === "iphone"
                           ? "apple"
@@ -246,7 +246,7 @@ function SessionCard(props) {
                       {props.data.session.UserPrimaryImageTag !== undefined ? (
                         <img
                           className="session-card-user-image"
-                          src={"/proxy/Users/Images/Primary?id=" + props.data.session.UserId + "&quality=50"}
+                          src={baseUrl+"/proxy/Users/Images/Primary?id=" + props.data.session.UserId + "&quality=50"}
                           alt=""
                         />
                       ) : (

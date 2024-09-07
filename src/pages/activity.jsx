@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 
-import axios from "axios";
+import axios from "../lib/axios_instance";
 
 import "./css/activity.css";
 import Config from "../lib/config";

@@ -13,20 +13,7 @@ import LanguageDetector from "i18next-browser-languagedetector";
 import { initReactI18next } from "react-i18next";
 
 import Loading from "./pages/components/general/loading.jsx";
-import routes from "./routes.jsx";
-
-const baseUrl = window.env.JS_BASE_URL ?? import.meta.env.JS_BASE_URL ?? "/";
-let validBaseUrls = [...new Set([baseUrl, ...routes.map((route) => "/" + route.path.split("/")[1])])];
-if (baseUrl != "/") {
-  validBaseUrls = validBaseUrls.filter((url) => url != "/");
-}
-const locationBase = "/" + window.location.pathname.split("/")[1];
-console.log("Base URL: ", baseUrl);
-console.log("Valid Base URLs: ", validBaseUrls);
-
-if (!validBaseUrls.includes(locationBase)) {
-  window.location.assign(baseUrl);
-}
+import baseUrl from "./lib/baseurl.jsx";
 
 i18n
   .use(Backend)
@@ -35,6 +22,9 @@ i18n
   .init({
     fallbackLng: "en-UK",
     debug: false,
+    backend: {
+      loadPath: `${baseUrl}/locales/{{lng}}/{{ns}}.json`,
+    },
     detection: {
       order: ["cookie", "localStorage", "sessionStorage", "navigator", "htmlTag", "querystring", "path", "subdomain"],
       cache: ["cookie"],

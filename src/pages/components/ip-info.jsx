@@ -8,7 +8,7 @@ import TableCell from "@mui/material/TableCell";
 import TableContainer from "@mui/material/TableContainer";
 import TableHead from "@mui/material/TableHead";
 import TableRow from "@mui/material/TableRow";
-import axios from "axios";
+import axios from "../../lib/axios_instance";
 import { Trans } from "react-i18next";
 
 export default function IpInfoModal(props) {

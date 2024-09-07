@@ -1,8 +1,8 @@
 import { useState, useEffect } from "react";
-import axios from "axios";
+import axios from "../../../lib/axios_instance";
 import ActivityTable from "../activity/activity-table";
 import { Trans } from "react-i18next";
-import { Button, FormControl, FormSelect } from "react-bootstrap";
+import { FormControl, FormSelect } from "react-bootstrap";
 import i18next from "i18next";
 
 function ItemActivity(props) {

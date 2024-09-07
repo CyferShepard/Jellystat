@@ -1,6 +1,6 @@
 /* eslint-disable react/prop-types */
 import { useState, useEffect } from "react";
-import axios from "axios";
+import axios from "../../lib/axios_instance";
 import { useParams } from "react-router-dom";
 import { Link } from "react-router-dom";
 import { Blurhash } from "react-blurhash";
@@ -26,6 +26,7 @@ import TvLineIcon from "remixicon-react/TvLineIcon";
 import FilmLineIcon from "remixicon-react/FilmLineIcon";
 import FileMusicLineIcon from "remixicon-react/FileMusicLineIcon";
 import CheckboxMultipleBlankLineIcon from "remixicon-react/CheckboxMultipleBlankLineIcon";
+import baseUrl from "../../lib/baseurl";
 
 function ItemInfo() {
   const { Id } = useParams();
@@ -207,7 +208,7 @@ function ItemInfo() {
                 <img
                   className="item-image"
                   src={
-                    "/proxy/Items/Images/Primary?id=" +
+                    baseUrl+"/proxy/Items/Images/Primary?id=" +
                     (["Episode", "Season"].includes(data.Type) ? data.SeriesId : data.Id) +
                     "&fillWidth=200&quality=90"
                   }

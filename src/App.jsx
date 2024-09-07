@@ -2,7 +2,7 @@
 import "./App.css";
 import React, { useState, useEffect } from "react";
 import { Routes, Route } from "react-router-dom";
-import axios from "axios";
+import axios from "./lib/axios_instance";
 
 import socket from "./socket";
 import { ToastContainer, toast } from "react-toastify";
