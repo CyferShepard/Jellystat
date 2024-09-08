@@ -102,7 +102,7 @@ const root = path.join(__dirname, "..", "dist");
 //hacky middleware to handle basename changes for UI
 
 app.use((req, res, next) => {
-  if (BASE_NAME && (req.url == "/" || req.url == "")) {
+  if (BASE_NAME && BASE_NAME != "" && (req.url == "/" || req.url == "")) {
     return res.redirect(BASE_NAME);
   }
   // Ignore requests containing 'socket.io'
