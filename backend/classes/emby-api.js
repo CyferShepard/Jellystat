@@ -105,7 +105,13 @@ class EmbyAPI {
         },
       });
 
-      return response?.data || [];
+      if (Array.isArray(response?.data)) {
+        return response?.data || [];
+      }
+
+      console.log(response?.data || response);
+
+      return [];
     } catch (error) {
       this.#errorHandler(error);
       return [];

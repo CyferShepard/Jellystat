@@ -7,7 +7,7 @@ const setupWebSocketServer = (server, namespacePath) => {
   io = socketIO(server, { path: namespacePath + "/socket.io" }); // Create the socket.io server
 
   io.on("connection", (socket) => {
-    console.log("Client connected to namespace:", namespacePath);
+    // console.log("Client connected to namespace:", namespacePath);
 
     socket.on("message", (message) => {
       console.log(`Received: ${message}`);

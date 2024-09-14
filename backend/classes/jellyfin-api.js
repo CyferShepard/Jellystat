@@ -104,8 +104,13 @@ class JellyfinAPI {
           "X-MediaBrowser-Token": this.config.JF_API_KEY,
         },
       });
+      if (Array.isArray(response?.data)) {
+        return response?.data || [];
+      }
 
-      return response?.data || [];
+      console.log(response?.data || response);
+
+      return [];
     } catch (error) {
       this.#errorHandler(error);
       return [];
