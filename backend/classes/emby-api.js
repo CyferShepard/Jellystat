@@ -109,7 +109,7 @@ class EmbyAPI {
         return response?.data || [];
       }
 
-      console.log(response?.data || response);
+      console.log("[JELLYFIN-API] : getUsers - " + (response?.data || response));
 
       return [];
     } catch (error) {
@@ -355,10 +355,18 @@ class EmbyAPI {
       if (!userid || userid == null) {
         let adminid = await new configClass().getPreferedAdmin();
         if (!adminid || adminid == null) {
-          userid = (await this.getAdmins())[0].Id;
+          const admins = await this.getAdmins();
+          if (admins.length > 0) {
+            userid = admins[0].Id;
+          }
         } else {
           userid = adminid;
         }
+      }
+
+      if (!userid || userid == null) {
+        console.log("[JELLYFIN-API]: getRecentlyAdded - No Admins/UserIds found");
+        return [];
       }
 
       let url = `${this.config.JF_HOST}/Users/${userid}/Items/Latest?Limit=${limit}`;
