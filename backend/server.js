@@ -106,7 +106,7 @@ app.use((req, res, next) => {
     return res.redirect(BASE_NAME);
   }
   // Ignore requests containing 'socket.io'
-  if (req.url.includes("socket.io")) {
+  if (req.url.includes("socket.io") || req.url.includes("swagger")) {
     return next();
   }
 
