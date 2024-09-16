@@ -651,6 +651,12 @@ router.post("/setTaskSettings", async (req, res) => {
     return;
   }
 
+  if (!Number.isInteger(Interval) && Interval <= 0) {
+    res.status(400);
+    res.send("A valid Interval(int) which is > 0 minutes is required");
+    return;
+  }
+
   try {
     const settingsjson = await db.query('SELECT settings FROM app_config where "ID"=1').then((res) => res.rows);
 
@@ -808,7 +814,8 @@ router.post("/getItemDetails", async (req, res) => {
     }
     // let query = `SELECT im."Name" "FileName",im.*,i.* FROM jf_library_items i left join jf_item_info im on i."Id" = im."Id" where i."Id"=$1`;
     let query = `SELECT im."Name" "FileName",im."Id",im."Path",im."Name",im."Bitrate",im."MediaStreams",im."Type",  COALESCE(im."Size" ,(SELECT SUM(im."Size") FROM jf_library_seasons s JOIN jf_library_episodes e on s."Id"=e."SeasonId" JOIN jf_item_info im ON im."Id" = e."EpisodeId" WHERE s."SeriesId" = i."Id")) "Size",i.*, (select "Name" from jf_libraries l where l."Id"=i."ParentId") "LibraryName" FROM jf_library_items i left join jf_item_info im on i."Id" = im."Id" where i."Id"=$1`;
-    let activityQuery = `SELECT  MAX("ActivityDateInserted") "LastActivityDate" FROM public.jf_playback_activity`;
+    let maxActivityQuery = `SELECT  MAX("ActivityDateInserted") "LastActivityDate" FROM public.jf_playback_activity`;
+    let activityCountQuery = `SELECT  Count("ActivityDateInserted") "times_played",  SUM("PlaybackDuration") "total_play_time" FROM public.jf_playback_activity`;
 
     const { rows: items } = await db.query(query, [Id]);
 
@@ -822,30 +829,42 @@ router.post("/getItemDetails", async (req, res) => {
         const { rows: episodes } = await db.query(query, [Id]);
 
         if (episodes.length !== 0) {
-          activityQuery = `${activityQuery} where "EpisodeId"=$1`;
-          const LastActivityDate = await db.querySingle(activityQuery, [Id]);
+          maxActivityQuery = `${maxActivityQuery} where "EpisodeId"=$1`;
+          activityCountQuery = `${activityCountQuery} where "EpisodeId"=$1`;
+          const LastActivityDate = await db.querySingle(maxActivityQuery, [Id]);
+          const TimesPlayed = await db.querySingle(activityCountQuery, [Id]);
 
           episodes.forEach((episode) => {
             episode.LastActivityDate = LastActivityDate.LastActivityDate ?? null;
+            episode.times_played = TimesPlayed.times_played ?? null;
+            episode.total_play_time = TimesPlayed.total_play_time ?? null;
           });
           res.send(episodes);
         } else {
           res.status(404).send("Item not found");
         }
       } else {
-        activityQuery = `${activityQuery} where "SeasonId"=$1`;
-        const LastActivityDate = await db.querySingle(activityQuery, [Id]);
+        maxActivityQuery = `${maxActivityQuery} where "SeasonId"=$1`;
+        activityCountQuery = `${activityCountQuery} where "SeasonId"=$1`;
+        const LastActivityDate = await db.querySingle(maxActivityQuery, [Id]);
+        const TimesPlayed = await db.querySingle(activityCountQuery, [Id]);
         seasons.forEach((season) => {
           season.LastActivityDate = LastActivityDate.LastActivityDate ?? null;
+          season.times_played = TimesPlayed.times_played ?? null;
+          season.total_play_time = TimesPlayed.total_play_time ?? null;
         });
         res.send(seasons);
       }
     } else {
-      activityQuery = `${activityQuery} where "NowPlayingItemId"=$1`;
-      const LastActivityDate = await db.querySingle(activityQuery, [Id]);
+      maxActivityQuery = `${maxActivityQuery} where "NowPlayingItemId"=$1`;
+      activityCountQuery = `${activityCountQuery} where "NowPlayingItemId"=$1`;
+      const LastActivityDate = await db.querySingle(maxActivityQuery, [Id]);
+      const TimesPlayed = await db.querySingle(activityCountQuery, [Id]);
 
       items.forEach((item) => {
         item.LastActivityDate = LastActivityDate.LastActivityDate ?? null;
+        item.times_played = TimesPlayed.times_played ?? null;
+        item.total_play_time = TimesPlayed.total_play_time ?? null;
       });
 
       res.send(items);
