@@ -42,7 +42,7 @@ exports.up =async function(knex) {
     END;
     $BODY$;
     ALTER FUNCTION fs_watch_stats_popular_hour_of_day(integer)
-    OWNER TO "${process.env.POSTGRES_USER}";
+    OWNER TO "${process.env.POSTGRES_ROLE}";
     `).catch(function(error) {
         console.error(error);
       });

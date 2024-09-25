@@ -48,7 +48,7 @@ exports.up = async function (knex) {
       $BODY$;
   
       ALTER FUNCTION fs_watch_stats_over_time(integer)
-        OWNER TO "${process.env.POSTGRES_USER}";
+        OWNER TO "${process.env.POSTGRES_ROLE}";
     `).catch(function(error) {
         console.error(error);
       });

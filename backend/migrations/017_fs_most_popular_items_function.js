@@ -53,7 +53,7 @@ exports.up = async function(knex) {
       END;
       $BODY$;
       ALTER FUNCTION fs_most_popular_items(integer, text)
-      OWNER TO "${process.env.POSTGRES_USER}";
+      OWNER TO "${process.env.POSTGRES_ROLE}";
     `).catch(function(error) {
         console.error(error);
       });

@@ -32,7 +32,7 @@ exports.up = async function(knex) {
       $BODY$;
   
       ALTER FUNCTION fs_user_stats(integer, text)
-      OWNER TO "${process.env.POSTGRES_USER}";
+      OWNER TO "${process.env.POSTGRES_ROLE}";
     `).catch(function(error) {
         console.error(error);
       });
