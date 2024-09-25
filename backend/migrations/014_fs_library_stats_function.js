@@ -28,7 +28,7 @@ exports.up = async function(knex) {
       $BODY$;
   
       ALTER FUNCTION fs_library_stats(integer, text)
-          OWNER TO "${process.env.POSTGRES_USER}";
+          OWNER TO "${process.env.POSTGRES_ROLE}";
     `).catch(function(error) {
         console.error(error);
       });

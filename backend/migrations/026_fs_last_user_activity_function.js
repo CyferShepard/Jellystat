@@ -37,7 +37,7 @@ exports.up = function(knex) {
     $BODY$;
 
       ALTER FUNCTION fs_last_user_activity(text)
-        OWNER TO "${process.env.POSTGRES_USER}";
+        OWNER TO "${process.env.POSTGRES_ROLE}";
     `).catch(function(error) {
         console.error(error);
       });
@@ -90,7 +90,7 @@ exports.up = function(knex) {
       $BODY$;
       
       ALTER FUNCTION fs_last_user_activity(text)
-        OWNER TO "${process.env.POSTGRES_USER}";
+        OWNER TO "${process.env.POSTGRES_ROLE}";
     `);
   };
   

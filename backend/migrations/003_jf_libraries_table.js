@@ -11,7 +11,7 @@ exports.up = async function(knex) {
           table.text('CollectionType').notNullable();
           table.text('ImageTagsPrimary');
         });
-        await knex.raw(`ALTER TABLE jf_libraries OWNER TO "${process.env.POSTGRES_USER}";`);
+        await knex.raw(`ALTER TABLE jf_libraries OWNER TO "${process.env.POSTGRES_ROLE}";`);
       }
     } catch (error) {
       console.error(error);

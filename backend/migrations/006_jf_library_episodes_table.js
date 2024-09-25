@@ -24,7 +24,7 @@ exports.up = async function(knex) {
         table.text('SeriesName');
       });
 
-      await knex.raw(`ALTER TABLE IF EXISTS jf_library_episodes OWNER TO "${process.env.POSTGRES_USER}";`);
+      await knex.raw(`ALTER TABLE IF EXISTS jf_library_episodes OWNER TO "${process.env.POSTGRES_ROLE}";`);
     }
   } catch (error) {
     console.error(error);

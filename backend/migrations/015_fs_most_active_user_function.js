@@ -20,7 +20,7 @@ exports.up = function(knex) {
       END;
       $BODY$;
       ALTER FUNCTION fs_most_active_user(integer)
-      OWNER TO "${process.env.POSTGRES_USER}";
+      OWNER TO "${process.env.POSTGRES_ROLE}";
     `).catch(function(error) {
       console.error(error);
     });

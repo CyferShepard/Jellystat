@@ -51,7 +51,7 @@ exports.up = function(knex) {
       $BODY$;
   
       ALTER FUNCTION fs_most_viewed_libraries(integer)
-        OWNER TO "${process.env.POSTGRES_USER}";
+        OWNER TO "${process.env.POSTGRES_ROLE}";
     `).catch(function(error) {
         console.error(error);
       });
