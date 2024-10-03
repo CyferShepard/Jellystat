@@ -222,11 +222,17 @@ function Users() {
   const [config, setConfig] = useState(null);
   const [rowsPerPage, setRowsPerPage] = React.useState(10);
   const [page, setPage] = React.useState(0);
-  const [itemCount, setItemCount] = useState(10);
+
+  const [itemCount, setItemCount] = useState(parseInt(localStorage.getItem("PREF_USER_ACTIVITY_ItemCount") ?? "10"));
   const [searchQuery, setSearchQuery] = useState("");
 
   const [order, setOrder] = React.useState("asc");
   const [orderBy, setOrderBy] = React.useState("LastSeen");
+
+  function setItemLimit(limit) {
+    setItemCount(limit);
+    localStorage.setItem("PREF_USER_ACTIVITY_ItemCount", limit);
+  }
 
   useEffect(() => {
     const fetchConfig = async () => {
@@ -422,7 +428,7 @@ function Users() {
               onChange={(event) => {
                 setRowsPerPage(event.target.value);
                 setPage(0);
-                setItemCount(event.target.value);
+                setItemLimit(event.target.value);
               }}
               value={itemCount}
               className="my-md-3 w-md-75 rounded-0 rounded-end"

@@ -9,9 +9,21 @@ import i18next from "i18next";
 function LibraryActivity(props) {
   const [data, setData] = useState();
   const token = localStorage.getItem("token");
-  const [itemCount, setItemCount] = useState(10);
+  const [itemCount, setItemCount] = useState(parseInt(localStorage.getItem("PREF_LIBRARY_ACTIVITY_ItemCount") ?? "10"));
   const [searchQuery, setSearchQuery] = useState("");
-  const [streamTypeFilter, setStreamTypeFilter] = useState("All");
+  const [streamTypeFilter, setStreamTypeFilter] = useState(
+    localStorage.getItem("PREF_LIBRARY_ACTIVITY_StreamTypeFilter") ?? "All"
+  );
+
+  function setItemLimit(limit) {
+    setItemCount(limit);
+    localStorage.setItem("PREF_LIBRARY_ACTIVITY_ItemCount", limit);
+  }
+
+  function setTypeFilter(filter) {
+    setStreamTypeFilter(filter);
+    localStorage.setItem("PREF_LIBRARY_ACTIVITY_StreamTypeFilter", filter);
+  }
 
   useEffect(() => {
     const fetchData = async () => {
@@ -72,7 +84,7 @@ function LibraryActivity(props) {
             </div>
             <FormSelect
               onChange={(event) => {
-                setStreamTypeFilter(event.target.value);
+                setTypeFilter(event.target.value);
               }}
               value={streamTypeFilter}
               className="w-md-75 rounded-0 rounded-end"
@@ -95,7 +107,7 @@ function LibraryActivity(props) {
             </div>
             <FormSelect
               onChange={(event) => {
-                setItemCount(event.target.value);
+                setItemLimit(event.target.value);
               }}
               value={itemCount}
               className="my-md-3 w-md-75 rounded-0 rounded-end"

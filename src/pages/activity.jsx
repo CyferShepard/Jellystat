@@ -15,22 +15,39 @@ import LibraryFilterModal from "./components/library/library-filter-modal";
 function Activity() {
   const [data, setData] = useState();
   const [config, setConfig] = useState(null);
-  const [streamTypeFilter, setStreamTypeFilter] = useState("All");
+  const [streamTypeFilter, setStreamTypeFilter] = useState(localStorage.getItem("PREF_ACTIVITY_StreamTypeFilter") ?? "All");
   const [searchQuery, setSearchQuery] = useState("");
-  const [itemCount, setItemCount] = useState(10);
-  const [libraryFilters, setLibraryFilters] = useState([]);
+  const [itemCount, setItemCount] = useState(parseInt(localStorage.getItem("PREF_ACTIVITY_ItemCount") ?? "10"));
+  const [libraryFilters, setLibraryFilters] = useState(
+    localStorage.getItem("PREF_ACTIVITY_libraryFilters") != undefined
+      ? JSON.parse(localStorage.getItem("PREF_ACTIVITY_libraryFilters"))
+      : []
+  );
   const [libraries, setLibraries] = useState([]);
   const [showLibraryFilters, setShowLibraryFilters] = useState(false);
 
+  function setItemLimit(limit) {
+    setItemCount(limit);
+    localStorage.setItem("PREF_ACTIVITY_ItemCount", limit);
+  }
+
+  function setTypeFilter(filter) {
+    setStreamTypeFilter(filter);
+    localStorage.setItem("PREF_ACTIVITY_StreamTypeFilter", filter);
+  }
+
   const handleLibraryFilter = (selectedOptions) => {
     setLibraryFilters(selectedOptions);
+    localStorage.setItem("PREF_ACTIVITY_libraryFilters", JSON.stringify(selectedOptions));
   };
 
   const toggleSelectAll = () => {
     if (libraryFilters.length > 0) {
       setLibraryFilters([]);
+      localStorage.setItem("PREF_ACTIVITY_libraryFilters", JSON.stringify([]));
     } else {
       setLibraryFilters(libraries.map((library) => library.Id));
+      localStorage.setItem("PREF_ACTIVITY_libraryFilters", JSON.stringify(libraries.map((library) => library.Id)));
     }
   };
 
@@ -73,15 +90,21 @@ function Activity() {
           },
         })
         .then((data) => {
-          const libraryFilters = data.data.map((library) => {
+          const fetchedLibraryFilters = data.data.map((library) => {
             return {
               Name: library.Name,
               Id: library.Id,
               Archived: library.archived,
             };
           });
-          setLibraries(libraryFilters);
-          setLibraryFilters(libraryFilters.map((library) => library.Id));
+          setLibraries(fetchedLibraryFilters);
+          if (libraryFilters.length == 0) {
+            setLibraryFilters(fetchedLibraryFilters.map((library) => library.Id));
+            localStorage.setItem(
+              "PREF_ACTIVITY_libraryFilters",
+              JSON.stringify(fetchedLibraryFilters.map((library) => library.Id))
+            );
+          }
         })
         .catch((error) => {
           console.log(error);
@@ -169,7 +192,7 @@ function Activity() {
             </div>
             <FormSelect
               onChange={(event) => {
-                setStreamTypeFilter(event.target.value);
+                setTypeFilter(event.target.value);
               }}
               value={streamTypeFilter}
               className="w-md-75 rounded-0 rounded-end"
@@ -192,7 +215,7 @@ function Activity() {
             </div>
             <FormSelect
               onChange={(event) => {
-                setItemCount(event.target.value);
+                setItemLimit(event.target.value);
               }}
               value={itemCount}
               className="w-md-75 rounded-0 rounded-end"

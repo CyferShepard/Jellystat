@@ -11,7 +11,17 @@ export default function Navbar() {
   const handleLogout = () => {
     localStorage.removeItem("token");
     localStorage.removeItem("config");
+    deleteLibraryTabKeys();
     window.location.reload();
+  };
+
+  const deleteLibraryTabKeys = () => {
+    for (let i = 0; i < localStorage.length; i++) {
+      const key = localStorage.key(i);
+      if (key.startsWith("PREF_")) {
+        localStorage.removeItem(key);
+      }
+    }
   };
 
   const location = useLocation();

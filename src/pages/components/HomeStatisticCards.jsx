@@ -15,8 +15,8 @@ import { Trans } from "react-i18next";
 import PlaybackMethodStats from "./statCards/playback_method_stats";
 
 function HomeStatisticCards() {
-  const [days, setDays] = useState(30);
-  const [input, setInput] = useState(30);
+  const [days, setDays] = useState(localStorage.getItem("PREF_HOME_STAT_DAYS") ?? 30);
+  const [input, setInput] = useState(localStorage.getItem("PREF_HOME_STAT_DAYS") ?? 30);
 
   const handleKeyDown = (event) => {
     if (event.key === "Enter") {
@@ -25,6 +25,7 @@ function HomeStatisticCards() {
         setDays(0);
       } else {
         setDays(parseInt(input));
+        localStorage.setItem("PREF_HOME_STAT_DAYS", input);
       }
 
       console.log(days);

@@ -155,7 +155,7 @@ export default function ActivityTable(props) {
         row = row.original;
         if (
           isRemoteSession(row.RemoteEndPoint) &&
-          (window.env.JS_GEOLITE_ACCOUNT_ID ?? import.meta.env.JS_GEOLITE_ACCOUNT_ID)
+          (window.env?.JS_GEOLITE_ACCOUNT_ID ?? import.meta.env.JS_GEOLITE_ACCOUNT_ID) != undefined
         ) {
           return (
             <Link className="text-decoration-none" onClick={() => showIPDataModal(row.RemoteEndPoint)}>

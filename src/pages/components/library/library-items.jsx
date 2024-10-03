@@ -17,15 +17,19 @@ function LibraryItems(props) {
   const [data, setData] = useState();
   const [config, setConfig] = useState();
   const [searchQuery, setSearchQuery] = useState("");
-  const [sortOrder, setSortOrder] = useState("Title");
-  const [sortAsc, setSortAsc] = useState("all");
+  const [sortOrder, setSortOrder] = useState(localStorage.getItem("PREF_sortOrder") ?? "Title");
+  const [sortAsc, setSortAsc] = useState(
+    localStorage.getItem("PREF_sortAsc") != undefined ? localStorage.getItem("PREF_sortAsc") == "true" : true
+  );
+
+  console.log(sortOrder);
 
   const archive = {
     all: "all",
     archived: "true",
     not_archived: "false",
   };
-  const [showArchived, setShowArchived] = useState(archive.all);
+  const [showArchived, setShowArchived] = useState(localStorage.getItem("PREF_archiveFilterValue") ?? archive.all);
 
   useEffect(() => {
     const fetchConfig = async () => {
@@ -69,11 +73,26 @@ function LibraryItems(props) {
 
   function sortOrderLogic(_sortOrder) {
     if (_sortOrder !== "Title") {
-      setSortAsc(false);
+      setSortDirection(false);
     } else {
-      setSortAsc(true);
+      setSortDirection(true);
     }
-    setSortOrder(_sortOrder);
+    setSortingOrder(_sortOrder);
+  }
+
+  function setSortDirection(asc) {
+    setSortAsc(asc);
+    localStorage.setItem("PREF_sortAsc", asc);
+  }
+
+  function setSortingOrder(order) {
+    setSortOrder(order);
+    localStorage.setItem("PREF_sortOrder", order);
+  }
+
+  function setArchivedFilter(value) {
+    setShowArchived(value);
+    localStorage.setItem("PREF_archiveFilterValue", value);
   }
 
   let filteredData = data;
@@ -105,7 +124,11 @@ function LibraryItems(props) {
 
         <div className="d-flex flex-column flex-md-row">
           <div className="d-flex flex-row w-md-75">
-            <FormSelect onChange={(e) => setShowArchived(e.target.value)} className="my-md-3 w-100 rounded">
+            <FormSelect
+              value={showArchived}
+              onChange={(e) => setArchivedFilter(e.target.value)}
+              className="my-md-3 w-100 rounded"
+            >
               <option value="all">
                 <Trans i18nKey="ALL" />
               </option>
@@ -121,6 +144,7 @@ function LibraryItems(props) {
             <FormSelect
               onChange={(e) => sortOrderLogic(e.target.value)}
               className="ms-md-3 my-md-3 w-100 rounded-0 rounded-start"
+              value={sortOrder}
             >
               <option value="Title">
                 <Trans i18nKey="TITLE" />
@@ -139,7 +163,7 @@ function LibraryItems(props) {
               </option>
             </FormSelect>
 
-            <Button className="my-md-3 rounded-0 rounded-end" onClick={() => setSortAsc(!sortAsc)}>
+            <Button className="my-md-3 rounded-0 rounded-end" onClick={() => setSortDirection(!sortAsc)}>
               {sortAsc ? <SortAscIcon /> : <SortDescIcon />}
             </Button>
           </div>
