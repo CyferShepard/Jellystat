@@ -23,7 +23,7 @@ export default function Settings() {
 
   return (
     <div className="settings my-2">
-      <Tabs defaultActiveKey={activeTab} activeTab={activeTab} onSelect={setTab} variant="pills">
+      <Tabs defaultActiveKey={activeTab} activeKey={activeTab} onSelect={setTab} variant="pills">
         <Tab
           eventKey="tabGeneral"
           className="bg-transparent my-2"
