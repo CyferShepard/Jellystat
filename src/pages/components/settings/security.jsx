@@ -95,7 +95,7 @@ export default function SettingsConfig() {
   async function handleFormSubmit(event) {
     event.preventDefault();
     setisSubmitted("");
-    if (formValues.JS_C_PASSWORD && formValues.JS_C_PASSWORD.length < 6) {
+    if (formValues.JS_C_PASSWORD) {
       setisSubmitted("Failed");
       setsubmissionMessage(i18next.t("ERROR_MESSAGES.PASSWORD_LENGTH"));
       return;
