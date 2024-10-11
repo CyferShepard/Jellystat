@@ -172,6 +172,7 @@
     "LOGS": "Logs",
     "SIZE": "Size",
     "JELLYFIN_URL": "Jellyfin URL",
+    "EMBY_URL": "Emby URL",
     "API_KEY": "API Key",
     "API_KEYS": "API Keys",
     "KEY_NAME": "Key Name",

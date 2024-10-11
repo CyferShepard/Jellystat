@@ -172,6 +172,7 @@
     "LOGS": "Journaux",
     "SIZE": "Taille",
     "JELLYFIN_URL": "URL du serveur Jellyfin",
+    "EMBY_URL": "URL du serveur Emby",
     "API_KEY": "Clé API",
     "API_KEYS": "Clés API",
     "KEY_NAME": "Nom de la clé",

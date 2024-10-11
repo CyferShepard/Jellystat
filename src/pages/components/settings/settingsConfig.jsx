@@ -160,7 +160,8 @@ export default function SettingsConfig() {
       <Form onSubmit={handleFormSubmit} className="settings-form">
         <Form.Group as={Row} className="mb-3">
           <Form.Label column className="">
-            <Trans i18nKey={"SETTINGS_PAGE.JELLYFIN_URL"} />
+            {config.settings?.IS_JELLYFIN ? <Trans i18nKey={"SETTINGS_PAGE.JELLYFIN_URL"} /> : <Trans i18nKey={"SETTINGS_PAGE.EMBY_URL"} /> }
+            
           </Form.Label>
           <Col sm="10">
             <Form.Control
