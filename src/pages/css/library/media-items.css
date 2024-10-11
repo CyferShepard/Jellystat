@@ -11,6 +11,7 @@
     color: white;
     margin-bottom: 20px;
     min-height: 300px;
+    justify-content: space-between;
 }
 
 .media-items-container::-webkit-scrollbar {
