@@ -447,7 +447,7 @@ async function syncPlaybackPluginData() {
   const installed_plugins = await API.getInstalledPlugins();
 
   const hasPlaybackReportingPlugin = installed_plugins.filter(
-    (plugins) => plugins?.ConfigurationFileName === "Jellyfin.Plugin.PlaybackReporting.xml" //TO-DO Change this to the correct plugin name
+    (plugins) => ["playback_reporting.xml", "Jellyfin.Plugin.PlaybackReporting.xml"].includes(plugins?.ConfigurationFileName) //TO-DO Change this to the correct plugin name
   );
 
   if (!hasPlaybackReportingPlugin || hasPlaybackReportingPlugin.length === 0) {
@@ -464,6 +464,10 @@ async function syncPlaybackPluginData() {
       .query('SELECT  MIN("ActivityDateInserted") "OldestPlaybackActivity" FROM public.jf_playback_activity')
       .then((res) => res.rows[0]?.OldestPlaybackActivity);
 
+    const NewestPlaybackActivity = await db
+      .query('SELECT  MAX("ActivityDateInserted") "OldestPlaybackActivity" FROM public.jf_playback_activity')
+      .then((res) => res.rows[0]?.OldestPlaybackActivity);
+
     const MaxPlaybackReportingPluginID = await db
       .query('SELECT MAX(rowid) "MaxRowId" FROM jf_playback_reporting_plugin_data')
       .then((res) => res.rows[0]?.MaxRowId);
@@ -471,15 +475,29 @@ async function syncPlaybackPluginData() {
     //Query Builder
     let query = `SELECT rowid, * FROM PlaybackActivity`;
 
-    if (OldestPlaybackActivity) {
-      const formattedDateTime = moment(OldestPlaybackActivity).format("YYYY-MM-DD HH:mm:ss");
+    if (OldestPlaybackActivity && NewestPlaybackActivity) {
+      const formattedDateTimeOld = moment(OldestPlaybackActivity).format("YYYY-MM-DD HH:mm:ss");
+      const formattedDateTimeNew = moment(NewestPlaybackActivity).format("YYYY-MM-DD HH:mm:ss");
+      query = query + ` WHERE (DateCreated < '${formattedDateTimeOld}' or DateCreated > '${formattedDateTimeNew}')`;
+    }
 
-      query = query + ` WHERE DateCreated < '${formattedDateTime}'`;
-
+    if (OldestPlaybackActivity && !NewestPlaybackActivity) {
+      const formattedDateTimeOld = moment(OldestPlaybackActivity).format("YYYY-MM-DD HH:mm:ss");
+      query = query + ` WHERE DateCreated < '${formattedDateTimeOld}'`;
       if (MaxPlaybackReportingPluginID) {
         query = query + ` AND rowid > ${MaxPlaybackReportingPluginID}`;
       }
-    } else if (MaxPlaybackReportingPluginID) {
+    }
+
+    if (!OldestPlaybackActivity && NewestPlaybackActivity) {
+      const formattedDateTimeNew = moment(NewestPlaybackActivity).format("YYYY-MM-DD HH:mm:ss");
+      query = query + ` WHERE DateCreated > '${formattedDateTimeNew}'`;
+      if (MaxPlaybackReportingPluginID) {
+        query = query + ` AND rowid > ${MaxPlaybackReportingPluginID}`;
+      }
+    }
+
+    if (!OldestPlaybackActivity && !NewestPlaybackActivity && MaxPlaybackReportingPluginID) {
       query = query + ` WHERE rowid > ${MaxPlaybackReportingPluginID}`;
     }
 
