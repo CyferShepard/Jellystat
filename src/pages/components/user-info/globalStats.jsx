@@ -14,6 +14,10 @@ function GlobalStats(props) {
   const [allStats, setAllStats] = useState({});
   const token = localStorage.getItem("token");
 
+  const [prefs, setPrefs] = useState(
+    localStorage.getItem("PREF_GLOBAL_STATS") != undefined ? JSON.parse(localStorage.getItem("PREF_GLOBAL_STATS")) : []
+  );
+
   function fetchStats(hours = 24, setMethod = setDayStats) {
     axios
       .post(
@@ -37,12 +41,12 @@ function GlobalStats(props) {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        fetchStats(24, setDayStats);
-        fetchStats(24 * 7, setWeekStats);
-        fetchStats(24 * 30, setMonthStats);
-        fetchStats(24 * 180, setd180Stats);
-        fetchStats(24 * 365, setd365Stats);
-        fetchStats(24 * 999, setAllStats);
+        if (!prefs.includes("1")) fetchStats(24, setDayStats);
+        if (!prefs.includes("7")) fetchStats(24 * 7, setWeekStats);
+        if (!prefs.includes("30")) fetchStats(24 * 30, setMonthStats);
+        if (!prefs.includes("180")) fetchStats(24 * 180, setd180Stats);
+        if (!prefs.includes("365")) fetchStats(24 * 365, setd365Stats);
+        if (!prefs.includes("ALL")) fetchStats(24 * 999, setAllStats);
       } catch (error) {
         console.log(error);
       }
@@ -59,12 +63,12 @@ function GlobalStats(props) {
         <Trans i18nKey="USERS_PAGE.USER_STATS" />
       </h1>
       <div className="global-stats-container">
-        <WatchTimeStats data={dayStats} heading={<Trans i18nKey="GLOBAL_STATS.LAST_24_HRS" />} />
-        <WatchTimeStats data={weekStats} heading={<Trans i18nKey="GLOBAL_STATS.LAST_7_DAYS" />} />
-        <WatchTimeStats data={monthStats} heading={<Trans i18nKey="GLOBAL_STATS.LAST_30_DAYS" />} />
-        <WatchTimeStats data={d180Stats} heading={<Trans i18nKey="GLOBAL_STATS.LAST_180_DAYS" />} />
-        <WatchTimeStats data={d365Stats} heading={<Trans i18nKey="GLOBAL_STATS.LAST_365_DAYS" />} />
-        <WatchTimeStats data={allStats} heading={<Trans i18nKey="GLOBAL_STATS.ALL_TIME" />} />
+        {!prefs.includes("1") && <WatchTimeStats data={dayStats} heading={<Trans i18nKey="GLOBAL_STATS.LAST_24_HRS" />} />}
+        {!prefs.includes("7") && <WatchTimeStats data={weekStats} heading={<Trans i18nKey="GLOBAL_STATS.LAST_7_DAYS" />} />}
+        {!prefs.includes("30") && <WatchTimeStats data={monthStats} heading={<Trans i18nKey="GLOBAL_STATS.LAST_30_DAYS" />} />}
+        {!prefs.includes("180") && <WatchTimeStats data={d180Stats} heading={<Trans i18nKey="GLOBAL_STATS.LAST_180_DAYS" />} />}
+        {!prefs.includes("365") && <WatchTimeStats data={d365Stats} heading={<Trans i18nKey="GLOBAL_STATS.LAST_365_DAYS" />} />}
+        {!prefs.includes("ALL") && <WatchTimeStats data={allStats} heading={<Trans i18nKey="GLOBAL_STATS.ALL_TIME" />} />}
       </div>
     </div>
   );
