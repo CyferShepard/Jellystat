@@ -10,7 +10,6 @@ import ExternalLinkFillIcon from "remixicon-react/ExternalLinkFillIcon";
 import ArchiveDrawerFillIcon from "remixicon-react/ArchiveDrawerFillIcon";
 import ArrowLeftSLineIcon from "remixicon-react/ArrowLeftSLineIcon";
 
-import GlobalStats from "./item-info/globalStats";
 import "../css/items/item-details.css";
 
 import MoreItems from "./item-info/more-items";
@@ -27,6 +26,7 @@ import FilmLineIcon from "remixicon-react/FilmLineIcon";
 import FileMusicLineIcon from "remixicon-react/FileMusicLineIcon";
 import CheckboxMultipleBlankLineIcon from "remixicon-react/CheckboxMultipleBlankLineIcon";
 import baseUrl from "../../lib/baseurl";
+import GlobalStats from "./general/globalStats";
 
 function ItemInfo() {
   const { Id } = useParams();
@@ -208,7 +208,8 @@ function ItemInfo() {
                 <img
                   className="item-image"
                   src={
-                    baseUrl+"/proxy/Items/Images/Primary?id=" +
+                    baseUrl +
+                    "/proxy/Items/Images/Primary?id=" +
                     (["Episode", "Season"].includes(data.Type) ? data.SeriesId : data.Id) +
                     "&fillWidth=200&quality=90"
                   }
@@ -347,7 +348,12 @@ function ItemInfo() {
 
       <Tabs defaultActiveKey="tabOverview" activeKey={activeTab} variant="pills" className="hide-tab-titles">
         <Tab eventKey="tabOverview" title="Overview" className="bg-transparent">
-          <GlobalStats ItemId={Id} />
+          <GlobalStats
+            id={Id}
+            param={"itemid"}
+            endpoint={"getGlobalItemStats"}
+            title={<Trans i18nKey="GLOBAL_STATS.ITEM_STATS" />}
+          />
           {["Series", "Season"].includes(data && data.Type) ? <MoreItems data={data} /> : <></>}
         </Tab>
         <Tab eventKey="tabActivity" title="Activity" className="bg-transparent">

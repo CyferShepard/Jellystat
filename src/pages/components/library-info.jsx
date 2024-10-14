@@ -6,7 +6,6 @@ import FilmLineIcon from "remixicon-react/FilmLineIcon";
 
 // import LibraryDetails from './library/library-details';
 import Loading from "./general/loading";
-import LibraryGlobalStats from "./library/library-stats";
 import LibraryLastWatched from "./library/last-watched";
 import RecentlyAdded from "./library/recently-added";
 import LibraryActivity from "./library/library-activity";
@@ -16,6 +15,7 @@ import ErrorBoundary from "./general/ErrorBoundary";
 import { Tabs, Tab, Button, ButtonGroup } from "react-bootstrap";
 import { Trans } from "react-i18next";
 import LibraryOptions from "./library/library-options";
+import GlobalStats from "./general/globalStats";
 
 function LibraryInfo() {
   const { LibraryId } = useParams();
@@ -103,7 +103,12 @@ function LibraryInfo() {
       </div>
       <Tabs defaultActiveKey={activeTab} activeKey={activeTab} variant="pills" className="hide-tab-titles">
         <Tab eventKey="tabOverview" title="Overview" className="bg-transparent">
-          <LibraryGlobalStats LibraryId={LibraryId} />
+          <GlobalStats
+            id={LibraryId}
+            param={"libraryid"}
+            endpoint={"getGlobalLibraryStats"}
+            title={<Trans i18nKey="LIBRARY_INFO.LIBRARY_STATS" />}
+          />
 
           {!data.archived && (
             <ErrorBoundary>

@@ -21,10 +21,10 @@ function GlobalStats(props) {
   function fetchStats(hours = 24, setMethod = setDayStats) {
     axios
       .post(
-        `/stats/getGlobalUserStats`,
+        `/stats/${props.endpoint ?? "getGlobalUserStats"}`,
         {
           hours: hours,
-          userid: props.UserId,
+          [props.param]: props.id,
         },
         {
           headers: {
@@ -55,13 +55,11 @@ function GlobalStats(props) {
     fetchData();
     const intervalId = setInterval(fetchData, 60000 * 5);
     return () => clearInterval(intervalId);
-  }, [props.UserId, token]);
+  }, [props.id, token]);
 
   return (
     <div>
-      <h1 className="py-3">
-        <Trans i18nKey="USERS_PAGE.USER_STATS" />
-      </h1>
+      <h1 className="py-3">{props.title}</h1>
       <div className="global-stats-container">
         {!prefs.includes("1") && <WatchTimeStats data={dayStats} heading={<Trans i18nKey="GLOBAL_STATS.LAST_24_HRS" />} />}
         {!prefs.includes("7") && <WatchTimeStats data={weekStats} heading={<Trans i18nKey="GLOBAL_STATS.LAST_7_DAYS" />} />}
