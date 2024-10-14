@@ -51,6 +51,8 @@
     "LAST_24_HRS": "24 dernières heures",
     "LAST_7_DAYS": "7 derniers jours",
     "LAST_30_DAYS": "30 derniers jours",
+    "LAST_180_DAYS": "180 derniers jours",
+    "LAST_365_DAYS": "365 derniers jours",
     "ALL_TIME": "Tout le temps",
     "ITEM_STATS": "Statistiques du média"
   },

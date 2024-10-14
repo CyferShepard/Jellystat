@@ -51,6 +51,8 @@
     "LAST_24_HRS": "Last 24 Hours",
     "LAST_7_DAYS": "Last 7 Days",
     "LAST_30_DAYS": "Last 30 Days",
+    "LAST_180_DAYS": "Last 180 Days",
+    "LAST_365_DAYS": "Last 365 Days",
     "ALL_TIME": "All Time",
     "ITEM_STATS": "Item Stats"
   },
