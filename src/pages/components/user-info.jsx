@@ -111,7 +111,7 @@ function UserInfo() {
         <Tab eventKey="tabOverview" className="bg-transparent">
           <GlobalStats
             id={UserId}
-            param={"UserId"}
+            param={"userid"}
             endpoint={"getGlobalUserStats"}
             title={<Trans i18nKey="USERS_PAGE.USER_STATS" />}
           />
