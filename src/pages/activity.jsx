@@ -155,7 +155,9 @@ function Activity() {
     );
   }
   filteredData = filteredData.filter(
-    (item) => libraryFilters.includes(item.ParentId) && (streamTypeFilter == "All" ? true : item.PlayMethod === streamTypeFilter)
+    (item) =>
+      (libraryFilters.includes(item.ParentId) || item.ParentId == null) &&
+      (streamTypeFilter == "All" ? true : item.PlayMethod === streamTypeFilter)
   );
 
   return (
