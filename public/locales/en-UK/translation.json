@@ -135,6 +135,8 @@
   "SHOW_ARCHIVED_LIBRARIES": "Show Archived Libraries",
   "HIDE_ARCHIVED_LIBRARIES": "Hide Archived Libraries",
   "UNITS": {
+    "YEAR": "Year",
+    "YEARS": "Years",
     "MONTH": "Month",
     "MONTHS": "Months",
     "DAY": "Day",

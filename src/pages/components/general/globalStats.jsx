@@ -145,7 +145,6 @@ function GlobalStats(props) {
           }}
         >
           {stats.map((stat) => {
-            // return <MenuItem key={stat.key}>{stat.heading}</MenuItem>;
             return (
               <div key={stat.key} style={{ padding: "10px" }}>
                 <FormControlLabel
@@ -156,14 +155,6 @@ function GlobalStats(props) {
             );
           })}
         </Menu>
-        {/* <Menu id="long-menu" anchorEl={anchorEl} keepMounted open={open} onClose={handleMenuClose}>
-        {stats.map((stat) => {
-            <MenuItem>{stat.heading}Test</MenuItem>;
-          })}
-          <MenuItem onClick={handleMenuClose}>Option 1</MenuItem>
-          <MenuItem onClick={handleMenuClose}>Option 2</MenuItem>
-          <MenuItem onClick={handleMenuClose}>Option 3</MenuItem>
-        </Menu> */}
       </div>
       <div className="global-stats-container">
         {stats.map((stat) => {

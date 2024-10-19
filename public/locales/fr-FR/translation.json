@@ -135,6 +135,8 @@
   "SHOW_ARCHIVED_LIBRARIES": "Afficher les médiathèques archivées",
   "HIDE_ARCHIVED_LIBRARIES": "Cacher les médiathèques archivées",
   "UNITS": {
+    "YEAR": "An",
+    "YEARS": "Ans",
     "MONTH": "Mois",
     "MONTHS": "Mois",
     "DAY": "Jour",
