@@ -36,6 +36,11 @@ class Config {
     return config.settings?.preferred_admin?.userid;
   }
 
+  async getExcludedLibraries() {
+    const config = await this.getConfig();
+    return config.settings?.ExcludedLibraries ?? [];
+  }
+
   #getConfigState(Configured) {
     let state = 0;
     try {

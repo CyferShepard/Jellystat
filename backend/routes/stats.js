@@ -410,7 +410,7 @@ router.post("/getViewsOverTime", async (req, res) => {
     }
     const { rows: stats } = await db.query(`select * from fs_watch_stats_over_time($1)`, [_days]);
 
-    const { rows: libraries } = await db.query(`select distinct "Id","Name" from jf_libraries`);
+    const { rows: libraries } = await db.query(`select distinct "Id","Name" from jf_libraries where archived=false`);
 
     const reorganizedData = {};
 
@@ -449,7 +449,7 @@ router.post("/getViewsByDays", async (req, res) => {
     }
     const { rows: stats } = await db.query(`select * from fs_watch_stats_popular_days_of_week($1)`, [_days]);
 
-    const { rows: libraries } = await db.query(`select distinct "Id","Name" from jf_libraries`);
+    const { rows: libraries } = await db.query(`select distinct "Id","Name" from jf_libraries where archived=false`);
 
     const reorganizedData = {};
 
@@ -484,7 +484,7 @@ router.post("/getViewsByHour", async (req, res) => {
     }
     const { rows: stats } = await db.query(`select * from fs_watch_stats_popular_hour_of_day($1)`, [_days]);
 
-    const { rows: libraries } = await db.query(`select distinct "Id","Name" from jf_libraries`);
+    const { rows: libraries } = await db.query(`select distinct "Id","Name" from jf_libraries where archived=false`);
 
     const reorganizedData = {};
 
