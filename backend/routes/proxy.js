@@ -2,9 +2,8 @@ const express = require("express");
 
 const { axios } = require("../classes/axios");
 const configClass = require("../classes/config");
-const JellyfinAPI = require("../classes/jellyfin-api");
+const API = require("../classes/api-loader");
 
-const Jellyfin = new JellyfinAPI();
 const router = express.Router();
 
 router.get("/web/assets/img/devices/", async (req, res) => {
@@ -17,6 +16,9 @@ router.get("/web/assets/img/devices/", async (req, res) => {
   }
 
   let url = `${config.JF_HOST}/web/assets/img/devices/${devicename}.svg`;
+  if (config.IS_JELLYFIN == false) {
+    url = `https://raw.githubusercontent.com/MediaBrowser/Emby.Resources/master/images/devices/${devicename}.png`;
+  }
 
   axios
     .get(url, {
@@ -133,7 +135,7 @@ router.get("/Users/Images/Primary/", async (req, res) => {
 
 router.get("/getSessions", async (req, res) => {
   try {
-    const sessions = await Jellyfin.getSessions();
+    const sessions = await API.getSessions();
     res.send(sessions);
   } catch (error) {
     res.status(503);
@@ -143,7 +145,7 @@ router.get("/getSessions", async (req, res) => {
 
 router.get("/getAdminUsers", async (req, res) => {
   try {
-    const adminUser = await Jellyfin.getAdmins();
+    const adminUser = await API.getAdmins();
     res.send(adminUser);
   } catch (error) {
     res.status(503);
@@ -155,7 +157,7 @@ router.get("/getRecentlyAdded", async (req, res) => {
   try {
     const { libraryid } = req.query;
 
-    const recentlyAdded = await Jellyfin.getRecentlyAdded({ libraryid: libraryid });
+    const recentlyAdded = await API.getRecentlyAdded({ libraryid: libraryid });
     res.send(recentlyAdded);
   } catch (error) {
     res.status(503);
@@ -163,7 +165,7 @@ router.get("/getRecentlyAdded", async (req, res) => {
   }
 });
 
-//Jellyfin related functions
+//API related functions
 
 router.post("/validateSettings", async (req, res) => {
   const { url, apikey } = req.body;
@@ -174,13 +176,18 @@ router.post("/validateSettings", async (req, res) => {
     return;
   }
 
-  const validation = await Jellyfin.validateSettings(url, apikey);
+  const validation = await API.validateSettings(url, apikey);
   if (validation.isValid === false) {
     res.status(validation.status);
     res.send(validation.errorMessage);
   } else {
     res.send(validation);
   }
+});
+
+// Handle other routes
+router.use((req, res) => {
+  res.status(404).send({ error: "Not Found" });
 });
 
 module.exports = router;

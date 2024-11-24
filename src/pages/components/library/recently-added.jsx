@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from "react";
-import axios from "axios";
+import { useState, useEffect } from "react";
+import axios from "../../../lib/axios_instance";
 
 import RecentlyAddedCard from "./RecentlyAdded/recently-added-card";
 
@@ -10,13 +10,14 @@ import { Trans } from "react-i18next";
 function RecentlyAdded(props) {
   const [data, setData] = useState();
   const token = localStorage.getItem("token");
+  const groupRecentlyAdded = localStorage.getItem("groupRecentlyAdded") ?? true;
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        let url = `/api/getRecentlyAdded`;
+        let url = `/api/getRecentlyAdded?GroupResults=${groupRecentlyAdded}`;
         if (props.LibraryId) {
-          url += `?libraryid=${props.LibraryId}`;
+          url += `&libraryid=${props.LibraryId}`;
         }
 
         const itemData = await axios.get(url, {

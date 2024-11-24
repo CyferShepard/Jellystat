@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import axios from "axios";
+import axios from "../../../lib/axios_instance";
 import { FormControl, FormSelect, Button } from "react-bootstrap";
 import SortAscIcon from "remixicon-react/SortAscIcon";
 import SortDescIcon from "remixicon-react/SortDescIcon";
@@ -11,25 +11,30 @@ import "../../css/library/media-items.css";
 import "../../css/width_breakpoint_css.css";
 import "../../css/radius_breakpoint_css.css";
 import { Trans } from "react-i18next";
+import Loading from "../general/loading";
 
 function LibraryItems(props) {
   const [data, setData] = useState();
   const [config, setConfig] = useState();
   const [searchQuery, setSearchQuery] = useState("");
-  const [sortOrder, setSortOrder] = useState("Title");
-  const [sortAsc, setSortAsc] = useState("all");
+  const [sortOrder, setSortOrder] = useState(localStorage.getItem("PREF_sortOrder") ?? "Title");
+  const [sortAsc, setSortAsc] = useState(
+    localStorage.getItem("PREF_sortAsc") != undefined ? localStorage.getItem("PREF_sortAsc") == "true" : true
+  );
+
+  console.log(sortOrder);
 
   const archive = {
     all: "all",
     archived: "true",
     not_archived: "false",
   };
-  const [showArchived, setShowArchived] = useState(archive.all);
+  const [showArchived, setShowArchived] = useState(localStorage.getItem("PREF_archiveFilterValue") ?? archive.all);
 
   useEffect(() => {
     const fetchConfig = async () => {
       try {
-        const newConfig = await Config();
+        const newConfig = await Config.getConfig();
         setConfig(newConfig);
       } catch (error) {
         console.log(error);
@@ -68,11 +73,26 @@ function LibraryItems(props) {
 
   function sortOrderLogic(_sortOrder) {
     if (_sortOrder !== "Title") {
-      setSortAsc(false);
+      setSortDirection(false);
     } else {
-      setSortAsc(true);
+      setSortDirection(true);
     }
-    setSortOrder(_sortOrder);
+    setSortingOrder(_sortOrder);
+  }
+
+  function setSortDirection(asc) {
+    setSortAsc(asc);
+    localStorage.setItem("PREF_sortAsc", asc);
+  }
+
+  function setSortingOrder(order) {
+    setSortOrder(order);
+    localStorage.setItem("PREF_sortOrder", order);
+  }
+
+  function setArchivedFilter(value) {
+    setShowArchived(value);
+    localStorage.setItem("PREF_archiveFilterValue", value);
   }
 
   let filteredData = data;
@@ -92,7 +112,7 @@ function LibraryItems(props) {
   }
 
   if (!data || !config) {
-    return <></>;
+    return <Loading />;
   }
 
   return (
@@ -104,7 +124,11 @@ function LibraryItems(props) {
 
         <div className="d-flex flex-column flex-md-row">
           <div className="d-flex flex-row w-md-75">
-            <FormSelect onChange={(e) => setShowArchived(e.target.value)} className="my-md-3 w-100 rounded">
+            <FormSelect
+              value={showArchived}
+              onChange={(e) => setArchivedFilter(e.target.value)}
+              className="my-md-3 w-100 rounded"
+            >
               <option value="all">
                 <Trans i18nKey="ALL" />
               </option>
@@ -120,6 +144,7 @@ function LibraryItems(props) {
             <FormSelect
               onChange={(e) => sortOrderLogic(e.target.value)}
               className="ms-md-3 my-md-3 w-100 rounded-0 rounded-start"
+              value={sortOrder}
             >
               <option value="Title">
                 <Trans i18nKey="TITLE" />
@@ -138,7 +163,7 @@ function LibraryItems(props) {
               </option>
             </FormSelect>
 
-            <Button className="my-md-3 rounded-0 rounded-end" onClick={() => setSortAsc(!sortAsc)}>
+            <Button className="my-md-3 rounded-0 rounded-end" onClick={() => setSortDirection(!sortAsc)}>
               {sortAsc ? <SortAscIcon /> : <SortDescIcon />}
             </Button>
           </div>

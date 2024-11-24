@@ -1,6 +1,6 @@
 /* eslint-disable react/prop-types */
 import { useState, useEffect } from "react";
-import axios from "axios";
+import axios from "../../lib/axios_instance";
 import { useParams } from "react-router-dom";
 import { Link } from "react-router-dom";
 import { Blurhash } from "react-blurhash";
@@ -10,7 +10,6 @@ import ExternalLinkFillIcon from "remixicon-react/ExternalLinkFillIcon";
 import ArchiveDrawerFillIcon from "remixicon-react/ArchiveDrawerFillIcon";
 import ArrowLeftSLineIcon from "remixicon-react/ArrowLeftSLineIcon";
 
-import GlobalStats from "./item-info/globalStats";
 import "../css/items/item-details.css";
 
 import MoreItems from "./item-info/more-items";
@@ -22,6 +21,12 @@ import Loading from "./general/loading";
 import ItemOptions from "./item-info/item-options";
 import { Trans } from "react-i18next";
 import i18next from "i18next";
+import TvLineIcon from "remixicon-react/TvLineIcon";
+import FilmLineIcon from "remixicon-react/FilmLineIcon";
+import FileMusicLineIcon from "remixicon-react/FileMusicLineIcon";
+import CheckboxMultipleBlankLineIcon from "remixicon-react/CheckboxMultipleBlankLineIcon";
+import baseUrl from "../../lib/baseurl";
+import GlobalStats from "./general/globalStats";
 
 function ItemInfo() {
   const { Id } = useParams();
@@ -31,6 +36,15 @@ function ItemInfo() {
   const [activeTab, setActiveTab] = useState("tabOverview");
 
   const [loaded, setLoaded] = useState(false);
+  const [fallback, setFallback] = useState(false);
+
+  const SeriesIcon = <TvLineIcon size={"50%"} />;
+  const MovieIcon = <FilmLineIcon size={"50%"} />;
+  const MusicIcon = <FileMusicLineIcon size={"50%"} />;
+  const MixedIcon = <CheckboxMultipleBlankLineIcon size={"50%"} />;
+
+  const currentLibraryDefaultIcon =
+    data?.Type === "Movie" ? MovieIcon : data?.Type === "Episode" ? SeriesIcon : data?.Type === "Audio" ? MusicIcon : MixedIcon;
 
   function formatFileSize(sizeInBytes) {
     const sizeInMB = sizeInBytes / 1048576; // 1 MB = 1048576 bytes
@@ -83,7 +97,7 @@ function ItemInfo() {
   useEffect(() => {
     const fetchConfig = async () => {
       try {
-        const newConfig = await Config();
+        const newConfig = await Config.getConfig();
         setConfig(newConfig);
       } catch (error) {
         console.log(error);
@@ -168,18 +182,33 @@ function ItemInfo() {
           <Row>
             <Col className="col-auto my-4 my-md-0 item-banner-image">
               {!data.archived && data.PrimaryImageHash && data.PrimaryImageHash != null && !loaded ? (
-                <Blurhash
-                  hash={data.PrimaryImageHash}
-                  width={"200px"}
-                  height={"300px"}
-                  className="rounded-3 overflow-hidden"
-                  style={{ display: "block" }}
-                />
+                <div
+                  className="d-flex flex-column justify-content-center align-items-center position-relative"
+                  style={{ height: "100%", width: "200px" }}
+                >
+                  {data.PrimaryImageHash && data.PrimaryImageHash != null ? (
+                    <Blurhash
+                      hash={data.PrimaryImageHash}
+                      width={"100%"}
+                      height={"100%"}
+                      className="rounded-3 overflow-hidden position-absolute"
+                      style={{ display: "block" }}
+                    />
+                  ) : null}
+
+                  {fallback ? (
+                    <div className="d-flex flex-column justify-content-center align-items-center position-absolute">
+                      {currentLibraryDefaultIcon}
+                    </div>
+                  ) : null}
+                </div>
               ) : null}
+
               {!data.archived ? (
                 <img
                   className="item-image"
                   src={
+                    baseUrl +
                     "/proxy/Items/Images/Primary?id=" +
                     (["Episode", "Season"].includes(data.Type) ? data.SeriesId : data.Id) +
                     "&fillWidth=200&quality=90"
@@ -189,6 +218,7 @@ function ItemInfo() {
                     display: loaded ? "block" : "none",
                   }}
                   onLoad={() => setLoaded(true)}
+                  onError={() => setFallback(true)}
                 />
               ) : (
                 <div
@@ -226,7 +256,12 @@ function ItemInfo() {
                   </h1>
                   <Link
                     className="px-2"
-                    to={config.hostUrl + "/web/index.html#!/details?id=" + (data.EpisodeId || data.Id)}
+                    to={
+                      config.hostUrl +
+                      `/web/index.html#!/${config.IS_JELLYFIN ? "details" : "item"}?id=` +
+                      (data.EpisodeId || data.Id) +
+                      (config.settings.ServerID ? "&serverId=" + config.settings.ServerID : "")
+                    }
                     title={i18next.t("ITEM_INFO.OPEN_IN_JELLYFIN")}
                     target="_blank"
                   >
@@ -313,7 +348,12 @@ function ItemInfo() {
 
       <Tabs defaultActiveKey="tabOverview" activeKey={activeTab} variant="pills" className="hide-tab-titles">
         <Tab eventKey="tabOverview" title="Overview" className="bg-transparent">
-          <GlobalStats ItemId={Id} />
+          <GlobalStats
+            id={Id}
+            param={"itemid"}
+            endpoint={"getGlobalItemStats"}
+            title={<Trans i18nKey="GLOBAL_STATS.ITEM_STATS" />}
+          />
           {["Series", "Season"].includes(data && data.Type) ? <MoreItems data={data} /> : <></>}
         </Tab>
         <Tab eventKey="tabActivity" title="Activity" className="bg-transparent">

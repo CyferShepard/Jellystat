@@ -101,7 +101,7 @@ function Row(logs) {
         </TableRow>
 
         <TableRow>
-          <TableCell className="py-0 pb-1" ><Trans i18nKey={"APECT_RATIO"}/></TableCell>
+          <TableCell className="py-0 pb-1" ><Trans i18nKey={"ASPECT_RATIO"}/></TableCell>
           <TableCell className="py-0 pb-1" >{data.MediaStreams ? data.MediaStreams.find(stream => stream.Type === 'Video')?.AspectRatio : '-'}</TableCell>
           <TableCell className="py-0 pb-1" >{data.MediaStreams ? data.MediaStreams.find(stream => stream.Type === 'Video')?.AspectRatio : '-'}</TableCell>
         </TableRow>

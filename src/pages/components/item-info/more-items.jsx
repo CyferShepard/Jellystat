@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import axios from "axios";
+import axios from "../../../lib/axios_instance";
 
 import MoreItemCards from "./more-items/more-items-card";
 
@@ -16,7 +16,7 @@ function MoreItems(props) {
 
     const fetchConfig = async () => {
         try {
-          const newConfig = await Config();
+          const newConfig = await Config.getConfig();
           setConfig(newConfig);
         } catch (error) {
             console.log(error);

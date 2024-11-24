@@ -16,7 +16,7 @@ exports.up = async function(knex) {
         table.text('SeriesPrimaryImageTag');
       });
 
-      await knex.raw(`ALTER TABLE IF EXISTS jf_library_seasons OWNER TO "${process.env.POSTGRES_USER}";`);
+      await knex.raw(`ALTER TABLE IF EXISTS jf_library_seasons OWNER TO "${process.env.POSTGRES_ROLE}";`);
     }
   } catch (error) {
     console.error(error);

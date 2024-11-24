@@ -104,8 +104,13 @@ class JellyfinAPI {
           "X-MediaBrowser-Token": this.config.JF_API_KEY,
         },
       });
+      if (Array.isArray(response?.data)) {
+        return response?.data || [];
+      }
 
-      return response?.data || [];
+      console.log("[JELLYFIN-API] : getUsers - " + (response?.data || response));
+
+      return [];
     } catch (error) {
       this.#errorHandler(error);
       return [];
@@ -130,6 +135,7 @@ class JellyfinAPI {
       let url = `${this.config.JF_HOST}/Items?ids=${ids}`;
       let startIndex = params && params.startIndex ? params.startIndex : 0;
       let increment = params && params.increment ? params.increment : 200;
+      let limit = params && params.limit !== undefined ? params.limit : increment;
       let recursive = params && params.recursive !== undefined ? params.recursive : true;
       let total = 200;
 
@@ -143,7 +149,7 @@ class JellyfinAPI {
             fields: "MediaSources,DateCreated",
             startIndex: startIndex,
             recursive: recursive,
-            limit: increment,
+            limit: limit,
             isMissing: false,
             excludeLocationTypes: "Virtual",
           },
@@ -155,7 +161,7 @@ class JellyfinAPI {
         const result = response?.data?.Items || [];
 
         final_response.push(...result);
-        if (response.data.TotalRecordCount === undefined) {
+        if (response.data.TotalRecordCount === undefined || final_response.length >= limit) {
           break;
         }
 
@@ -175,14 +181,26 @@ class JellyfinAPI {
     }
     try {
       let url = `${this.config.JF_HOST}/Items?ParentId=${id}`;
+      let userid;
+      if (!userid || userid == null) {
+        await new configClass().getPreferedAdmin().then(async (adminid) => {
+          if (!adminid || adminid == null) {
+            userid = (await this.getAdmins())[0].Id;
+          } else {
+            userid = adminid;
+          }
+        });
+      }
+      url += `&userId=${userid}`;
       if (itemid && itemid != null) {
         url += `&Ids=${itemid}`;
       }
 
-      let startIndex = params && params.startIndex ? params.startIndex : 0;
-      let increment = params && params.increment ? params.increment : 200;
+      let startIndex = params && params.startIndex !== undefined ? params.startIndex : 0;
+      let increment = params && params.increment !== undefined ? params.increment : 200;
+      let limit = params && params.limit !== undefined ? params.limit : increment;
       let recursive = params && params.recursive !== undefined ? params.recursive : true;
-      let total = 200;
+      let total = startIndex + increment;
 
       let AllItems = [];
       while (startIndex < total || total === undefined) {
@@ -194,9 +212,11 @@ class JellyfinAPI {
             fields: "MediaSources,DateCreated",
             startIndex: startIndex,
             recursive: recursive,
-            limit: increment,
+            limit: limit,
             isMissing: false,
             excludeLocationTypes: "Virtual",
+            sortBy: "DateCreated",
+            sortOrder: "Descending",
           },
         });
 
@@ -207,11 +227,19 @@ class JellyfinAPI {
 
         AllItems.push(...result);
 
-        if (response.data.TotalRecordCount === undefined) {
-          break;
-        }
         if (ws && syncTask && wsMessage) {
-          ws(syncTask.wsKey, { type: "Update", message: `${wsMessage} - ${((startIndex / total) * 100).toFixed(2)}%` });
+          ws(syncTask.wsKey, {
+            type: "Update",
+            message: `${wsMessage} - ${((Math.min(startIndex, total) / total) * 100).toFixed(2)}%`,
+          });
+        }
+
+        if (
+          response.data.TotalRecordCount === undefined ||
+          (params && params.startIndex !== undefined) ||
+          AllItems.length >= limit
+        ) {
+          break;
         }
 
         await this.#delay(10);
@@ -324,10 +352,18 @@ class JellyfinAPI {
       if (!userid || userid == null) {
         let adminid = await new configClass().getPreferedAdmin();
         if (!adminid || adminid == null) {
-          userid = (await this.getAdmins())[0].Id;
+          const admins = await this.getAdmins();
+          if (admins.length > 0) {
+            userid = admins[0].Id;
+          }
         } else {
           userid = adminid;
         }
+      }
+
+      if (!userid || userid == null) {
+        console.log("[JELLYFIN-API]: getRecentlyAdded - No Admins/UserIds found");
+        return [];
       }
 
       let url = `${this.config.JF_HOST}/Users/${userid}/Items/Latest?Limit=${limit}`;
@@ -367,8 +403,14 @@ class JellyfinAPI {
         },
       });
       let result = response.data && Array.isArray(response.data) ? response.data : [];
+
       if (result.length > 0) {
-        result = result.filter((session) => session.NowPlayingItem !== undefined && session.NowPlayingItem.Type != "Trailer");
+        result = result.filter(
+          (session) =>
+            session.NowPlayingItem !== undefined &&
+            session.NowPlayingItem.Type != "Trailer" &&
+            session.NowPlayingItem.ProviderIds["prerolls.video"] == undefined
+        );
       }
       return result;
     } catch (error) {
@@ -467,6 +509,25 @@ class JellyfinAPI {
           ? "Unable to connect. Please check the URL and your network connection."
           : error.message;
       return result;
+    }
+  }
+
+  async systemInfo() {
+    if (!this.configReady) {
+      return [];
+    }
+    let url = `${this.config.JF_HOST}/system/info`;
+    try {
+      const response = await axios.get(url, {
+        headers: {
+          "X-MediaBrowser-Token": this.config.JF_API_KEY,
+        },
+      });
+
+      return response?.data || {};
+    } catch (error) {
+      this.#errorHandler(error, url);
+      return {};
     }
   }
 }

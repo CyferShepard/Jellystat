@@ -1,27 +1,30 @@
 // ws.js
-const socketIO = require('socket.io');
+const socketIO = require("socket.io");
 
 let io; // Store the socket.io server instance
 
-const setupWebSocketServer = (server) => {
-  io = socketIO(server);
+const setupWebSocketServer = (server, namespacePath) => {
+  io = socketIO(server, { path: namespacePath + "/socket.io" }); // Create the socket.io server
 
-  io.on('connection', (socket) => {
-    // console.log('Client connected');
+  io.on("connection", (socket) => {
+    // console.log("Client connected to namespace:", namespacePath);
 
-    socket.on('message', (message) => {
-      // console.log(`Received: ${message}`);
-
+    socket.on("message", (message) => {
+      console.log(`Received: ${message}`);
     });
   });
 };
 
 const sendToAllClients = (message) => {
-  io.emit('message', message);
+  if (io) {
+    io.emit("message", message);
+  }
 };
 
-const sendUpdate = (tag,message) => {
-  io.emit(tag, message);
+const sendUpdate = (tag, message) => {
+  if (io) {
+    io.emit(tag, message);
+  }
 };
 
 module.exports = { setupWebSocketServer, sendToAllClients, sendUpdate };

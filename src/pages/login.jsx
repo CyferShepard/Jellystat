@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import axios from "axios";
+import axios from "../lib/axios_instance";
 import Config from "../lib/config";
 import CryptoJS from "crypto-js";
 import "./css/setup.css";
@@ -54,7 +54,8 @@ function Login() {
       .then(async (response) => {
         localStorage.setItem("token", response.data.token);
         setProcessing(false);
-        if (JS_USERNAME) {
+        if (JS_USERNAME || response.data.token) {
+          await Config.setConfig();
           setsubmitButtonText(i18next.t("SUCCESS"));
           window.location.reload();
           return;
@@ -80,7 +81,7 @@ function Login() {
   useEffect(() => {
     const fetchConfig = async () => {
       try {
-        const newConfig = await Config();
+        const newConfig = await Config.setConfig();
         setConfig(newConfig);
       } catch (error) {
         if (error.code === "ERR_NETWORK") {

@@ -28,7 +28,7 @@ pool.on("error", (err, client) => {
   //process.exit(-1);
 });
 
-async function deleteBulk(table_name, data) {
+async function deleteBulk(table_name, data, pkName) {
   const client = await pool.connect();
   let result = "SUCCESS";
   let message = "";
@@ -37,7 +37,7 @@ async function deleteBulk(table_name, data) {
 
     if (data && data.length !== 0) {
       const deleteQuery = {
-        text: `DELETE FROM ${table_name} WHERE "Id" IN (${pgp.as.csv(data)})`,
+        text: `DELETE FROM ${table_name} WHERE "${pkName ?? "Id"}" IN (${pgp.as.csv(data)})`,
       };
       //  console.log(deleteQuery);
       await client.query(deleteQuery);
@@ -109,10 +109,10 @@ async function insertBulk(table_name, data, columns) {
   try {
     await client.query("BEGIN");
     const update_query = update_query_map.find((query) => query.table === table_name).query;
-    await client.query("COMMIT");
     const cs = new pgp.helpers.ColumnSet(columns, { table: table_name });
     const query = pgp.helpers.insert(data, cs) + update_query; // Update the column names accordingly
     await client.query(query);
+    await client.query("COMMIT");
   } catch (error) {
     await client.query("ROLLBACK");
     message = "" + error;
@@ -149,10 +149,24 @@ async function query(text, params) {
   }
 }
 
+async function querySingle(sql, params) {
+  try {
+    const { rows: results } = await query(sql, params);
+    if (results.length > 0) {
+      return results[0];
+    } else {
+      return null;
+    }
+  } catch (error) {
+    throw error;
+  }
+}
+
 module.exports = {
   query: query,
   deleteBulk: deleteBulk,
   insertBulk: insertBulk,
   updateSingleFieldBulk: updateSingleFieldBulk,
+  querySingle: querySingle,
   // initDB: initDB,
 };

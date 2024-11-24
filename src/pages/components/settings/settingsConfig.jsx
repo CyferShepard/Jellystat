@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import axios from "axios";
+import axios from "../../../lib/axios_instance";
 import Config from "../../../lib/config";
 import Loading from "../general/loading";
 import Form from "react-bootstrap/Form";
@@ -42,7 +42,7 @@ export default function SettingsConfig() {
   }
 
   useEffect(() => {
-    Config()
+    Config.getConfig()
       .then((config) => {
         setFormValues({ JF_HOST: config.hostUrl });
         setConfig(config);
@@ -94,6 +94,7 @@ export default function SettingsConfig() {
         setisSubmitted("Failed");
         setsubmissionMessage(`Error Updating Configuration: ${errorMessage}`);
       });
+      Config.setConfig();
   }
 
   function handleFormChange(event) {
@@ -129,6 +130,7 @@ export default function SettingsConfig() {
         setisSubmitted("Failed");
         setsubmissionMessage("Error Updating Configuration: ", error);
       });
+      Config.setConfig();
   }
 
   function updateLanguage(event) {
@@ -158,7 +160,8 @@ export default function SettingsConfig() {
       <Form onSubmit={handleFormSubmit} className="settings-form">
         <Form.Group as={Row} className="mb-3">
           <Form.Label column className="">
-            <Trans i18nKey={"SETTINGS_PAGE.JELLYFIN_URL"} />
+            {config.settings?.IS_JELLYFIN ? <Trans i18nKey={"SETTINGS_PAGE.JELLYFIN_URL"} /> : <Trans i18nKey={"SETTINGS_PAGE.EMBY_URL"} /> }
+            
           </Form.Label>
           <Col sm="10">
             <Form.Control

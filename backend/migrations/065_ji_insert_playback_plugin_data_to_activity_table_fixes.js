@@ -54,7 +54,7 @@ exports.up = async function (knex) {
                   
     $BODY$;
     ALTER PROCEDURE public.ji_insert_playback_plugin_data_to_activity_table()
-    OWNER TO "${process.env.POSTGRES_USER ?? postgres}";`);
+    OWNER TO "${process.env.POSTGRES_ROLE}";`);
   } catch (error) {
     console.error(error);
   }
@@ -114,7 +114,7 @@ exports.down = async function (knex) {
                   
     $BODY$;
     ALTER PROCEDURE public.ji_insert_playback_plugin_data_to_activity_table()
-    OWNER TO "${process.env.POSTGRES_USER ?? postgres}";`);
+    OWNER TO "${process.env.POSTGRES_ROLE}";`);
   } catch (error) {
     console.error(error);
   }

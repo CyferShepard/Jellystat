@@ -1,5 +1,5 @@
 import { useState } from "react";
-import axios from "axios";
+import axios from "../../../lib/axios_instance";
 import Button from "react-bootstrap/Button";
 
 import Table from "@mui/material/Table";

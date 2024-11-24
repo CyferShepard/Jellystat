@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import axios from "axios";
+import axios from "../../../lib/axios_instance";
 import Form from "react-bootstrap/Form";
 import Row from "react-bootstrap/Row";
 import Col from "react-bootstrap/Col";
@@ -31,7 +31,7 @@ export default function SettingsConfig() {
   useEffect(() => {
     const fetchConfig = async () => {
       try {
-        const newConfig = await Config();
+        const newConfig = await Config.getConfig();
         setuse_password(newConfig.requireLogin);
         setFormValues({ JS_USERNAME: newConfig.username });
       } catch (error) {
@@ -84,6 +84,7 @@ export default function SettingsConfig() {
         }
       )
       .then((data) => {
+        Config.setConfig();
         setuse_password(requireLogin);
       })
       .catch((error) => {
@@ -94,7 +95,7 @@ export default function SettingsConfig() {
   async function handleFormSubmit(event) {
     event.preventDefault();
     setisSubmitted("");
-    if (formValues.JS_C_PASSWORD && formValues.JS_C_PASSWORD.length < 6) {
+    if (formValues.JS_C_PASSWORD) {
       setisSubmitted("Failed");
       setsubmissionMessage(i18next.t("ERROR_MESSAGES.PASSWORD_LENGTH"));
       return;
@@ -126,6 +127,7 @@ export default function SettingsConfig() {
     // let result = await updatePassword(hashedOldPassword, hashedNewPassword);
     let result = await updateUser(username, hashedOldPassword, hashedNewPassword);
 
+    Config.setConfig();
     if (result.isValid) {
       setisSubmitted("Success");
       setsubmissionMessage(i18next.t("PASSWORD_UPDATE_SUCCESS"));

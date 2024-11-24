@@ -1,3 +1,6 @@
+process.env.POSTGRES_USER = process.env.POSTGRES_USER ?? "postgres";
+process.env.POSTGRES_ROLE =
+  process.env.POSTGRES_ROLE ?? process.env.POSTGRES_USER;
 
 module.exports = {
     development: {

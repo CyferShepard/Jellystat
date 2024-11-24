@@ -12,7 +12,7 @@ exports.up = async function(knex) {
           table.json('Log');
           table.text('Result');
         });
-        await knex.raw(`ALTER TABLE jf_logging OWNER TO "${process.env.POSTGRES_USER}";`);
+        await knex.raw(`ALTER TABLE jf_logging OWNER TO "${process.env.POSTGRES_ROLE}";`);
       }
     } catch (error) {
       console.error(error);

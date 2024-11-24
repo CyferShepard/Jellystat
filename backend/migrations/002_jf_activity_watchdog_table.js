@@ -20,7 +20,7 @@ exports.up = async function(knex) {
         table.timestamp('ActivityDateInserted').defaultTo(knex.fn.now());
         table.text('PlayMethod');
       });
-      await knex.raw(`ALTER TABLE jf_activity_watchdog OWNER TO "${process.env.POSTGRES_USER}";`);
+      await knex.raw(`ALTER TABLE jf_activity_watchdog OWNER TO "${process.env.POSTGRES_ROLE}";`);
     }
   } catch (error) {
     console.error(error);

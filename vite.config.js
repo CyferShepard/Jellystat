@@ -4,6 +4,7 @@ import react from "@vitejs/plugin-react-swc";
 // https://vitejs.dev/config/
 export default defineConfig({
   envPrefix: "JS_",
+  base: "",
   optimizeDeps: {
     include: ["react", "react-dom", "react-router-dom", "axios", "react-toastify"],
     esbuildOptions: {

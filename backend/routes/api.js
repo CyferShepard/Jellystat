@@ -8,12 +8,12 @@ const { randomUUID } = require("crypto");
 const { axios } = require("../classes/axios");
 const configClass = require("../classes/config");
 const { checkForUpdates } = require("../version-control");
-const JellyfinAPI = require("../classes/jellyfin-api");
+const API = require("../classes/api-loader");
 const { sendUpdate } = require("../ws");
 const moment = require("moment");
+const { tables } = require("../global/backup_tables");
 
 const router = express.Router();
-const Jellyfin = new JellyfinAPI();
 
 //Functions
 function groupActivity(rows) {
@@ -45,6 +45,29 @@ function groupActivity(rows) {
     }
   });
   return groupedResults;
+}
+
+function groupRecentlyAdded(rows) {
+  const groupedResults = {};
+  rows.forEach((row) => {
+    if (row.Type != "Movie") {
+      const key = row.SeriesId + row.SeasonId;
+      if (groupedResults[key]) {
+        groupedResults[key].NewEpisodeCount++;
+      } else {
+        groupedResults[key] = { ...row };
+        if (row.Type != "Series" && row.Type != "Movie") {
+          groupedResults[key].NewEpisodeCount = 1;
+        }
+      }
+    } else {
+      groupedResults[row.Id] = {
+        ...row,
+      };
+    }
+  });
+
+  return Object.values(groupedResults);
 }
 
 async function purgeLibraryItems(id, withActivity, purgeAll = false) {
@@ -118,6 +141,7 @@ router.get("/getconfig", async (req, res) => {
       APP_USER: config.APP_USER,
       settings: config.settings,
       REQUIRE_LOGIN: config.REQUIRE_LOGIN,
+      IS_JELLYFIN: config.IS_JELLYFIN,
     };
 
     res.send(payload);
@@ -126,13 +150,26 @@ router.get("/getconfig", async (req, res) => {
   }
 });
 
+router.get("/getLibraries", async (req, res) => {
+  try {
+    const libraries = await db.query("SELECT * FROM jf_libraries").then((res) => res.rows);
+    res.send(libraries);
+  } catch (error) {
+    res.status(503);
+    res.send(error);
+  }
+});
+
 router.get("/getRecentlyAdded", async (req, res) => {
   try {
-    const { libraryid, limit = 10 } = req.query;
+    const { libraryid, limit = 50, GroupResults = true } = req.query;
 
-    let recentlyAddedFronJellystat = await Jellyfin.getRecentlyAdded({ libraryid: libraryid });
+    const config = await new configClass().getConfig();
+    const excluded_libraries = config.settings.ExcludedLibraries || [];
 
-    let recentlyAddedFronJellystatMapped = recentlyAddedFronJellystat.map((item) => {
+    let recentlyAddedFromJellystat = await API.getRecentlyAdded({ libraryid: libraryid });
+
+    let recentlyAddedFromJellystatMapped = recentlyAddedFromJellystat.map((item) => {
       return {
         Name: item.Name,
         SeriesName: item.SeriesName,
@@ -159,12 +196,12 @@ router.get("/getRecentlyAdded", async (req, res) => {
 
     if (libraryid !== undefined) {
       const { rows } = await db.query(
-        `SELECT i."Name", null "SeriesName", "Id", null "SeriesId", null "SeasonId", null "EpisodeId", null "SeasonNumber", null "EpisodeNumber",  "PrimaryImageHash",i."DateCreated", "Type"
+        `SELECT i."Name", null "SeriesName", "Id", null "SeriesId", null "SeasonId", null "EpisodeId", null "SeasonNumber", null "EpisodeNumber",  "PrimaryImageHash",i."DateCreated", "Type", i."ParentId"
         FROM public.jf_library_items i
         where i.archived=false
           and i."ParentId"=$1
       union
-      SELECT e."Name",  e."SeriesName",e."Id" , e."SeriesId", e."SeasonId", e."EpisodeId",  e."ParentIndexNumber" "SeasonNumber",  e."IndexNumber" "EpisodeNumber", e."PrimaryImageHash", e."DateCreated", e."Type"
+      SELECT e."Name",  e."SeriesName",e."Id" , e."SeriesId", e."SeasonId", e."EpisodeId",  e."ParentIndexNumber" "SeasonNumber",  e."IndexNumber" "EpisodeNumber", e."PrimaryImageHash", e."DateCreated", e."Type", i."ParentId"
         FROM public.jf_library_episodes e
         JOIN public.jf_library_items i
         on i."Id"=e."SeriesId"
@@ -177,21 +214,25 @@ router.get("/getRecentlyAdded", async (req, res) => {
       if (rows[0].DateCreated !== undefined && rows[0].DateCreated !== null) {
         let lastSynctedItemDate = moment(rows[0].DateCreated, "YYYY-MM-DD HH:mm:ss.SSSZ");
 
-        recentlyAddedFronJellystatMapped = recentlyAddedFronJellystatMapped.filter((item) =>
+        recentlyAddedFromJellystatMapped = recentlyAddedFromJellystatMapped.filter((item) =>
           moment(item.DateCreated, "YYYY-MM-DD HH:mm:ss.SSSZ").isAfter(lastSynctedItemDate)
         );
       }
 
-      res.send([...recentlyAddedFronJellystatMapped, ...rows]);
+      const filteredDbRows = rows.filter((item) => !excluded_libraries.includes(item.ParentId));
+
+      res.send([...recentlyAddedFromJellystatMapped, ...filteredDbRows]);
       return;
     }
     const { rows } = await db.query(
-      `SELECT i."Name", null "SeriesName", "Id", null "SeriesId", null "SeasonId", null "EpisodeId", null "SeasonNumber" , null "EpisodeNumber" ,  "PrimaryImageHash",i."DateCreated", "Type"
+      `SELECT i."Name", null "SeriesName", "Id", null "SeriesId", null "SeasonId", null "EpisodeId", null "SeasonNumber" , null "EpisodeNumber" ,  "PrimaryImageHash",i."DateCreated", "Type", i."ParentId"
       FROM public.jf_library_items i
       where i.archived=false
     union
-    SELECT e."Name",  e."SeriesName",e."Id" , e."SeriesId", e."SeasonId", e."EpisodeId",  e."ParentIndexNumber"  "SeasonNumber",  e."IndexNumber" "EpisodeNumber", e."PrimaryImageHash", e."DateCreated", e."Type"
+    SELECT e."Name",  e."SeriesName",e."Id" , e."SeriesId", e."SeasonId", e."EpisodeId",  e."ParentIndexNumber"  "SeasonNumber",  e."IndexNumber" "EpisodeNumber", e."PrimaryImageHash", e."DateCreated", e."Type", i."ParentId"
       FROM public.jf_library_episodes e
+       JOIN public.jf_library_items i
+        on i."Id"=e."SeriesId"
       where e.archived=false
     order by "DateCreated" desc
     limit $1`,
@@ -201,12 +242,21 @@ router.get("/getRecentlyAdded", async (req, res) => {
     if (rows[0].DateCreated !== undefined && rows[0].DateCreated !== null) {
       let lastSynctedItemDate = moment(rows[0].DateCreated, "YYYY-MM-DD HH:mm:ss.SSSZ");
 
-      recentlyAddedFronJellystatMapped = recentlyAddedFronJellystatMapped.filter((item) =>
+      recentlyAddedFromJellystatMapped = recentlyAddedFromJellystatMapped.filter((item) =>
         moment(item.DateCreated, "YYYY-MM-DD HH:mm:ss.SSSZ").isAfter(lastSynctedItemDate)
       );
     }
 
-    res.send([...recentlyAddedFronJellystatMapped, ...rows]);
+    const filteredDbRows = rows.filter((item) => !excluded_libraries.includes(item.ParentId));
+
+    let recentlyAdded = [...recentlyAddedFromJellystatMapped, ...filteredDbRows];
+    recentlyAdded = recentlyAdded.filter((item) => item.Type !== "Series");
+
+    if (GroupResults == true) {
+      recentlyAdded = groupRecentlyAdded(recentlyAdded);
+    }
+
+    res.send(recentlyAdded);
     return;
   } catch (error) {
     res.status(503);
@@ -226,7 +276,7 @@ router.post("/setconfig", async (req, res) => {
 
     var url = JF_HOST;
 
-    const validation = await Jellyfin.validateSettings(url, JF_API_KEY);
+    const validation = await API.validateSettings(url, JF_API_KEY);
     if (validation.isValid === false) {
       res.status(validation.status);
       res.send(validation);
@@ -241,6 +291,22 @@ router.post("/setconfig", async (req, res) => {
     }
 
     const { rows } = await db.query(query, [validation.cleanedUrl, JF_API_KEY]);
+
+    const systemInfo = await API.systemInfo();
+
+    if (systemInfo && systemInfo != {}) {
+      const settingsjson = await db.query('SELECT settings FROM app_config where "ID"=1').then((res) => res.rows);
+
+      if (settingsjson.length > 0) {
+        const settings = settingsjson[0].settings || {};
+
+        settings.ServerID = systemInfo?.Id || null;
+
+        let query = 'UPDATE app_config SET settings=$1 where "ID"=1';
+
+        await db.query(query, [settings]);
+      }
+    }
     res.send(rows);
   } catch (error) {
     console.log(error);
@@ -400,7 +466,7 @@ router.get("/TrackedLibraries", async (req, res) => {
   }
 
   try {
-    const libraries = await Jellyfin.getLibraries();
+    const libraries = await API.getLibraries();
 
     const ExcludedLibraries = config.settings?.ExcludedLibraries || [];
 
@@ -585,6 +651,12 @@ router.post("/setTaskSettings", async (req, res) => {
     return;
   }
 
+  if (!Number.isInteger(Interval) && Interval <= 0) {
+    res.status(400);
+    res.send("A valid Interval(int) which is > 0 minutes is required");
+    return;
+  }
+
   try {
     const settingsjson = await db.query('SELECT settings FROM app_config where "ID"=1').then((res) => res.rows);
 
@@ -723,7 +795,7 @@ router.post("/getEpisodes", async (req, res) => {
     }
 
     const { rows } = await db.query(
-      `SELECT e.*, i."PrimaryImageHash" FROM jf_library_episodes e left join jf_library_items i on i."Id"=e."SeriesId" where "SeasonId"=$1`,
+      `SELECT e.*, i."PrimaryImageHash", ii."Size" FROM jf_library_episodes e left join jf_library_items i on i."Id"=e."SeriesId" join jf_item_info ii on ii."Id"=e."EpisodeId" where "SeasonId"=$1`,
       [Id]
     );
     res.send(rows);
@@ -742,6 +814,8 @@ router.post("/getItemDetails", async (req, res) => {
     }
     // let query = `SELECT im."Name" "FileName",im.*,i.* FROM jf_library_items i left join jf_item_info im on i."Id" = im."Id" where i."Id"=$1`;
     let query = `SELECT im."Name" "FileName",im."Id",im."Path",im."Name",im."Bitrate",im."MediaStreams",im."Type",  COALESCE(im."Size" ,(SELECT SUM(im."Size") FROM jf_library_seasons s JOIN jf_library_episodes e on s."Id"=e."SeasonId" JOIN jf_item_info im ON im."Id" = e."EpisodeId" WHERE s."SeriesId" = i."Id")) "Size",i.*, (select "Name" from jf_libraries l where l."Id"=i."ParentId") "LibraryName" FROM jf_library_items i left join jf_item_info im on i."Id" = im."Id" where i."Id"=$1`;
+    let maxActivityQuery = `SELECT  MAX("ActivityDateInserted") "LastActivityDate" FROM public.jf_playback_activity`;
+    let activityCountQuery = `SELECT  Count("ActivityDateInserted") "times_played",  SUM("PlaybackDuration") "total_play_time" FROM public.jf_playback_activity`;
 
     const { rows: items } = await db.query(query, [Id]);
 
@@ -755,14 +829,44 @@ router.post("/getItemDetails", async (req, res) => {
         const { rows: episodes } = await db.query(query, [Id]);
 
         if (episodes.length !== 0) {
+          maxActivityQuery = `${maxActivityQuery} where "EpisodeId"=$1`;
+          activityCountQuery = `${activityCountQuery} where "EpisodeId"=$1`;
+          const LastActivityDate = await db.querySingle(maxActivityQuery, [Id]);
+          const TimesPlayed = await db.querySingle(activityCountQuery, [Id]);
+
+          episodes.forEach((episode) => {
+            episode.LastActivityDate = LastActivityDate.LastActivityDate ?? null;
+            episode.times_played = TimesPlayed.times_played ?? null;
+            episode.total_play_time = TimesPlayed.total_play_time ?? null;
+          });
           res.send(episodes);
         } else {
           res.status(404).send("Item not found");
         }
       } else {
+        maxActivityQuery = `${maxActivityQuery} where "SeasonId"=$1`;
+        activityCountQuery = `${activityCountQuery} where "SeasonId"=$1`;
+        const LastActivityDate = await db.querySingle(maxActivityQuery, [Id]);
+        const TimesPlayed = await db.querySingle(activityCountQuery, [Id]);
+        seasons.forEach((season) => {
+          season.LastActivityDate = LastActivityDate.LastActivityDate ?? null;
+          season.times_played = TimesPlayed.times_played ?? null;
+          season.total_play_time = TimesPlayed.total_play_time ?? null;
+        });
         res.send(seasons);
       }
     } else {
+      maxActivityQuery = `${maxActivityQuery} where "NowPlayingItemId"=$1`;
+      activityCountQuery = `${activityCountQuery} where "NowPlayingItemId"=$1`;
+      const LastActivityDate = await db.querySingle(maxActivityQuery, [Id]);
+      const TimesPlayed = await db.querySingle(activityCountQuery, [Id]);
+
+      items.forEach((item) => {
+        item.LastActivityDate = LastActivityDate.LastActivityDate ?? null;
+        item.times_played = TimesPlayed.times_played ?? null;
+        item.total_play_time = TimesPlayed.total_play_time ?? null;
+      });
+
       res.send(items);
     }
   } catch (error) {
@@ -881,15 +985,76 @@ router.delete("/libraryItems/purge", async (req, res) => {
   }
 });
 
+router.get("/getBackupTables", async (req, res) => {
+  try {
+    const config = await new configClass().getConfig();
+    const excluded_tables = config.settings.ExcludedTables || [];
+
+    let backupTables = tables.map((table) => {
+      return {
+        ...table,
+        Excluded: excluded_tables.includes(table.value),
+      };
+    });
+
+    res.send(backupTables);
+    return;
+  } catch (error) {
+    res.status(503);
+    res.send(error);
+  }
+});
+
+router.post("/setExcludedBackupTable", async (req, res) => {
+  const { table } = req.body;
+  if (table === undefined || tables.map((item) => item.value).indexOf(table) === -1) {
+    res.status(400);
+    res.send("Invalid table provided");
+    return;
+  }
+
+  const settingsjson = await db.query('SELECT settings FROM app_config where "ID"=1').then((res) => res.rows);
+
+  if (settingsjson.length > 0) {
+    const settings = settingsjson[0].settings || {};
+
+    let excludedTables = settings.ExcludedTables || [];
+    if (excludedTables.includes(table)) {
+      excludedTables = excludedTables.filter((item) => item !== table);
+    } else {
+      excludedTables.push(table);
+    }
+    settings.ExcludedTables = excludedTables;
+
+    let query = 'UPDATE app_config SET settings=$1 where "ID"=1';
+
+    await db.query(query, [settings]);
+
+    let backupTables = tables.map((table) => {
+      return {
+        ...table,
+        Excluded: settings.ExcludedTables.includes(table.value),
+      };
+    });
+
+    res.send(backupTables);
+  } else {
+    res.status(404);
+    res.send("Settings not found");
+  }
+});
+
 //DB Queries - History
 router.get("/getHistory", async (req, res) => {
   try {
     const { rows } = await db.query(`
-    SELECT a.*, e."IndexNumber" "EpisodeNumber",e."ParentIndexNumber" "SeasonNumber" 
+    SELECT a.*, e."IndexNumber" "EpisodeNumber",e."ParentIndexNumber" "SeasonNumber" , i."ParentId"
     FROM jf_playback_activity a
     left join jf_library_episodes e
     on a."EpisodeId"=e."EpisodeId"
     and a."SeasonId"=e."SeasonId"
+    left join jf_library_items i
+    on i."Id"=a."NowPlayingItemId" or e."SeriesId"=i."Id"
      order by a."ActivityDateInserted" desc`);
 
     const groupedResults = groupActivity(rows);
@@ -976,11 +1141,13 @@ router.post("/getUserHistory", async (req, res) => {
     }
 
     const { rows } = await db.query(
-      `select a.*, e."IndexNumber" "EpisodeNumber",e."ParentIndexNumber" "SeasonNumber" 
+      `select a.*, e."IndexNumber" "EpisodeNumber",e."ParentIndexNumber" "SeasonNumber" , i."ParentId"
       from jf_playback_activity a
       left join jf_library_episodes e
       on a."EpisodeId"=e."EpisodeId"
       and a."SeasonId"=e."SeasonId"
+      left join jf_library_items i
+    on i."Id"=a."NowPlayingItemId" or e."SeriesId"=i."Id"
       where a."UserId"=$1;`,
       [userid]
     );
@@ -1013,6 +1180,11 @@ router.post("/deletePlaybackActivity", async (req, res) => {
     res.status(503);
     res.send(error);
   }
+});
+
+// Handle other routes
+router.use((req, res) => {
+  res.status(404).send({ error: "Not Found" });
 });
 
 module.exports = router;

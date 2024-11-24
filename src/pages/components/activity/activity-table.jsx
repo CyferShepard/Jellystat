@@ -1,6 +1,6 @@
 /* eslint-disable react/prop-types */
 import React, { useEffect, useMemo } from "react";
-import axios from "axios";
+import axios from "../../../lib/axios_instance";
 import { enUS } from "@mui/material/locale";
 
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
@@ -155,8 +155,7 @@ export default function ActivityTable(props) {
         row = row.original;
         if (
           isRemoteSession(row.RemoteEndPoint) &&
-          import.meta.env.JS_GEOLITE_ACCOUNT_ID &&
-          import.meta.env.JS_GEOLITE_LICENSE_KEY
+          (window.env?.JS_GEOLITE_ACCOUNT_ID ?? import.meta.env.JS_GEOLITE_ACCOUNT_ID) != undefined
         ) {
           return (
             <Link className="text-decoration-none" onClick={() => showIPDataModal(row.RemoteEndPoint)}>
@@ -284,7 +283,8 @@ export default function ActivityTable(props) {
     enableGlobalFilter: false,
     enableBottomToolbar: false,
     enableRowSelection: (row) => row.original.Id,
-    enableSubRowSelection: true,
+    enableMultiRowSelection: true,
+    enableBatchRowSelection: true,
     onRowSelectionChange: setRowSelection,
     positionToolbarAlertBanner: "bottom",
     renderTopToolbarCustomActions: () => {

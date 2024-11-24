@@ -1,12 +1,11 @@
 import { useParams } from "react-router-dom";
 import { useState, useEffect } from "react";
-import axios from "axios";
+import axios from "../../lib/axios_instance";
 import TvLineIcon from "remixicon-react/TvLineIcon";
 import FilmLineIcon from "remixicon-react/FilmLineIcon";
 
 // import LibraryDetails from './library/library-details';
 import Loading from "./general/loading";
-import LibraryGlobalStats from "./library/library-stats";
 import LibraryLastWatched from "./library/last-watched";
 import RecentlyAdded from "./library/recently-added";
 import LibraryActivity from "./library/library-activity";
@@ -16,12 +15,20 @@ import ErrorBoundary from "./general/ErrorBoundary";
 import { Tabs, Tab, Button, ButtonGroup } from "react-bootstrap";
 import { Trans } from "react-i18next";
 import LibraryOptions from "./library/library-options";
+import GlobalStats from "./general/globalStats";
 
 function LibraryInfo() {
   const { LibraryId } = useParams();
-  const [activeTab, setActiveTab] = useState("tabOverview");
+  const [activeTab, setActiveTab] = useState(
+    localStorage.getItem(`PREF_LIBRARY_TAB_LAST_SELECTED_${LibraryId}`) ?? "tabOverview"
+  );
   const [data, setData] = useState();
   const token = localStorage.getItem("token");
+
+  function setTab(tabName) {
+    setActiveTab(tabName);
+    localStorage.setItem(`PREF_LIBRARY_TAB_LAST_SELECTED_${LibraryId}`, tabName);
+  }
 
   useEffect(() => {
     const fetchData = async () => {
@@ -64,23 +71,18 @@ function LibraryInfo() {
           <p className="user-name">{data.Name}</p>
           <ButtonGroup>
             <Button
-              onClick={() => setActiveTab("tabOverview")}
+              onClick={() => setTab("tabOverview")}
               active={activeTab === "tabOverview"}
               variant="outline-primary"
               type="button"
             >
               <Trans i18nKey="TAB_CONTROLS.OVERVIEW" />
             </Button>
-            <Button
-              onClick={() => setActiveTab("tabItems")}
-              active={activeTab === "tabItems"}
-              variant="outline-primary"
-              type="button"
-            >
+            <Button onClick={() => setTab("tabItems")} active={activeTab === "tabItems"} variant="outline-primary" type="button">
               <Trans i18nKey="MEDIA" />
             </Button>
             <Button
-              onClick={() => setActiveTab("tabActivity")}
+              onClick={() => setTab("tabActivity")}
               active={activeTab === "tabActivity"}
               variant="outline-primary"
               type="button"
@@ -89,7 +91,7 @@ function LibraryInfo() {
             </Button>
 
             <Button
-              onClick={() => setActiveTab("tabOptions")}
+              onClick={() => setTab("tabOptions")}
               active={activeTab === "tabOptions"}
               variant="outline-primary"
               type="button"
@@ -99,9 +101,14 @@ function LibraryInfo() {
           </ButtonGroup>
         </div>
       </div>
-      <Tabs defaultActiveKey="tabOverview" activeKey={activeTab} variant="pills" className="hide-tab-titles">
+      <Tabs defaultActiveKey={activeTab} activeKey={activeTab} variant="pills" className="hide-tab-titles">
         <Tab eventKey="tabOverview" title="Overview" className="bg-transparent">
-          <LibraryGlobalStats LibraryId={LibraryId} />
+          <GlobalStats
+            id={LibraryId}
+            param={"libraryid"}
+            endpoint={"getGlobalLibraryStats"}
+            title={<Trans i18nKey="LIBRARY_INFO.LIBRARY_STATS" />}
+          />
 
           {!data.archived && (
             <ErrorBoundary>

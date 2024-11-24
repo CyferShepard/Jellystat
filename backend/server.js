@@ -1,6 +1,7 @@
 // core
 require("dotenv").config();
 const http = require("http");
+const fs = require("fs");
 const path = require("path");
 const express = require("express");
 const compression = require("compression");
@@ -21,8 +22,8 @@ const apiRouter = require("./routes/api");
 const proxyRouter = require("./routes/proxy");
 const { router: syncRouter } = require("./routes/sync");
 const statsRouter = require("./routes/stats");
-const { router: backupRouter } = require("./routes/backup");
-const { router: logRouter } = require("./routes/logging");
+const backupRouter = require("./routes/backup");
+const logRouter = require("./routes/logging");
 const utilsRouter = require("./routes/utils");
 
 // tasks
@@ -31,13 +32,29 @@ const tasks = require("./tasks/tasks");
 
 // websocket
 const { setupWebSocketServer } = require("./ws");
+const writeEnvVariables = require("./classes/env");
+
+process.env.POSTGRES_USER = process.env.POSTGRES_USER ?? "postgres";
+process.env.POSTGRES_ROLE =
+  process.env.POSTGRES_ROLE ?? process.env.POSTGRES_USER;
 
 const app = express();
 const db = knex(knexConfig.development);
 
+const ensureSlashes = (url) => {
+  if (!url.startsWith("/")) {
+    url = "/" + url;
+  }
+  if (url.endsWith("/")) {
+    url = url.slice(0, -1);
+  }
+  return url;
+};
+
 const PORT = 3000;
 const LISTEN_IP = "0.0.0.0";
 const JWT_SECRET = process.env.JWT_SECRET;
+const BASE_NAME = process.env.JS_BASE_URL ? ensureSlashes(process.env.JS_BASE_URL) : "";
 
 if (JWT_SECRET === undefined) {
   console.log("JWT Secret cannot be undefined");
@@ -51,8 +68,79 @@ app.set("trust proxy", 1);
 app.disable("x-powered-by");
 app.use(compression());
 
+function typeInferenceMiddleware(req, res, next) {
+  Object.keys(req.query).forEach((key) => {
+    const value = req.query[key];
+    if (value.toLowerCase() === "true" || value.toLowerCase() === "false") {
+      // Convert to boolean
+      req.query[key] = value.toLowerCase() === "true";
+    } else if (!isNaN(value) && value.trim() !== "") {
+      // Convert to number if it's a valid number
+      req.query[key] = +value;
+    }
+  });
+  next();
+}
+
+app.use(typeInferenceMiddleware);
+
+const findFile = (dir, fileName) => {
+  const files = fs.readdirSync(dir);
+  for (const file of files) {
+    const fullPath = path.join(dir, file);
+    const stat = fs.statSync(fullPath);
+    if (stat.isDirectory()) {
+      const result = findFile(fullPath, fileName);
+      if (result) {
+        return result;
+      }
+    } else if (file === fileName) {
+      return fullPath;
+    }
+  }
+  return null;
+};
+
+const root = path.join(__dirname, "..", "dist");
+
+//hacky middleware to handle basename changes for UI
+
+app.use((req, res, next) => {
+  if (BASE_NAME && BASE_NAME != "" && (req.url == "/" || req.url == "")) {
+    return res.redirect(BASE_NAME);
+  }
+  // Ignore requests containing 'socket.io'
+  if (req.url.includes("socket.io") || req.url.includes("swagger")) {
+    return next();
+  }
+
+  const fileRegex = /\/([^\/]+\.(css|ico|js|json|png))$/;
+  const match = req.url.match(fileRegex);
+  if (match) {
+    // Extract the file name
+    const fileName = match[1];
+
+    //Exclude translation.json from this hack as it messes up the translations by returning the first file regardless of language chosen
+    if (fileName != "translation.json") {
+      // Find the file
+      const filePath = findFile(root, fileName);
+      if (filePath) {
+        return res.sendFile(filePath);
+      } else {
+        return res.status(404).send("File not found");
+      }
+    }
+  }
+
+  if (BASE_NAME && req.url.startsWith(BASE_NAME) && req.url !== BASE_NAME) {
+    req.url = req.url.slice(BASE_NAME.length);
+    // console.log("URL: " + req.url);
+  }
+  next();
+});
+
 // initiate routes
-app.use("/auth", authRouter, () => {
+app.use(`/auth`, authRouter, () => {
   /*  #swagger.tags = ['Auth'] */
 }); // mount the API router at /auth
 app.use("/proxy", proxyRouter, () => {
@@ -81,10 +169,14 @@ app.use("/utils", authenticate, utilsRouter, () => {
 app.use("/swagger", swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 
 // for deployment of static page
-const root = path.join(__dirname, "..", "dist");
-app.use(express.static(root));
-app.get("*", (req, res) => {
-  res.sendFile(path.join(__dirname, "..", "dist", "index.html"));
+writeEnvVariables().then(() => {
+  app.use(express.static(root));
+  app.get("*", (req, res, next) => {
+    if (req.url.includes("socket.io")) {
+      return next();
+    }
+    res.sendFile(path.join(__dirname, "..", "dist", "index.html"));
+  });
 });
 
 // JWT middleware
@@ -114,7 +206,9 @@ async function authenticate(req, res, next) {
     }
   } else {
     if (apiKey) {
-      const keysjson = await dbInstance.query('SELECT api_keys FROM app_config where "ID"=1').then((res) => res.rows[0].api_keys);
+      const keysjson = await dbInstance
+        .query('SELECT api_keys FROM app_config where "ID"=1')
+        .then((res) => res.rows[0].api_keys);
 
       if (!keysjson || Object.keys(keysjson).length === 0) {
         return res.status(404).json({ message: "No API keys configured" });
@@ -144,7 +238,7 @@ try {
     db.migrate.latest().then(() => {
       const server = http.createServer(app);
 
-      setupWebSocketServer(server);
+      setupWebSocketServer(server, BASE_NAME);
       server.listen(PORT, LISTEN_IP, async () => {
         console.log(`[JELLYSTAT] Server listening on http://127.0.0.1:${PORT}`);
         ActivityMonitor.ActivityMonitor(1000);

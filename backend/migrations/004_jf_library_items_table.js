@@ -22,7 +22,7 @@ exports.up = async function(knex) {
         table.text('ParentId').notNullable().references('Id').inTable('jf_libraries').onDelete('SET NULL').onUpdate('NO ACTION');
         table.text('PrimaryImageHash');
       });
-      await knex.raw(`ALTER TABLE IF EXISTS jf_library_items OWNER TO "${process.env.POSTGRES_USER}";`);
+      await knex.raw(`ALTER TABLE IF EXISTS jf_library_items OWNER TO "${process.env.POSTGRES_ROLE}";`);
 
     }
   } catch (error) {

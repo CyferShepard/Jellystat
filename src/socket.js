@@ -1,5 +1,8 @@
-import { io } from 'socket.io-client';
+import { io } from "socket.io-client";
+import baseUrl from "./lib/baseurl";
 
-const socket = io();
+const socket = io({
+  path: baseUrl + "/socket.io/",
+});
 
 export default socket;

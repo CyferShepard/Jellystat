@@ -1,6 +1,5 @@
 import { useState, useEffect } from "react";
-import axios from "axios";
-
+import axios from "../../../lib/axios_instance";
 import Chart from "./chart";
 
 import "../../css/stats.css";

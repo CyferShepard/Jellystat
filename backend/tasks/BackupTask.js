@@ -1,8 +1,8 @@
 const db = require("../db");
-const Logging = require("../routes/logging");
+const Logging = require("../classes/logging");
 const configClass =require("../classes/config");
 
-const backup = require("../routes/backup");
+const backup = require("../classes/backup");
 const moment = require('moment');
 const { randomUUID }  = require('crypto');
 const taskstate = require("../logging/taskstate");
@@ -103,7 +103,7 @@ async function intervalCallback() {
        Logging.insertLog(uuid,triggertype.Automatic,taskName.backup);
    
 
-       await backup.backup(refLog);
+       await backup(refLog);
        Logging.updateLog(uuid,refLog.logData,taskstate.SUCCESS);
 
 

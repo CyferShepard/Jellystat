@@ -28,7 +28,8 @@
     "MOST_POPULAR_MUSIC": "MOST POPULAR MUSIC",
     "MOST_VIEWED_LIBRARIES": "MOST VIEWED LIBRARIES",
     "MOST_USED_CLIENTS": "MOST USED CLIENTS",
-    "MOST_ACTIVE_USERS": "MOST ACTIVE USERS"
+    "MOST_ACTIVE_USERS": "MOST ACTIVE USERS",
+    "CONCURRENT_STREAMS": "CONCURRENT STREAMS"
   },
   "LIBRARY_OVERVIEW": {
     "MOVIE_LIBRARIES": "MOVIE LIBRARIES",
@@ -50,6 +51,8 @@
     "LAST_24_HRS": "Last 24 Hours",
     "LAST_7_DAYS": "Last 7 Days",
     "LAST_30_DAYS": "Last 30 Days",
+    "LAST_180_DAYS": "Last 180 Days",
+    "LAST_365_DAYS": "Last 365 Days",
     "ALL_TIME": "All Time",
     "ITEM_STATS": "Item Stats"
   },
@@ -132,6 +135,8 @@
   "SHOW_ARCHIVED_LIBRARIES": "Show Archived Libraries",
   "HIDE_ARCHIVED_LIBRARIES": "Hide Archived Libraries",
   "UNITS": {
+    "YEAR": "Year",
+    "YEARS": "Years",
     "MONTH": "Month",
     "MONTHS": "Months",
     "DAY": "Day",
@@ -143,7 +148,8 @@
     "SECOND": "Second",
     "SECONDS": "Seconds",
     "PLAYS": "Plays",
-    "ITEMS": "Items"
+    "ITEMS": "Items",
+    "STREAMS": "Streams"
   },
   "USERS_PAGE": {
     "ALL_USERS": "All Users",
@@ -170,6 +176,7 @@
     "LOGS": "Logs",
     "SIZE": "Size",
     "JELLYFIN_URL": "Jellyfin URL",
+    "EMBY_URL": "Emby URL",
     "API_KEY": "API Key",
     "API_KEYS": "API Keys",
     "KEY_NAME": "Key Name",

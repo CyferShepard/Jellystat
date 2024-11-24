@@ -3,6 +3,10 @@ const db = require("../db");
 class Config {
   async getConfig() {
     try {
+      //Manual overrides
+      process.env.POSTGRES_USER = process.env.POSTGRES_USER ?? "postgres";
+
+      //
       const { rows: config } = await db.query('SELECT * FROM app_config where "ID"=1');
 
       const state = this.#getConfigState(config);
@@ -12,14 +16,15 @@ class Config {
       }
 
       return {
-        JF_HOST: config[0].JF_HOST,
-        JF_API_KEY: config[0].JF_API_KEY,
+        JF_HOST: process.env.JF_HOST ?? config[0].JF_HOST,
+        JF_API_KEY: process.env.JF_API_KEY ?? config[0].JF_API_KEY,
         APP_USER: config[0].APP_USER,
         APP_PASSWORD: config[0].APP_PASSWORD,
         REQUIRE_LOGIN: config[0].REQUIRE_LOGIN,
         settings: config[0].settings,
         api_keys: config[0].api_keys,
         state: state,
+        IS_JELLYFIN: (process.env.IS_EMBY_API || "false").toLowerCase() === "false",
       };
     } catch (error) {
       return { error: "Config Details Not Found" };
@@ -29,6 +34,11 @@ class Config {
   async getPreferedAdmin() {
     const config = await this.getConfig();
     return config.settings?.preferred_admin?.userid;
+  }
+
+  async getExcludedLibraries() {
+    const config = await this.getConfig();
+    return config.settings?.ExcludedLibraries ?? [];
   }
 
   #getConfigState(Configured) {

@@ -1,6 +1,6 @@
 import "../css/libraryOverview.css";
 import { useState, useEffect } from "react";
-import axios from "axios";
+import axios from "../../lib/axios_instance";
 import Loading from "./general/loading";
 
 import LibraryStatComponent from "./libraryStatCard/library-stat-component";

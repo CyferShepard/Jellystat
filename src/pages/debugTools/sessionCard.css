@@ -1,0 +1,6 @@
+.json-data-container {
+  max-height: 300px;
+  overflow-y: auto;
+  background-color: black;
+  border-radius: 0px 0px 8px 8px;
+}

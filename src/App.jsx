@@ -2,7 +2,7 @@
 import "./App.css";
 import React, { useState, useEffect } from "react";
 import { Routes, Route } from "react-router-dom";
-import axios from "axios";
+import axios from "./lib/axios_instance";
 
 import socket from "./socket";
 import { ToastContainer, toast } from "react-toastify";
@@ -17,20 +17,8 @@ import Setup from "./pages/setup";
 import Login from "./pages/login";
 
 import Navbar from "./pages/components/general/navbar";
-import Home from "./pages/home";
-import Settings from "./pages/settings";
-import Users from "./pages/users";
-import UserInfo from "./pages/components/user-info";
-import Libraries from "./pages/libraries";
-import LibraryInfo from "./pages/components/library-info";
-import ItemInfo from "./pages/components/item-info";
 import ErrorPage from "./pages/components/general/error";
-import About from "./pages/about";
-
-import Testing from "./pages/testing";
-import Activity from "./pages/activity";
-import Statistics from "./pages/statistics";
-import { t } from "i18next";
+import routes from "./routes";
 
 function App() {
   const [setupState, setSetupState] = useState(0);
@@ -99,7 +87,7 @@ function App() {
   useEffect(() => {
     const fetchConfig = async () => {
       try {
-        const newConfig = await Config();
+        const newConfig = await Config.getConfig();
         if (!newConfig.response) {
           setConfig(newConfig);
         } else {
@@ -162,17 +150,9 @@ function App() {
           <Navbar />
           <main className="w-md-100">
             <Routes>
-              <Route path="/" element={<Home />} />
-              <Route path="/settings" element={<Settings />} />
-              <Route path="/users" element={<Users />} />
-              <Route path="/users/:UserId" element={<UserInfo />} />
-              <Route path="/libraries" element={<Libraries />} />
-              <Route path="/libraries/:LibraryId" element={<LibraryInfo />} />
-              <Route path="/libraries/item/:Id" element={<ItemInfo />} />
-              <Route path="/statistics" element={<Statistics />} />
-              <Route path="/activity" element={<Activity />} />
-              <Route path="/testing" element={<Testing />} />
-              <Route path="/about" element={<About />} />
+              {routes.map((route, index) => (
+                <Route key={index} path={route.path} element={route.element} />
+              ))}
             </Routes>
           </main>
         </div>

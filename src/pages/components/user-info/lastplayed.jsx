@@ -1,6 +1,5 @@
 import { useState, useEffect } from "react";
-import axios from "axios";
-
+import axios from "../../../lib/axios_instance";
 import LastWatchedCard from "../general/last-watched-card";
 import ErrorBoundary from "../general/ErrorBoundary";
 
@@ -15,7 +14,7 @@ function LastPlayed(props) {
   useEffect(() => {
     const fetchConfig = async () => {
       try {
-        const newConfig = await Config();
+        const newConfig = await Config.getConfig();
         setConfig(newConfig);
       } catch (error) {
         console.log(error);

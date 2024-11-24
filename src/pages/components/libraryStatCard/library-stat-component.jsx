@@ -42,7 +42,7 @@ function LibraryStatComponent(props) {
               </div>
             </Card.Header>
             {props.data &&
-            props.data.map((item, index) => (
+            props.data.slice(0,5).map((item, index) => (
               <div className="d-flex justify-content-between  stat-items" key={item.Id || index}>
               
                 <div className="d-flex justify-content-between">

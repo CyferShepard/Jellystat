@@ -13,6 +13,7 @@ import LanguageDetector from "i18next-browser-languagedetector";
 import { initReactI18next } from "react-i18next";
 
 import Loading from "./pages/components/general/loading.jsx";
+import baseUrl from "./lib/baseurl.jsx";
 
 i18n
   .use(Backend)
@@ -21,6 +22,9 @@ i18n
   .init({
     fallbackLng: "en-UK",
     debug: false,
+    backend: {
+      loadPath: `${baseUrl}/locales/{{lng}}/{{ns}}.json`,
+    },
     detection: {
       order: ["cookie", "localStorage", "sessionStorage", "navigator", "htmlTag", "querystring", "path", "subdomain"],
       cache: ["cookie"],
@@ -33,7 +37,7 @@ i18n
     ReactDOM.createRoot(document.getElementById("root")).render(
       <React.StrictMode>
         <Suspense fallback={<Loading />} />
-        <BrowserRouter basename={import.meta.env.JS_BASE_URL ?? "/"}>
+        <BrowserRouter basename={baseUrl}>
           <App />
         </BrowserRouter>
       </React.StrictMode>

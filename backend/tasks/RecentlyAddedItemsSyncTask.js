@@ -14,7 +14,7 @@ async function RecentlyAddedItemsSyncTask() {
     console.log("Error Cleaning up Sync Tasks: " + error);
   }
 
-  let interval = 10000;
+  let interval = 11000;
 
   let taskDelay = 60; //in minutes
 
@@ -71,11 +71,26 @@ async function RecentlyAddedItemsSyncTask() {
                                           LIMIT 1`
         )
         .then((res) => res.rows);
+
+      const last_execution_FullSync = await db
+        .query(
+          `SELECT "TimeRun","Result"
+                                            FROM public.jf_logging
+                                            WHERE "Name"='${taskName.fullsync}'
+                                            AND "Result"='${taskstate.RUNNING}'
+                                            ORDER BY "TimeRun" DESC
+                                            LIMIT 1`
+        )
+        .then((res) => res.rows);
       if (last_execution.length !== 0) {
         await fetchTaskSettings();
         let last_execution_time = moment(last_execution[0].TimeRun).add(taskDelay, "minutes");
 
-        if (!current_time.isAfter(last_execution_time) || last_execution[0].Result === taskstate.RUNNING) {
+        if (
+          !current_time.isAfter(last_execution_time) ||
+          last_execution[0].Result === taskstate.RUNNING ||
+          last_execution_FullSync.length > 0
+        ) {
           intervalTask = setInterval(intervalCallback, interval);
           return;
         }
