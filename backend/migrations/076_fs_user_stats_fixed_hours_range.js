@@ -22,7 +22,7 @@ AS $BODY$
               jf_playback_activity."UserName" AS "Name"
           FROM jf_playback_activity
           WHERE
-              jf_playback_activity."ActivityDateInserted" BETWEEN  NOW() - INTERVAL '1 hour' * hours AND NOW()
+              jf_playback_activity."ActivityDateInserted" >  NOW() - INTERVAL '1 hour' * hours 
               AND jf_playback_activity."UserId" = userid
           GROUP BY jf_playback_activity."UserId", jf_playback_activity."UserName"
           ORDER BY count(*) DESC;
