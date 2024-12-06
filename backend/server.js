@@ -35,8 +35,7 @@ const { setupWebSocketServer } = require("./ws");
 const writeEnvVariables = require("./classes/env");
 
 process.env.POSTGRES_USER = process.env.POSTGRES_USER ?? "postgres";
-process.env.POSTGRES_ROLE =
-  process.env.POSTGRES_ROLE ?? process.env.POSTGRES_USER;
+process.env.POSTGRES_ROLE = process.env.POSTGRES_ROLE ?? process.env.POSTGRES_USER;
 
 const app = express();
 const db = knex(knexConfig.development);
@@ -110,7 +109,7 @@ app.use((req, res, next) => {
     return res.redirect(BASE_NAME);
   }
   // Ignore requests containing 'socket.io'
-  if (req.url.includes("socket.io") || req.url.includes("swagger")) {
+  if (req.url.includes("socket.io") || req.url.includes("swagger") || req.url.startsWith("/backup")) {
     return next();
   }
 
@@ -206,9 +205,7 @@ async function authenticate(req, res, next) {
     }
   } else {
     if (apiKey) {
-      const keysjson = await dbInstance
-        .query('SELECT api_keys FROM app_config where "ID"=1')
-        .then((res) => res.rows[0].api_keys);
+      const keysjson = await dbInstance.query('SELECT api_keys FROM app_config where "ID"=1').then((res) => res.rows[0].api_keys);
 
       if (!keysjson || Object.keys(keysjson).length === 0) {
         return res.status(404).json({ message: "No API keys configured" });
