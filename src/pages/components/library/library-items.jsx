@@ -12,6 +12,7 @@ import "../../css/width_breakpoint_css.css";
 import "../../css/radius_breakpoint_css.css";
 import { Trans } from "react-i18next";
 import Loading from "../general/loading";
+import i18next from "i18next";
 
 function LibraryItems(props) {
   const [data, setData] = useState();
@@ -169,7 +170,7 @@ function LibraryItems(props) {
           </div>
           <FormControl
             type="text"
-            placeholder="Search"
+            placeholder={i18next.t("SEARCH")}
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             className="ms-md-3 mt-2 mb-2 my-md-3 w-sm-100 w-md-75"
