@@ -30,11 +30,11 @@ function formatTotalWatchTime(seconds) {
   let timeString = "";
 
   if (hours > 0) {
-    timeString += `${hours} ${hours === 1 ? "hr" : "hrs"} `;
+    timeString += `${hours} ${hours === 1 ? i18next.t("UNITS.HOUR").toLowerCase() : i18next.t("UNITS.HOURS").toLowerCase()} `;
   }
 
   if (minutes > 0) {
-    timeString += `${minutes} ${minutes === 1 ? "min" : "mins"} `;
+    timeString += `${minutes} ${minutes === 1 ? i18next.t("UNITS.MINUTE").toLowerCase() : i18next.t("UNITS.MINUTES").toLowerCase()} `;
   }
 
   if (remainingSeconds > 0) {

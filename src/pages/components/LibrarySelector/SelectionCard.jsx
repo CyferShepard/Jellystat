@@ -73,7 +73,7 @@ function SelectionCard(props) {
 
             <Row className="space-between-end card-row">
               <Col className="card-label"><Trans i18nKey={"TYPE"}/></Col>
-              <Col className="text-end">{props.data.CollectionType==='tvshows' ? 'Series' : props.data.CollectionType==='movies'? "Movies" : props.data.CollectionType==='music'? "Music" : 'Mixed'}</Col>
+              <Col className="text-end">{props.data.CollectionType==='tvshows' ? <Trans i18nKey="SERIES" /> : props.data.CollectionType==='movies'? <Trans i18nKey="MOVIES" /> : props.data.CollectionType==='music'? <Trans i18nKey="MUSIC" /> : 'Mixed'}</Col>
             </Row>
 
             <Row className="space-between-end card-row">

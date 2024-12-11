@@ -78,7 +78,7 @@ function LibraryActivity(props) {
         </h1>
 
         <div className="d-flex flex-column flex-md-row">
-          <div className="d-flex flex-row w-100 ms-md-3 w-sm-100 w-md-75 mb-3 my-md-3">
+          <div className="d-flex flex-row w-100 ms-md-3 w-sm-100 w-md-75 mb-3 my-md-3" style={{whiteSpace: "nowrap"}}>
             <div className="d-flex flex-col rounded-0 rounded-start  align-items-center px-2 bg-primary-1">
               <Trans i18nKey="TYPE" />
             </div>
@@ -101,7 +101,7 @@ function LibraryActivity(props) {
             </FormSelect>
           </div>
 
-          <div className="d-flex flex-row w-100 ms-md-3 w-sm-100 w-md-75  ms-md-3">
+          <div className="d-flex flex-row w-100 ms-md-3 w-sm-100 w-md-75  ms-md-3" style={{whiteSpace: "nowrap"}}>
             <div className="d-flex flex-col rounded-0 rounded-start  align-items-center px-2 bg-primary-1 my-md-3">
               <Trans i18nKey="UNITS.ITEMS" />
             </div>
