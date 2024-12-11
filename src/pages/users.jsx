@@ -419,7 +419,7 @@ function Users() {
           <Trans i18nKey="USERS_PAGE.ALL_USERS" />
         </h1>
 
-        <div className="d-flex flex-column flex-md-row">
+        <div className="d-flex flex-column flex-md-row" style={{whiteSpace: "nowrap"}}>
           <div className="d-flex flex-row w-100">
             <div className="d-flex flex-col my-md-3 rounded-0 rounded-start  align-items-center px-2 bg-primary-1">
               <Trans i18nKey="UNITS.ITEMS" />
