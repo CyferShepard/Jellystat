@@ -75,7 +75,7 @@ function LibrarySelector() {
         {data &&
           data.map((item) => (
             <ErrorBoundary key={item.Id}>
-              <SelectionCard data={item} base_url={config.hostUrl} />
+              <SelectionCard data={item} base_url={config.settings?.EXTERNAL_URL ?? config.hostUrl} />
             </ErrorBoundary>
           ))}
       </div>

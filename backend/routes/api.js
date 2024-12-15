@@ -312,6 +312,45 @@ router.post("/setconfig", async (req, res) => {
     console.log(error);
   }
 });
+
+router.post("/setExternalUrl", async (req, res) => {
+  try {
+    const { ExternalUrl } = req.body;
+
+    if (ExternalUrl === undefined) {
+      res.status(400);
+      res.send("ExternalUrl is required for configuration");
+      return;
+    }
+
+    const config = await new configClass().getConfig();
+    const validation = await API.validateSettings(ExternalUrl, config.JF_API_KEY);
+    if (validation.isValid === false) {
+      res.status(validation.status);
+      res.send(validation);
+      return;
+    }
+
+    try {
+      const settings = config.settings || {};
+      settings.EXTERNAL_URL = ExternalUrl;
+
+      const query = 'UPDATE app_config SET settings=$1 where "ID"=1';
+
+      await db.query(query, [settings]);
+      config.settings = settings;
+      res.send(config);
+    } catch (error) {
+      res.status(503);
+      res.send({ error: "Error: " + error });
+    }
+  } catch (error) {
+    console.log(error);
+    res.status(503);
+    res.send({ error: "Error: " + error });
+  }
+});
+
 router.post("/setPreferredAdmin", async (req, res) => {
   try {
     const { userid, username } = req.body;

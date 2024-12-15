@@ -454,7 +454,7 @@ function Users() {
           <EnhancedTableHead order={order} orderBy={orderBy} onRequestSort={handleRequestSort} rowCount={rowsPerPage} />
           <TableBody>
             {filteredData.map((row) => (
-              <Row key={row.UserId} data={row} updateTrackedState={updateTrackedState} hostUrl={config.hostUrl} />
+              <Row key={row.UserId} data={row} updateTrackedState={updateTrackedState} hostUrl={config.settings?.EXTERNAL_URL ?? config.hostUrl} />
             ))}
             {data.length === 0 ? (
               <tr>

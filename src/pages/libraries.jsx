@@ -107,7 +107,11 @@ function Libraries() {
             .sort((a, b) => a.Name - b.Name)
             .map((item) => (
               <ErrorBoundary key={item.Id}>
-                <LibraryCard data={item} metadata={metadata.find((data) => data.Id === item.Id)} base_url={config.hostUrl} />
+                <LibraryCard
+                  data={item}
+                  metadata={metadata.find((data) => data.Id === item.Id)}
+                  base_url={config.settings?.EXTERNAL_URL ?? config.hostUrl}
+                />
               </ErrorBoundary>
             ))}
       </div>

@@ -26,9 +26,12 @@ export default function SettingsConfig() {
   const [selectedLanguage, setSelectedLanguage] = useState(localStorage.getItem("i18nextLng") ?? "en-US");
   const [showKey, setKeyState] = useState(false);
   const [formValues, setFormValues] = useState({});
+  const [formValuesExternal, setFormValuesExternal] = useState({});
   const [isSubmitted, setisSubmitted] = useState("");
+  const [isSubmittedExternal, setisSubmittedExternal] = useState("");
   const [loadSate, setloadSate] = useState("Loading");
   const [submissionMessage, setsubmissionMessage] = useState("");
+  const [submissionMessageExternal, setsubmissionMessageExternal] = useState("");
   const token = localStorage.getItem("token");
   const [twelve_hr, set12hr] = useState(localStorage.getItem("12hr") === "true");
 
@@ -45,6 +48,7 @@ export default function SettingsConfig() {
     Config.getConfig()
       .then((config) => {
         setFormValues({ JF_HOST: config.hostUrl });
+        setFormValuesExternal({ ExternalUrl: config.settings?.EXTERNAL_URL });
         setConfig(config);
         setSelectedAdmin(config.settings?.preferred_admin);
         setloadSate("Loaded");
@@ -94,11 +98,40 @@ export default function SettingsConfig() {
         setisSubmitted("Failed");
         setsubmissionMessage(`Error Updating Configuration: ${errorMessage}`);
       });
-      Config.setConfig();
+    Config.setConfig();
+  }
+
+  async function handleFormSubmitExternal(event) {
+    event.preventDefault();
+
+    setisSubmittedExternal("");
+    axios
+      .post("/api/setExternalUrl/", formValuesExternal, {
+        headers: {
+          Authorization: `Bearer ${config.token}`,
+          "Content-Type": "application/json",
+        },
+      })
+      .then((response) => {
+        console.log("Config updated successfully:", response.data);
+        setisSubmittedExternal("Success");
+        setsubmissionMessageExternal("Successfully updated configuration");
+      })
+      .catch((error) => {
+        let errorMessage = error.response.data.errorMessage;
+        console.log("Error updating config:", errorMessage);
+        setisSubmittedExternal("Failed");
+        setsubmissionMessageExternal(`Error Updating Configuration: ${errorMessage}`);
+      });
+    Config.setConfig();
   }
 
   function handleFormChange(event) {
     setFormValues({ ...formValues, [event.target.name]: event.target.value });
+  }
+
+  function handleFormChangeExternal(event) {
+    setFormValuesExternal({ ...formValuesExternal, [event.target.name]: event.target.value });
   }
 
   function updateAdmin(event) {
@@ -130,7 +163,7 @@ export default function SettingsConfig() {
         setisSubmitted("Failed");
         setsubmissionMessage("Error Updating Configuration: ", error);
       });
-      Config.setConfig();
+    Config.setConfig();
   }
 
   function updateLanguage(event) {
@@ -160,8 +193,11 @@ export default function SettingsConfig() {
       <Form onSubmit={handleFormSubmit} className="settings-form">
         <Form.Group as={Row} className="mb-3">
           <Form.Label column className="">
-            {config.settings?.IS_JELLYFIN ? <Trans i18nKey={"SETTINGS_PAGE.JELLYFIN_URL"} /> : <Trans i18nKey={"SETTINGS_PAGE.EMBY_URL"} /> }
-            
+            {config.settings?.IS_JELLYFIN ? (
+              <Trans i18nKey={"SETTINGS_PAGE.JELLYFIN_URL"} />
+            ) : (
+              <Trans i18nKey={"SETTINGS_PAGE.EMBY_URL"} />
+            )}
           </Form.Label>
           <Col sm="10">
             <Form.Control
@@ -208,6 +244,39 @@ export default function SettingsConfig() {
           </Button>
         </div>
       </Form>
+
+      <Form onSubmit={handleFormSubmitExternal} className="settings-form">
+        <Form.Group as={Row} className="mb-3">
+          <Form.Label column className="">
+            <Trans i18nKey={"SETTINGS_PAGE.EXTERNAL_URL"} />
+          </Form.Label>
+          <Col sm="10">
+            <Form.Control
+              id="ExternalUrl"
+              name="ExternalUrl"
+              value={formValuesExternal.ExternalUrl || ""}
+              onChange={handleFormChangeExternal}
+              placeholder="http://example.jellyfin.server"
+            />
+          </Col>
+        </Form.Group>
+
+        {isSubmittedExternal !== "" ? (
+          isSubmittedExternal === "Failed" ? (
+            <Alert variant="danger">{submissionMessageExternal}</Alert>
+          ) : (
+            <Alert variant="success">{submissionMessageExternal}</Alert>
+          )
+        ) : (
+          <></>
+        )}
+        <div className="d-flex flex-column flex-md-row justify-content-end align-items-md-center">
+          <Button variant="outline-success" type="submit">
+            <Trans i18nKey={"SETTINGS_PAGE.UPDATE"} />
+          </Button>
+        </div>
+      </Form>
+
       <Form className="settings-form">
         <Form.Group as={Row} className="mb-3">
           <Form.Label column className="">

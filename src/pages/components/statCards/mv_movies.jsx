@@ -74,7 +74,7 @@ function MVMusic(props) {
 
 
   return (
-    <ItemStatComponent base_url={config.hostUrl} data={data} heading={<Trans i18nKey="STAT_CARDS.MOST_VIEWED_MOVIES" />} units={<Trans i18nKey="UNITS.PLAYS" />}/>
+    <ItemStatComponent base_url={config.settings?.EXTERNAL_URL ?? config.hostUrl} data={data} heading={<Trans i18nKey="STAT_CARDS.MOST_VIEWED_MOVIES" />} units={<Trans i18nKey="UNITS.PLAYS" />}/>
   );
 }
 

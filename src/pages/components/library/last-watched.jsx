@@ -62,7 +62,7 @@ function LibraryLastWatched(props) {
         <h1 className="my-3"><Trans i18nKey="LAST_WATCHED"/></h1>
         <div className="last-played-container">
         {data.map((item) => (
-                    <LastWatchedCard data={item} base_url={config.hostUrl} key={item.Id+item.SeasonNumber+item.EpisodeNumber}/>
+                    <LastWatchedCard data={item} base_url={config.settings?.EXTERNAL_URL ?? config.hostUrl} key={item.Id+item.SeasonNumber+item.EpisodeNumber}/>
           ))}
 
         </div>
