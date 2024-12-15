@@ -67,7 +67,7 @@ function LastPlayed(props) {
       <div className="last-played-container">
         {data.map((item, index) => (
           <ErrorBoundary key={item.Id + item.EpisodeNumber + index}>
-            <LastWatchedCard data={item} base_url={config.hostUrl} />
+            <LastWatchedCard data={item} base_url={config.settings?.EXTERNAL_URL ?? config.hostUrl} />
           </ErrorBoundary>
         ))}
       </div>

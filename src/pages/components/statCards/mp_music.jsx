@@ -70,7 +70,7 @@ function MPMusic(props) {
 
 
   return (
-    <ItemStatComponent  base_url={config.hostUrl} data={data} heading={<Trans i18nKey="STAT_CARDS.MOST_POPULAR_MUSIC" />} units={<Trans i18nKey="USERS" />} isAudio={true}/>
+    <ItemStatComponent  base_url={config.settings?.EXTERNAL_URL ?? config.hostUrl} data={data} heading={<Trans i18nKey="STAT_CARDS.MOST_POPULAR_MUSIC" />} units={<Trans i18nKey="USERS" />} isAudio={true}/>
   );
 }
 

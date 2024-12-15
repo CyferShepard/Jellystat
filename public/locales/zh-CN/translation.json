@@ -177,6 +177,7 @@
     "SIZE": "大小",
     "JELLYFIN_URL": "Jellyfin URL",
     "EMBY_URL": "Emby URL",
+    "EXTERNAL_URL": "External URL",
     "API_KEY": "API 密钥",
     "API_KEYS": "API 密钥",
     "KEY_NAME": "密钥名称",
