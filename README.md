@@ -46,6 +46,7 @@
 - Clone the project from git
 - Set your env variables before starting the server (Variable names as per [Environmental Variables](#environmental-variables) above).
 - Run `npm install` to install necessary packages
+- Run `npm run build` to build local files ready to run
 - Run `npm run start-server` to only run the backend nodejs server
 - Run `npm run start-client` to only run the frontend React UI
 - Run `npm run start-app` to run both backend and frontend at the same time
