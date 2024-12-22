@@ -74,7 +74,7 @@ function ItemActivity(props) {
   filteredData = filteredData.filter((item) =>
     streamTypeFilter == "All"
       ? true
-      : item.PlayMethod === (config.settings?.IS_JELLYFIN ? streamTypeFilter : streamTypeFilter.replace("Play", "Stream"))
+      : item.PlayMethod === (config?.IS_JELLYFIN ? streamTypeFilter : streamTypeFilter.replace("Play", "Stream"))
   );
 
   return (

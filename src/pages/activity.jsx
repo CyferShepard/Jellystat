@@ -159,7 +159,7 @@ function Activity() {
       (libraryFilters.includes(item.ParentId) || item.ParentId == null) &&
       (streamTypeFilter == "All"
         ? true
-        : item.PlayMethod === (config.settings?.IS_JELLYFIN ? streamTypeFilter : streamTypeFilter.replace("Play", "Stream")))
+        : item.PlayMethod === (config?.IS_JELLYFIN ? streamTypeFilter : streamTypeFilter.replace("Play", "Stream")))
   );
 
   return (
