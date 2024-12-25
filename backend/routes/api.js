@@ -16,9 +16,10 @@ const { tables } = require("../global/backup_tables");
 const router = express.Router();
 
 //Functions
-function groupActivity(rows) {
+function groupActivity(rows, limit) {
   const groupedResults = {};
-  rows.forEach((row) => {
+  let objectsAdded = 0
+  rows.every((row) => {
     const key = row.NowPlayingItemId + row.EpisodeId + row.UserId;
     if (groupedResults[key]) {
       if (row.ActivityDateInserted > groupedResults[key].ActivityDateInserted) {
@@ -34,7 +35,9 @@ function groupActivity(rows) {
         results: [],
       };
       groupedResults[key].results.push(row);
+      objectsAdded++;
     }
+    return (objectsAdded < limit);
   });
 
   // Update GroupedResults with playbackDurationSum
@@ -1085,6 +1088,8 @@ router.post("/setExcludedBackupTable", async (req, res) => {
 
 //DB Queries - History
 router.get("/getHistory", async (req, res) => {
+  const { limit = 50 } = req.query;
+
   try {
     const { rows } = await db.query(`
     SELECT a.*, e."IndexNumber" "EpisodeNumber",e."ParentIndexNumber" "SeasonNumber" , i."ParentId"
@@ -1094,9 +1099,9 @@ router.get("/getHistory", async (req, res) => {
     and a."SeasonId"=e."SeasonId"
     left join jf_library_items i
     on i."Id"=a."NowPlayingItemId" or e."SeriesId"=i."Id"
-     order by a."ActivityDateInserted" desc`);
+    order by a."ActivityDateInserted" desc`);
 
-    const groupedResults = groupActivity(rows);
+    const groupedResults = groupActivity(rows, limit);
 
     res.send(Object.values(groupedResults));
   } catch (error) {
@@ -1106,6 +1111,7 @@ router.get("/getHistory", async (req, res) => {
 
 router.post("/getLibraryHistory", async (req, res) => {
   try {
+    const { limit = 50 } = req.query;
     const { libraryid } = req.body;
 
     if (libraryid === undefined) {
@@ -1126,7 +1132,7 @@ router.post("/getLibraryHistory", async (req, res) => {
       order by a."ActivityDateInserted" desc`,
       [libraryid]
     );
-    const groupedResults = groupActivity(rows);
+    const groupedResults = groupActivity(rows, limit);
     res.send(Object.values(groupedResults));
   } catch (error) {
     console.log(error);
@@ -1149,10 +1155,11 @@ router.post("/getItemHistory", async (req, res) => {
       `select a.*, e."IndexNumber" "EpisodeNumber",e."ParentIndexNumber" "SeasonNumber" 
       from jf_playback_activity a
       left join jf_library_episodes e
-    on a."EpisodeId"=e."EpisodeId"
-    and a."SeasonId"=e."SeasonId"
+      on a."EpisodeId"=e."EpisodeId"
+      and a."SeasonId"=e."SeasonId"
       where
-      (a."EpisodeId"=$1 OR a."SeasonId"=$1 OR a."NowPlayingItemId"=$1);`,
+      (a."EpisodeId"=$1 OR a."SeasonId"=$1 OR a."NowPlayingItemId"=$1)
+      order by a."ActivityDateInserted" desc;`,
       [itemid]
     );
 
@@ -1171,6 +1178,7 @@ router.post("/getItemHistory", async (req, res) => {
 
 router.post("/getUserHistory", async (req, res) => {
   try {
+    const { limit = 50 } = req.query;
     const { userid } = req.body;
 
     if (userid === undefined) {
@@ -1186,12 +1194,13 @@ router.post("/getUserHistory", async (req, res) => {
       on a."EpisodeId"=e."EpisodeId"
       and a."SeasonId"=e."SeasonId"
       left join jf_library_items i
-    on i."Id"=a."NowPlayingItemId" or e."SeriesId"=i."Id"
-      where a."UserId"=$1;`,
+      on i."Id"=a."NowPlayingItemId" or e."SeriesId"=i."Id"
+      where a."UserId"=$1
+      order by a."ActivityDateInserted" desc`,
       [userid]
     );
 
-    const groupedResults = groupActivity(rows);
+    const groupedResults = groupActivity(rows, limit);
 
     res.send(Object.values(groupedResults));
   } catch (error) {
@@ -1212,7 +1221,6 @@ router.post("/deletePlaybackActivity", async (req, res) => {
     }
 
     await db.query(`DELETE from jf_playback_activity where "Id" = ANY($1)`, [ids]);
-    // const groupedResults = groupActivity(rows);
     res.send(`${ids.length} Records Deleted`);
   } catch (error) {
     console.log(error);

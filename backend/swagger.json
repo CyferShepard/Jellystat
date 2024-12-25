@@ -1735,6 +1735,11 @@
             "name": "req",
             "in": "query",
             "type": "string"
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "type": "string"
           }
         ],
         "responses": {
@@ -1770,6 +1775,11 @@
           },
           {
             "name": "req",
+            "in": "query",
+            "type": "string"
+          },
+          {
+            "name": "limit",
             "in": "query",
             "type": "string"
           },
@@ -1880,6 +1890,11 @@
           },
           {
             "name": "req",
+            "in": "query",
+            "type": "string"
+          },
+          {
+            "name": "limit",
             "in": "query",
             "type": "string"
           },
