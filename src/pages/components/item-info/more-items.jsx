@@ -71,7 +71,7 @@ function MoreItems(props) {
         <div className="last-played-container">
         
          {data.sort((a,b) => a.IndexNumber-b.IndexNumber).map((item) => (
-                     <MoreItemCards data={item} base_url={config.hostUrl} key={item.Id}/>
+                     <MoreItemCards data={item} base_url={config.settings?.EXTERNAL_URL ?? config.hostUrl} key={item.Id}/>
           ))}
 
         </div>

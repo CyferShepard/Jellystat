@@ -12,6 +12,7 @@ import "../../css/width_breakpoint_css.css";
 import "../../css/radius_breakpoint_css.css";
 import { Trans } from "react-i18next";
 import Loading from "../general/loading";
+import i18next from "i18next";
 
 function LibraryItems(props) {
   const [data, setData] = useState();
@@ -169,7 +170,7 @@ function LibraryItems(props) {
           </div>
           <FormControl
             type="text"
-            placeholder="Search"
+            placeholder={i18next.t("SEARCH")}
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             className="ms-md-3 mt-2 mb-2 my-md-3 w-sm-100 w-md-75"
@@ -211,7 +212,7 @@ function LibraryItems(props) {
             }
           })
           .map((item) => (
-            <MoreItemCards data={item} base_url={config.hostUrl} key={item.Id + item.SeasonNumber + item.EpisodeNumber} />
+            <MoreItemCards data={item} base_url={config.settings?.EXTERNAL_URL ?? config.hostUrl} key={item.Id + item.SeasonNumber + item.EpisodeNumber} />
           ))}
       </div>
     </div>

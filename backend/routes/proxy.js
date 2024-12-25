@@ -26,6 +26,9 @@ router.get("/web/assets/img/devices/", async (req, res) => {
     })
     .then((response) => {
       res.set("Content-Type", "image/svg+xml");
+      if (config.IS_JELLYFIN == false) {
+        res.set("Content-Type", "image/png");
+      }
       res.status(200);
 
       if (response.headers["content-type"].startsWith("image/")) {

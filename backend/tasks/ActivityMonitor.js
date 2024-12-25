@@ -7,6 +7,7 @@ const configClass = require("../classes/config");
 const API = require("../classes/api-loader");
 const { sendUpdate } = require("../ws");
 const { isNumber } = require("@mui/x-data-grid/internals");
+const MINIMUM_SECONDS_TO_INCLUDE_PLAYBACK = process.env.MINIMUM_SECONDS_TO_INCLUDE_PLAYBACK ? Number(process.env.MINIMUM_SECONDS_TO_INCLUDE_PLAYBACK) : 1;
 
 async function getSessionsInWatchDog(SessionData, WatchdogData) {
   let existingData = await WatchdogData.filter((wdData) => {
@@ -180,7 +181,7 @@ async function ActivityMonitor(interval) {
       let ExistingDataToUpdate = [];
 
       //for each item in playbackToInsert, check if it exists in the recent playback activity and update accordingly. insert new row if updating existing exceeds the runtime
-      if (playbackToInsert.length > 0 && ExistingRecords.length > 0) {
+      if (playbackToInsert.length >0 && ExistingRecords.length >0) {
         ExistingDataToUpdate = playbackToInsert.filter((playbackData) => {
           const existingrow = ExistingRecords.find((existing) => {
             let newDurationWithingRunTime = true;
@@ -211,7 +212,7 @@ async function ActivityMonitor(interval) {
       //remove items from playbackToInsert that already exists in the recent playback activity so it doesnt duplicate or where PlaybackDuration===0
       playbackToInsert = playbackToInsert.filter(
         (pb) =>
-          pb.PlaybackDuration > 0 &&
+          pb.PlaybackDuration >= MINIMUM_SECONDS_TO_INCLUDE_PLAYBACK &&
           !ExistingRecords.some(
             (er) => er.NowPlayingItemId === pb.NowPlayingItemId && er.EpisodeId === pb.EpisodeId && er.UserId === pb.UserId
           )
@@ -219,7 +220,7 @@ async function ActivityMonitor(interval) {
 
       //remove items where PlaybackDuration===0
 
-      ExistingDataToUpdate = ExistingDataToUpdate.filter((pb) => pb.PlaybackDuration > 0);
+      ExistingDataToUpdate = ExistingDataToUpdate.filter((pb) => pb.PlaybackDuration >= MINIMUM_SECONDS_TO_INCLUDE_PLAYBACK);
 
       if (toDeleteIds.length > 0) {
         await db.deleteBulk("jf_activity_watchdog", toDeleteIds, "ActivityId");

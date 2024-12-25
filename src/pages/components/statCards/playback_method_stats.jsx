@@ -77,7 +77,7 @@ function PlaybackMethodStats(props) {
 
   return (
     <ItemStatComponent
-      base_url={config.hostUrl}
+      base_url={config.settings?.EXTERNAL_URL ?? config.hostUrl}
       data={data.map((stream) =>
         stream.Name == "DirectPlay" ? { ...stream, Name: translations.DirectPlay } : { ...stream, Name: translations.Transocde }
       )}

@@ -8,6 +8,7 @@ import "../../css/radius_breakpoint_css.css";
 import "../../css/users/user-activity.css";
 import i18next from "i18next";
 import LibraryFilterModal from "../library/library-filter-modal";
+import Config from "../../../lib/config.jsx";
 
 function UserActivity(props) {
   const [data, setData] = useState();
@@ -18,6 +19,25 @@ function UserActivity(props) {
   const [libraryFilters, setLibraryFilters] = useState([]);
   const [libraries, setLibraries] = useState([]);
   const [showLibraryFilters, setShowLibraryFilters] = useState(false);
+  const [config, setConfig] = useState();
+
+  useEffect(() => {
+    const fetchConfig = async () => {
+      try {
+        const newConfig = await Config.getConfig();
+        setConfig(newConfig);
+      } catch (error) {
+        console.log(error);
+      }
+    };
+
+    if (!config) {
+      fetchConfig();
+    }
+
+    const intervalId = setInterval(config, 60000 * 5);
+    return () => clearInterval(intervalId);
+  }, [config]);
 
   const handleLibraryFilter = (selectedOptions) => {
     setLibraryFilters(selectedOptions);
@@ -101,7 +121,9 @@ function UserActivity(props) {
   filteredData = filteredData.filter(
     (item) =>
       (libraryFilters.includes(item.ParentId) || item.ParentId == null) &&
-      (streamTypeFilter == "All" ? true : item.PlayMethod === streamTypeFilter)
+      (streamTypeFilter == "All"
+        ? true
+        : item.PlayMethod === (config?.IS_JELLYFIN ? streamTypeFilter : streamTypeFilter.replace("Play", "Stream")))
   );
   return (
     <div className="Activity">
@@ -126,7 +148,7 @@ function UserActivity(props) {
           <Trans i18nKey="ITEM_ACTIVITY" />
         </h1>
 
-        <div className="d-flex flex-column flex-md-row">
+        <div className="d-flex flex-column flex-md-row" style={{ whiteSpace: "nowrap" }}>
           <Button onClick={() => setShowLibraryFilters(true)} className="ms-md-3 mb-3 my-md-3">
             <Trans i18nKey="MENU_TABS.LIBRARIES" />
           </Button>
@@ -154,7 +176,7 @@ function UserActivity(props) {
             </FormSelect>
           </div>
 
-          <div className="d-flex flex-row w-100 ms-md-3 w-sm-100 w-md-75  ms-md-3">
+          <div className="d-flex flex-row w-100 ms-md-3 w-sm-100 w-md-75  ms-md-3" style={{ whiteSpace: "nowrap" }}>
             <div className="d-flex flex-col rounded-0 rounded-start  align-items-center px-2 bg-primary-1 my-md-3">
               <Trans i18nKey="UNITS.ITEMS" />
             </div>

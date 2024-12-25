@@ -257,7 +257,7 @@ function ItemInfo() {
                   <Link
                     className="px-2"
                     to={
-                      config.hostUrl +
+                     (config.settings?.EXTERNAL_URL ?? config.hostUrl) +
                       `/web/index.html#!/${config.IS_JELLYFIN ? "details" : "item"}?id=` +
                       (data.EpisodeId || data.Id) +
                       (config.settings.ServerID ? "&serverId=" + config.settings.ServerID : "")

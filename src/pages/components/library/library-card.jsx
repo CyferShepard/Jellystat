@@ -157,7 +157,7 @@ function LibraryCard(props) {
           </Link>
 
 
-          <Card.Body className="library-card-details">
+          <Card.Body className="library-card-details" style={{whiteSpace: "nowrap"}}>
             <Row className="space-between-end card-row">
               <Col className="card-label"><Trans i18nKey="LIBRARY_CARD.LIBRARY" /></Col>
               <Col className="text-end">{props.data.Name}</Col>
@@ -195,7 +195,7 @@ function LibraryCard(props) {
 
             <Row className="space-between-end card-row">
               <Col className="card-label"><Trans i18nKey="LIBRARY_CARD.LAST_PLAYED" /></Col>
-              <Col className="text-end">{props.data.ItemName || 'n/a'}</Col>
+              <Col className="text-end">{props.data.ItemName || `${i18next.t("ERROR_MESSAGES.N/A")}`}</Col>
             </Row>
 
             <Row className="space-between-end card-row">
