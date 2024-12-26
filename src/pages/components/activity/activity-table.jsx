@@ -363,7 +363,6 @@ export default function ActivityTable(props) {
 
       return row.results;
     },
-    paginateExpandedRows: false,
     onPaginationChange: handlePageChange,
     getRowId: (row) => row.Id,
     muiExpandButtonProps: ({ row }) => ({
