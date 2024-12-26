@@ -25,6 +25,12 @@ function Activity() {
   );
   const [libraries, setLibraries] = useState([]);
   const [showLibraryFilters, setShowLibraryFilters] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [isBusy, setIsBusy] = useState(false);
+
+  const handlePageChange = (newPage) => {
+    setCurrentPage(newPage);
+  };
 
   function setItemLimit(limit) {
     setItemCount(limit);
@@ -64,7 +70,8 @@ function Activity() {
     };
 
     const fetchHistory = () => {
-      const url = `/api/getHistory`;
+      setIsBusy(true);
+      const url = `/api/getHistory?size=${itemCount}&page=${currentPage}`;
       axios
         .get(url, {
           headers: {
@@ -74,9 +81,11 @@ function Activity() {
         })
         .then((data) => {
           setData(data.data);
+          setIsBusy(false);
         })
         .catch((error) => {
           console.log(error);
+          setIsBusy(false);
         });
     };
 
@@ -111,9 +120,11 @@ function Activity() {
         });
     };
 
-    if (!data && config) {
-      fetchHistory();
-      fetchLibraries();
+    if (config) {
+      if (!data || data.current_page !== currentPage) {
+        fetchHistory();
+        fetchLibraries();
+      }
     }
 
     if (!config) {
@@ -122,7 +133,7 @@ function Activity() {
 
     const intervalId = setInterval(fetchHistory, 60000 * 60);
     return () => clearInterval(intervalId);
-  }, [data, config]);
+  }, [data, config, itemCount, currentPage]);
 
   if (!data) {
     return <Loading />;
@@ -145,10 +156,10 @@ function Activity() {
     );
   }
 
-  let filteredData = data;
+  let filteredData = data.results;
 
   if (searchQuery) {
-    filteredData = data.filter((item) =>
+    filteredData = data.results.filter((item) =>
       (!item.SeriesName ? item.NowPlayingItemName : item.SeriesName + " - " + item.NowPlayingItemName)
         .toLowerCase()
         .includes(searchQuery.toLowerCase())
@@ -240,7 +251,13 @@ function Activity() {
         </div>
       </div>
       <div className="Activity">
-        <ActivityTable data={filteredData} itemCount={itemCount} />
+        <ActivityTable
+          data={filteredData}
+          itemCount={itemCount}
+          onPageChange={handlePageChange}
+          pageCount={data.pages}
+          isBusy={isBusy}
+        />
       </div>
     </div>
   );

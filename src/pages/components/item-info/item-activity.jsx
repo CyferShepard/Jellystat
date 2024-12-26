@@ -13,6 +13,12 @@ function ItemActivity(props) {
   const [searchQuery, setSearchQuery] = useState("");
   const [streamTypeFilter, setStreamTypeFilter] = useState("All");
   const [config, setConfig] = useState();
+  const [currentPage, setCurrentPage] = useState(1);
+  const [isBusy, setIsBusy] = useState(false);
+
+  const handlePageChange = (newPage) => {
+    setCurrentPage(newPage);
+  };
 
   useEffect(() => {
     const fetchConfig = async () => {
@@ -30,8 +36,9 @@ function ItemActivity(props) {
 
     const fetchData = async () => {
       try {
+        setIsBusy(true);
         const itemData = await axios.post(
-          `/api/getItemHistory`,
+          `/api/getItemHistory?size=${itemCount}&page=${currentPage}`,
           {
             itemid: props.itemid,
           },
@@ -43,6 +50,7 @@ function ItemActivity(props) {
           }
         );
         setData(itemData.data);
+        setIsBusy(false);
       } catch (error) {
         console.log(error);
       }
@@ -54,16 +62,16 @@ function ItemActivity(props) {
 
     const intervalId = setInterval(fetchData, 60000 * 5);
     return () => clearInterval(intervalId);
-  }, [data, props.itemid, token]);
+  }, [data, props.itemid, token, itemCount, currentPage]);
 
-  if (!data) {
+  if (!data || !data.results) {
     return <></>;
   }
 
-  let filteredData = data;
+  let filteredData = data.results;
 
   if (searchQuery) {
-    filteredData = data.filter(
+    filteredData = data.results.filter(
       (item) =>
         (!item.SeriesName ? item.NowPlayingItemName : item.SeriesName + " - " + item.NowPlayingItemName)
           .toLowerCase()
@@ -136,7 +144,13 @@ function ItemActivity(props) {
       </div>
 
       <div className="Activity">
-        <ActivityTable data={filteredData} itemCount={itemCount} />
+        <ActivityTable
+          data={filteredData}
+          itemCount={itemCount}
+          onPageChange={handlePageChange}
+          pageCount={data.pages}
+          isBusy={isBusy}
+        />
       </div>
     </div>
   );

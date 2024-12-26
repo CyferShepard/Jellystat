@@ -1,7 +1,6 @@
 const { Pool } = require("pg");
 const pgp = require("pg-promise")();
 const { update_query: update_query_map } = require("./models/bulk_insert_update_handler");
-const moment = require("moment");
 
 const _POSTGRES_USER = process.env.POSTGRES_USER;
 const _POSTGRES_PASSWORD = process.env.POSTGRES_PASSWORD;
@@ -20,6 +19,9 @@ const pool = new Pool({
   database: _POSTGRES_DATABASE,
   password: _POSTGRES_PASSWORD,
   port: _POSTGRES_PORT,
+  max: 20, // Maximum number of connections in the pool
+  idleTimeoutMillis: 30000, // Close idle clients after 30 seconds
+  connectionTimeoutMillis: 2000, // Return an error after 2 seconds if connection could not be established
 });
 
 pool.on("error", (err, client) => {
@@ -163,6 +165,7 @@ async function querySingle(sql, params) {
 }
 
 module.exports = {
+  pool: pool,
   query: query,
   deleteBulk: deleteBulk,
   insertBulk: insertBulk,

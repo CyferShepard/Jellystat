@@ -14,7 +14,7 @@ import StreamInfo from "./stream_info";
 import "../../css/activity/activity-table.css";
 import i18next from "i18next";
 import IpInfoModal from "../ip-info";
-// import Loading from "../general/loading";
+import BusyLoader from "../general/busyLoader.jsx";
 import { MRT_TablePagination, MaterialReactTable, useMaterialReactTable } from "material-react-table";
 import { Box, ThemeProvider, Typography, createTheme } from "@mui/material";
 
@@ -34,7 +34,9 @@ function formatTotalWatchTime(seconds) {
   }
 
   if (minutes > 0) {
-    timeString += `${minutes} ${minutes === 1 ? i18next.t("UNITS.MINUTE").toLowerCase() : i18next.t("UNITS.MINUTES").toLowerCase()} `;
+    timeString += `${minutes} ${
+      minutes === 1 ? i18next.t("UNITS.MINUTE").toLowerCase() : i18next.t("UNITS.MINUTES").toLowerCase()
+    } `;
   }
 
   if (remainingSeconds > 0) {
@@ -60,16 +62,29 @@ export default function ActivityTable(props) {
   const [data, setData] = React.useState(props.data ?? []);
   const uniqueUserNames = [...new Set(data.map((item) => item.UserName))];
   const uniqueClients = [...new Set(data.map((item) => item.Client))];
+  const pages = props.pageCount || 1;
+  const isBusy = props.isBusy;
 
   const [rowSelection, setRowSelection] = React.useState({});
   const [pagination, setPagination] = React.useState({
+    pageSize: 10,
     pageIndex: 0,
-    pageSize: 10, //customize the default page size
   });
 
   const [modalState, setModalState] = React.useState(false);
   const [modalData, setModalData] = React.useState();
 
+  const handlePageChange = (updater) => {
+    setPagination((old) => {
+      const newPaginationState = typeof updater === "function" ? updater(old) : updater;
+      console.log(newPaginationState);
+      const newPage = newPaginationState.pageIndex; // MaterialReactTable uses 0-based index
+      if (props.onPageChange) {
+        props.onPageChange(newPage + 1);
+      }
+      return newPaginationState;
+    });
+  };
   //IP MODAL
 
   const ipv4Regex = new RegExp(
@@ -266,10 +281,15 @@ export default function ActivityTable(props) {
     enableExpanding: true,
     enableDensityToggle: false,
     enableTopToolbar: Object.keys(rowSelection).length > 0,
+    manualPagination: true,
+    autoResetPageIndex: false,
     initialState: {
       expanded: false,
       showGlobalFilter: true,
-      pagination: { pageSize: 10, pageIndex: 0 },
+      pagination: {
+        pageSize: 10,
+        pageIndex: 0,
+      },
       sorting: [
         {
           id: "Date",
@@ -277,6 +297,7 @@ export default function ActivityTable(props) {
         },
       ],
     },
+    pageCount: pages,
     showAlertBanner: false,
     enableHiding: false,
     enableFullScreenToggle: false,
@@ -343,7 +364,7 @@ export default function ActivityTable(props) {
       return row.results;
     },
     paginateExpandedRows: false,
-    onPaginationChange: setPagination,
+    onPaginationChange: handlePageChange,
     getRowId: (row) => row.Id,
     muiExpandButtonProps: ({ row }) => ({
       children: row.getIsExpanded() ? <IndeterminateCircleFillIcon /> : <AddCircleFillIcon />,
@@ -417,6 +438,8 @@ export default function ActivityTable(props) {
 
   return (
     <LocalizationProvider dateAdapter={AdapterDayjs}>
+      {isBusy && <BusyLoader />}
+
       <IpInfoModal show={ipModalVisible} onHide={() => setIPModalVisible(false)} ipAddress={ipAddressLookup} />
       <Modal
         show={confirmDeleteShow}

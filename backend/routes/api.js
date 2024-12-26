@@ -2,6 +2,8 @@
 const express = require("express");
 
 const db = require("../db");
+const dbHelper = require("../classes/db-helper");
+
 const pgp = require("pg-promise")();
 const { randomUUID } = require("crypto");
 
@@ -16,9 +18,8 @@ const { tables } = require("../global/backup_tables");
 const router = express.Router();
 
 //Functions
-function groupActivity(rows, limit) {
+function groupActivity(rows) {
   const groupedResults = {};
-  let objectsAdded = 0
   rows.every((row) => {
     const key = row.NowPlayingItemId + row.EpisodeId + row.UserId;
     if (groupedResults[key]) {
@@ -35,9 +36,8 @@ function groupActivity(rows, limit) {
         results: [],
       };
       groupedResults[key].results.push(row);
-      objectsAdded++;
     }
-    return (objectsAdded < limit);
+    return true;
   });
 
   // Update GroupedResults with playbackDurationSum
@@ -1088,22 +1088,41 @@ router.post("/setExcludedBackupTable", async (req, res) => {
 
 //DB Queries - History
 router.get("/getHistory", async (req, res) => {
-  const { limit = 50 } = req.query;
+  const { size = 50, page = 1 } = req.query;
 
   try {
-    const { rows } = await db.query(`
-    SELECT a.*, e."IndexNumber" "EpisodeNumber",e."ParentIndexNumber" "SeasonNumber" , i."ParentId"
-    FROM jf_playback_activity a
-    left join jf_library_episodes e
-    on a."EpisodeId"=e."EpisodeId"
-    and a."SeasonId"=e."SeasonId"
-    left join jf_library_items i
-    on i."Id"=a."NowPlayingItemId" or e."SeriesId"=i."Id"
-    order by a."ActivityDateInserted" desc`);
+    const result = await dbHelper.query({
+      select: ["a.*", "e.IndexNumber as EpisodeNumber", "e.ParentIndexNumber as SeasonNumber", "i.ParentId"],
+      table: "jf_playback_activity",
+      alias: "a",
+      joins: [
+        {
+          type: "left",
+          table: "jf_library_episodes",
+          alias: "e",
+          conditions: [
+            { first: "a.EpisodeId", operator: "=", second: "e.EpisodeId", type: "and" },
+            { first: "a.SeasonId", operator: "=", second: "e.SeasonId", type: "and" },
+          ],
+        },
+        {
+          type: "left",
+          table: "jf_library_items",
+          alias: "i",
+          conditions: [
+            { first: "i.Id", operator: "=", second: "a.NowPlayingItemId", type: "or" },
+            { first: "e.SeriesId", operator: "=", second: "i.Id", type: "or" },
+          ],
+        },
+      ],
+      order_by: "a.ActivityDateInserted",
+      sort_order: "desc",
+      pageNumber: page,
+      pageSize: size,
+    });
 
-    const groupedResults = groupActivity(rows, limit);
-
-    res.send(Object.values(groupedResults));
+    const groupedResults = groupActivity(result.results);
+    res.send({ current_page: page, pages: result.pages, results: Object.values(groupedResults) });
   } catch (error) {
     console.log(error);
   }
@@ -1111,7 +1130,7 @@ router.get("/getHistory", async (req, res) => {
 
 router.post("/getLibraryHistory", async (req, res) => {
   try {
-    const { limit = 50 } = req.query;
+    const { size = 50, page = 1 } = req.query;
     const { libraryid } = req.body;
 
     if (libraryid === undefined) {
@@ -1120,20 +1139,36 @@ router.post("/getLibraryHistory", async (req, res) => {
       return;
     }
 
-    const { rows } = await db.query(
-      `select a.* , e."IndexNumber" "EpisodeNumber",e."ParentIndexNumber" "SeasonNumber" 
-      from jf_playback_activity a 
-      join jf_library_items i 
-      on i."Id"=a."NowPlayingItemId" 
-      left join jf_library_episodes e
-      on a."EpisodeId"=e."EpisodeId"
-      and a."SeasonId"=e."SeasonId"  
-      where i."ParentId"=$1 
-      order by a."ActivityDateInserted" desc`,
-      [libraryid]
-    );
-    const groupedResults = groupActivity(rows, limit);
-    res.send(Object.values(groupedResults));
+    const result = await dbHelper.query({
+      select: ["a.*", "e.IndexNumber as EpisodeNumber", "e.ParentIndexNumber as SeasonNumber", "i.ParentId"],
+      table: "jf_playback_activity",
+      alias: "a",
+      joins: [
+        {
+          type: "inner",
+          table: "jf_library_items",
+          alias: "i",
+          conditions: [{ first: "i.Id", operator: "=", second: "a.NowPlayingItemId" }],
+        },
+        {
+          type: "left",
+          table: "jf_library_episodes",
+          alias: "e",
+          conditions: [
+            { first: "a.EpisodeId", operator: "=", second: "e.EpisodeId" },
+            { first: "a.SeasonId", operator: "=", second: "e.SeasonId" },
+          ],
+        },
+      ],
+      where: [{ column: "i.ParentId", operator: "=", value: libraryid }],
+      order_by: "ActivityDateInserted",
+      sort_order: "desc",
+      pageNumber: page,
+      pageSize: size,
+    });
+
+    const groupedResults = groupActivity(result.results);
+    res.send({ current_page: page, pages: result.pages, results: Object.values(groupedResults) });
   } catch (error) {
     console.log(error);
     res.status(503);
@@ -1143,6 +1178,7 @@ router.post("/getLibraryHistory", async (req, res) => {
 
 router.post("/getItemHistory", async (req, res) => {
   try {
+    const { size = 50, page = 1 } = req.query;
     const { itemid } = req.body;
 
     if (itemid === undefined) {
@@ -1151,24 +1187,47 @@ router.post("/getItemHistory", async (req, res) => {
       return;
     }
 
-    const { rows } = await db.query(
-      `select a.*, e."IndexNumber" "EpisodeNumber",e."ParentIndexNumber" "SeasonNumber" 
-      from jf_playback_activity a
-      left join jf_library_episodes e
-      on a."EpisodeId"=e."EpisodeId"
-      and a."SeasonId"=e."SeasonId"
-      where
-      (a."EpisodeId"=$1 OR a."SeasonId"=$1 OR a."NowPlayingItemId"=$1)
-      order by a."ActivityDateInserted" desc;`,
-      [itemid]
-    );
+    const result = await dbHelper.query({
+      select: ["a.*", "e.IndexNumber as EpisodeNumber", "e.ParentIndexNumber as SeasonNumber"],
+      table: "jf_playback_activity",
+      alias: "a",
+      joins: [
+        {
+          type: "left",
+          table: "jf_library_episodes",
+          alias: "e",
+          conditions: [
+            { first: "a.EpisodeId", operator: "=", second: "e.EpisodeId" },
+            { first: "a.SeasonId", operator: "=", second: "e.SeasonId" },
+          ],
+        },
+        {
+          type: "left",
+          table: "jf_library_items",
+          alias: "i",
+          conditions: [
+            { first: "i.Id", operator: "=", second: "a.NowPlayingItemId", type: "or" },
+            { first: "e.SeriesId", operator: "=", second: "i.Id", type: "or" },
+          ],
+        },
+      ],
+      where: [
+        { column: "a.EpisodeId", operator: "=", value: itemid, type: "or" },
+        { column: "a.SeasonId", operator: "=", value: itemid, type: "or" },
+        { column: "a.NowPlayingItemId", operator: "=", value: itemid, type: "or" },
+      ],
+      order_by: "ActivityDateInserted",
+      sort_order: "desc",
+      pageNumber: page,
+      pageSize: size,
+    });
 
-    const groupedResults = rows.map((item) => ({
-      ...item,
-      results: [],
-    }));
+    // const groupedResults = rows.map((item) => ({
+    //   ...item,
+    //   results: [],
+    // }));
 
-    res.send(groupedResults);
+    res.send({ current_page: page, pages: result.pages, results: result.results });
   } catch (error) {
     console.log(error);
     res.status(503);
@@ -1178,7 +1237,7 @@ router.post("/getItemHistory", async (req, res) => {
 
 router.post("/getUserHistory", async (req, res) => {
   try {
-    const { limit = 50 } = req.query;
+    const { size = 50, page = 1 } = req.query;
     const { userid } = req.body;
 
     if (userid === undefined) {
@@ -1187,22 +1246,38 @@ router.post("/getUserHistory", async (req, res) => {
       return;
     }
 
-    const { rows } = await db.query(
-      `select a.*, e."IndexNumber" "EpisodeNumber",e."ParentIndexNumber" "SeasonNumber" , i."ParentId"
-      from jf_playback_activity a
-      left join jf_library_episodes e
-      on a."EpisodeId"=e."EpisodeId"
-      and a."SeasonId"=e."SeasonId"
-      left join jf_library_items i
-      on i."Id"=a."NowPlayingItemId" or e."SeriesId"=i."Id"
-      where a."UserId"=$1
-      order by a."ActivityDateInserted" desc`,
-      [userid]
-    );
+    const result = await dbHelper.query({
+      select: ["a.*", "e.IndexNumber as EpisodeNumber", "e.ParentIndexNumber as SeasonNumber", "i.ParentId"],
+      table: "jf_playback_activity",
+      alias: "a",
+      joins: [
+        {
+          type: "left",
+          table: "jf_library_episodes",
+          alias: "e",
+          conditions: [
+            { first: "a.EpisodeId", operator: "=", second: "e.EpisodeId" },
+            { first: "a.SeasonId", operator: "=", second: "e.SeasonId" },
+          ],
+        },
+        {
+          type: "left",
+          table: "jf_library_items",
+          alias: "i",
+          conditions: [
+            { first: "i.Id", operator: "=", second: "a.NowPlayingItemId", type: "or" },
+            { first: "e.SeriesId", operator: "=", second: "i.Id", type: "or" },
+          ],
+        },
+      ],
+      where: [{ column: "a.UserId", operator: "=", value: userid }],
+      order_by: "ActivityDateInserted",
+      sort_order: "desc",
+      pageNumber: page,
+      pageSize: size,
+    });
 
-    const groupedResults = groupActivity(rows, limit);
-
-    res.send(Object.values(groupedResults));
+    res.send({ current_page: page, pages: result.pages, results: result.results });
   } catch (error) {
     console.log(error);
     res.status(503);

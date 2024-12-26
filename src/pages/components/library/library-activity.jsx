@@ -16,6 +16,12 @@ function LibraryActivity(props) {
     localStorage.getItem("PREF_LIBRARY_ACTIVITY_StreamTypeFilter") ?? "All"
   );
   const [config, setConfig] = useState();
+  const [currentPage, setCurrentPage] = useState(1);
+  const [isBusy, setIsBusy] = useState(false);
+
+  const handlePageChange = (newPage) => {
+    setCurrentPage(newPage);
+  };
 
   function setItemLimit(limit) {
     setItemCount(limit);
@@ -42,8 +48,9 @@ function LibraryActivity(props) {
     }
     const fetchData = async () => {
       try {
-        const libraryrData = await axios.post(
-          `/api/getLibraryHistory`,
+        setIsBusy(true);
+        const libraryData = await axios.post(
+          `/api/getLibraryHistory?size=${itemCount}&page=${currentPage}`,
           {
             libraryid: props.LibraryId,
           },
@@ -54,28 +61,29 @@ function LibraryActivity(props) {
             },
           }
         );
-        setData(libraryrData.data);
+        setData(libraryData.data);
+        setIsBusy(false);
       } catch (error) {
         console.log(error);
       }
     };
 
-    if (!data) {
+    if (!data || data.current_page !== currentPage) {
       fetchData();
     }
 
     const intervalId = setInterval(fetchData, 60000 * 5);
     return () => clearInterval(intervalId);
-  }, [data, props.LibraryId, token]);
+  }, [data, props.LibraryId, token, itemCount, currentPage]);
 
-  if (!data) {
+  if (!data || !data.results) {
     return <></>;
   }
 
-  let filteredData = data;
+  let filteredData = data.results;
 
   if (searchQuery) {
-    filteredData = data.filter((item) =>
+    filteredData = data.results.filter((item) =>
       (!item.SeriesName ? item.NowPlayingItemName : item.SeriesName + " - " + item.NowPlayingItemName)
         .toLowerCase()
         .includes(searchQuery.toLowerCase())
@@ -147,7 +155,13 @@ function LibraryActivity(props) {
       </div>
 
       <div className="Activity">
-        <ActivityTable data={filteredData} itemCount={itemCount} />
+        <ActivityTable
+          data={filteredData}
+          itemCount={itemCount}
+          onPageChange={handlePageChange}
+          pageCount={data.pages}
+          isBusy={isBusy}
+        />
       </div>
     </div>
   );
