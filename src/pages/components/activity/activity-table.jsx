@@ -298,6 +298,7 @@ export default function ActivityTable(props) {
       ],
     },
     pageCount: pages,
+    rowCount: pagination.pageSize, // fix for bug causing pagination index to reset when row count changes
     showAlertBanner: false,
     enableHiding: false,
     enableFullScreenToggle: false,
