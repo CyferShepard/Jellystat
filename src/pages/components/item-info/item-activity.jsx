@@ -56,7 +56,7 @@ function ItemActivity(props) {
       }
     };
 
-    if (!data) {
+    if (!data || data.current_page !== currentPage) {
       fetchData();
     }
 
