@@ -18,8 +18,9 @@ const { tables } = require("../global/backup_tables");
 const router = express.Router();
 
 //Functions
-function groupActivity(rows) {
+function groupActivity(rows, limit) {
   const groupedResults = {};
+  let resultsAdded = 0;
   rows.every((row) => {
     const key = row.NowPlayingItemId + row.EpisodeId + row.UserId;
     if (groupedResults[key]) {
@@ -36,8 +37,9 @@ function groupActivity(rows) {
         results: [],
       };
       groupedResults[key].results.push(row);
+      resultsAdded++;
     }
-    return true;
+    return (resultsAdded < limit);
   });
 
   // Update GroupedResults with playbackDurationSum
@@ -1088,7 +1090,7 @@ router.post("/setExcludedBackupTable", async (req, res) => {
 
 //DB Queries - History
 router.get("/getHistory", async (req, res) => {
-  const { size = 50, page = 1 } = req.query;
+  const { size = 50, page = 1, resultLimit = size } = req.query;
 
   try {
     const result = await dbHelper.query({
@@ -1121,7 +1123,7 @@ router.get("/getHistory", async (req, res) => {
       pageSize: size,
     });
 
-    const groupedResults = groupActivity(result.results);
+    const groupedResults = groupActivity(result.results, resultLimit);
     res.send({ current_page: page, pages: result.pages, results: Object.values(groupedResults) });
   } catch (error) {
     console.log(error);
@@ -1130,7 +1132,7 @@ router.get("/getHistory", async (req, res) => {
 
 router.post("/getLibraryHistory", async (req, res) => {
   try {
-    const { size = 50, page = 1 } = req.query;
+    const { size = 50, page = 1, resultLimit = size } = req.query;
     const { libraryid } = req.body;
 
     if (libraryid === undefined) {
@@ -1170,7 +1172,7 @@ router.post("/getLibraryHistory", async (req, res) => {
       pageSize: size,
     });
 
-    const groupedResults = groupActivity(result.results);
+    const groupedResults = groupActivity(result.results, resultLimit);
     res.send({ current_page: page, pages: result.pages, results: Object.values(groupedResults) });
   } catch (error) {
     console.log(error);

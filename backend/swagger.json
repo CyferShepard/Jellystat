@@ -1928,6 +1928,11 @@
             "name": "page",
             "in": "query",
             "type": "string"
+          },
+          {
+            "name": "resultLimit",
+            "in": "query",
+            "type": "string"
           }
         ],
         "responses": {
@@ -1973,6 +1978,11 @@
           },
           {
             "name": "page",
+            "in": "query",
+            "type": "string"
+          },
+          {
+            "name": "resultLimit",
             "in": "query",
             "type": "string"
           },
