@@ -1101,8 +1101,8 @@ router.get("/getHistory", async (req, res) => {
           table: "jf_library_episodes",
           alias: "e",
           conditions: [
-            { first: "a.EpisodeId", operator: "=", second: "e.EpisodeId", type: "and" },
-            { first: "a.SeasonId", operator: "=", second: "e.SeasonId", type: "and" },
+            { first: "a.EpisodeId", operator: "=", second: "e.EpisodeId" },
+            { first: "a.SeasonId", operator: "=", second: "e.SeasonId" },
           ],
         },
         {
@@ -1110,7 +1110,7 @@ router.get("/getHistory", async (req, res) => {
           table: "jf_library_items",
           alias: "i",
           conditions: [
-            { first: "i.Id", operator: "=", second: "a.NowPlayingItemId", type: "or" },
+            { first: "i.Id", operator: "=", second: "a.NowPlayingItemId" },
             { first: "e.SeriesId", operator: "=", second: "i.Id", type: "or" },
           ],
         },
@@ -1148,7 +1148,10 @@ router.post("/getLibraryHistory", async (req, res) => {
           type: "inner",
           table: "jf_library_items",
           alias: "i",
-          conditions: [{ first: "i.Id", operator: "=", second: "a.NowPlayingItemId" }],
+          conditions: [
+            { first: "i.Id", operator: "=", second: "a.NowPlayingItemId" },
+            { first: "i.ParentId", operator: "=", value: libraryid },
+          ],
         },
         {
           type: "left",
@@ -1160,7 +1163,7 @@ router.post("/getLibraryHistory", async (req, res) => {
           ],
         },
       ],
-      where: [{ column: "i.ParentId", operator: "=", value: libraryid }],
+
       order_by: "ActivityDateInserted",
       sort_order: "desc",
       pageNumber: page,
@@ -1206,13 +1209,13 @@ router.post("/getItemHistory", async (req, res) => {
           table: "jf_library_items",
           alias: "i",
           conditions: [
-            { first: "i.Id", operator: "=", second: "a.NowPlayingItemId", type: "or" },
+            { first: "i.Id", operator: "=", second: "a.NowPlayingItemId" },
             { first: "e.SeriesId", operator: "=", second: "i.Id", type: "or" },
           ],
         },
       ],
       where: [
-        { column: "a.EpisodeId", operator: "=", value: itemid, type: "or" },
+        { column: "a.EpisodeId", operator: "=", value: itemid },
         { column: "a.SeasonId", operator: "=", value: itemid, type: "or" },
         { column: "a.NowPlayingItemId", operator: "=", value: itemid, type: "or" },
       ],
@@ -1221,11 +1224,6 @@ router.post("/getItemHistory", async (req, res) => {
       pageNumber: page,
       pageSize: size,
     });
-
-    // const groupedResults = rows.map((item) => ({
-    //   ...item,
-    //   results: [],
-    // }));
 
     res.send({ current_page: page, pages: result.pages, results: result.results });
   } catch (error) {
@@ -1265,7 +1263,7 @@ router.post("/getUserHistory", async (req, res) => {
           table: "jf_library_items",
           alias: "i",
           conditions: [
-            { first: "i.Id", operator: "=", second: "a.NowPlayingItemId", type: "or" },
+            { first: "i.Id", operator: "=", second: "a.NowPlayingItemId" },
             { first: "e.SeriesId", operator: "=", second: "i.Id", type: "or" },
           ],
         },

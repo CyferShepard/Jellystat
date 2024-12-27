@@ -59,7 +59,9 @@ async function query({
       const joinConditions = join.conditions
         .map((condition, index) => {
           const conjunction = index === 0 ? "" : condition.type ? condition.type.toUpperCase() : "AND";
-          return `${conjunction} ${wrapField(condition.first)} ${condition.operator} ${wrapField(condition.second)}`;
+          return `${conjunction} ${wrapField(condition.first)} ${condition.operator} ${
+            condition.second ? wrapField(condition.second) : `'${condition.value}'`
+          }`;
         })
         .join(" ");
       const joinQuery = ` ${join.type.toUpperCase()} JOIN ${join.table} AS ${join.alias} ON ${joinConditions}`;
