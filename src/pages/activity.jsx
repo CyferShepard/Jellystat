@@ -18,6 +18,7 @@ function Activity() {
   const [streamTypeFilter, setStreamTypeFilter] = useState(localStorage.getItem("PREF_ACTIVITY_StreamTypeFilter") ?? "All");
   const [searchQuery, setSearchQuery] = useState("");
   const [itemCount, setItemCount] = useState(parseInt(localStorage.getItem("PREF_ACTIVITY_ItemCount") ?? "10"));
+  const [prevItemCount, setPrevItemCount] = useState(parseInt(localStorage.getItem("PREF_ACTIVITY_PrevItemCount") ?? "10"));
   const [libraryFilters, setLibraryFilters] = useState(
     localStorage.getItem("PREF_ACTIVITY_libraryFilters") != undefined
       ? JSON.parse(localStorage.getItem("PREF_ACTIVITY_libraryFilters"))
@@ -35,6 +36,11 @@ function Activity() {
   function setItemLimit(limit) {
     setItemCount(limit);
     localStorage.setItem("PREF_ACTIVITY_ItemCount", limit);
+  }
+
+  function setPrevItemLimit(limit) {
+    setPrevItemCount(limit);
+    localStorage.setItem("PREF_ACTIVITY_PrevItemCount", limit);
   }
 
   function setTypeFilter(filter) {
@@ -120,8 +126,13 @@ function Activity() {
         });
     };
 
+    let itemCountChanged = prevItemCount !== itemCount;
+    if (itemCountChanged) {
+      setPrevItemLimit(itemCount);
+    }
+
     if (config) {
-      if (!data || data.current_page !== currentPage) {
+      if (!data || data.current_page !== currentPage || itemCountChanged) {
         fetchHistory();
         fetchLibraries();
       }
