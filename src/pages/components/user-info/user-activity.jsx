@@ -13,7 +13,7 @@ import Config from "../../../lib/config.jsx";
 function UserActivity(props) {
   const [data, setData] = useState();
   const token = localStorage.getItem("token");
-  const [itemCount, setItemCount] = useState(10);
+  const [itemCount, setItemCount] = useState(parseInt(localStorage.getItem("PREF_ACTIVITY_ItemCount") ?? "10"));
   const [searchQuery, setSearchQuery] = useState("");
   const [streamTypeFilter, setStreamTypeFilter] = useState("All");
   const [libraryFilters, setLibraryFilters] = useState([]);
@@ -22,6 +22,11 @@ function UserActivity(props) {
   const [config, setConfig] = useState();
   const [currentPage, setCurrentPage] = useState(1);
   const [isBusy, setIsBusy] = useState(false);
+
+  function setItemLimit(limit) {
+    setItemCount(parseInt(limit));
+    localStorage.setItem("PREF_ACTIVITY_ItemCount", limit);
+  }
 
   useEffect(() => {
     const fetchConfig = async () => {
@@ -105,7 +110,10 @@ function UserActivity(props) {
         });
     };
 
-    fetchHistory();
+    if (!data || (data.current_page && data.current_page !== currentPage) || (data.size && data.size !== itemCount)) {
+      fetchHistory();
+    }
+
     fetchLibraries();
 
     const intervalId = setInterval(fetchHistory, 60000 * 5);
@@ -190,7 +198,7 @@ function UserActivity(props) {
             </div>
             <FormSelect
               onChange={(event) => {
-                setItemCount(event.target.value);
+                setItemLimit(event.target.value);
               }}
               value={itemCount}
               className="my-md-3 w-md-75 rounded-0 rounded-end"

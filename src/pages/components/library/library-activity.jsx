@@ -24,7 +24,7 @@ function LibraryActivity(props) {
   };
 
   function setItemLimit(limit) {
-    setItemCount(limit);
+    setItemCount(parseInt(limit));
     localStorage.setItem("PREF_LIBRARY_ACTIVITY_ItemCount", limit);
   }
 
@@ -68,7 +68,7 @@ function LibraryActivity(props) {
       }
     };
 
-    if (!data || data.current_page !== currentPage) {
+    if (!data || (data.current_page && data.current_page !== currentPage) || (data.size && data.size !== itemCount)) {
       fetchData();
     }
 

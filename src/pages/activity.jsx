@@ -33,7 +33,7 @@ function Activity() {
   };
 
   function setItemLimit(limit) {
-    setItemCount(limit);
+    setItemCount(parseInt(limit));
     localStorage.setItem("PREF_ACTIVITY_ItemCount", limit);
   }
 
@@ -121,7 +121,7 @@ function Activity() {
     };
 
     if (config) {
-      if (!data || data.current_page !== currentPage) {
+      if (!data || (data.current_page && data.current_page !== currentPage) || (data.size && data.size !== itemCount)) {
         fetchHistory();
         fetchLibraries();
       }

@@ -9,7 +9,7 @@ import Config from "../../../lib/config.jsx";
 function ItemActivity(props) {
   const [data, setData] = useState();
   const token = localStorage.getItem("token");
-  const [itemCount, setItemCount] = useState(10);
+  const [itemCount, setItemCount] = useState(parseInt(localStorage.getItem("PREF_ACTIVITY_ItemCount") ?? "10"));
   const [searchQuery, setSearchQuery] = useState("");
   const [streamTypeFilter, setStreamTypeFilter] = useState("All");
   const [config, setConfig] = useState();
@@ -19,6 +19,10 @@ function ItemActivity(props) {
   const handlePageChange = (newPage) => {
     setCurrentPage(newPage);
   };
+  function setItemLimit(limit) {
+    setItemCount(parseInt(limit));
+    localStorage.setItem("PREF_ACTIVITY_ItemCount", limit);
+  }
 
   useEffect(() => {
     const fetchConfig = async () => {
@@ -56,7 +60,7 @@ function ItemActivity(props) {
       }
     };
 
-    if (!data || data.current_page !== currentPage) {
+    if (!data || (data.current_page && data.current_page !== currentPage) || (data.size && data.size !== itemCount)) {
       fetchData();
     }
 
@@ -122,7 +126,7 @@ function ItemActivity(props) {
             </div>
             <FormSelect
               onChange={(event) => {
-                setItemCount(event.target.value);
+                setItemLimit(event.target.value);
               }}
               value={itemCount}
               className="my-md-3 w-md-75 rounded-0 rounded-end"

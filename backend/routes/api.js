@@ -1122,7 +1122,7 @@ router.get("/getHistory", async (req, res) => {
     });
 
     const groupedResults = groupActivity(result.results);
-    res.send({ current_page: page, pages: result.pages, results: Object.values(groupedResults) });
+    res.send({ current_page: page, pages: result.pages, size: size, results: Object.values(groupedResults) });
   } catch (error) {
     console.log(error);
   }
@@ -1171,7 +1171,7 @@ router.post("/getLibraryHistory", async (req, res) => {
     });
 
     const groupedResults = groupActivity(result.results);
-    res.send({ current_page: page, pages: result.pages, results: Object.values(groupedResults) });
+    res.send({ current_page: page, pages: result.pages, size: size, results: Object.values(groupedResults) });
   } catch (error) {
     console.log(error);
     res.status(503);
@@ -1225,7 +1225,7 @@ router.post("/getItemHistory", async (req, res) => {
       pageSize: size,
     });
 
-    res.send({ current_page: page, pages: result.pages, results: result.results });
+    res.send({ current_page: page, pages: result.pages, size: size, results: result.results });
   } catch (error) {
     console.log(error);
     res.status(503);
@@ -1275,7 +1275,7 @@ router.post("/getUserHistory", async (req, res) => {
       pageSize: size,
     });
 
-    res.send({ current_page: page, pages: result.pages, results: result.results });
+    res.send({ current_page: page, pages: result.pages, size: size, results: result.results });
   } catch (error) {
     console.log(error);
     res.status(503);
