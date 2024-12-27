@@ -49,6 +49,7 @@
     "i18next-http-backend": "^2.4.3",
     "knex": "^2.4.2",
     "material-react-table": "^3.1.0",
+    "memoizee": "^0.4.17",
     "moment": "^2.29.4",
     "multer": "^1.4.5-lts.1",
     "passport": "^0.6.0",
