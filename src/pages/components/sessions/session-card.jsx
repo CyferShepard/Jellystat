@@ -43,20 +43,6 @@ function getETAFromTicks(ticks) {
   return eta.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
 }
 
-function convertBitrate(bitrate) {
-  if (!bitrate) {
-    return "N/A";
-  }
-  const kbps = (bitrate / 1000).toFixed(1);
-  const mbps = (bitrate / 1000000).toFixed(1);
-
-  if (kbps >= 1000) {
-    return mbps + " Mbps";
-  } else {
-    return kbps + " Kbps";
-  }
-}
-
 function SessionCard(props) {
   const cardStyle = {
     backgroundImage: `url(proxy/Items/Images/Backdrop?id=${
@@ -137,24 +123,10 @@ function SessionCard(props) {
                     </Row>
                     <Row className="d-flex flex-column flex-md-row">
                       <Col className="col-auto ellipse">
-                        {props.data.session.PlayState.PlayMethod +
-                          (props.data.session.NowPlayingItem.MediaStreams
-                            ? " ( " +
-                              props.data.session.NowPlayingItem.MediaStreams.find(
-                                (stream) => stream.Type === "Video"
-                              )?.Codec.toUpperCase() +
-                              (props.data.session.TranscodingInfo
-                                ? " - " + props.data.session.TranscodingInfo.VideoCodec.toUpperCase()
-                                : "") +
-                              " - " +
-                              convertBitrate(
-                                props.data.session.TranscodingInfo
-                                  ? props.data.session.TranscodingInfo.Bitrate
-                                  : props.data.session.NowPlayingItem.MediaStreams.find((stream) => stream.Type === "Video")
-                                      ?.BitRate
-                              ) +
-                              " )"
-                            : "")}
+                        <span>{props.data.session.NowPlayingItem.VideoStream}</span>
+                      </Col>
+                      <Col className="col-auto ellipse">
+                        <span>{props.data.session.NowPlayingItem.AudioStream}</span>
                       </Col>
                       <Col className="col-auto ellipse">
                         <Tooltip title={props.data.session.NowPlayingItem.SubtitleStream}>
