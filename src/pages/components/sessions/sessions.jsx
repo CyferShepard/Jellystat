@@ -79,11 +79,10 @@ function Sessions() {
   }
 
   const getAudioStream = (row) => {
-    let result = "";
-
+    let mediaTypeAudio = row.NowPlayingItem.Type === 'Audio';
     let streamIndex = row.PlayState.AudioStreamIndex;
-    if (streamIndex === undefined || streamIndex === -1) {
-      return result;
+    if ((streamIndex === undefined || streamIndex === -1) && !mediaTypeAudio) {
+      return "";
     }
 
     let transcodeType = "Direct Stream";
@@ -93,12 +92,24 @@ function Sessions() {
       transcodeCodec = ` -> ${row.TranscodingInfo.AudioCodec.toUpperCase()}`;
     }
 
-    let originalCodec = "";
-    if (row.NowPlayingItem.MediaStreams && row.NowPlayingItem.MediaStreams.length && streamIndex < row.NowPlayingItem.MediaStreams.length) {
-      originalCodec = row.NowPlayingItem.MediaStreams[streamIndex].Codec.toUpperCase();
+    let bitRate = "";
+    if (mediaTypeAudio) {
+      bitRate = " - " + convertBitrate(
+        row.TranscodingInfo
+          ? row.TranscodingInfo.Bitrate
+          : row.NowPlayingItem.Bitrate);
     }
 
-    return originalCodec != "" ? `Audio: ${transcodeType} (${originalCodec}${transcodeCodec})`
+    let originalCodec = "";
+    if (mediaTypeAudio){
+      
+      originalCodec = `${row.NowPlayingItem.Container.toUpperCase()}`;
+    }
+    else if (row.NowPlayingItem.MediaStreams && row.NowPlayingItem.MediaStreams.length && streamIndex < row.NowPlayingItem.MediaStreams.length) {
+        originalCodec = row.NowPlayingItem.MediaStreams[streamIndex].Codec.toUpperCase();
+    }
+
+    return originalCodec != "" ? `Audio: ${transcodeType} (${originalCodec}${transcodeCodec}${bitRate})`
                                : `Audio: ${transcodeType}`;
   }
 
