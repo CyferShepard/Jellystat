@@ -122,16 +122,22 @@ function SessionCard(props) {
                       </Col>
                     </Row>
                     <Row className="d-flex flex-column flex-md-row">
+                      {props.data.session.NowPlayingItem.VideoStream !== "" &&
+                        <Col className="col-auto ellipse">
+                            <span>{props.data.session.NowPlayingItem.VideoStream}</span>
+                        </Col>
+                      }
                       <Col className="col-auto ellipse">
-                        <span>{props.data.session.NowPlayingItem.VideoStream}</span>
+                        {props.data.session.NowPlayingItem.AudioStream !== "" &&
+                          <span>{props.data.session.NowPlayingItem.AudioStream}</span>
+                        }
                       </Col>
                       <Col className="col-auto ellipse">
-                        <span>{props.data.session.NowPlayingItem.AudioStream}</span>
-                      </Col>
-                      <Col className="col-auto ellipse">
-                        <Tooltip title={props.data.session.NowPlayingItem.SubtitleStream}>
-                          <span>{props.data.session.NowPlayingItem.SubtitleStream}</span>
-                        </Tooltip>
+                        {props.data.session.NowPlayingItem.SubtitleStream !== "" &&
+                          <Tooltip title={props.data.session.NowPlayingItem.SubtitleStream}>
+                            <span>{props.data.session.NowPlayingItem.SubtitleStream}</span>
+                          </Tooltip>
+                        }
                       </Col>
                     </Row>
                     <Row>
@@ -185,7 +191,14 @@ function SessionCard(props) {
                         </Link>
                       </Card.Text>
                     </Row>
-                  ) : (
+                  ) : (props.data.session.NowPlayingItem.Type === "Audio" && props.data.session.NowPlayingItem.Artists.length > 0) ? (
+                    <Col className="col-auto p-0">
+                      <Card.Text>
+                        {props.data.session.NowPlayingItem.Artists[0]}
+                      </Card.Text>
+                    </Col>
+                  ) :
+                  (
                     <></>
                   )}
                   <Row className="d-flex flex-row justify-content-between p-0 m-0">
