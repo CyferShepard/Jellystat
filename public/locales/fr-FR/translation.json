@@ -17,7 +17,9 @@
     "LIBRARY_OVERVIEW": "Vue d'ensemble des médiathèques"
   },
   "SESSIONS": {
-    "NO_SESSIONS": "Aucune lecture en cours n'a été trouvée"
+    "NO_SESSIONS": "Aucune lecture en cours n'a été trouvée",
+    "DIRECT_PLAY": "",
+    "TRANSCODE": ""
   },
   "STAT_CARDS": {
     "MOST_VIEWED_MOVIES": "FILMS LES PLUS VUS",
@@ -301,5 +303,6 @@
   "LONGITUDE": "Longitude",
   "TIMEZONE": "Fuseau horaire",
   "POSTCODE": "Code postal",
-  "X_ROWS_SELECTED": "{ROWS} Ligne(s) sélectionnée(s)"
+  "X_ROWS_SELECTED": "{ROWS} Ligne(s) sélectionnée(s)",
+  "SUBTITLES": ""
 }

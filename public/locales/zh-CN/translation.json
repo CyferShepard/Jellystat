@@ -17,7 +17,9 @@
     "LIBRARY_OVERVIEW": "媒体库总览"
   },
   "SESSIONS": {
-    "NO_SESSIONS": "未找到活动会话"
+    "NO_SESSIONS": "未找到活动会话",
+    "DIRECT_PLAY": "",
+    "TRANSCODE": ""
   },
   "STAT_CARDS": {
     "MOST_VIEWED_MOVIES": "最多观看电影",
@@ -301,5 +303,6 @@
   "LONGITUDE": "经度",
   "TIMEZONE": "时区",
   "POSTCODE": "邮编",
-  "X_ROWS_SELECTED": "已选中 {ROWS} 行"
+  "X_ROWS_SELECTED": "已选中 {ROWS} 行",
+  "SUBTITLES": ""
 }
