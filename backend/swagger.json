@@ -37,7 +37,10 @@
       "description": "Jellystat Log Endpoints"
     }
   ],
-  "schemes": ["http", "https"],
+  "schemes": [
+    "http",
+    "https"
+  ],
   "securityDefinitions": {
     "apiKey": {
       "type": "apiKey",
@@ -48,7 +51,9 @@
   "paths": {
     "/auth/login": {
       "post": {
-        "tags": ["Auth"],
+        "tags": [
+          "Auth"
+        ],
         "description": "",
         "parameters": [
           {
@@ -85,7 +90,9 @@
     },
     "/auth/isConfigured": {
       "get": {
-        "tags": ["Auth"],
+        "tags": [
+          "Auth"
+        ],
         "description": "",
         "responses": {
           "200": {
@@ -102,7 +109,9 @@
     },
     "/auth/createuser": {
       "post": {
-        "tags": ["Auth"],
+        "tags": [
+          "Auth"
+        ],
         "description": "",
         "parameters": [
           {
@@ -139,7 +148,9 @@
     },
     "/auth/configSetup": {
       "post": {
-        "tags": ["Auth"],
+        "tags": [
+          "Auth"
+        ],
         "description": "",
         "parameters": [
           {
@@ -176,7 +187,9 @@
     },
     "/proxy/web/assets/img/devices/": {
       "get": {
-        "tags": ["Proxy"],
+        "tags": [
+          "Proxy"
+        ],
         "description": "",
         "parameters": [
           {
@@ -200,7 +213,9 @@
     },
     "/proxy/Items/Images/Backdrop/": {
       "get": {
-        "tags": ["Proxy"],
+        "tags": [
+          "Proxy"
+        ],
         "description": "",
         "parameters": [
           {
@@ -239,7 +254,9 @@
     },
     "/proxy/Items/Images/Primary/": {
       "get": {
-        "tags": ["Proxy"],
+        "tags": [
+          "Proxy"
+        ],
         "description": "",
         "parameters": [
           {
@@ -273,7 +290,9 @@
     },
     "/proxy/Users/Images/Primary/": {
       "get": {
-        "tags": ["Proxy"],
+        "tags": [
+          "Proxy"
+        ],
         "description": "",
         "parameters": [
           {
@@ -307,7 +326,9 @@
     },
     "/proxy/getSessions": {
       "get": {
-        "tags": ["Proxy"],
+        "tags": [
+          "Proxy"
+        ],
         "description": "",
         "responses": {
           "200": {
@@ -324,7 +345,9 @@
     },
     "/proxy/getAdminUsers": {
       "get": {
-        "tags": ["Proxy"],
+        "tags": [
+          "Proxy"
+        ],
         "description": "",
         "responses": {
           "200": {
@@ -341,7 +364,9 @@
     },
     "/proxy/getRecentlyAdded": {
       "get": {
-        "tags": ["Proxy"],
+        "tags": [
+          "Proxy"
+        ],
         "description": "",
         "parameters": [
           {
@@ -365,7 +390,9 @@
     },
     "/proxy/validateSettings": {
       "post": {
-        "tags": ["Proxy"],
+        "tags": [
+          "Proxy"
+        ],
         "description": "",
         "parameters": [
           {
@@ -399,7 +426,9 @@
     },
     "/api/getconfig": {
       "get": {
-        "tags": ["API"],
+        "tags": [
+          "API"
+        ],
         "description": "",
         "parameters": [
           {
@@ -439,7 +468,9 @@
     },
     "/api/getLibraries": {
       "get": {
-        "tags": ["API"],
+        "tags": [
+          "API"
+        ],
         "description": "",
         "parameters": [
           {
@@ -476,7 +507,9 @@
     },
     "/api/getRecentlyAdded": {
       "get": {
-        "tags": ["API"],
+        "tags": [
+          "API"
+        ],
         "description": "",
         "parameters": [
           {
@@ -531,7 +564,9 @@
     },
     "/api/setconfig": {
       "post": {
-        "tags": ["API"],
+        "tags": [
+          "API"
+        ],
         "description": "",
         "parameters": [
           {
@@ -586,7 +621,9 @@
     },
     "/api/setExternalUrl": {
       "post": {
-        "tags": ["API"],
+        "tags": [
+          "API"
+        ],
         "description": "",
         "parameters": [
           {
@@ -641,7 +678,9 @@
     },
     "/api/setPreferredAdmin": {
       "post": {
-        "tags": ["API"],
+        "tags": [
+          "API"
+        ],
         "description": "",
         "parameters": [
           {
@@ -696,7 +735,9 @@
     },
     "/api/setRequireLogin": {
       "post": {
-        "tags": ["API"],
+        "tags": [
+          "API"
+        ],
         "description": "",
         "parameters": [
           {
@@ -748,7 +789,9 @@
     },
     "/api/updateCredentials": {
       "post": {
-        "tags": ["API"],
+        "tags": [
+          "API"
+        ],
         "description": "",
         "parameters": [
           {
@@ -809,7 +852,9 @@
     },
     "/api/updatePassword": {
       "post": {
-        "tags": ["API"],
+        "tags": [
+          "API"
+        ],
         "description": "",
         "parameters": [
           {
@@ -861,7 +906,9 @@
     },
     "/api/TrackedLibraries": {
       "get": {
-        "tags": ["API"],
+        "tags": [
+          "API"
+        ],
         "description": "",
         "parameters": [
           {
@@ -901,7 +948,9 @@
     },
     "/api/setExcludedLibraries": {
       "post": {
-        "tags": ["API"],
+        "tags": [
+          "API"
+        ],
         "description": "",
         "parameters": [
           {
@@ -953,7 +1002,9 @@
     },
     "/api/UntrackedUsers": {
       "get": {
-        "tags": ["API"],
+        "tags": [
+          "API"
+        ],
         "description": "",
         "parameters": [
           {
@@ -993,7 +1044,9 @@
     },
     "/api/setUntrackedUsers": {
       "post": {
-        "tags": ["API"],
+        "tags": [
+          "API"
+        ],
         "description": "",
         "parameters": [
           {
@@ -1045,7 +1098,9 @@
     },
     "/api/keys": {
       "get": {
-        "tags": ["API"],
+        "tags": [
+          "API"
+        ],
         "description": "",
         "parameters": [
           {
@@ -1080,7 +1135,9 @@
         }
       },
       "delete": {
-        "tags": ["API"],
+        "tags": [
+          "API"
+        ],
         "description": "",
         "parameters": [
           {
@@ -1130,7 +1187,9 @@
         }
       },
       "post": {
-        "tags": ["API"],
+        "tags": [
+          "API"
+        ],
         "description": "",
         "parameters": [
           {
@@ -1182,7 +1241,9 @@
     },
     "/api/getTaskSettings": {
       "get": {
-        "tags": ["API"],
+        "tags": [
+          "API"
+        ],
         "description": "",
         "parameters": [
           {
@@ -1222,7 +1283,9 @@
     },
     "/api/setTaskSettings": {
       "post": {
-        "tags": ["API"],
+        "tags": [
+          "API"
+        ],
         "description": "",
         "parameters": [
           {
@@ -1280,7 +1343,9 @@
     },
     "/api/CheckForUpdates": {
       "get": {
-        "tags": ["API"],
+        "tags": [
+          "API"
+        ],
         "description": "",
         "parameters": [
           {
@@ -1317,7 +1382,9 @@
     },
     "/api/getUserDetails": {
       "post": {
-        "tags": ["API"],
+        "tags": [
+          "API"
+        ],
         "description": "",
         "parameters": [
           {
@@ -1372,7 +1439,9 @@
     },
     "/api/getLibrary": {
       "post": {
-        "tags": ["API"],
+        "tags": [
+          "API"
+        ],
         "description": "",
         "parameters": [
           {
@@ -1427,7 +1496,9 @@
     },
     "/api/getLibraryItems": {
       "post": {
-        "tags": ["API"],
+        "tags": [
+          "API"
+        ],
         "description": "",
         "parameters": [
           {
@@ -1479,7 +1550,9 @@
     },
     "/api/getSeasons": {
       "post": {
-        "tags": ["API"],
+        "tags": [
+          "API"
+        ],
         "description": "",
         "parameters": [
           {
@@ -1531,7 +1604,9 @@
     },
     "/api/getEpisodes": {
       "post": {
-        "tags": ["API"],
+        "tags": [
+          "API"
+        ],
         "description": "",
         "parameters": [
           {
@@ -1583,7 +1658,9 @@
     },
     "/api/getItemDetails": {
       "post": {
-        "tags": ["API"],
+        "tags": [
+          "API"
+        ],
         "description": "",
         "parameters": [
           {
@@ -1635,7 +1712,9 @@
     },
     "/api/item/purge": {
       "delete": {
-        "tags": ["API"],
+        "tags": [
+          "API"
+        ],
         "description": "",
         "parameters": [
           {
@@ -1693,7 +1772,9 @@
     },
     "/api/library/purge": {
       "delete": {
-        "tags": ["API"],
+        "tags": [
+          "API"
+        ],
         "description": "",
         "parameters": [
           {
@@ -1751,7 +1832,9 @@
     },
     "/api/libraryItems/purge": {
       "delete": {
-        "tags": ["API"],
+        "tags": [
+          "API"
+        ],
         "description": "",
         "parameters": [
           {
@@ -1809,7 +1892,9 @@
     },
     "/api/getBackupTables": {
       "get": {
-        "tags": ["API"],
+        "tags": [
+          "API"
+        ],
         "description": "",
         "parameters": [
           {
@@ -1849,7 +1934,9 @@
     },
     "/api/setExcludedBackupTable": {
       "post": {
-        "tags": ["API"],
+        "tags": [
+          "API"
+        ],
         "description": "",
         "parameters": [
           {
@@ -1901,7 +1988,9 @@
     },
     "/api/getHistory": {
       "get": {
-        "tags": ["API"],
+        "tags": [
+          "API"
+        ],
         "description": "",
         "parameters": [
           {
@@ -1926,6 +2015,11 @@
           },
           {
             "name": "page",
+            "in": "query",
+            "type": "string"
+          },
+          {
+            "name": "search",
             "in": "query",
             "type": "string"
           }
@@ -1948,7 +2042,9 @@
     },
     "/api/getLibraryHistory": {
       "post": {
-        "tags": ["API"],
+        "tags": [
+          "API"
+        ],
         "description": "",
         "parameters": [
           {
@@ -1973,6 +2069,11 @@
           },
           {
             "name": "page",
+            "in": "query",
+            "type": "string"
+          },
+          {
+            "name": "search",
             "in": "query",
             "type": "string"
           },
@@ -2013,7 +2114,9 @@
     },
     "/api/getItemHistory": {
       "post": {
-        "tags": ["API"],
+        "tags": [
+          "API"
+        ],
         "description": "",
         "parameters": [
           {
@@ -2038,6 +2141,11 @@
           },
           {
             "name": "page",
+            "in": "query",
+            "type": "string"
+          },
+          {
+            "name": "search",
             "in": "query",
             "type": "string"
           },
@@ -2078,7 +2186,9 @@
     },
     "/api/getUserHistory": {
       "post": {
-        "tags": ["API"],
+        "tags": [
+          "API"
+        ],
         "description": "",
         "parameters": [
           {
@@ -2103,6 +2213,11 @@
           },
           {
             "name": "page",
+            "in": "query",
+            "type": "string"
+          },
+          {
+            "name": "search",
             "in": "query",
             "type": "string"
           },
@@ -2143,7 +2258,9 @@
     },
     "/api/deletePlaybackActivity": {
       "post": {
-        "tags": ["API"],
+        "tags": [
+          "API"
+        ],
         "description": "",
         "parameters": [
           {
@@ -2198,7 +2315,9 @@
     },
     "/stats/getLibraryOverview": {
       "get": {
-        "tags": ["Stats"],
+        "tags": [
+          "Stats"
+        ],
         "description": "",
         "parameters": [
           {
@@ -2238,7 +2357,9 @@
     },
     "/stats/getMostViewedByType": {
       "post": {
-        "tags": ["Stats"],
+        "tags": [
+          "Stats"
+        ],
         "description": "",
         "parameters": [
           {
@@ -2293,7 +2414,9 @@
     },
     "/stats/getMostPopularByType": {
       "post": {
-        "tags": ["Stats"],
+        "tags": [
+          "Stats"
+        ],
         "description": "",
         "parameters": [
           {
@@ -2348,7 +2471,9 @@
     },
     "/stats/getMostViewedLibraries": {
       "post": {
-        "tags": ["Stats"],
+        "tags": [
+          "Stats"
+        ],
         "description": "",
         "parameters": [
           {
@@ -2400,7 +2525,9 @@
     },
     "/stats/getMostUsedClient": {
       "post": {
-        "tags": ["Stats"],
+        "tags": [
+          "Stats"
+        ],
         "description": "",
         "parameters": [
           {
@@ -2452,7 +2579,9 @@
     },
     "/stats/getMostActiveUsers": {
       "post": {
-        "tags": ["Stats"],
+        "tags": [
+          "Stats"
+        ],
         "description": "",
         "parameters": [
           {
@@ -2504,7 +2633,9 @@
     },
     "/stats/getPlaybackActivity": {
       "get": {
-        "tags": ["Stats"],
+        "tags": [
+          "Stats"
+        ],
         "description": "",
         "parameters": [
           {
@@ -2544,7 +2675,9 @@
     },
     "/stats/getAllUserActivity": {
       "get": {
-        "tags": ["Stats"],
+        "tags": [
+          "Stats"
+        ],
         "description": "",
         "parameters": [
           {
@@ -2581,7 +2714,9 @@
     },
     "/stats/getUserLastPlayed": {
       "post": {
-        "tags": ["Stats"],
+        "tags": [
+          "Stats"
+        ],
         "description": "",
         "parameters": [
           {
@@ -2633,7 +2768,9 @@
     },
     "/stats/getGlobalUserStats": {
       "post": {
-        "tags": ["Stats"],
+        "tags": [
+          "Stats"
+        ],
         "description": "",
         "parameters": [
           {
@@ -2688,7 +2825,9 @@
     },
     "/stats/getGlobalItemStats": {
       "post": {
-        "tags": ["Stats"],
+        "tags": [
+          "Stats"
+        ],
         "description": "",
         "parameters": [
           {
@@ -2743,7 +2882,9 @@
     },
     "/stats/getGlobalLibraryStats": {
       "post": {
-        "tags": ["Stats"],
+        "tags": [
+          "Stats"
+        ],
         "description": "",
         "parameters": [
           {
@@ -2798,7 +2939,9 @@
     },
     "/stats/getLibraryCardStats": {
       "get": {
-        "tags": ["Stats"],
+        "tags": [
+          "Stats"
+        ],
         "description": "",
         "parameters": [
           {
@@ -2836,7 +2979,9 @@
         }
       },
       "post": {
-        "tags": ["Stats"],
+        "tags": [
+          "Stats"
+        ],
         "description": "",
         "parameters": [
           {
@@ -2888,7 +3033,9 @@
     },
     "/stats/getLibraryMetadata": {
       "get": {
-        "tags": ["Stats"],
+        "tags": [
+          "Stats"
+        ],
         "description": "",
         "parameters": [
           {
@@ -2928,7 +3075,9 @@
     },
     "/stats/getLibraryItemsWithStats": {
       "post": {
-        "tags": ["Stats"],
+        "tags": [
+          "Stats"
+        ],
         "description": "",
         "parameters": [
           {
@@ -2977,7 +3126,9 @@
     },
     "/stats/getLibraryItemsPlayMethodStats": {
       "post": {
-        "tags": ["Stats"],
+        "tags": [
+          "Stats"
+        ],
         "description": "",
         "parameters": [
           {
@@ -3038,7 +3189,9 @@
     },
     "/stats/getPlaybackMethodStats": {
       "post": {
-        "tags": ["Stats"],
+        "tags": [
+          "Stats"
+        ],
         "description": "",
         "parameters": [
           {
@@ -3090,7 +3243,9 @@
     },
     "/stats/getLibraryLastPlayed": {
       "post": {
-        "tags": ["Stats"],
+        "tags": [
+          "Stats"
+        ],
         "description": "",
         "parameters": [
           {
@@ -3142,7 +3297,9 @@
     },
     "/stats/getViewsOverTime": {
       "post": {
-        "tags": ["Stats"],
+        "tags": [
+          "Stats"
+        ],
         "description": "",
         "parameters": [
           {
@@ -3194,7 +3351,9 @@
     },
     "/stats/getViewsByDays": {
       "post": {
-        "tags": ["Stats"],
+        "tags": [
+          "Stats"
+        ],
         "description": "",
         "parameters": [
           {
@@ -3246,7 +3405,9 @@
     },
     "/stats/getViewsByHour": {
       "post": {
-        "tags": ["Stats"],
+        "tags": [
+          "Stats"
+        ],
         "description": "",
         "parameters": [
           {
@@ -3298,7 +3459,9 @@
     },
     "/backup/beginBackup": {
       "get": {
-        "tags": ["Backup"],
+        "tags": [
+          "Backup"
+        ],
         "description": "",
         "parameters": [
           {
@@ -3338,7 +3501,9 @@
     },
     "/backup/restore/{filename}": {
       "get": {
-        "tags": ["Backup"],
+        "tags": [
+          "Backup"
+        ],
         "description": "",
         "parameters": [
           {
@@ -3384,7 +3549,9 @@
     },
     "/backup/files": {
       "get": {
-        "tags": ["Backup"],
+        "tags": [
+          "Backup"
+        ],
         "description": "",
         "parameters": [
           {
@@ -3424,7 +3591,9 @@
     },
     "/backup/files/{filename}": {
       "get": {
-        "tags": ["Backup"],
+        "tags": [
+          "Backup"
+        ],
         "description": "",
         "parameters": [
           {
@@ -3465,7 +3634,9 @@
         }
       },
       "delete": {
-        "tags": ["Backup"],
+        "tags": [
+          "Backup"
+        ],
         "description": "",
         "parameters": [
           {
@@ -3511,7 +3682,9 @@
     },
     "/backup/upload": {
       "post": {
-        "tags": ["Backup"],
+        "tags": [
+          "Backup"
+        ],
         "description": "",
         "parameters": [
           {
@@ -3548,7 +3721,9 @@
     },
     "/logs/getLogs": {
       "get": {
-        "tags": ["Logs"],
+        "tags": [
+          "Logs"
+        ],
         "description": "",
         "parameters": [
           {
@@ -3585,7 +3760,9 @@
     },
     "/utils/geolocateIp": {
       "post": {
-        "tags": ["Utils"],
+        "tags": [
+          "Utils"
+        ],
         "description": "",
         "parameters": [
           {

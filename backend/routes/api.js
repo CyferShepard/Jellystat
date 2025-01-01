@@ -1088,10 +1088,10 @@ router.post("/setExcludedBackupTable", async (req, res) => {
 
 //DB Queries - History
 router.get("/getHistory", async (req, res) => {
-  const { size = 50, page = 1 } = req.query;
+  const { size = 50, page = 1, search } = req.query;
 
   try {
-    const result = await dbHelper.query({
+    const query = {
       select: ["a.*", "e.IndexNumber as EpisodeNumber", "e.ParentIndexNumber as SeasonNumber", "i.ParentId"],
       table: "jf_playback_activity",
       alias: "a",
@@ -1115,14 +1115,29 @@ router.get("/getHistory", async (req, res) => {
           ],
         },
       ],
+
       order_by: "a.ActivityDateInserted",
       sort_order: "desc",
       pageNumber: page,
       pageSize: size,
-    });
+    };
+    if (search && search.length > 0) {
+      query.where = [
+        {
+          field: `LOWER(COALESCE(a."SeriesName" || ' - ' || a."NowPlayingItemName", a."NowPlayingItemName"))`,
+          operator: "LIKE",
+          value: `%${search.toLowerCase()}%`,
+        },
+      ];
+    }
+    const result = await dbHelper.query(query);
 
     const groupedResults = groupActivity(result.results);
-    res.send({ current_page: page, pages: result.pages, size: size, results: Object.values(groupedResults) });
+    const response = { current_page: page, pages: result.pages, size: size, results: Object.values(groupedResults) };
+    if (search && search.length > 0) {
+      response.search = search;
+    }
+    res.send(response);
   } catch (error) {
     console.log(error);
   }
@@ -1130,7 +1145,7 @@ router.get("/getHistory", async (req, res) => {
 
 router.post("/getLibraryHistory", async (req, res) => {
   try {
-    const { size = 50, page = 1 } = req.query;
+    const { size = 50, page = 1, search } = req.query;
     const { libraryid } = req.body;
 
     if (libraryid === undefined) {
@@ -1139,7 +1154,7 @@ router.post("/getLibraryHistory", async (req, res) => {
       return;
     }
 
-    const result = await dbHelper.query({
+    const query = {
       select: ["a.*", "e.IndexNumber as EpisodeNumber", "e.ParentIndexNumber as SeasonNumber", "i.ParentId"],
       table: "jf_playback_activity",
       alias: "a",
@@ -1168,10 +1183,26 @@ router.post("/getLibraryHistory", async (req, res) => {
       sort_order: "desc",
       pageNumber: page,
       pageSize: size,
-    });
+    };
+
+    if (search && search.length > 0) {
+      query.where = [
+        {
+          field: `LOWER(COALESCE(a."SeriesName" || ' - ' || a."NowPlayingItemName", a."NowPlayingItemName"))`,
+          operator: "LIKE",
+          value: `%${search.toLowerCase()}%`,
+        },
+      ];
+    }
+
+    const result = await dbHelper.query(query);
 
     const groupedResults = groupActivity(result.results);
-    res.send({ current_page: page, pages: result.pages, size: size, results: Object.values(groupedResults) });
+    const response = { current_page: page, pages: result.pages, size: size, results: Object.values(groupedResults) };
+    if (search && search.length > 0) {
+      response.search = search;
+    }
+    res.send(response);
   } catch (error) {
     console.log(error);
     res.status(503);
@@ -1181,7 +1212,7 @@ router.post("/getLibraryHistory", async (req, res) => {
 
 router.post("/getItemHistory", async (req, res) => {
   try {
-    const { size = 50, page = 1 } = req.query;
+    const { size = 50, page = 1, search } = req.query;
     const { itemid } = req.body;
 
     if (itemid === undefined) {
@@ -1190,7 +1221,7 @@ router.post("/getItemHistory", async (req, res) => {
       return;
     }
 
-    const result = await dbHelper.query({
+    const query = {
       select: ["a.*", "e.IndexNumber as EpisodeNumber", "e.ParentIndexNumber as SeasonNumber"],
       table: "jf_playback_activity",
       alias: "a",
@@ -1215,17 +1246,35 @@ router.post("/getItemHistory", async (req, res) => {
         },
       ],
       where: [
-        { column: "a.EpisodeId", operator: "=", value: itemid },
-        { column: "a.SeasonId", operator: "=", value: itemid, type: "or" },
-        { column: "a.NowPlayingItemId", operator: "=", value: itemid, type: "or" },
+        [
+          { column: "a.EpisodeId", operator: "=", value: itemid },
+          { column: "a.SeasonId", operator: "=", value: itemid, type: "or" },
+          { column: "a.NowPlayingItemId", operator: "=", value: itemid, type: "or" },
+        ],
       ],
       order_by: "ActivityDateInserted",
       sort_order: "desc",
       pageNumber: page,
       pageSize: size,
-    });
+    };
 
-    res.send({ current_page: page, pages: result.pages, size: size, results: result.results });
+    if (search && search.length > 0) {
+      query.where.push([
+        {
+          field: `LOWER(COALESCE(a."SeriesName" || ' - ' || a."NowPlayingItemName", a."NowPlayingItemName"))`,
+          operator: "LIKE",
+          value: `%${search.toLowerCase()}%`,
+        },
+      ]);
+    }
+
+    const result = await dbHelper.query(query);
+
+    const response = { current_page: page, pages: result.pages, size: size, results: result.results };
+    if (search && search.length > 0) {
+      response.search = search;
+    }
+    res.send(response);
   } catch (error) {
     console.log(error);
     res.status(503);
@@ -1235,7 +1284,7 @@ router.post("/getItemHistory", async (req, res) => {
 
 router.post("/getUserHistory", async (req, res) => {
   try {
-    const { size = 50, page = 1 } = req.query;
+    const { size = 50, page = 1, search } = req.query;
     const { userid } = req.body;
 
     if (userid === undefined) {
@@ -1244,7 +1293,7 @@ router.post("/getUserHistory", async (req, res) => {
       return;
     }
 
-    const result = await dbHelper.query({
+    const query = {
       select: ["a.*", "e.IndexNumber as EpisodeNumber", "e.ParentIndexNumber as SeasonNumber", "i.ParentId"],
       table: "jf_playback_activity",
       alias: "a",
@@ -1268,14 +1317,31 @@ router.post("/getUserHistory", async (req, res) => {
           ],
         },
       ],
-      where: [{ column: "a.UserId", operator: "=", value: userid }],
+      where: [[{ column: "a.UserId", operator: "=", value: userid }]],
       order_by: "ActivityDateInserted",
       sort_order: "desc",
       pageNumber: page,
       pageSize: size,
-    });
+    };
 
-    res.send({ current_page: page, pages: result.pages, size: size, results: result.results });
+    if (search && search.length > 0) {
+      query.where.push([
+        {
+          field: `LOWER(COALESCE(a."SeriesName" || ' - ' || a."NowPlayingItemName", a."NowPlayingItemName"))`,
+          operator: "LIKE",
+          value: `%${search.toLowerCase()}%`,
+        },
+      ]);
+    }
+    const result = await dbHelper.query(query);
+
+    const response = { current_page: page, pages: result.pages, size: size, results: result.results };
+
+    if (search && search.length > 0) {
+      response.search = search;
+    }
+
+    res.send(response);
   } catch (error) {
     console.log(error);
     res.status(503);

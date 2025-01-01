@@ -12,6 +12,7 @@ function LibraryActivity(props) {
   const token = localStorage.getItem("token");
   const [itemCount, setItemCount] = useState(parseInt(localStorage.getItem("PREF_LIBRARY_ACTIVITY_ItemCount") ?? "10"));
   const [searchQuery, setSearchQuery] = useState("");
+  const [debouncedSearchQuery, setDebouncedSearchQuery] = useState(searchQuery);
   const [streamTypeFilter, setStreamTypeFilter] = useState(
     localStorage.getItem("PREF_LIBRARY_ACTIVITY_StreamTypeFilter") ?? "All"
   );
@@ -34,6 +35,16 @@ function LibraryActivity(props) {
   }
 
   useEffect(() => {
+    const handler = setTimeout(() => {
+      setDebouncedSearchQuery(searchQuery);
+    }, 300); // Adjust the delay as needed
+
+    return () => {
+      clearTimeout(handler);
+    };
+  }, [searchQuery]);
+
+  useEffect(() => {
     const fetchConfig = async () => {
       try {
         const newConfig = await Config.getConfig();
@@ -50,7 +61,7 @@ function LibraryActivity(props) {
       try {
         setIsBusy(true);
         const libraryData = await axios.post(
-          `/api/getLibraryHistory?size=${itemCount}&page=${currentPage}`,
+          `/api/getLibraryHistory?size=${itemCount}&page=${currentPage}&search=${debouncedSearchQuery}`,
           {
             libraryid: props.LibraryId,
           },
@@ -68,13 +79,18 @@ function LibraryActivity(props) {
       }
     };
 
-    if (!data || (data.current_page && data.current_page !== currentPage) || (data.size && data.size !== itemCount)) {
+    if (
+      !data ||
+      (data.current_page && data.current_page !== currentPage) ||
+      (data.size && data.size !== itemCount) ||
+      (data.search ? data.search : "") !== debouncedSearchQuery
+    ) {
       fetchData();
     }
 
     const intervalId = setInterval(fetchData, 60000 * 5);
     return () => clearInterval(intervalId);
-  }, [data, props.LibraryId, token, itemCount, currentPage]);
+  }, [data, props.LibraryId, token, itemCount, currentPage, debouncedSearchQuery]);
 
   if (!data || !data.results) {
     return <></>;
@@ -82,13 +98,13 @@ function LibraryActivity(props) {
 
   let filteredData = data.results;
 
-  if (searchQuery) {
-    filteredData = data.results.filter((item) =>
-      (!item.SeriesName ? item.NowPlayingItemName : item.SeriesName + " - " + item.NowPlayingItemName)
-        .toLowerCase()
-        .includes(searchQuery.toLowerCase())
-    );
-  }
+  // if (searchQuery) {
+  //   filteredData = data.results.filter((item) =>
+  //     (!item.SeriesName ? item.NowPlayingItemName : item.SeriesName + " - " + item.NowPlayingItemName)
+  //       .toLowerCase()
+  //       .includes(searchQuery.toLowerCase())
+  //   );
+  // }
 
   filteredData = filteredData.filter((item) =>
     streamTypeFilter == "All"

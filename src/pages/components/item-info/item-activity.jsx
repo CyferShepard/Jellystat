@@ -11,6 +11,7 @@ function ItemActivity(props) {
   const token = localStorage.getItem("token");
   const [itemCount, setItemCount] = useState(parseInt(localStorage.getItem("PREF_ACTIVITY_ItemCount") ?? "10"));
   const [searchQuery, setSearchQuery] = useState("");
+  const [debouncedSearchQuery, setDebouncedSearchQuery] = useState(searchQuery);
   const [streamTypeFilter, setStreamTypeFilter] = useState("All");
   const [config, setConfig] = useState();
   const [currentPage, setCurrentPage] = useState(1);
@@ -23,6 +24,16 @@ function ItemActivity(props) {
     setItemCount(parseInt(limit));
     localStorage.setItem("PREF_ACTIVITY_ItemCount", limit);
   }
+
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      setDebouncedSearchQuery(searchQuery);
+    }, 300); // Adjust the delay as needed
+
+    return () => {
+      clearTimeout(handler);
+    };
+  }, [searchQuery]);
 
   useEffect(() => {
     const fetchConfig = async () => {
@@ -42,7 +53,7 @@ function ItemActivity(props) {
       try {
         setIsBusy(true);
         const itemData = await axios.post(
-          `/api/getItemHistory?size=${itemCount}&page=${currentPage}`,
+          `/api/getItemHistory?size=${itemCount}&page=${currentPage}&search=${debouncedSearchQuery}`,
           {
             itemid: props.itemid,
           },
@@ -60,13 +71,18 @@ function ItemActivity(props) {
       }
     };
 
-    if (!data || (data.current_page && data.current_page !== currentPage) || (data.size && data.size !== itemCount)) {
+    if (
+      !data ||
+      (data.current_page && data.current_page !== currentPage) ||
+      (data.size && data.size !== itemCount) ||
+      (data.search ? data.search : "") !== debouncedSearchQuery
+    ) {
       fetchData();
     }
 
     const intervalId = setInterval(fetchData, 60000 * 5);
     return () => clearInterval(intervalId);
-  }, [data, props.itemid, token, itemCount, currentPage]);
+  }, [data, props.itemid, token, itemCount, currentPage, debouncedSearchQuery]);
 
   if (!data || !data.results) {
     return <></>;
@@ -74,14 +90,14 @@ function ItemActivity(props) {
 
   let filteredData = data.results;
 
-  if (searchQuery) {
-    filteredData = data.results.filter(
-      (item) =>
-        (!item.SeriesName ? item.NowPlayingItemName : item.SeriesName + " - " + item.NowPlayingItemName)
-          .toLowerCase()
-          .includes(searchQuery.toLowerCase()) || item.UserName.toLowerCase().includes(searchQuery.toLowerCase())
-    );
-  }
+  // if (searchQuery) {
+  //   filteredData = data.results.filter(
+  //     (item) =>
+  //       (!item.SeriesName ? item.NowPlayingItemName : item.SeriesName + " - " + item.NowPlayingItemName)
+  //         .toLowerCase()
+  //         .includes(searchQuery.toLowerCase()) || item.UserName.toLowerCase().includes(searchQuery.toLowerCase())
+  //   );
+  // }
 
   filteredData = filteredData.filter((item) =>
     streamTypeFilter == "All"

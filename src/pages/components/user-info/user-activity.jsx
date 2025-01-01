@@ -15,6 +15,7 @@ function UserActivity(props) {
   const token = localStorage.getItem("token");
   const [itemCount, setItemCount] = useState(parseInt(localStorage.getItem("PREF_ACTIVITY_ItemCount") ?? "10"));
   const [searchQuery, setSearchQuery] = useState("");
+  const [debouncedSearchQuery, setDebouncedSearchQuery] = useState(searchQuery);
   const [streamTypeFilter, setStreamTypeFilter] = useState("All");
   const [libraryFilters, setLibraryFilters] = useState([]);
   const [libraries, setLibraries] = useState([]);
@@ -27,6 +28,16 @@ function UserActivity(props) {
     setItemCount(parseInt(limit));
     localStorage.setItem("PREF_ACTIVITY_ItemCount", limit);
   }
+
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      setDebouncedSearchQuery(searchQuery);
+    }, 300); // Adjust the delay as needed
+
+    return () => {
+      clearTimeout(handler);
+    };
+  }, [searchQuery]);
 
   useEffect(() => {
     const fetchConfig = async () => {
@@ -67,7 +78,7 @@ function UserActivity(props) {
       try {
         setIsBusy(true);
         const itemData = await axios.post(
-          `/api/getUserHistory?size=${itemCount}&page=${currentPage}`,
+          `/api/getUserHistory?size=${itemCount}&page=${currentPage}&search=${debouncedSearchQuery}`,
           {
             userid: props.UserId,
           },
@@ -110,7 +121,12 @@ function UserActivity(props) {
         });
     };
 
-    if (!data || (data.current_page && data.current_page !== currentPage) || (data.size && data.size !== itemCount)) {
+    if (
+      !data ||
+      (data.current_page && data.current_page !== currentPage) ||
+      (data.size && data.size !== itemCount) ||
+      (data.search ? data.search : "") !== debouncedSearchQuery
+    ) {
       fetchHistory();
     }
 
@@ -118,7 +134,7 @@ function UserActivity(props) {
 
     const intervalId = setInterval(fetchHistory, 60000 * 5);
     return () => clearInterval(intervalId);
-  }, [props.UserId, token, itemCount, currentPage]);
+  }, [props.UserId, token, itemCount, currentPage, debouncedSearchQuery]);
 
   if (!data || !data.results) {
     return <></>;
@@ -126,13 +142,13 @@ function UserActivity(props) {
 
   let filteredData = data.results;
 
-  if (searchQuery) {
-    filteredData = data.results.filter((item) =>
-      (!item.SeriesName ? item.NowPlayingItemName : item.SeriesName + " - " + item.NowPlayingItemName)
-        .toLowerCase()
-        .includes(searchQuery.toLowerCase())
-    );
-  }
+  // if (searchQuery) {
+  //   filteredData = data.results.filter((item) =>
+  //     (!item.SeriesName ? item.NowPlayingItemName : item.SeriesName + " - " + item.NowPlayingItemName)
+  //       .toLowerCase()
+  //       .includes(searchQuery.toLowerCase())
+  //   );
+  // }
 
   filteredData = filteredData.filter(
     (item) =>

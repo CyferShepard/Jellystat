@@ -17,6 +17,7 @@ function Activity() {
   const [config, setConfig] = useState(null);
   const [streamTypeFilter, setStreamTypeFilter] = useState(localStorage.getItem("PREF_ACTIVITY_StreamTypeFilter") ?? "All");
   const [searchQuery, setSearchQuery] = useState("");
+  const [debouncedSearchQuery, setDebouncedSearchQuery] = useState(searchQuery);
   const [itemCount, setItemCount] = useState(parseInt(localStorage.getItem("PREF_ACTIVITY_ItemCount") ?? "10"));
   const [libraryFilters, setLibraryFilters] = useState(
     localStorage.getItem("PREF_ACTIVITY_libraryFilters") != undefined
@@ -58,6 +59,16 @@ function Activity() {
   };
 
   useEffect(() => {
+    const handler = setTimeout(() => {
+      setDebouncedSearchQuery(searchQuery);
+    }, 300); // Adjust the delay as needed
+
+    return () => {
+      clearTimeout(handler);
+    };
+  }, [searchQuery]);
+
+  useEffect(() => {
     const fetchConfig = async () => {
       try {
         const newConfig = await Config.getConfig();
@@ -71,7 +82,7 @@ function Activity() {
 
     const fetchHistory = () => {
       setIsBusy(true);
-      const url = `/api/getHistory?size=${itemCount}&page=${currentPage}`;
+      const url = `/api/getHistory?size=${itemCount}&page=${currentPage}&search=${debouncedSearchQuery}`;
       axios
         .get(url, {
           headers: {
@@ -121,7 +132,12 @@ function Activity() {
     };
 
     if (config) {
-      if (!data || (data.current_page && data.current_page !== currentPage) || (data.size && data.size !== itemCount)) {
+      if (
+        !data ||
+        (data.current_page && data.current_page !== currentPage) ||
+        (data.size && data.size !== itemCount) ||
+        (data.search ? data.search : "") !== debouncedSearchQuery
+      ) {
         fetchHistory();
         fetchLibraries();
       }
@@ -133,7 +149,7 @@ function Activity() {
 
     const intervalId = setInterval(fetchHistory, 60000 * 60);
     return () => clearInterval(intervalId);
-  }, [data, config, itemCount, currentPage]);
+  }, [data, config, itemCount, currentPage, debouncedSearchQuery]);
 
   if (!data) {
     return <Loading />;
@@ -158,13 +174,13 @@ function Activity() {
 
   let filteredData = data.results;
 
-  if (searchQuery) {
-    filteredData = data.results.filter((item) =>
-      (!item.SeriesName ? item.NowPlayingItemName : item.SeriesName + " - " + item.NowPlayingItemName)
-        .toLowerCase()
-        .includes(searchQuery.toLowerCase())
-    );
-  }
+  // if (searchQuery) {
+  //   filteredData = data.results.filter((item) =>
+  //     (!item.SeriesName ? item.NowPlayingItemName : item.SeriesName + " - " + item.NowPlayingItemName)
+  //       .toLowerCase()
+  //       .includes(searchQuery.toLowerCase())
+  //   );
+  // }
   filteredData = filteredData.filter(
     (item) =>
       (libraryFilters.includes(item.ParentId) || item.ParentId == null) &&

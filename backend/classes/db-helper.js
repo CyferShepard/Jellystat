@@ -25,11 +25,14 @@ function buildWhereClause(conditions) {
   return conditions
     .map((condition, index) => {
       if (Array.isArray(condition)) {
-        return `(${buildWhereClause(condition)})`;
+        return `${index > 0 ? "AND" : ""} (${buildWhereClause(condition)})`;
       } else if (typeof condition === "object") {
-        const { column, operator, value, type } = condition;
+        const { column, field, operator, value, type } = condition;
         const conjunction = index === 0 ? "" : type ? type.toUpperCase() : "AND";
-        return `${conjunction} ${wrapField(column)} ${operator} '${value}'`;
+        if (operator == "LIKE") {
+          return `${conjunction} ${column ? wrapField(column) : field} ${operator} '%${value}%'`;
+        }
+        return `${conjunction} ${column ? wrapField(column) : field} ${operator} '${value}'`;
       }
       return "";
     })
