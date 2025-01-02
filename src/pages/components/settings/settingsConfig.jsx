@@ -231,9 +231,9 @@ export default function SettingsConfig() {
         </Form.Group>
         {isSubmitted !== "" ? (
           isSubmitted === "Failed" ? (
-            <Alert variant="danger">{submissionMessage}</Alert>
+            <Alert bg="dark" data-bs-theme="dark" variant="danger">{submissionMessage}</Alert>
           ) : (
-            <Alert variant="success">{submissionMessage}</Alert>
+            <Alert bg="dark" data-bs-theme="dark" variant="success">{submissionMessage}</Alert>
           )
         ) : (
           <></>
@@ -263,9 +263,9 @@ export default function SettingsConfig() {
 
         {isSubmittedExternal !== "" ? (
           isSubmittedExternal === "Failed" ? (
-            <Alert variant="danger">{submissionMessageExternal}</Alert>
+            <Alert bg="dark" data-bs-theme="dark" variant="danger">{submissionMessageExternal}</Alert>
           ) : (
-            <Alert variant="success">{submissionMessageExternal}</Alert>
+            <Alert bg="dark" data-bs-theme="dark" variant="success">{submissionMessageExternal}</Alert>
           )
         ) : (
           <></>

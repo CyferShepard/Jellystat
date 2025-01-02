@@ -151,3 +151,7 @@ h2 {
 .hide-tab-titles {
   display: none !important;
 }
+
+::placeholder {
+  color: #a7a7a7 !important; /* Replace with your desired color */
+}

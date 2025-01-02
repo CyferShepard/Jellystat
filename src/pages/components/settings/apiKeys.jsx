@@ -150,7 +150,7 @@ async function handleFormSubmit(event) {
         <div>
           <h1 className="my-2"><Trans i18nKey={"SETTINGS_PAGE.API_KEYS"}/></h1>
             {showAlert && showAlert.visible && (
-                <Alert variant={showAlert.type} onClose={handleCloseAlert} dismissible>
+                <Alert bg="dark" data-bs-theme="dark" variant={showAlert.type} onClose={handleCloseAlert} dismissible>
                   <Alert.Heading>{showAlert.title}</Alert.Heading>
                   <p>
                   {showAlert.message}
