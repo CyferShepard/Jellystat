@@ -125,7 +125,7 @@ function UserActivity(props) {
       !data ||
       (data.current_page && data.current_page !== currentPage) ||
       (data.size && data.size !== itemCount) ||
-      (data.search ? data.search : "") !== debouncedSearchQuery
+      (data.search ? data.search : "") !== debouncedSearchQuery.trim()
     ) {
       fetchHistory();
     }

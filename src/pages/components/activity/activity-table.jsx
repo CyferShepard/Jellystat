@@ -77,7 +77,6 @@ export default function ActivityTable(props) {
   const handlePageChange = (updater) => {
     setPagination((old) => {
       const newPaginationState = typeof updater === "function" ? updater(old) : updater;
-      console.log(newPaginationState);
       const newPage = newPaginationState.pageIndex; // MaterialReactTable uses 0-based index
       if (props.onPageChange) {
         props.onPageChange(newPage + 1);
