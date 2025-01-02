@@ -18,38 +18,6 @@ const { tables } = require("../global/backup_tables");
 const router = express.Router();
 
 //Functions
-function groupActivity(rows) {
-  const groupedResults = {};
-  rows.every((row) => {
-    const key = row.NowPlayingItemId + row.EpisodeId + row.UserId;
-    if (groupedResults[key]) {
-      if (row.ActivityDateInserted > groupedResults[key].ActivityDateInserted) {
-        groupedResults[key] = {
-          ...row,
-          results: groupedResults[key].results,
-        };
-      }
-      groupedResults[key].results.push(row);
-    } else {
-      groupedResults[key] = {
-        ...row,
-        results: [],
-      };
-      groupedResults[key].results.push(row);
-    }
-    return true;
-  });
-
-  // Update GroupedResults with playbackDurationSum
-  Object.values(groupedResults).forEach((row) => {
-    if (row.results && row.results.length > 0) {
-      row.PlaybackDuration = row.results.reduce((acc, item) => acc + parseInt(item.PlaybackDuration), 0);
-      row.TotalPlays = row.results.length;
-    }
-  });
-  return groupedResults;
-}
-
 function groupRecentlyAdded(rows) {
   const groupedResults = {};
   rows.forEach((row) => {
@@ -1091,27 +1059,33 @@ router.get("/getHistory", async (req, res) => {
   const { size = 50, page = 1, search } = req.query;
 
   try {
+    const cte = {
+      cteAlias: "activity_results",
+      select: [
+        "a.NowPlayingItemId",
+        `COALESCE(a."EpisodeId", '1') as "EpisodeId"`,
+        "a.UserId",
+        `json_agg(row_to_json(a) ORDER BY "ActivityDateInserted" DESC) as results`,
+      ],
+      table: "jf_playback_activity_with_metadata",
+      alias: "a",
+      group_by: ["a.NowPlayingItemId", `COALESCE(a."EpisodeId", '1')`, "a.UserId"],
+    };
+
     const query = {
-      select: ["a.*", "e.IndexNumber as EpisodeNumber", "e.ParentIndexNumber as SeasonNumber", "i.ParentId"],
-      table: "jf_playback_activity",
+      cte: cte,
+      select: ["a.*", "a.EpisodeNumber", "a.SeasonNumber", "a.ParentId", "ar.results"],
+      table: "js_latest_playback_activity",
       alias: "a",
       joins: [
         {
           type: "left",
-          table: "jf_library_episodes",
-          alias: "e",
+          table: "activity_results",
+          alias: "ar",
           conditions: [
-            { first: "a.EpisodeId", operator: "=", second: "e.EpisodeId" },
-            { first: "a.SeasonId", operator: "=", second: "e.SeasonId" },
-          ],
-        },
-        {
-          type: "left",
-          table: "jf_library_items",
-          alias: "i",
-          conditions: [
-            { first: "i.Id", operator: "=", second: "a.NowPlayingItemId" },
-            { first: "e.SeriesId", operator: "=", second: "i.Id", type: "or" },
+            { first: "a.NowPlayingItemId", operator: "=", second: "ar.NowPlayingItemId" },
+            { first: "a.EpisodeId", operator: "=", second: "ar.EpisodeId", type: "and" },
+            { first: "a.UserId", operator: "=", second: "ar.UserId", type: "and" },
           ],
         },
       ],
@@ -1121,19 +1095,24 @@ router.get("/getHistory", async (req, res) => {
       pageNumber: page,
       pageSize: size,
     };
+
     if (search && search.length > 0) {
       query.where = [
         {
           field: `LOWER(COALESCE(a."SeriesName" || ' - ' || a."NowPlayingItemName", a."NowPlayingItemName"))`,
           operator: "LIKE",
-          value: `%${search.toLowerCase()}%`,
+          value: `${search.toLowerCase()}`,
         },
       ];
     }
     const result = await dbHelper.query(query);
 
-    const groupedResults = groupActivity(result.results);
-    const response = { current_page: page, pages: result.pages, size: size, results: Object.values(groupedResults) };
+    result.results = result.results.map((item) => ({
+      ...item,
+      TotalPlays: item.results?.length ?? 1,
+      PlaybackDuration: item.results ? item.results.reduce((acc, cur) => acc + cur.PlaybackDuration, 0) : item.PlaybackDuration,
+    }));
+    const response = { current_page: page, pages: result.pages, size: size, results: result.results };
     if (search && search.length > 0) {
       response.search = search;
     }
@@ -1154,9 +1133,23 @@ router.post("/getLibraryHistory", async (req, res) => {
       return;
     }
 
+    const cte = {
+      cteAlias: "activity_results",
+      select: [
+        "a.NowPlayingItemId",
+        `COALESCE(a."EpisodeId", '1') as "EpisodeId"`,
+        "a.UserId",
+        `json_agg(row_to_json(a) ORDER BY "ActivityDateInserted" DESC) as results`,
+      ],
+      table: "jf_playback_activity_with_metadata",
+      alias: "a",
+      group_by: ["a.NowPlayingItemId", `COALESCE(a."EpisodeId", '1')`, "a.UserId"],
+    };
+
     const query = {
-      select: ["a.*", "e.IndexNumber as EpisodeNumber", "e.ParentIndexNumber as SeasonNumber", "i.ParentId"],
-      table: "jf_playback_activity",
+      cte: cte,
+      select: ["a.*", "a.EpisodeNumber", "a.SeasonNumber", "a.ParentId", "ar.results"],
+      table: "js_latest_playback_activity",
       alias: "a",
       joins: [
         {
@@ -1170,16 +1163,17 @@ router.post("/getLibraryHistory", async (req, res) => {
         },
         {
           type: "left",
-          table: "jf_library_episodes",
-          alias: "e",
+          table: "activity_results",
+          alias: "ar",
           conditions: [
-            { first: "a.EpisodeId", operator: "=", second: "e.EpisodeId" },
-            { first: "a.SeasonId", operator: "=", second: "e.SeasonId" },
+            { first: "a.NowPlayingItemId", operator: "=", second: "ar.NowPlayingItemId" },
+            { first: "a.EpisodeId", operator: "=", second: "ar.EpisodeId", type: "and" },
+            { first: "a.UserId", operator: "=", second: "ar.UserId", type: "and" },
           ],
         },
       ],
 
-      order_by: "ActivityDateInserted",
+      order_by: "a.ActivityDateInserted",
       sort_order: "desc",
       pageNumber: page,
       pageSize: size,
@@ -1197,8 +1191,13 @@ router.post("/getLibraryHistory", async (req, res) => {
 
     const result = await dbHelper.query(query);
 
-    const groupedResults = groupActivity(result.results);
-    const response = { current_page: page, pages: result.pages, size: size, results: Object.values(groupedResults) };
+    result.results = result.results.map((item) => ({
+      ...item,
+      TotalPlays: item.results?.length ?? 1,
+      PlaybackDuration: item.results ? item.results.reduce((acc, cur) => acc + cur.PlaybackDuration, 0) : item.PlaybackDuration,
+    }));
+
+    const response = { current_page: page, pages: result.pages, size: size, results: result.results };
     if (search && search.length > 0) {
       response.search = search;
     }
@@ -1222,29 +1221,9 @@ router.post("/getItemHistory", async (req, res) => {
     }
 
     const query = {
-      select: ["a.*", "e.IndexNumber as EpisodeNumber", "e.ParentIndexNumber as SeasonNumber"],
-      table: "jf_playback_activity",
+      select: ["a.*", "a.EpisodeNumber", "a.SeasonNumber", "a.ParentId"],
+      table: "jf_playback_activity_with_metadata",
       alias: "a",
-      joins: [
-        {
-          type: "left",
-          table: "jf_library_episodes",
-          alias: "e",
-          conditions: [
-            { first: "a.EpisodeId", operator: "=", second: "e.EpisodeId" },
-            { first: "a.SeasonId", operator: "=", second: "e.SeasonId" },
-          ],
-        },
-        {
-          type: "left",
-          table: "jf_library_items",
-          alias: "i",
-          conditions: [
-            { first: "i.Id", operator: "=", second: "a.NowPlayingItemId" },
-            { first: "e.SeriesId", operator: "=", second: "i.Id", type: "or" },
-          ],
-        },
-      ],
       where: [
         [
           { column: "a.EpisodeId", operator: "=", value: itemid },
@@ -1294,29 +1273,9 @@ router.post("/getUserHistory", async (req, res) => {
     }
 
     const query = {
-      select: ["a.*", "e.IndexNumber as EpisodeNumber", "e.ParentIndexNumber as SeasonNumber", "i.ParentId"],
-      table: "jf_playback_activity",
+      select: ["a.*", "a.EpisodeNumber", "a.SeasonNumber", "a.ParentId"],
+      table: "jf_playback_activity_with_metadata",
       alias: "a",
-      joins: [
-        {
-          type: "left",
-          table: "jf_library_episodes",
-          alias: "e",
-          conditions: [
-            { first: "a.EpisodeId", operator: "=", second: "e.EpisodeId" },
-            { first: "a.SeasonId", operator: "=", second: "e.SeasonId" },
-          ],
-        },
-        {
-          type: "left",
-          table: "jf_library_items",
-          alias: "i",
-          conditions: [
-            { first: "i.Id", operator: "=", second: "a.NowPlayingItemId" },
-            { first: "e.SeriesId", operator: "=", second: "i.Id", type: "or" },
-          ],
-        },
-      ],
       where: [[{ column: "a.UserId", operator: "=", value: userid }]],
       order_by: "ActivityDateInserted",
       sort_order: "desc",

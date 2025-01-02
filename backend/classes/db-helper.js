@@ -4,6 +4,18 @@ function wrapField(field) {
   if (field === "*") {
     return field;
   }
+  if (
+    field.includes("COALESCE") ||
+    field.includes("SUM") ||
+    field.includes("COUNT") ||
+    field.includes("MAX") ||
+    field.includes("MIN") ||
+    field.includes("AVG") ||
+    field.includes("DISTINCT") ||
+    field.includes("json_agg")
+  ) {
+    return field;
+  }
   if (field.includes(" as ")) {
     const [column, alias] = field.split(" as ");
     return `${column
@@ -40,7 +52,50 @@ function buildWhereClause(conditions) {
     .trim();
 }
 
+function buildCTE(cte) {
+  if (!cte) {
+    return "";
+  }
+
+  const { select, table, cteAlias, alias, joins = [], where = [], group_by = [], order_by, sort_order = "desc" } = cte;
+  let query = `WITH ${cteAlias} AS (SELECT ${select.map(wrapField).join(", ")} FROM ${wrapField(table)} AS ${wrapField(alias)}`;
+
+  // Add joins
+  joins.forEach((join) => {
+    const joinConditions = join.conditions
+      .map((condition, index) => {
+        const conjunction = index === 0 ? "" : condition.type ? condition.type.toUpperCase() : "AND";
+        return `${conjunction} ${wrapField(condition.first)} ${condition.operator} ${
+          condition.second ? wrapField(condition.second) : `'${condition.value}'`
+        }`;
+      })
+      .join(" ");
+    const joinQuery = ` ${join.type.toUpperCase()} JOIN ${join.table} AS ${join.alias} ON ${joinConditions}`;
+    query += joinQuery;
+  });
+
+  // Add where conditions
+  const whereClause = buildWhereClause(where);
+  if (whereClause) {
+    query += ` WHERE ${whereClause}`;
+  }
+
+  // Add group by
+  if (group_by.length > 0) {
+    query += ` GROUP BY ${group_by.map(wrapField).join(", ")}`;
+  }
+
+  // Add order by
+  if (order_by) {
+    query += ` ORDER BY ${wrapField(order_by)} ${sort_order}`;
+  }
+
+  query += ")";
+  return query;
+}
+
 async function query({
+  cte,
   select = ["*"],
   table,
   alias,
@@ -54,8 +109,8 @@ async function query({
   const client = await pool.connect();
   try {
     // Build the base query
-    let countQuery = `SELECT COUNT(*) FROM ${wrapField(table)} AS ${wrapField(alias)}`;
-    let query = `SELECT ${select.map(wrapField).join(", ")} FROM ${wrapField(table)} AS ${wrapField(alias)}`;
+    let countQuery = `${buildCTE(cte)} SELECT COUNT(*) FROM ${wrapField(table)} AS ${wrapField(alias)}`;
+    let query = `${buildCTE(cte)} SELECT ${select.map(wrapField).join(", ")} FROM ${wrapField(table)} AS ${wrapField(alias)}`;
 
     // Add joins
     joins.forEach((join) => {
