@@ -93,6 +93,7 @@ async function purgeLibraryItems(id, withActivity, purgeAll = false) {
       text: `DELETE FROM jf_playback_activity WHERE${
         episodeIds.length > 0 ? ` "EpisodeId" IN (${pgp.as.csv(episodeIds)})  OR` : ""
       }${seasonIds.length > 0 ? ` "SeasonId" IN (${pgp.as.csv(seasonIds)}) OR` : ""} "NowPlayingItemId"='${id}'`,
+      refreshViews: true,
     };
     await db.query(deleteQuery);
   }
@@ -923,6 +924,7 @@ router.delete("/item/purge", async (req, res) => {
           }${
             seasons.length > 0 ? ` "SeasonId" IN (${pgp.as.csv(seasons.map((item) => item.SeasonId))}) OR` : ""
           } "NowPlayingItemId"='${id}'`,
+          refreshViews: true,
         };
         await db.query(deleteQuery);
       }
@@ -1318,7 +1320,7 @@ router.post("/deletePlaybackActivity", async (req, res) => {
       return;
     }
 
-    await db.query(`DELETE from jf_playback_activity where "Id" = ANY($1)`, [ids]);
+    await db.query(`DELETE from jf_playback_activity where "Id" = ANY($1)`, [ids], true);
     res.send(`${ids.length} Records Deleted`);
   } catch (error) {
     console.log(error);

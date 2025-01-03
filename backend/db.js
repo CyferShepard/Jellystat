@@ -47,6 +47,12 @@ async function deleteBulk(table_name, data, pkName) {
 
     await client.query("COMMIT");
     message = data.length + " Rows removed.";
+
+    if (table_name === "jf_playback_activity") {
+      for (const view of materializedViews) {
+        refreshMaterializedView(view);
+      }
+    }
   } catch (error) {
     await client.query("ROLLBACK");
     message = "Bulk delete error: " + error;
@@ -87,6 +93,32 @@ async function updateSingleFieldBulk(table_name, data, field_name, new_value, wh
   return { Result: result, message: "" + message };
 }
 
+const materializedViews = ["js_latest_playback_activity", "js_library_stats_overview"];
+
+async function refreshMaterializedView(view_name) {
+  const client = await pool.connect();
+  let result = "SUCCESS";
+  let message = "";
+  try {
+    await client.query("BEGIN");
+
+    const refreshQuery = {
+      text: `REFRESH MATERIALIZED VIEW ${view_name}`,
+    };
+    await client.query(refreshQuery);
+
+    await client.query("COMMIT");
+    message = view_name + " refreshed.";
+  } catch (error) {
+    await client.query("ROLLBACK");
+    message = "Refresh materialized view error: " + error;
+    result = "ERROR";
+  } finally {
+    client.release();
+  }
+  return { Result: result, message: "" + message };
+}
+
 async function insertBulk(table_name, data, columns) {
   //dedupe data
 
@@ -115,6 +147,12 @@ async function insertBulk(table_name, data, columns) {
     const query = pgp.helpers.insert(data, cs) + update_query; // Update the column names accordingly
     await client.query(query);
     await client.query("COMMIT");
+
+    if (table_name === "jf_playback_activity") {
+      for (const view of materializedViews) {
+        refreshMaterializedView(view);
+      }
+    }
   } catch (error) {
     await client.query("ROLLBACK");
     message = "" + error;
@@ -128,9 +166,15 @@ async function insertBulk(table_name, data, columns) {
   };
 }
 
-async function query(text, params) {
+async function query(text, params, refreshViews = false) {
   try {
     const result = await pool.query(text, params);
+
+    if (refreshViews) {
+      for (const view of materializedViews) {
+        refreshMaterializedView(view);
+      }
+    }
     return result;
   } catch (error) {
     if (error?.routine === "auth_failed") {
