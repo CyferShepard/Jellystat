@@ -90,8 +90,8 @@ function Row(logs) {
 
         <TableRow>
           <TableCell className="py-0 pb-1" ><Trans i18nKey={"FRAMERATE"}/></TableCell>
-          <TableCell className="py-0 pb-1" >{data.MediaStreams ? parseFloat(data.MediaStreams.find(stream => stream.Type === 'Video')?.RealFrameRate).toFixed(2) : '-'}</TableCell>
-          <TableCell className="py-0 pb-1" >{data.MediaStreams ? parseFloat(data.MediaStreams.find(stream => stream.Type === 'Video')?.RealFrameRate).toFixed(2) : '-'}</TableCell>
+          <TableCell className="py-0 pb-1" >{data.MediaStreams ? data.MediaStreams.find(stream => stream.Type === 'Video') ? parseFloat(data.MediaStreams.find(stream => stream.Type === 'Video').RealFrameRate.toFixed(2)) : '-' : '-'}</TableCell>
+          <TableCell className="py-0 pb-1" >{data.MediaStreams ? data.MediaStreams.find(stream => stream.Type === 'Video') ? parseFloat(data.MediaStreams.find(stream => stream.Type === 'Video').RealFrameRate.toFixed(2)) : '-' : '-'}</TableCell>
         </TableRow>
 
         <TableRow>
