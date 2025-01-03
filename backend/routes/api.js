@@ -1068,6 +1068,8 @@ router.get("/getHistory", async (req, res) => {
         `COALESCE(a."EpisodeId", '1') as "EpisodeId"`,
         "a.UserId",
         `json_agg(row_to_json(a) ORDER BY "ActivityDateInserted" DESC) as results`,
+        `COUNT(a.*) as "TotalPlays"`,
+        `SUM(a."PlaybackDuration") as "TotalDuration"`,
       ],
       table: "jf_playback_activity_with_metadata",
       alias: "a",
@@ -1076,7 +1078,7 @@ router.get("/getHistory", async (req, res) => {
 
     const query = {
       cte: cte,
-      select: ["a.*", "a.EpisodeNumber", "a.SeasonNumber", "a.ParentId", "ar.results"],
+      select: ["a.*", "a.EpisodeNumber", "a.SeasonNumber", "a.ParentId", "ar.results", "ar.TotalPlays", "ar.TotalDuration"],
       table: "js_latest_playback_activity",
       alias: "a",
       joins: [
@@ -1111,8 +1113,7 @@ router.get("/getHistory", async (req, res) => {
 
     result.results = result.results.map((item) => ({
       ...item,
-      TotalPlays: item.results?.length ?? 1,
-      PlaybackDuration: item.results ? item.results.reduce((acc, cur) => acc + cur.PlaybackDuration, 0) : item.PlaybackDuration,
+      PlaybackDuration: item.TotalDuration ? item.TotalDuration : item.PlaybackDuration,
     }));
     const response = { current_page: page, pages: result.pages, size: size, results: result.results };
     if (search && search.length > 0) {
@@ -1142,6 +1143,8 @@ router.post("/getLibraryHistory", async (req, res) => {
         `COALESCE(a."EpisodeId", '1') as "EpisodeId"`,
         "a.UserId",
         `json_agg(row_to_json(a) ORDER BY "ActivityDateInserted" DESC) as results`,
+        `COUNT(a.*) as "TotalPlays"`,
+        `SUM(a."PlaybackDuration") as "TotalDuration"`,
       ],
       table: "jf_playback_activity_with_metadata",
       alias: "a",
@@ -1150,7 +1153,7 @@ router.post("/getLibraryHistory", async (req, res) => {
 
     const query = {
       cte: cte,
-      select: ["a.*", "a.EpisodeNumber", "a.SeasonNumber", "a.ParentId", "ar.results"],
+      select: ["a.*", "a.EpisodeNumber", "a.SeasonNumber", "a.ParentId", "ar.results", "ar.TotalPlays", "ar.TotalDuration"],
       table: "js_latest_playback_activity",
       alias: "a",
       joins: [
@@ -1195,8 +1198,7 @@ router.post("/getLibraryHistory", async (req, res) => {
 
     result.results = result.results.map((item) => ({
       ...item,
-      TotalPlays: item.results?.length ?? 1,
-      PlaybackDuration: item.results ? item.results.reduce((acc, cur) => acc + cur.PlaybackDuration, 0) : item.PlaybackDuration,
+      PlaybackDuration: item.TotalDuration ? item.TotalDuration : item.PlaybackDuration,
     }));
 
     const response = { current_page: page, pages: result.pages, size: size, results: result.results };
