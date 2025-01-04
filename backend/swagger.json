@@ -2022,6 +2022,26 @@
             "name": "search",
             "in": "query",
             "type": "string"
+          },
+          {
+            "name": "sort",
+            "in": "query",
+            "type": "string",
+            "enum": [
+              "UserName",
+              "RemoteEndPoint",
+              "NowPlayingItemName",
+              "Client",
+              "DeviceName",
+              "ActivityDateInserted",
+              "PlaybackDuration",
+              "TotalPlays"
+            ]
+          },
+          {
+            "name": "desc",
+            "in": "query",
+            "type": "string"
           }
         ],
         "responses": {
@@ -2074,6 +2094,26 @@
           },
           {
             "name": "search",
+            "in": "query",
+            "type": "string"
+          },
+          {
+            "name": "sort",
+            "in": "query",
+            "type": "string",
+            "enum": [
+              "UserName",
+              "RemoteEndPoint",
+              "NowPlayingItemName",
+              "Client",
+              "DeviceName",
+              "ActivityDateInserted",
+              "PlaybackDuration",
+              "TotalPlays"
+            ]
+          },
+          {
+            "name": "desc",
             "in": "query",
             "type": "string"
           },
@@ -2150,6 +2190,25 @@
             "type": "string"
           },
           {
+            "name": "sort",
+            "in": "query",
+            "type": "string",
+            "enum": [
+              "UserName",
+              "RemoteEndPoint",
+              "NowPlayingItemName",
+              "Client",
+              "DeviceName",
+              "ActivityDateInserted",
+              "PlaybackDuration"
+            ]
+          },
+          {
+            "name": "desc",
+            "in": "query",
+            "type": "string"
+          },
+          {
             "name": "body",
             "in": "body",
             "schema": {
@@ -2218,6 +2277,25 @@
           },
           {
             "name": "search",
+            "in": "query",
+            "type": "string"
+          },
+          {
+            "name": "sort",
+            "in": "query",
+            "type": "string",
+            "enum": [
+              "UserName",
+              "RemoteEndPoint",
+              "NowPlayingItemName",
+              "Client",
+              "DeviceName",
+              "ActivityDateInserted",
+              "PlaybackDuration"
+            ]
+          },
+          {
+            "name": "desc",
             "in": "query",
             "type": "string"
           },
