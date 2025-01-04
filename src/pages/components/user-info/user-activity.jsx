@@ -22,6 +22,7 @@ function UserActivity(props) {
   const [showLibraryFilters, setShowLibraryFilters] = useState(false);
   const [config, setConfig] = useState();
   const [currentPage, setCurrentPage] = useState(1);
+  const [sorting, setSorting] = useState({ column: "ActivityDateInserted", desc: true });
   const [isBusy, setIsBusy] = useState(false);
 
   function setItemLimit(limit) {
@@ -73,12 +74,16 @@ function UserActivity(props) {
     setCurrentPage(newPage);
   };
 
+  const onSortChange = (sort) => {
+    setSorting({ column: sort.column, desc: sort.desc });
+  };
+
   useEffect(() => {
     const fetchHistory = async () => {
       try {
         setIsBusy(true);
         const itemData = await axios.post(
-          `/api/getUserHistory?size=${itemCount}&page=${currentPage}&search=${debouncedSearchQuery}`,
+          `/api/getUserHistory?size=${itemCount}&page=${currentPage}&search=${debouncedSearchQuery}&sort=${sorting.column}&desc=${sorting.desc}`,
           {
             userid: props.UserId,
           },
@@ -125,7 +130,9 @@ function UserActivity(props) {
       !data ||
       (data.current_page && data.current_page !== currentPage) ||
       (data.size && data.size !== itemCount) ||
-      (data.search ? data.search : "") !== debouncedSearchQuery.trim()
+      (data?.search ?? "") !== debouncedSearchQuery.trim() ||
+      (data?.sort ?? "") !== sorting.column ||
+      (data?.desc ?? true) !== sorting.desc
     ) {
       fetchHistory();
     }
@@ -134,7 +141,7 @@ function UserActivity(props) {
 
     const intervalId = setInterval(fetchHistory, 60000 * 5);
     return () => clearInterval(intervalId);
-  }, [props.UserId, token, itemCount, currentPage, debouncedSearchQuery]);
+  }, [props.UserId, token, itemCount, currentPage, debouncedSearchQuery, sorting]);
 
   if (!data || !data.results) {
     return <></>;
@@ -240,6 +247,7 @@ function UserActivity(props) {
           data={filteredData}
           itemCount={itemCount}
           onPageChange={handlePageChange}
+          onSortChange={onSortChange}
           pageCount={data.pages}
           isBusy={isBusy}
         />

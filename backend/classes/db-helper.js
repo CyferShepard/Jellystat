@@ -12,7 +12,8 @@ function wrapField(field) {
     field.includes("MIN") ||
     field.includes("AVG") ||
     field.includes("DISTINCT") ||
-    field.includes("json_agg")
+    field.includes("json_agg") ||
+    field.includes("CASE")
   ) {
     return field;
   }

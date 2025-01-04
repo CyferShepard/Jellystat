@@ -18,10 +18,15 @@ function LibraryActivity(props) {
   );
   const [config, setConfig] = useState();
   const [currentPage, setCurrentPage] = useState(1);
+  const [sorting, setSorting] = useState({ column: "ActivityDateInserted", desc: true });
   const [isBusy, setIsBusy] = useState(false);
 
   const handlePageChange = (newPage) => {
     setCurrentPage(newPage);
+  };
+
+  const onSortChange = (sort) => {
+    setSorting({ column: sort.column, desc: sort.desc });
   };
 
   function setItemLimit(limit) {
@@ -61,7 +66,7 @@ function LibraryActivity(props) {
       try {
         setIsBusy(true);
         const libraryData = await axios.post(
-          `/api/getLibraryHistory?size=${itemCount}&page=${currentPage}&search=${debouncedSearchQuery}`,
+          `/api/getLibraryHistory?size=${itemCount}&page=${currentPage}&search=${debouncedSearchQuery}&sort=${sorting.column}&desc=${sorting.desc}`,
           {
             libraryid: props.LibraryId,
           },
@@ -83,14 +88,16 @@ function LibraryActivity(props) {
       !data ||
       (data.current_page && data.current_page !== currentPage) ||
       (data.size && data.size !== itemCount) ||
-      (data.search ? data.search : "") !== debouncedSearchQuery.trim()
+      (data?.search ?? "") !== debouncedSearchQuery.trim() ||
+      (data?.sort ?? "") !== sorting.column ||
+      (data?.desc ?? true) !== sorting.desc
     ) {
       fetchData();
     }
 
     const intervalId = setInterval(fetchData, 60000 * 5);
     return () => clearInterval(intervalId);
-  }, [data, props.LibraryId, token, itemCount, currentPage, debouncedSearchQuery]);
+  }, [data, props.LibraryId, token, itemCount, currentPage, debouncedSearchQuery, sorting]);
 
   if (!data || !data.results) {
     return <></>;
@@ -175,6 +182,7 @@ function LibraryActivity(props) {
           data={filteredData}
           itemCount={itemCount}
           onPageChange={handlePageChange}
+          onSortChange={onSortChange}
           pageCount={data.pages}
           isBusy={isBusy}
         />

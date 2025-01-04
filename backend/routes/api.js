@@ -17,6 +17,28 @@ const { tables } = require("../global/backup_tables");
 
 const router = express.Router();
 
+//consts
+const groupedSortMap = [
+  { field: "UserName", column: "a.UserName" },
+  { field: "RemoteEndPoint", column: "a.RemoteEndPoint" },
+  { field: "NowPlayingItemName", column: "FullName" },
+  { field: "Client", column: "a.Client" },
+  { field: "DeviceName", column: "a.DeviceName" },
+  { field: "ActivityDateInserted", column: "a.ActivityDateInserted" },
+  { field: "PlaybackDuration", column: "ar.TotalDuration" },
+  { field: "TotalPlays", column: "TotalPlays" },
+];
+
+const unGroupedSortMap = [
+  { field: "UserName", column: "a.UserName" },
+  { field: "RemoteEndPoint", column: "a.RemoteEndPoint" },
+  { field: "NowPlayingItemName", column: "FullName" },
+  { field: "Client", column: "a.Client" },
+  { field: "DeviceName", column: "a.DeviceName" },
+  { field: "ActivityDateInserted", column: "a.ActivityDateInserted" },
+  { field: "PlaybackDuration", column: "a.PlaybackDuration" },
+];
+
 //Functions
 function groupRecentlyAdded(rows) {
   const groupedResults = {};
@@ -1058,7 +1080,9 @@ router.post("/setExcludedBackupTable", async (req, res) => {
 
 //DB Queries - History
 router.get("/getHistory", async (req, res) => {
-  const { size = 50, page = 1, search } = req.query;
+  const { size = 50, page = 1, search, sort = "ActivityDateInserted", desc = true } = req.query;
+
+  const sortField = groupedSortMap.find((item) => item.field === sort)?.column || "a.ActivityDateInserted";
 
   try {
     const cte = {
@@ -1078,7 +1102,21 @@ router.get("/getHistory", async (req, res) => {
 
     const query = {
       cte: cte,
-      select: ["a.*", "a.EpisodeNumber", "a.SeasonNumber", "a.ParentId", "ar.results", "ar.TotalPlays", "ar.TotalDuration"],
+      select: [
+        "a.*",
+        "a.EpisodeNumber",
+        "a.SeasonNumber",
+        "a.ParentId",
+        "ar.results",
+        "ar.TotalPlays",
+        "ar.TotalDuration",
+        `
+        CASE 
+          WHEN a."SeriesName" is null THEN a."NowPlayingItemName"
+          ELSE CONCAT(a."SeriesName" , ' : S' , a."SeasonNumber" , 'E' , a."EpisodeNumber" , ' - ' , a."NowPlayingItemName")
+        END AS "FullName"
+        `,
+      ],
       table: "js_latest_playback_activity",
       alias: "a",
       joins: [
@@ -1094,8 +1132,8 @@ router.get("/getHistory", async (req, res) => {
         },
       ],
 
-      order_by: "a.ActivityDateInserted",
-      sort_order: "desc",
+      order_by: sortField,
+      sort_order: desc ? "desc" : "asc",
       pageNumber: page,
       pageSize: size,
     };
@@ -1103,7 +1141,12 @@ router.get("/getHistory", async (req, res) => {
     if (search && search.length > 0) {
       query.where = [
         {
-          field: `LOWER(COALESCE(a."SeriesName" || ' - ' || a."NowPlayingItemName", a."NowPlayingItemName"))`,
+          field: `LOWER(
+          CASE 
+            WHEN a."SeriesName" is null THEN a."NowPlayingItemName"
+            ELSE CONCAT(a."SeriesName" , ' : S' , a."SeasonNumber" , 'E' , a."EpisodeNumber" , ' - ' , a."NowPlayingItemName")
+          END 
+          )`,
           operator: "LIKE",
           value: `${search.toLowerCase()}`,
         },
@@ -1115,10 +1158,11 @@ router.get("/getHistory", async (req, res) => {
       ...item,
       PlaybackDuration: item.TotalDuration ? item.TotalDuration : item.PlaybackDuration,
     }));
-    const response = { current_page: page, pages: result.pages, size: size, results: result.results };
+    const response = { current_page: page, pages: result.pages, size: size, sort: sort, desc: desc, results: result.results };
     if (search && search.length > 0) {
       response.search = search;
     }
+
     res.send(response);
   } catch (error) {
     console.log(error);
@@ -1127,7 +1171,7 @@ router.get("/getHistory", async (req, res) => {
 
 router.post("/getLibraryHistory", async (req, res) => {
   try {
-    const { size = 50, page = 1, search } = req.query;
+    const { size = 50, page = 1, search, sort = "ActivityDateInserted", desc = true } = req.query;
     const { libraryid } = req.body;
 
     if (libraryid === undefined) {
@@ -1135,6 +1179,8 @@ router.post("/getLibraryHistory", async (req, res) => {
       res.send("No Library ID provided");
       return;
     }
+
+    const sortField = groupedSortMap.find((item) => item.field === sort)?.column || "a.ActivityDateInserted";
 
     const cte = {
       cteAlias: "activity_results",
@@ -1153,7 +1199,21 @@ router.post("/getLibraryHistory", async (req, res) => {
 
     const query = {
       cte: cte,
-      select: ["a.*", "a.EpisodeNumber", "a.SeasonNumber", "a.ParentId", "ar.results", "ar.TotalPlays", "ar.TotalDuration"],
+      select: [
+        "a.*",
+        "a.EpisodeNumber",
+        "a.SeasonNumber",
+        "a.ParentId",
+        "ar.results",
+        "ar.TotalPlays",
+        "ar.TotalDuration",
+        `
+        CASE 
+          WHEN a."SeriesName" is null THEN a."NowPlayingItemName"
+          ELSE CONCAT(a."SeriesName" , ' : S' , a."SeasonNumber" , 'E' , a."EpisodeNumber" , ' - ' , a."NowPlayingItemName")
+        END AS "FullName"
+        `,
+      ],
       table: "js_latest_playback_activity",
       alias: "a",
       joins: [
@@ -1178,8 +1238,8 @@ router.post("/getLibraryHistory", async (req, res) => {
         },
       ],
 
-      order_by: "a.ActivityDateInserted",
-      sort_order: "desc",
+      order_by: sortField,
+      sort_order: desc ? "desc" : "asc",
       pageNumber: page,
       pageSize: size,
     };
@@ -1187,9 +1247,14 @@ router.post("/getLibraryHistory", async (req, res) => {
     if (search && search.length > 0) {
       query.where = [
         {
-          field: `LOWER(COALESCE(a."SeriesName" || ' - ' || a."NowPlayingItemName", a."NowPlayingItemName"))`,
+          field: `LOWER(
+          CASE 
+            WHEN a."SeriesName" is null THEN a."NowPlayingItemName"
+            ELSE CONCAT(a."SeriesName" , ' : S' , a."SeasonNumber" , 'E' , a."EpisodeNumber" , ' - ' , a."NowPlayingItemName")
+          END 
+          )`,
           operator: "LIKE",
-          value: `%${search.toLowerCase()}%`,
+          value: `${search.toLowerCase()}`,
         },
       ];
     }
@@ -1201,7 +1266,7 @@ router.post("/getLibraryHistory", async (req, res) => {
       PlaybackDuration: item.TotalDuration ? item.TotalDuration : item.PlaybackDuration,
     }));
 
-    const response = { current_page: page, pages: result.pages, size: size, results: result.results };
+    const response = { current_page: page, pages: result.pages, size: size, sort: sort, desc: desc, results: result.results };
     if (search && search.length > 0) {
       response.search = search;
     }
@@ -1215,7 +1280,7 @@ router.post("/getLibraryHistory", async (req, res) => {
 
 router.post("/getItemHistory", async (req, res) => {
   try {
-    const { size = 50, page = 1, search } = req.query;
+    const { size = 50, page = 1, search, sort = "ActivityDateInserted", desc = true } = req.query;
     const { itemid } = req.body;
 
     if (itemid === undefined) {
@@ -1224,8 +1289,21 @@ router.post("/getItemHistory", async (req, res) => {
       return;
     }
 
+    const sortField = unGroupedSortMap.find((item) => item.field === sort)?.column || "a.ActivityDateInserted";
+
     const query = {
-      select: ["a.*", "a.EpisodeNumber", "a.SeasonNumber", "a.ParentId"],
+      select: [
+        "a.*",
+        "a.EpisodeNumber",
+        "a.SeasonNumber",
+        "a.ParentId",
+        `
+        CASE 
+          WHEN a."SeriesName" is null THEN a."NowPlayingItemName"
+          ELSE CONCAT(a."SeriesName" , ' : S' , a."SeasonNumber" , 'E' , a."EpisodeNumber" , ' - ' , a."NowPlayingItemName")
+        END AS "FullName"
+        `,
+      ],
       table: "jf_playback_activity_with_metadata",
       alias: "a",
       where: [
@@ -1235,25 +1313,30 @@ router.post("/getItemHistory", async (req, res) => {
           { column: "a.NowPlayingItemId", operator: "=", value: itemid, type: "or" },
         ],
       ],
-      order_by: "ActivityDateInserted",
-      sort_order: "desc",
+      order_by: sortField,
+      sort_order: desc ? "desc" : "asc",
       pageNumber: page,
       pageSize: size,
     };
 
     if (search && search.length > 0) {
-      query.where.push([
+      query.where = [
         {
-          field: `LOWER(COALESCE(a."SeriesName" || ' - ' || a."NowPlayingItemName", a."NowPlayingItemName"))`,
+          field: `LOWER(
+          CASE 
+            WHEN a."SeriesName" is null THEN a."NowPlayingItemName"
+            ELSE CONCAT(a."SeriesName" , ' : S' , a."SeasonNumber" , 'E' , a."EpisodeNumber" , ' - ' , a."NowPlayingItemName")
+          END 
+          )`,
           operator: "LIKE",
-          value: `%${search.toLowerCase()}%`,
+          value: `${search.toLowerCase()}`,
         },
-      ]);
+      ];
     }
 
     const result = await dbHelper.query(query);
 
-    const response = { current_page: page, pages: result.pages, size: size, results: result.results };
+    const response = { current_page: page, pages: result.pages, size: size, sort: sort, desc: desc, results: result.results };
     if (search && search.length > 0) {
       response.search = search;
     }
@@ -1267,7 +1350,7 @@ router.post("/getItemHistory", async (req, res) => {
 
 router.post("/getUserHistory", async (req, res) => {
   try {
-    const { size = 50, page = 1, search } = req.query;
+    const { size = 50, page = 1, search, sort = "ActivityDateInserted", desc = true } = req.query;
     const { userid } = req.body;
 
     if (userid === undefined) {
@@ -1276,29 +1359,47 @@ router.post("/getUserHistory", async (req, res) => {
       return;
     }
 
+    const sortField = unGroupedSortMap.find((item) => item.field === sort)?.column || "a.ActivityDateInserted";
+
     const query = {
-      select: ["a.*", "a.EpisodeNumber", "a.SeasonNumber", "a.ParentId"],
+      select: [
+        "a.*",
+        "a.EpisodeNumber",
+        "a.SeasonNumber",
+        "a.ParentId",
+        `
+        CASE 
+          WHEN a."SeriesName" is null THEN a."NowPlayingItemName"
+          ELSE CONCAT(a."SeriesName" , ' : S' , a."SeasonNumber" , 'E' , a."EpisodeNumber" , ' - ' , a."NowPlayingItemName")
+        END AS "FullName"
+        `,
+      ],
       table: "jf_playback_activity_with_metadata",
       alias: "a",
       where: [[{ column: "a.UserId", operator: "=", value: userid }]],
-      order_by: "ActivityDateInserted",
-      sort_order: "desc",
+      order_by: sortField,
+      sort_order: desc ? "desc" : "asc",
       pageNumber: page,
       pageSize: size,
     };
 
     if (search && search.length > 0) {
-      query.where.push([
+      query.where = [
         {
-          field: `LOWER(COALESCE(a."SeriesName" || ' - ' || a."NowPlayingItemName", a."NowPlayingItemName"))`,
+          field: `LOWER(
+          CASE 
+            WHEN a."SeriesName" is null THEN a."NowPlayingItemName"
+            ELSE CONCAT(a."SeriesName" , ' : S' , a."SeasonNumber" , 'E' , a."EpisodeNumber" , ' - ' , a."NowPlayingItemName")
+          END 
+          )`,
           operator: "LIKE",
-          value: `%${search.toLowerCase()}%`,
+          value: `${search.toLowerCase()}`,
         },
-      ]);
+      ];
     }
     const result = await dbHelper.query(query);
 
-    const response = { current_page: page, pages: result.pages, size: size, results: result.results };
+    const response = { current_page: page, pages: result.pages, size: size, sort: sort, desc: desc, results: result.results };
 
     if (search && search.length > 0) {
       response.search = search;

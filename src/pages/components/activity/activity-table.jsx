@@ -70,6 +70,7 @@ export default function ActivityTable(props) {
     pageSize: 10,
     pageIndex: 0,
   });
+  const [sorting, setSorting] = React.useState([{ id: "Date", desc: true }]);
 
   const [modalState, setModalState] = React.useState(false);
   const [modalData, setModalData] = React.useState();
@@ -84,6 +85,7 @@ export default function ActivityTable(props) {
       return newPaginationState;
     });
   };
+
   //IP MODAL
 
   const ipv4Regex = new RegExp(
@@ -188,6 +190,7 @@ export default function ActivityTable(props) {
             ? row.NowPlayingItemName
             : row.SeriesName + " : S" + row.SeasonNumber + "E" + row.EpisodeNumber + " - " + row.NowPlayingItemName
         }`,
+      field: "NowPlayingItemName",
       header: i18next.t("TITLE"),
       minSize: 300,
       Cell: ({ row }) => {
@@ -221,6 +224,7 @@ export default function ActivityTable(props) {
     },
     {
       accessorFn: (row) => new Date(row.ActivityDateInserted),
+      field: "ActivityDateInserted",
       header: i18next.t("DATE"),
       size: 110,
       filterVariant: "date-range",
@@ -248,12 +252,29 @@ export default function ActivityTable(props) {
     },
     {
       accessorFn: (row) => Number(row.TotalPlays ?? 1),
+      field: "TotalPlays",
       header: i18next.t("TOTAL_PLAYS"),
       filterFn: "betweenInclusive",
 
       Cell: ({ cell }) => <span>{cell.getValue() ?? 1}</span>,
     },
   ];
+
+  const fieldMap = columns.map((column) => {
+    return { accessorKey: column.accessorKey ?? column.field, header: column.header };
+  });
+
+  const handleSortingChange = (updater) => {
+    setSorting((old) => {
+      const newSortingState = typeof updater === "function" ? updater(old) : updater;
+      const column = newSortingState.length > 0 ? newSortingState[0].id : "Date";
+      const desc = newSortingState.length > 0 ? newSortingState[0].desc : true;
+      if (props.onSortChange) {
+        props.onSortChange({ column: fieldMap.find((field) => field.header == column)?.accessorKey ?? column, desc: desc });
+      }
+      return newSortingState;
+    });
+  };
 
   useEffect(() => {
     setData(props.data);
@@ -279,8 +300,10 @@ export default function ActivityTable(props) {
     enableExpandAll: false,
     enableExpanding: true,
     enableDensityToggle: false,
+    onSortingChange: handleSortingChange,
     enableTopToolbar: Object.keys(rowSelection).length > 0,
     manualPagination: true,
+    manualSorting: true,
     autoResetPageIndex: false,
     initialState: {
       expanded: false,
@@ -354,7 +377,7 @@ export default function ActivityTable(props) {
         },
       },
     },
-    state: { rowSelection, pagination },
+    state: { rowSelection, pagination, sorting },
     filterFromLeafRows: true,
     getSubRows: (row) => {
       if (Array.isArray(row.results) && row.results.length == 1) {

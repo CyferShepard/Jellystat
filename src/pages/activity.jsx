@@ -27,10 +27,15 @@ function Activity() {
   const [libraries, setLibraries] = useState([]);
   const [showLibraryFilters, setShowLibraryFilters] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
+  const [sorting, setSorting] = useState({ column: "ActivityDateInserted", desc: true });
   const [isBusy, setIsBusy] = useState(false);
 
   const handlePageChange = (newPage) => {
     setCurrentPage(newPage);
+  };
+
+  const onSortChange = (sort) => {
+    setSorting({ column: sort.column, desc: sort.desc });
   };
 
   function setItemLimit(limit) {
@@ -82,7 +87,7 @@ function Activity() {
 
     const fetchHistory = () => {
       setIsBusy(true);
-      const url = `/api/getHistory?size=${itemCount}&page=${currentPage}&search=${debouncedSearchQuery}`;
+      const url = `/api/getHistory?size=${itemCount}&page=${currentPage}&search=${debouncedSearchQuery}&sort=${sorting.column}&desc=${sorting.desc}`;
       axios
         .get(url, {
           headers: {
@@ -136,7 +141,9 @@ function Activity() {
         !data ||
         (data.current_page && data.current_page !== currentPage) ||
         (data.size && data.size !== itemCount) ||
-        (data.search ? data.search : "") !== debouncedSearchQuery.trim()
+        (data?.search ?? "") !== debouncedSearchQuery.trim() ||
+        (data?.sort ?? "") !== sorting.column ||
+        (data?.desc ?? true) !== sorting.desc
       ) {
         fetchHistory();
         fetchLibraries();
@@ -149,7 +156,7 @@ function Activity() {
 
     const intervalId = setInterval(fetchHistory, 60000 * 60);
     return () => clearInterval(intervalId);
-  }, [data, config, itemCount, currentPage, debouncedSearchQuery]);
+  }, [data, config, itemCount, currentPage, debouncedSearchQuery, sorting]);
 
   if (!data) {
     return <Loading />;
@@ -271,6 +278,7 @@ function Activity() {
           data={filteredData}
           itemCount={itemCount}
           onPageChange={handlePageChange}
+          onSortChange={onSortChange}
           pageCount={data.pages}
           isBusy={isBusy}
         />
