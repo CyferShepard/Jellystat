@@ -300,6 +300,7 @@ export default function ActivityTable(props) {
     enableExpandAll: false,
     enableExpanding: true,
     enableDensityToggle: false,
+    enableFilters: false,
     onSortingChange: handleSortingChange,
     enableTopToolbar: Object.keys(rowSelection).length > 0,
     manualPagination: true,
