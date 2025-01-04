@@ -25,8 +25,8 @@ const groupedSortMap = [
   { field: "Client", column: "a.Client" },
   { field: "DeviceName", column: "a.DeviceName" },
   { field: "ActivityDateInserted", column: "a.ActivityDateInserted" },
-  { field: "PlaybackDuration", column: "ar.TotalDuration" },
-  { field: "TotalPlays", column: "TotalPlays" },
+  { field: "PlaybackDuration", column: `COALESCE(ar."TotalDuration", a."PlaybackDuration")` },
+  { field: "TotalPlays", column: `COALESCE("TotalPlays",1)` },
 ];
 
 const unGroupedSortMap = [
