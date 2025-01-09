@@ -29,6 +29,7 @@
     "MOST_VIEWED_LIBRARIES": "LIBRERIE PIÙ VISTE",
     "MOST_USED_CLIENTS": "CLIENTS PIÙ UTILIZZATI",
     "MOST_ACTIVE_USERS": "UTENTI PIÙ ATTIVI"
+    "CONCURRENT_STREAMS": "FLUSSI SIMULTANEI"
   },
   "LIBRARY_OVERVIEW": {
     "MOVIE_LIBRARIES": "LIBRERIE FILM",
@@ -50,6 +51,8 @@
     "LAST_24_HRS": "Ultime 24 ore",
     "LAST_7_DAYS": "Ultimi 7 giorni",
     "LAST_30_DAYS": "Ultimi 30 giorni",
+    "LAST_180_DAYS": "Ultimi 180 giorni",
+    "LAST_365_DAYS": "Ultimi 365 giorni",
     "ALL_TIME": "Totale",
     "ITEM_STATS": "Statistiche elemento"
   },
@@ -132,6 +135,8 @@
   "SHOW_ARCHIVED_LIBRARIES": "Mostra librerie archiviate",
   "HIDE_ARCHIVED_LIBRARIES": "Nascondi librerie archiviate",
   "UNITS": {
+    "YEAR": "Anno",
+    "YEARS": "Anni",
     "MONTH": "Mese",
     "MONTHS": "Mesi",
     "DAY": "Giorno",
@@ -144,6 +149,7 @@
     "SECONDS": "Secondi",
     "PLAYS": "Riproduzioni",
     "ITEMS": "Elementi"
+    "STREAMS": "Flussi"
   },
   "USERS_PAGE": {
     "ALL_USERS": "Tutti gli utenti",
@@ -170,6 +176,8 @@
     "LOGS": "Log",
     "SIZE": "Dimensione",
     "JELLYFIN_URL": "URL Jellyfin",
+    "EMBY_URL": "URL Emby",
+    "EXTERNAL_URL": "URL esterno",
     "API_KEY": "Chiave API",
     "API_KEYS": "Chiavi API",
     "KEY_NAME": "Nome chiave",
