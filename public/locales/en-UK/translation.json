@@ -8,7 +8,8 @@
     "STATISTICS": "Statistics",
     "SETTINGS": "Settings",
     "ABOUT": "About",
-    "LOGOUT": "Logout"
+    "LOGOUT": "Logout",
+    "TIMELINE": "Timeline"
   },
   "HOME_PAGE": {
     "SESSIONS": "Sessions",
@@ -229,6 +230,9 @@
     "UPDATE_AVAILABLE": "Update Available",
     "GITHUB": "Github",
     "Backup": "Backup Jellystat"
+  },
+  "TIMELINE_PAGE": {
+    "TIMELINE": "Timeline"
   },
   "SEARCH": "Search",
   "TOTAL": "Total",

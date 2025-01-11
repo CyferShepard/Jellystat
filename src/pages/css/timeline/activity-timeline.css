@@ -1,0 +1,25 @@
+@import "../variables.module.css";
+
+.Heading {
+  justify-content: space-between;
+}
+.activity-card {
+  display: flex;
+  width: 10rem;
+  .activity-card-img {
+    border-radius: var(--bs-border-radius-lg) !important;
+    object-fit: cover;
+    background-color: black;
+    background-repeat: no-repeat;
+    background-size: cover;
+    transition: all 0.2s ease-in-out;
+  }
+}
+
+.MuiTimelineItem-root {
+  height: 20rem;
+}
+
+.MuiTimelineContent-root {
+  align-self: center;
+}

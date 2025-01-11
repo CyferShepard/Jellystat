@@ -1432,6 +1432,31 @@ router.post("/deletePlaybackActivity", async (req, res) => {
   }
 });
 
+router.post("/getActivityTimeLine", async (req, res) => {
+  try {
+    const { userId, libraries } = req.body;
+
+    if (libraries === undefined || !Array.isArray(libraries)) {
+      res.status(400);
+      res.send("A list of IDs is required. EG: [1,2,3]");
+      return;
+    }
+
+    if (userId === undefined) {
+      res.status(400);
+      res.send("A userId is required.");
+      return;
+    }
+
+    const {rows} = await db.query(`SELECT * FROM fs_get_user_activity($1, $2);`, [userId, libraries]);
+    res.send(rows);
+  } catch (error) {
+    console.log(error);
+    res.status(503);
+    res.send(error);
+  }
+});
+
 // Handle other routes
 router.use((req, res) => {
   res.status(404).send({ error: "Not Found" });
