@@ -78,7 +78,8 @@
   "TAB_CONTROLS": {
     "OVERVIEW": "Overview",
     "ACTIVITY": "Activity",
-    "OPTIONS": "Options"
+    "OPTIONS": "Options",
+    "TIMELINE": "Timeline"
   },
   "ITEM_ACTIVITY": "Item Activity",
   "ACTIVITY_TABLE": {
@@ -232,7 +233,8 @@
     "Backup": "Backup Jellystat"
   },
   "TIMELINE_PAGE": {
-    "TIMELINE": "Timeline"
+    "TIMELINE": "Timeline",
+    "EPISODES":"Episodes"
   },
   "SEARCH": "Search",
   "TOTAL": "Total",

@@ -6,8 +6,11 @@
 .activity-card {
   display: flex;
   width: 10rem;
-  .activity-card-img {
+  * {
+    flex-grow: 1;
     border-radius: var(--bs-border-radius-lg) !important;
+  }
+  .activity-card-img {
     object-fit: cover;
     background-color: black;
     background-repeat: no-repeat;

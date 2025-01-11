@@ -11,10 +11,13 @@ import Loading from "./components/general/loading";
 import { Button, FormSelect, Modal } from "react-bootstrap";
 import LibraryFilterModal from "./components/library/library-filter-modal";
 
-function ActivityTimeline() {
+function ActivityTimeline(props) {
+  const { preselectedUser } = props;
   const [users, setUsers] = useState();
   const [selectedUser, setSelectedUser] = useState(
-    localStorage.getItem("PREF_ACTIVITY_TIMELINE_selectedUser") ?? ""
+    preselectedUser ??
+      localStorage.getItem("PREF_ACTIVITY_TIMELINE_selectedUser") ??
+      ""
   );
   const [libraries, setLibraries] = useState();
   const [config, setConfig] = useState(null);
@@ -27,6 +30,9 @@ function ActivityTimeline() {
         )
       : []
   );
+
+  const timelineReady =
+    (users?.length > 0 || !!preselectedUser) && libraries?.length > 0;
 
   const handleLibraryFilter = (selectedOptions) => {
     setSelectedLibraries(selectedOptions);
@@ -76,7 +82,7 @@ function ActivityTimeline() {
   }, [config]);
 
   useEffect(() => {
-    if (config) {
+    if (config && !preselectedUser) {
       const url = `/stats/getAllUserActivity`;
       axios
         .get(url, {
@@ -92,7 +98,7 @@ function ActivityTimeline() {
           console.log(error);
         });
     }
-  }, [config]);
+  }, [config, preselectedUser]);
 
   useEffect(() => {
     if (config) {
@@ -113,7 +119,7 @@ function ActivityTimeline() {
     }
   }, [config]);
 
-  return users?.length > 0 && libraries?.length > 0 ? (
+  return timelineReady ? (
     <div className="watch-stats">
       <div className="Heading">
         <h1>
@@ -125,20 +131,24 @@ function ActivityTimeline() {
         >
           <div className="user-selection">
             <div className="d-flex flex-row w-100 ms-md-3 w-sm-100 w-md-75 mb-3 my-md-3">
-              <div className="d-flex flex-col rounded-0 rounded-start  align-items-center px-2 bg-primary-1">
-                <Trans i18nKey="USER" />
-              </div>
-              <FormSelect
-                onChange={(e) => handleUserSelection(e.target.value)}
-                value={selectedUser}
-                className="w-md-75 rounded-0 rounded-end"
-              >
-                {users.map((user) => (
-                  <option key={user.UserId} value={user.UserId}>
-                    {user.UserName}
-                  </option>
-                ))}
-              </FormSelect>
+              {!preselectedUser && (
+                <>
+                  <div className="d-flex flex-col rounded-0 rounded-start  align-items-center px-2 bg-primary-1">
+                    <Trans i18nKey="USER" />
+                  </div>
+                  <FormSelect
+                    onChange={(e) => handleUserSelection(e.target.value)}
+                    value={selectedUser}
+                    className="w-md-75 rounded-0 rounded-end"
+                  >
+                    {users.map((user) => (
+                      <option key={user.UserId} value={user.UserId}>
+                        {user.UserName}
+                      </option>
+                    ))}
+                  </FormSelect>
+                </>
+              )}
             </div>
           </div>
           <div className="library-selection">

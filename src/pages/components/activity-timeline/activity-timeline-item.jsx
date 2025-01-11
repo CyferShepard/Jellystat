@@ -15,6 +15,8 @@ import moment from "moment";
 import TvLineIcon from "remixicon-react/TvLineIcon.js";
 import FilmLineIcon from "remixicon-react/FilmLineIcon.js";
 import { MEDIA_TYPES } from "./helpers";
+import { Link } from "react-router-dom";
+import { Trans } from "react-i18next";
 
 function formatEntryDates(entry) {
   const { FirstActivityDate, LastActivityDate, MediaType } = entry;
@@ -39,28 +41,31 @@ const SeriesIcon = <TvLineIcon size={"50%"} color="white" />;
 const MovieIcon = <FilmLineIcon size={"50%"} color="white" />;
 
 export default function ActivityTimelineItem(entry) {
-  const { Title, SeasonName, NowPlayingItemId } = entry;
+  const { Title, SeasonName, NowPlayingItemId, EpisodeCount, MediaType } =
+    entry;
   const [useDefaultImage, setUseDefaultImage] = useState(false);
   return (
     <TimelineItem>
       <TimelineSeparator>
         <TimelineConnector />
         <div className="activity-card">
-          {!useDefaultImage ? (
-            <Card.Img
-              variant="top"
-              className="activity-card-img"
-              src={
-                baseUrl +
-                "/proxy/Items/Images/Primary?id=" +
-                NowPlayingItemId +
-                "&fillWidth=800&quality=50"
-              }
-              onError={() => setUseDefaultImage(true)}
-            />
-          ) : (
-            <DefaultImage {...entry} />
-          )}
+          <Link to={`/libraries/item/${NowPlayingItemId}`}>
+            {!useDefaultImage ? (
+              <Card.Img
+                variant="top"
+                className="activity-card-img"
+                src={
+                  baseUrl +
+                  "/proxy/Items/Images/Primary?id=" +
+                  NowPlayingItemId +
+                  "&fillWidth=800&quality=50"
+                }
+                onError={() => setUseDefaultImage(true)}
+              />
+            ) : (
+              <DefaultImage {...entry} />
+            )}
+          </Link>
         </div>
         <TimelineConnector />
       </TimelineSeparator>
@@ -70,6 +75,11 @@ export default function ActivityTimelineItem(entry) {
         </Typography>
         {SeasonName && <Typography>{SeasonName}</Typography>}
         <Typography>{formatEntryDates(entry)}</Typography>
+        {MediaType === MEDIA_TYPES.Shows && EpisodeCount && (
+          <Typography>
+            {EpisodeCount} <Trans i18nKey="TIMELINE_PAGE.EPISODES" />
+          </Typography>
+        )}
       </TimelineContent>
     </TimelineItem>
   );

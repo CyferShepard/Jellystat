@@ -1,10 +1,11 @@
 exports.up = function(knex) {
   return knex.schema.raw(`
-    CREATE OR REPLACE FUNCTION fs_get_user_activity(
+    create or replace
+    function fs_get_user_activity(
         user_id text,
         library_ids text[]  
     )
-    RETURNS TABLE (
+    returns table (
         "UserName" text,
         "Title" text,
         "EpisodeCount" bigint, 
@@ -14,52 +15,58 @@ exports.up = function(knex) {
         "SeasonName" text,
         "MediaType" text,
         "NowPlayingItemId" text
-    ) AS $$
-    BEGIN
-        RETURN QUERY
-        SELECT 
-            jp."UserName",
-            CASE 
-                WHEN jp."SeriesName" IS NOT NULL THEN jp."SeriesName"
-                ELSE jp."NowPlayingItemName"
-            END AS "Title",
-            COUNT(DISTINCT jp."EpisodeId") AS "EpisodeCount", 
-            MIN(jp."ActivityDateInserted") AS "FirstActivityDate",
-            MAX(jp."ActivityDateInserted") AS "LastActivityDate",
-            SUM(jp."PlaybackDuration")::bigint AS "TotalPlaybackDuration", 
-            ls."Name" AS "SeasonName",
-            CASE 
-              WHEN jp."SeriesName" IS NOT NULL THEN 'Show'
-              ELSE 'Movie'
-          END AS "MediaType",
-            jp."NowPlayingItemId"
-        FROM 
-            public.jf_playback_activity AS jp
-        JOIN 
-            public.jf_library_items AS jli ON jp."NowPlayingItemId" = jli."Id"
-        JOIN 
-            public.jf_libraries AS jl ON jli."ParentId" = jl."Id"
-        LEFT JOIN 
-            public.jf_library_seasons AS ls ON jp."SeasonId" = ls."Id"
-        WHERE 
-            jp."UserId" = user_id
-            AND jl."Id" = ANY(library_ids) 
-        GROUP BY 
-            jp."UserName", 
-            CASE 
-                WHEN jp."SeriesName" IS NOT NULL THEN jp."SeriesName"
-                ELSE jp."NowPlayingItemName"
-            END,
-            jp."SeriesName",
-            jp."SeasonId",
-            ls."Name",
-            jp."NowPlayingItemId"
-        HAVING
-            NOT (MAX(jl."Name") = 'Shows' AND ls."Name" IS NULL)
-        ORDER BY 
-            MAX(jp."ActivityDateInserted") DESC;
-    END;
-    $$ LANGUAGE plpgsql;
+    ) as $$
+    begin
+        return QUERY
+        select
+        jp."UserName",
+        case
+            when jp."SeriesName" is not null then jp."SeriesName"
+            else jp."NowPlayingItemName"
+        end as "Title",
+        COUNT(distinct jp."EpisodeId") as "EpisodeCount",
+        MIN(jp."ActivityDateInserted") as "FirstActivityDate",
+        MAX(jp."ActivityDateInserted") as "LastActivityDate",
+        SUM(jp."PlaybackDuration")::bigint as "TotalPlaybackDuration",
+        ls."Name" as "SeasonName",
+        case
+            when jp."SeriesName" is not null then 'Show'
+            else 'Movie'
+        end as "MediaType",
+        jp."NowPlayingItemId"
+    from
+        public.jf_playback_activity as jp
+    join 
+            public.jf_library_items as jli on
+        jp."NowPlayingItemId" = jli."Id"
+    join 
+            public.jf_libraries as jl on
+        jli."ParentId" = jl."Id"
+    left join 
+            public.jf_library_seasons as ls on
+        jp."SeasonId" = ls."Id"
+    where
+        jp."UserId" = user_id
+        and jl."Id" = any(library_ids)
+    group by
+        jp."UserName",
+        case
+            when jp."SeriesName" is not null then jp."SeriesName"
+            else jp."NowPlayingItemName"
+        end,
+        jp."SeriesName",
+        jp."SeasonId",
+        ls."Name",
+        jp."NowPlayingItemId"
+    having
+        not (MAX(jl."Name") = 'Shows'
+            and ls."Name" is null)
+        and SUM(jp."PlaybackDuration") >= 900
+    order by
+        MAX(jp."ActivityDateInserted") desc;
+    end;
+
+    $$ language plpgsql;
 `);
 };
 
