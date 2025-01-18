@@ -1,6 +1,7 @@
 export const MEDIA_TYPES = {
-  Movies: "Movie",
-  Shows: "Show",
+  Movies: "movies",
+  Shows: "tvshows",
+  Music: "music",
 };
 
 /**

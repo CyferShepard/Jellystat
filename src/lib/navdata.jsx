@@ -7,14 +7,13 @@ import SettingsFillIcon from 'remixicon-react/SettingsFillIcon';
 import GalleryFillIcon from 'remixicon-react/GalleryFillIcon';
 import UserFillIcon from 'remixicon-react/UserFillIcon';
 import InformationFillIcon from 'remixicon-react/InformationFillIcon';
-import TimeLineIcon from 'remixicon-react/TimeLineIcon';
 import { Trans } from 'react-i18next';
 
 
 export const navData = [
     {
         id: 0,
-        icon: <HomeFillIcon />,
+        icon: <HomeFillIcon/>,
         text: <Trans i18nKey="MENU_TABS.HOME" />,
         link: ""
     },
@@ -35,12 +34,6 @@ export const navData = [
         icon: <HistoryFillIcon />,
         text: <Trans i18nKey="MENU_TABS.ACTIVITY" />,
         link: "activity"
-    },
-    {
-        id: 8,
-        icon: <TimeLineIcon />,
-        text: <Trans i18nKey="MENU_TABS.TIMELINE" />,
-        link: "timeline"
     },
     {
         id: 5,
