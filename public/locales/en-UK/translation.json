@@ -8,7 +8,8 @@
     "STATISTICS": "Statistics",
     "SETTINGS": "Settings",
     "ABOUT": "About",
-    "LOGOUT": "Logout"
+    "LOGOUT": "Logout",
+    "TIMELINE": "Timeline"
   },
   "HOME_PAGE": {
     "SESSIONS": "Sessions",
@@ -77,7 +78,8 @@
   "TAB_CONTROLS": {
     "OVERVIEW": "Overview",
     "ACTIVITY": "Activity",
-    "OPTIONS": "Options"
+    "OPTIONS": "Options",
+    "TIMELINE": "Timeline"
   },
   "ITEM_ACTIVITY": "Item Activity",
   "ACTIVITY_TABLE": {
@@ -229,6 +231,10 @@
     "UPDATE_AVAILABLE": "Update Available",
     "GITHUB": "Github",
     "Backup": "Backup Jellystat"
+  },
+  "TIMELINE_PAGE": {
+    "TIMELINE": "Timeline",
+    "EPISODES":"Episodes"
   },
   "SEARCH": "Search",
   "TOTAL": "Total",
