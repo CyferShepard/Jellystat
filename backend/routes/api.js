@@ -40,7 +40,7 @@ const unGroupedSortMap = [
 ];
 
 const filterFields = [
-  { field: "UserName", column: `LOWER(u."Name")` },
+  { field: "UserName", column: `LOWER(a."UserName")` },
   { field: "RemoteEndPoint", column: `LOWER(a."RemoteEndPoint")` },
   {
     field: "NowPlayingItemName",
@@ -1273,12 +1273,6 @@ router.get("/getHistory", async (req, res) => {
             { first: "a.UserId", operator: "=", second: "ar.UserId", type: "and" },
           ],
         },
-        {
-          type: "left",
-          table: "jf_users",
-          alias: "u",
-          conditions: [{ first: "a.UserId", operator: "=", second: "u.Id" }],
-        },
       ],
 
       order_by: sortField,
@@ -1439,12 +1433,6 @@ router.post("/getLibraryHistory", async (req, res) => {
             { first: "a.UserId", operator: "=", second: "ar.UserId", type: "and" },
           ],
         },
-        {
-          type: "left",
-          table: "jf_users",
-          alias: "u",
-          conditions: [{ first: "a.UserId", operator: "=", second: "u.Id" }],
-        },
       ],
 
       order_by: sortField,
@@ -1569,14 +1557,6 @@ router.post("/getItemHistory", async (req, res) => {
       ],
       table: "jf_playback_activity_with_metadata",
       alias: "a",
-      joins: [
-        {
-          type: "left",
-          table: "jf_users",
-          alias: "u",
-          conditions: [{ first: "a.UserId", operator: "=", second: "u.Id" }],
-        },
-      ],
       where: [
         [
           { column: "a.EpisodeId", operator: "=", value: itemid },
@@ -1702,14 +1682,6 @@ router.post("/getUserHistory", async (req, res) => {
       ],
       table: "jf_playback_activity_with_metadata",
       alias: "a",
-      joins: [
-        {
-          type: "left",
-          table: "jf_users",
-          alias: "u",
-          conditions: [{ first: "a.UserId", operator: "=", second: "u.Id" }],
-        },
-      ],
       where: [[{ column: "a.UserId", operator: "=", value: userid }]],
       order_by: sortField,
       sort_order: desc ? "desc" : "asc",
