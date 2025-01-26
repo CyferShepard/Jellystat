@@ -39,6 +39,25 @@ const unGroupedSortMap = [
   { field: "PlaybackDuration", column: "a.PlaybackDuration" },
 ];
 
+const filterFields = [
+  { field: "UserName", column: `LOWER(u."Name")` },
+  { field: "RemoteEndPoint", column: `LOWER(a."RemoteEndPoint")` },
+  {
+    field: "NowPlayingItemName",
+    column: `LOWER(
+          CASE 
+            WHEN a."SeriesName" is null THEN a."NowPlayingItemName"
+            ELSE CONCAT(a."SeriesName" , ' : S' , a."SeasonNumber" , 'E' , a."EpisodeNumber" , ' - ' , a."NowPlayingItemName")
+          END 
+          )`,
+  },
+  { field: "Client", column: `LOWER(a."Client")` },
+  { field: "DeviceName", column: `LOWER(a."DeviceName")` },
+  { field: "ActivityDateInserted", column: "a.ActivityDateInserted", isColumn: true },
+  { field: "PlaybackDuration", column: `a.PlaybackDuration`, isColumn: true, applyToCTE: true },
+  { field: "TotalPlays", column: `COALESCE("TotalPlays",1)` },
+];
+
 //Functions
 function groupRecentlyAdded(rows) {
   const groupedResults = {};
@@ -121,6 +140,82 @@ async function purgeLibraryItems(id, withActivity, purgeAll = false) {
   }
 }
 
+function buildFilterList(query, filtersArray) {
+  if (filtersArray.length > 0) {
+    query.where = query.where || [];
+    filtersArray.forEach((filter) => {
+      const findField = filterFields.find((item) => item.field === filter.field);
+      const column = findField?.column || "a.ActivityDateInserted";
+      const isColumn = findField?.isColumn || false;
+      const applyToCTE = findField?.applyToCTE || false;
+      if (filter.min) {
+        query.where.push({
+          column: column,
+          operator: ">=",
+          value: filter.min,
+        });
+
+        if (applyToCTE) {
+          if (query.cte) {
+            if (!query.cte.where) {
+              query.cte.where = [];
+            }
+            query.cte.where.push({
+              column: column,
+              operator: ">=",
+              value: filter.min,
+            });
+          }
+        }
+      }
+
+      if (filter.max) {
+        query.where.push({
+          column: column,
+          operator: "<=",
+          value: filter.max,
+        });
+
+        if (applyToCTE) {
+          if (query.cte) {
+            if (!query.cte.where) {
+              query.cte.where = [];
+            }
+            query.cte.where.push({
+              column: column,
+              operator: "<=",
+              value: filter.max,
+            });
+          }
+        }
+      }
+
+      if (filter.value) {
+        const whereClause = {
+          operator: "LIKE",
+          value: filter.value.toLowerCase(),
+        };
+        if (isColumn) {
+          whereClause.column = column;
+        } else {
+          whereClause.field = column;
+        }
+        query.where.push(whereClause);
+
+        if (applyToCTE) {
+          if (query.cte) {
+            if (!query.cte.where) {
+              query.cte.where = [];
+            }
+            query.cte.where.push(whereClause);
+          }
+        }
+      }
+    });
+  }
+}
+
+//////////////////////////////
 router.get("/getconfig", async (req, res) => {
   try {
     const config = await new configClass().getConfig();
@@ -1080,7 +1175,55 @@ router.post("/setExcludedBackupTable", async (req, res) => {
 
 //DB Queries - History
 router.get("/getHistory", async (req, res) => {
-  const { size = 50, page = 1, search, sort = "ActivityDateInserted", desc = true } = req.query;
+  const { size = 50, page = 1, search, sort = "ActivityDateInserted", desc = true, filters } = req.query;
+
+  let filtersArray = [];
+  if (filters) {
+    try {
+      filtersArray = JSON.parse(filters);
+    } catch (error) {
+      return res.status(400).json({
+        error: "Invalid filters parameter",
+        example: [
+          {
+            field: "ActivityDateInserted",
+            min: "2024-12-31T22:00:00.000Z",
+            max: "2024-12-31T22:00:00.000Z",
+          },
+          {
+            field: "PlaybackDuration",
+            min: "1",
+            max: "10",
+          },
+          {
+            field: "TotalPlays",
+            min: "1",
+            max: "10",
+          },
+          {
+            field: "DeviceName",
+            value: "test",
+          },
+          {
+            field: "Client",
+            value: "test",
+          },
+          {
+            field: "NowPlayingItemName",
+            value: "test",
+          },
+          {
+            field: "RemoteEndPoint",
+            value: "127.0.0.1",
+          },
+          {
+            field: "UserName",
+            value: "test",
+          },
+        ],
+      });
+    }
+  }
 
   const sortField = groupedSortMap.find((item) => item.field === sort)?.column || "a.ActivityDateInserted";
 
@@ -1130,6 +1273,12 @@ router.get("/getHistory", async (req, res) => {
             { first: "a.UserId", operator: "=", second: "ar.UserId", type: "and" },
           ],
         },
+        {
+          type: "left",
+          table: "jf_users",
+          alias: "u",
+          conditions: [{ first: "a.UserId", operator: "=", second: "u.Id" }],
+        },
       ],
 
       order_by: sortField,
@@ -1152,6 +1301,8 @@ router.get("/getHistory", async (req, res) => {
         },
       ];
     }
+
+    buildFilterList(query, filtersArray);
     const result = await dbHelper.query(query);
 
     result.results = result.results.map((item) => ({
@@ -1163,6 +1314,10 @@ router.get("/getHistory", async (req, res) => {
       response.search = search;
     }
 
+    if (filtersArray.length > 0) {
+      response.filters = filtersArray;
+    }
+
     res.send(response);
   } catch (error) {
     console.log(error);
@@ -1171,7 +1326,55 @@ router.get("/getHistory", async (req, res) => {
 
 router.post("/getLibraryHistory", async (req, res) => {
   try {
-    const { size = 50, page = 1, search, sort = "ActivityDateInserted", desc = true } = req.query;
+    const { size = 50, page = 1, search, sort = "ActivityDateInserted", desc = true, filters } = req.query;
+
+    let filtersArray = [];
+    if (filters) {
+      try {
+        filtersArray = JSON.parse(filters);
+      } catch (error) {
+        return res.status(400).json({
+          error: "Invalid filters parameter",
+          example: [
+            {
+              field: "ActivityDateInserted",
+              min: "2024-12-31T22:00:00.000Z",
+              max: "2024-12-31T22:00:00.000Z",
+            },
+            {
+              field: "PlaybackDuration",
+              min: "1",
+              max: "10",
+            },
+            {
+              field: "TotalPlays",
+              min: "1",
+              max: "10",
+            },
+            {
+              field: "DeviceName",
+              value: "test",
+            },
+            {
+              field: "Client",
+              value: "test",
+            },
+            {
+              field: "NowPlayingItemName",
+              value: "test",
+            },
+            {
+              field: "RemoteEndPoint",
+              value: "127.0.0.1",
+            },
+            {
+              field: "UserName",
+              value: "test",
+            },
+          ],
+        });
+      }
+    }
     const { libraryid } = req.body;
 
     if (libraryid === undefined) {
@@ -1236,6 +1439,12 @@ router.post("/getLibraryHistory", async (req, res) => {
             { first: "a.UserId", operator: "=", second: "ar.UserId", type: "and" },
           ],
         },
+        {
+          type: "left",
+          table: "jf_users",
+          alias: "u",
+          conditions: [{ first: "a.UserId", operator: "=", second: "u.Id" }],
+        },
       ],
 
       order_by: sortField,
@@ -1259,6 +1468,8 @@ router.post("/getLibraryHistory", async (req, res) => {
       ];
     }
 
+    buildFilterList(query, filtersArray);
+
     const result = await dbHelper.query(query);
 
     result.results = result.results.map((item) => ({
@@ -1270,6 +1481,9 @@ router.post("/getLibraryHistory", async (req, res) => {
     if (search && search.length > 0) {
       response.search = search;
     }
+    if (filtersArray.length > 0) {
+      response.filters = filtersArray;
+    }
     res.send(response);
   } catch (error) {
     console.log(error);
@@ -1280,13 +1494,62 @@ router.post("/getLibraryHistory", async (req, res) => {
 
 router.post("/getItemHistory", async (req, res) => {
   try {
-    const { size = 50, page = 1, search, sort = "ActivityDateInserted", desc = true } = req.query;
+    const { size = 50, page = 1, search, sort = "ActivityDateInserted", desc = true, filters } = req.query;
     const { itemid } = req.body;
 
     if (itemid === undefined) {
       res.status(400);
       res.send("No Item ID provided");
       return;
+    }
+
+    let filtersArray = [];
+    if (filters) {
+      try {
+        filtersArray = JSON.parse(filters);
+        filtersArray = filtersArray.filter((filter) => filter.field !== "TotalPlays");
+      } catch (error) {
+        return res.status(400).json({
+          error: "Invalid filters parameter",
+          example: [
+            {
+              field: "ActivityDateInserted",
+              min: "2024-12-31T22:00:00.000Z",
+              max: "2024-12-31T22:00:00.000Z",
+            },
+            {
+              field: "PlaybackDuration",
+              min: "1",
+              max: "10",
+            },
+            {
+              field: "TotalPlays",
+              min: "1",
+              max: "10",
+            },
+            {
+              field: "DeviceName",
+              value: "test",
+            },
+            {
+              field: "Client",
+              value: "test",
+            },
+            {
+              field: "NowPlayingItemName",
+              value: "test",
+            },
+            {
+              field: "RemoteEndPoint",
+              value: "127.0.0.1",
+            },
+            {
+              field: "UserName",
+              value: "test",
+            },
+          ],
+        });
+      }
     }
 
     const sortField = unGroupedSortMap.find((item) => item.field === sort)?.column || "a.ActivityDateInserted";
@@ -1306,6 +1569,14 @@ router.post("/getItemHistory", async (req, res) => {
       ],
       table: "jf_playback_activity_with_metadata",
       alias: "a",
+      joins: [
+        {
+          type: "left",
+          table: "jf_users",
+          alias: "u",
+          conditions: [{ first: "a.UserId", operator: "=", second: "u.Id" }],
+        },
+      ],
       where: [
         [
           { column: "a.EpisodeId", operator: "=", value: itemid },
@@ -1334,12 +1605,18 @@ router.post("/getItemHistory", async (req, res) => {
       ];
     }
 
+    buildFilterList(query, filtersArray);
     const result = await dbHelper.query(query);
 
     const response = { current_page: page, pages: result.pages, size: size, sort: sort, desc: desc, results: result.results };
     if (search && search.length > 0) {
       response.search = search;
     }
+
+    if (filters) {
+      response.filters = JSON.parse(filters);
+    }
+
     res.send(response);
   } catch (error) {
     console.log(error);
@@ -1350,7 +1627,56 @@ router.post("/getItemHistory", async (req, res) => {
 
 router.post("/getUserHistory", async (req, res) => {
   try {
-    const { size = 50, page = 1, search, sort = "ActivityDateInserted", desc = true } = req.query;
+    const { size = 50, page = 1, search, sort = "ActivityDateInserted", desc = true, filters } = req.query;
+
+    let filtersArray = [];
+    if (filters) {
+      try {
+        filtersArray = JSON.parse(filters);
+        filtersArray = filtersArray.filter((filter) => filter.field !== "TotalPlays");
+      } catch (error) {
+        return res.status(400).json({
+          error: "Invalid filters parameter",
+          example: [
+            {
+              field: "ActivityDateInserted",
+              min: "2024-12-31T22:00:00.000Z",
+              max: "2024-12-31T22:00:00.000Z",
+            },
+            {
+              field: "PlaybackDuration",
+              min: "1",
+              max: "10",
+            },
+            {
+              field: "TotalPlays",
+              min: "1",
+              max: "10",
+            },
+            {
+              field: "DeviceName",
+              value: "test",
+            },
+            {
+              field: "Client",
+              value: "test",
+            },
+            {
+              field: "NowPlayingItemName",
+              value: "test",
+            },
+            {
+              field: "RemoteEndPoint",
+              value: "127.0.0.1",
+            },
+            {
+              field: "UserName",
+              value: "test",
+            },
+          ],
+        });
+      }
+    }
     const { userid } = req.body;
 
     if (userid === undefined) {
@@ -1376,6 +1702,14 @@ router.post("/getUserHistory", async (req, res) => {
       ],
       table: "jf_playback_activity_with_metadata",
       alias: "a",
+      joins: [
+        {
+          type: "left",
+          table: "jf_users",
+          alias: "u",
+          conditions: [{ first: "a.UserId", operator: "=", second: "u.Id" }],
+        },
+      ],
       where: [[{ column: "a.UserId", operator: "=", value: userid }]],
       order_by: sortField,
       sort_order: desc ? "desc" : "asc",
@@ -1397,12 +1731,19 @@ router.post("/getUserHistory", async (req, res) => {
         },
       ];
     }
+
+    buildFilterList(query, filtersArray);
+
     const result = await dbHelper.query(query);
 
     const response = { current_page: page, pages: result.pages, size: size, sort: sort, desc: desc, results: result.results };
 
     if (search && search.length > 0) {
       response.search = search;
+    }
+
+    if (filters) {
+      response.filters = JSON.parse(filters);
     }
 
     res.send(response);
@@ -1448,7 +1789,7 @@ router.post("/getActivityTimeLine", async (req, res) => {
       return;
     }
 
-    const {rows} = await db.query(`SELECT * FROM fs_get_user_activity($1, $2);`, [userId, libraries]);
+    const { rows } = await db.query(`SELECT * FROM fs_get_user_activity($1, $2);`, [userId, libraries]);
     res.send(rows);
   } catch (error) {
     console.log(error);

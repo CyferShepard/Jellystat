@@ -60,8 +60,6 @@ const token = localStorage.getItem("token");
 export default function ActivityTable(props) {
   const twelve_hr = JSON.parse(localStorage.getItem("12hr"));
   const [data, setData] = React.useState(props.data ?? []);
-  const uniqueUserNames = [...new Set(data.map((item) => item.UserName))];
-  const uniqueClients = [...new Set(data.map((item) => item.Client))];
   const pages = props.pageCount || 1;
   const isBusy = props.isBusy;
 
@@ -71,6 +69,8 @@ export default function ActivityTable(props) {
     pageIndex: 0,
   });
   const [sorting, setSorting] = React.useState([{ id: "Date", desc: true }]);
+
+  const [columnFilters, setColumnFilters] = React.useState([]);
 
   const [modalState, setModalState] = React.useState(false);
   const [modalData, setModalData] = React.useState();
@@ -152,8 +152,6 @@ export default function ActivityTable(props) {
     {
       accessorKey: "UserName",
       header: i18next.t("USER"),
-      filterVariant: "select",
-      filterSelectOptions: uniqueUserNames,
       Cell: ({ row }) => {
         row = row.original;
         return (
@@ -207,8 +205,6 @@ export default function ActivityTable(props) {
     {
       accessorKey: "Client",
       header: i18next.t("ACTIVITY_TABLE.CLIENT"),
-      filterVariant: "select",
-      filterSelectOptions: uniqueClients,
       Cell: ({ row }) => {
         row = row.original;
         return (
@@ -246,8 +242,8 @@ export default function ActivityTable(props) {
       accessorKey: "PlaybackDuration",
       header: i18next.t("ACTIVITY_TABLE.TOTAL_PLAYBACK"),
       minSize: 200,
-      filterFn: (row, id, filterValue) => formatTotalWatchTime(row.getValue(id)).startsWith(filterValue),
-
+      // filterFn: (row, id, filterValue) => formatTotalWatchTime(row.getValue(id)).startsWith(filterValue),
+      filterVariant: "range",
       Cell: ({ cell }) => <span>{formatTotalWatchTime(cell.getValue())}</span>,
     },
     {
@@ -276,6 +272,35 @@ export default function ActivityTable(props) {
     });
   };
 
+  const handleFilteringChange = (updater) => {
+    setColumnFilters((old) => {
+      const newFilterState = typeof updater === "function" ? updater(old) : updater;
+
+      const modifiedFilterState = newFilterState.map((filter) => ({ ...filter }));
+
+      modifiedFilterState.map((filter) => {
+        filter.field = fieldMap.find((field) => field.header == filter.id)?.accessorKey ?? filter.id;
+        delete filter.id;
+        if (Array.isArray(filter.value)) {
+          filter.min = filter.value[0];
+          filter.max = filter.value[1];
+          delete filter.value;
+        } else {
+          const val = filter.value;
+          delete filter.value;
+          filter.value = val;
+        }
+
+        return filter;
+      });
+
+      if (props.onFilterChange) {
+        props.onFilterChange(modifiedFilterState);
+      }
+      return newFilterState;
+    });
+  };
+
   useEffect(() => {
     setData(props.data);
   }, [props.data]);
@@ -300,8 +325,10 @@ export default function ActivityTable(props) {
     enableExpandAll: false,
     enableExpanding: true,
     enableDensityToggle: false,
-    enableFilters: false,
+    enableFilters: true,
+    manualFiltering: true,
     onSortingChange: handleSortingChange,
+    onColumnFiltersChange: handleFilteringChange,
     enableTopToolbar: Object.keys(rowSelection).length > 0,
     manualPagination: true,
     manualSorting: true,
@@ -378,7 +405,7 @@ export default function ActivityTable(props) {
         },
       },
     },
-    state: { rowSelection, pagination, sorting },
+    state: { rowSelection, pagination, sorting, columnFilters },
     filterFromLeafRows: true,
     getSubRows: (row) => {
       if (Array.isArray(row.results) && row.results.length == 1) {

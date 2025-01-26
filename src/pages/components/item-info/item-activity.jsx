@@ -16,6 +16,7 @@ function ItemActivity(props) {
   const [config, setConfig] = useState();
   const [currentPage, setCurrentPage] = useState(1);
   const [sorting, setSorting] = useState({ column: "ActivityDateInserted", desc: true });
+  const [filterParams, setFilterParams] = useState([]);
   const [isBusy, setIsBusy] = useState(false);
 
   const handlePageChange = (newPage) => {
@@ -24,6 +25,10 @@ function ItemActivity(props) {
 
   const onSortChange = (sort) => {
     setSorting({ column: sort.column, desc: sort.desc });
+  };
+
+  const onFilterChange = (filter) => {
+    setFilterParams(filter);
   };
 
   function setItemLimit(limit) {
@@ -59,7 +64,7 @@ function ItemActivity(props) {
       try {
         setIsBusy(true);
         const itemData = await axios.post(
-          `/api/getItemHistory?size=${itemCount}&page=${currentPage}&search=${debouncedSearchQuery}&sort=${sorting.column}&desc=${sorting.desc}`,
+          `/api/getItemHistory`,
           {
             itemid: props.itemid,
           },
@@ -67,6 +72,14 @@ function ItemActivity(props) {
             headers: {
               Authorization: `Bearer ${token}`,
               "Content-Type": "application/json",
+            },
+            params: {
+              size: itemCount,
+              page: currentPage,
+              search: debouncedSearchQuery,
+              sort: sorting.column,
+              desc: sorting.desc,
+              filters: filterParams != undefined ? JSON.stringify(filterParams) : null,
             },
           }
         );
@@ -83,14 +96,15 @@ function ItemActivity(props) {
       (data.size && data.size !== itemCount) ||
       (data?.search ?? "") !== debouncedSearchQuery.trim() ||
       (data?.sort ?? "") !== sorting.column ||
-      (data?.desc ?? true) !== sorting.desc
+      (data?.desc ?? true) !== sorting.desc ||
+      JSON.stringify(data?.filters ?? []) !== JSON.stringify(filterParams ?? [])
     ) {
       fetchData();
     }
 
     const intervalId = setInterval(fetchData, 60000 * 5);
     return () => clearInterval(intervalId);
-  }, [data, props.itemid, token, itemCount, currentPage, debouncedSearchQuery, sorting]);
+  }, [data, props.itemid, token, itemCount, currentPage, debouncedSearchQuery, sorting, filterParams]);
 
   if (!data || !data.results) {
     return <></>;
@@ -177,6 +191,7 @@ function ItemActivity(props) {
           itemCount={itemCount}
           onPageChange={handlePageChange}
           onSortChange={onSortChange}
+          onFilterChange={onFilterChange}
           pageCount={data.pages}
           isBusy={isBusy}
         />

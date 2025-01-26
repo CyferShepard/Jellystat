@@ -72,7 +72,7 @@
     "semver": "^7.5.3",
     "sequelize": "^6.29.0",
     "socket.io": "^4.7.2",
-    "socket.io-client": "^4.7.2",
+    "socket.io-client": "^4.8.1",
     "swagger-autogen": "^2.23.5",
     "swagger-jsdoc": "^6.2.8",
     "swagger-ui-express": "^5.0.0",

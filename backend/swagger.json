@@ -2042,11 +2042,19 @@
             "name": "desc",
             "in": "query",
             "type": "string"
+          },
+          {
+            "name": "filters",
+            "in": "query",
+            "type": "string"
           }
         ],
         "responses": {
           "200": {
             "description": "OK"
+          },
+          "400": {
+            "description": "Bad Request"
           },
           "401": {
             "description": "Unauthorized"
@@ -2114,6 +2122,11 @@
           },
           {
             "name": "desc",
+            "in": "query",
+            "type": "string"
+          },
+          {
+            "name": "filters",
             "in": "query",
             "type": "string"
           },
@@ -2209,6 +2222,11 @@
             "type": "string"
           },
           {
+            "name": "filters",
+            "in": "query",
+            "type": "string"
+          },
+          {
             "name": "body",
             "in": "body",
             "schema": {
@@ -2300,6 +2318,11 @@
             "type": "string"
           },
           {
+            "name": "filters",
+            "in": "query",
+            "type": "string"
+          },
+          {
             "name": "body",
             "in": "body",
             "schema": {
@@ -2363,6 +2386,66 @@
               "type": "object",
               "properties": {
                 "ids": {
+                  "example": "any"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "404": {
+            "description": "Not Found"
+          },
+          "503": {
+            "description": "Service Unavailable"
+          }
+        }
+      }
+    },
+    "/api/getActivityTimeLine": {
+      "post": {
+        "tags": [
+          "API"
+        ],
+        "description": "",
+        "parameters": [
+          {
+            "name": "authorization",
+            "in": "header",
+            "type": "string"
+          },
+          {
+            "name": "x-api-token",
+            "in": "header",
+            "type": "string"
+          },
+          {
+            "name": "req",
+            "in": "query",
+            "type": "string"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "userId": {
+                  "example": "any"
+                },
+                "libraries": {
                   "example": "any"
                 }
               }

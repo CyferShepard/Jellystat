@@ -23,6 +23,7 @@ function UserActivity(props) {
   const [config, setConfig] = useState();
   const [currentPage, setCurrentPage] = useState(1);
   const [sorting, setSorting] = useState({ column: "ActivityDateInserted", desc: true });
+  const [filterParams, setFilterParams] = useState([]);
   const [isBusy, setIsBusy] = useState(false);
 
   function setItemLimit(limit) {
@@ -78,12 +79,16 @@ function UserActivity(props) {
     setSorting({ column: sort.column, desc: sort.desc });
   };
 
+  const onFilterChange = (filter) => {
+    setFilterParams(filter);
+  };
+
   useEffect(() => {
     const fetchHistory = async () => {
       try {
         setIsBusy(true);
         const itemData = await axios.post(
-          `/api/getUserHistory?size=${itemCount}&page=${currentPage}&search=${debouncedSearchQuery}&sort=${sorting.column}&desc=${sorting.desc}`,
+          `/api/getUserHistory`,
           {
             userid: props.UserId,
           },
@@ -91,6 +96,14 @@ function UserActivity(props) {
             headers: {
               Authorization: `Bearer ${token}`,
               "Content-Type": "application/json",
+            },
+            params: {
+              size: itemCount,
+              page: currentPage,
+              search: debouncedSearchQuery,
+              sort: sorting.column,
+              desc: sorting.desc,
+              filters: filterParams != undefined ? JSON.stringify(filterParams) : null,
             },
           }
         );
@@ -132,7 +145,8 @@ function UserActivity(props) {
       (data.size && data.size !== itemCount) ||
       (data?.search ?? "") !== debouncedSearchQuery.trim() ||
       (data?.sort ?? "") !== sorting.column ||
-      (data?.desc ?? true) !== sorting.desc
+      (data?.desc ?? true) !== sorting.desc ||
+      JSON.stringify(data?.filters ?? []) !== JSON.stringify(filterParams ?? [])
     ) {
       fetchHistory();
     }
@@ -141,7 +155,7 @@ function UserActivity(props) {
 
     const intervalId = setInterval(fetchHistory, 60000 * 5);
     return () => clearInterval(intervalId);
-  }, [props.UserId, token, itemCount, currentPage, debouncedSearchQuery, sorting]);
+  }, [props.UserId, token, itemCount, currentPage, debouncedSearchQuery, sorting, filterParams]);
 
   if (!data || !data.results) {
     return <></>;
@@ -248,6 +262,7 @@ function UserActivity(props) {
           itemCount={itemCount}
           onPageChange={handlePageChange}
           onSortChange={onSortChange}
+          onFilterChange={onFilterChange}
           pageCount={data.pages}
           isBusy={isBusy}
         />

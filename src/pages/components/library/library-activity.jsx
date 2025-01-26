@@ -19,6 +19,7 @@ function LibraryActivity(props) {
   const [config, setConfig] = useState();
   const [currentPage, setCurrentPage] = useState(1);
   const [sorting, setSorting] = useState({ column: "ActivityDateInserted", desc: true });
+  const [filterParams, setFilterParams] = useState([]);
   const [isBusy, setIsBusy] = useState(false);
 
   const handlePageChange = (newPage) => {
@@ -27,6 +28,10 @@ function LibraryActivity(props) {
 
   const onSortChange = (sort) => {
     setSorting({ column: sort.column, desc: sort.desc });
+  };
+
+  const onFilterChange = (filter) => {
+    setFilterParams(filter);
   };
 
   function setItemLimit(limit) {
@@ -66,7 +71,7 @@ function LibraryActivity(props) {
       try {
         setIsBusy(true);
         const libraryData = await axios.post(
-          `/api/getLibraryHistory?size=${itemCount}&page=${currentPage}&search=${debouncedSearchQuery}&sort=${sorting.column}&desc=${sorting.desc}`,
+          `/api/getLibraryHistory`,
           {
             libraryid: props.LibraryId,
           },
@@ -74,6 +79,14 @@ function LibraryActivity(props) {
             headers: {
               Authorization: `Bearer ${token}`,
               "Content-Type": "application/json",
+            },
+            params: {
+              size: itemCount,
+              page: currentPage,
+              search: debouncedSearchQuery,
+              sort: sorting.column,
+              desc: sorting.desc,
+              filters: filterParams != undefined ? JSON.stringify(filterParams) : null,
             },
           }
         );
@@ -90,14 +103,15 @@ function LibraryActivity(props) {
       (data.size && data.size !== itemCount) ||
       (data?.search ?? "") !== debouncedSearchQuery.trim() ||
       (data?.sort ?? "") !== sorting.column ||
-      (data?.desc ?? true) !== sorting.desc
+      (data?.desc ?? true) !== sorting.desc ||
+      JSON.stringify(data?.filters ?? []) !== JSON.stringify(filterParams ?? [])
     ) {
       fetchData();
     }
 
     const intervalId = setInterval(fetchData, 60000 * 5);
     return () => clearInterval(intervalId);
-  }, [data, props.LibraryId, token, itemCount, currentPage, debouncedSearchQuery, sorting]);
+  }, [data, props.LibraryId, token, itemCount, currentPage, debouncedSearchQuery, sorting, filterParams]);
 
   if (!data || !data.results) {
     return <></>;
@@ -183,6 +197,7 @@ function LibraryActivity(props) {
           itemCount={itemCount}
           onPageChange={handlePageChange}
           onSortChange={onSortChange}
+          onFilterChange={onFilterChange}
           pageCount={data.pages}
           isBusy={isBusy}
         />
