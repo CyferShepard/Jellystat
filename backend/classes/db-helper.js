@@ -1,4 +1,5 @@
 const { pool } = require("../db.js");
+const pgp = require("pg-promise")();
 
 function wrapField(field) {
   if (field === "*") {
@@ -43,9 +44,9 @@ function buildWhereClause(conditions) {
         const { column, field, operator, value, type } = condition;
         const conjunction = index === 0 ? "" : type ? type.toUpperCase() : "AND";
         if (operator == "LIKE") {
-          return `${conjunction} ${column ? wrapField(column) : field} ${operator} '%${value}%'`;
+          return `${conjunction} ${column ? wrapField(column) : field} ${operator} ${value}`;
         }
-        return `${conjunction} ${column ? wrapField(column) : field} ${operator} '${value}'`;
+        return `${conjunction} ${column ? wrapField(column) : field} ${operator} ${value}`;
       }
       return "";
     })
@@ -67,7 +68,7 @@ function buildCTE(cte) {
       .map((condition, index) => {
         const conjunction = index === 0 ? "" : condition.type ? condition.type.toUpperCase() : "AND";
         return `${conjunction} ${wrapField(condition.first)} ${condition.operator} ${
-          condition.second ? wrapField(condition.second) : `'${condition.value}'`
+          condition.second ? wrapField(condition.second) : `${condition.value}`
         }`;
       })
       .join(" ");
@@ -102,6 +103,7 @@ async function query({
   alias,
   joins = [],
   where = [],
+  values = [],
   order_by = "Id",
   sort_order = "desc",
   pageNumber = 1,
@@ -119,7 +121,7 @@ async function query({
         .map((condition, index) => {
           const conjunction = index === 0 ? "" : condition.type ? condition.type.toUpperCase() : "AND";
           return `${conjunction} ${wrapField(condition.first)} ${condition.operator} ${
-            condition.second ? wrapField(condition.second) : `'${condition.value}'`
+            condition.second ? wrapField(condition.second) : `${condition.value}`
           }`;
         })
         .join(" ");
@@ -140,10 +142,10 @@ async function query({
     query += ` LIMIT ${pageSize} OFFSET ${(pageNumber - 1) * pageSize}`;
 
     // Execute the query
-    const result = await client.query(query);
+    const result = await client.query(query, values);
 
     // Count total rows
-    const countResult = await client.query(countQuery);
+    const countResult = await client.query(countQuery, values);
     const totalRows = parseInt(countResult.rows[0].count, 10);
 
     // Return the structured response

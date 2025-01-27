@@ -152,8 +152,10 @@ function buildFilterList(query, filtersArray) {
         query.where.push({
           column: column,
           operator: ">=",
-          value: filter.min,
+          value: `$${query.values.length + 1}`,
         });
+
+        query.values.push(filter.min);
 
         if (applyToCTE) {
           if (query.cte) {
@@ -163,8 +165,10 @@ function buildFilterList(query, filtersArray) {
             query.cte.where.push({
               column: column,
               operator: ">=",
-              value: filter.min,
+              value: `$${query.values.length + 1}`,
             });
+
+            query.values.push(filter.min);
           }
         }
       }
@@ -173,8 +177,10 @@ function buildFilterList(query, filtersArray) {
         query.where.push({
           column: column,
           operator: "<=",
-          value: filter.max,
+          value: `$${query.values.length + 1}`,
         });
+
+        query.values.push(filter.max);
 
         if (applyToCTE) {
           if (query.cte) {
@@ -184,8 +190,10 @@ function buildFilterList(query, filtersArray) {
             query.cte.where.push({
               column: column,
               operator: "<=",
-              value: filter.max,
+              value: `$${query.values.length + 1}`,
             });
+
+            query.values.push(filter.max);
           }
         }
       }
@@ -193,8 +201,11 @@ function buildFilterList(query, filtersArray) {
       if (filter.value) {
         const whereClause = {
           operator: "LIKE",
-          value: filter.value.toLowerCase(),
+          value: `$${query.values.length + 1}`,
         };
+
+        query.values.push(`%${filter.value.toLowerCase()}%`);
+
         if (isColumn) {
           whereClause.column = column;
         } else {
@@ -207,7 +218,10 @@ function buildFilterList(query, filtersArray) {
             if (!query.cte.where) {
               query.cte.where = [];
             }
+            whereClause.value = `$${query.values.length + 1}`;
             query.cte.where.push(whereClause);
+
+            query.values.push(`%${filter.value.toLowerCase()}%`);
           }
         }
       }
@@ -1227,6 +1241,8 @@ router.get("/getHistory", async (req, res) => {
 
   const sortField = groupedSortMap.find((item) => item.field === sort)?.column || "a.ActivityDateInserted";
 
+  const values = [];
+
   try {
     const cte = {
       cteAlias: "activity_results",
@@ -1291,10 +1307,14 @@ router.get("/getHistory", async (req, res) => {
           END 
           )`,
           operator: "LIKE",
-          value: `${search.toLowerCase()}`,
+          value: `$${values.length + 1}`,
         },
       ];
+
+      values.push(`%${search.toLowerCase()}%`);
     }
+
+    query.values = values;
 
     buildFilterList(query, filtersArray);
     const result = await dbHelper.query(query);
@@ -1378,6 +1398,7 @@ router.post("/getLibraryHistory", async (req, res) => {
     }
 
     const sortField = groupedSortMap.find((item) => item.field === sort)?.column || "a.ActivityDateInserted";
+    const values = [];
 
     const cte = {
       cteAlias: "activity_results",
@@ -1420,7 +1441,7 @@ router.post("/getLibraryHistory", async (req, res) => {
           alias: "i",
           conditions: [
             { first: "i.Id", operator: "=", second: "a.NowPlayingItemId" },
-            { first: "i.ParentId", operator: "=", value: libraryid },
+            { first: "i.ParentId", operator: "=", value: `$${values.length + 1}` },
           ],
         },
         {
@@ -1441,6 +1462,8 @@ router.post("/getLibraryHistory", async (req, res) => {
       pageSize: size,
     };
 
+    values.push(libraryid);
+
     if (search && search.length > 0) {
       query.where = [
         {
@@ -1451,10 +1474,14 @@ router.post("/getLibraryHistory", async (req, res) => {
           END 
           )`,
           operator: "LIKE",
-          value: `${search.toLowerCase()}`,
+          value: `$${values.length + 1}`,
         },
       ];
+
+      values.push(`%${search.toLowerCase()}%`);
     }
+
+    query.values = values;
 
     buildFilterList(query, filtersArray);
 
@@ -1541,7 +1568,7 @@ router.post("/getItemHistory", async (req, res) => {
     }
 
     const sortField = unGroupedSortMap.find((item) => item.field === sort)?.column || "a.ActivityDateInserted";
-
+    const values = [];
     const query = {
       select: [
         "a.*",
@@ -1559,9 +1586,9 @@ router.post("/getItemHistory", async (req, res) => {
       alias: "a",
       where: [
         [
-          { column: "a.EpisodeId", operator: "=", value: itemid },
-          { column: "a.SeasonId", operator: "=", value: itemid, type: "or" },
-          { column: "a.NowPlayingItemId", operator: "=", value: itemid, type: "or" },
+          { column: "a.EpisodeId", operator: "=", value: `$${values.length + 1}` },
+          { column: "a.SeasonId", operator: "=", value: `$${values.length + 2}`, type: "or" },
+          { column: "a.NowPlayingItemId", operator: "=", value: `$${values.length + 3}`, type: "or" },
         ],
       ],
       order_by: sortField,
@@ -1569,6 +1596,10 @@ router.post("/getItemHistory", async (req, res) => {
       pageNumber: page,
       pageSize: size,
     };
+
+    values.push(itemid);
+    values.push(itemid);
+    values.push(itemid);
 
     if (search && search.length > 0) {
       query.where = [
@@ -1580,11 +1611,13 @@ router.post("/getItemHistory", async (req, res) => {
           END 
           )`,
           operator: "LIKE",
-          value: `${search.toLowerCase()}`,
+          value: `$${values.length + 1}`,
         },
       ];
+      values.push(`%${search.toLowerCase()}%`);
     }
 
+    query.values = values;
     buildFilterList(query, filtersArray);
     const result = await dbHelper.query(query);
 
@@ -1667,6 +1700,7 @@ router.post("/getUserHistory", async (req, res) => {
 
     const sortField = unGroupedSortMap.find((item) => item.field === sort)?.column || "a.ActivityDateInserted";
 
+    const values = [];
     const query = {
       select: [
         "a.*",
@@ -1682,12 +1716,14 @@ router.post("/getUserHistory", async (req, res) => {
       ],
       table: "jf_playback_activity_with_metadata",
       alias: "a",
-      where: [[{ column: "a.UserId", operator: "=", value: userid }]],
+      where: [[{ column: "a.UserId", operator: "=", value: `$${values.length + 1}` }]],
       order_by: sortField,
       sort_order: desc ? "desc" : "asc",
       pageNumber: page,
       pageSize: size,
     };
+
+    values.push(userid);
 
     if (search && search.length > 0) {
       query.where = [
@@ -1699,10 +1735,13 @@ router.post("/getUserHistory", async (req, res) => {
           END 
           )`,
           operator: "LIKE",
-          value: `${search.toLowerCase()}`,
+          value: `$${values.length + 1}`,
         },
       ];
+      values.push(`%${search.toLowerCase()}%`);
     }
+
+    query.values = values;
 
     buildFilterList(query, filtersArray);
 
