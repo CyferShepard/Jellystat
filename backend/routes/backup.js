@@ -10,6 +10,7 @@ const backup = require('../classes/backup');
 const triggertype = require('../logging/triggertype');
 const taskstate = require('../logging/taskstate');
 const taskName = require('../logging/taskName');
+const sanitizeFilename = require('../utils/sanitizer');
 
 const { sendUpdate } = require('../ws');
 const db = require('../db');
@@ -150,11 +151,13 @@ router.get('/restore/:filename', async (req, res) => {
     let refLog = { logData: [], uuid: uuid };
     Logging.insertLog(uuid, triggertype.Manual, taskName.restore);
 
+    const filename = sanitizeFilename(req.params.filename);
     const filePath = path.join(
+      process.cwd(),
       __dirname,
       '..',
       backupfolder,
-      req.params.filename
+      filename
     );
 
     await restore(filePath, refLog);
@@ -196,11 +199,13 @@ router.get('/files', (req, res) => {
 
 //download backup file
 router.get('/files/:filename', (req, res) => {
+  const filename = sanitizeFilename(req.params.filename);
   const filePath = path.join(
+    process.cwd(),
     __dirname,
     '..',
     backupfolder,
-    req.params.filename
+    filename
   );
   res.download(filePath);
 });
@@ -208,11 +213,13 @@ router.get('/files/:filename', (req, res) => {
 //delete backup
 router.delete('/files/:filename', (req, res) => {
   try {
+    const filename = sanitizeFilename(req.params.filename);
     const filePath = path.join(
+      process.cwd(),
       __dirname,
       '..',
       backupfolder,
-      req.params.filename
+      filename
     );
 
     fs.unlink(filePath, err => {
