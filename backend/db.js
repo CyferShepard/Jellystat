@@ -1,7 +1,6 @@
 const { Pool } = require("pg");
 const pgp = require("pg-promise")();
 const { update_query: update_query_map } = require("./models/bulk_insert_update_handler");
-const moment = require("moment");
 
 const _POSTGRES_USER = process.env.POSTGRES_USER;
 const _POSTGRES_PASSWORD = process.env.POSTGRES_PASSWORD;
@@ -20,6 +19,9 @@ const pool = new Pool({
   database: _POSTGRES_DATABASE,
   password: _POSTGRES_PASSWORD,
   port: _POSTGRES_PORT,
+  max: 20, // Maximum number of connections in the pool
+  idleTimeoutMillis: 30000, // Close idle clients after 30 seconds
+  connectionTimeoutMillis: 2000, // Return an error after 2 seconds if connection could not be established
 });
 
 pool.on("error", (err, client) => {
@@ -45,6 +47,12 @@ async function deleteBulk(table_name, data, pkName) {
 
     await client.query("COMMIT");
     message = data.length + " Rows removed.";
+
+    if (table_name === "jf_playback_activity") {
+      for (const view of materializedViews) {
+        refreshMaterializedView(view);
+      }
+    }
   } catch (error) {
     await client.query("ROLLBACK");
     message = "Bulk delete error: " + error;
@@ -85,6 +93,32 @@ async function updateSingleFieldBulk(table_name, data, field_name, new_value, wh
   return { Result: result, message: "" + message };
 }
 
+const materializedViews = ["js_latest_playback_activity", "js_library_stats_overview"];
+
+async function refreshMaterializedView(view_name) {
+  const client = await pool.connect();
+  let result = "SUCCESS";
+  let message = "";
+  try {
+    await client.query("BEGIN");
+
+    const refreshQuery = {
+      text: `REFRESH MATERIALIZED VIEW ${view_name}`,
+    };
+    await client.query(refreshQuery);
+
+    await client.query("COMMIT");
+    message = view_name + " refreshed.";
+  } catch (error) {
+    await client.query("ROLLBACK");
+    message = "Refresh materialized view error: " + error;
+    result = "ERROR";
+  } finally {
+    client.release();
+  }
+  return { Result: result, message: "" + message };
+}
+
 async function insertBulk(table_name, data, columns) {
   //dedupe data
 
@@ -113,6 +147,12 @@ async function insertBulk(table_name, data, columns) {
     const query = pgp.helpers.insert(data, cs) + update_query; // Update the column names accordingly
     await client.query(query);
     await client.query("COMMIT");
+
+    if (table_name === "jf_playback_activity") {
+      for (const view of materializedViews) {
+        refreshMaterializedView(view);
+      }
+    }
   } catch (error) {
     await client.query("ROLLBACK");
     message = "" + error;
@@ -126,9 +166,15 @@ async function insertBulk(table_name, data, columns) {
   };
 }
 
-async function query(text, params) {
+async function query(text, params, refreshViews = false) {
   try {
     const result = await pool.query(text, params);
+
+    if (refreshViews) {
+      for (const view of materializedViews) {
+        refreshMaterializedView(view);
+      }
+    }
     return result;
   } catch (error) {
     if (error?.routine === "auth_failed") {
@@ -163,6 +209,7 @@ async function querySingle(sql, params) {
 }
 
 module.exports = {
+  pool: pool,
   query: query,
   deleteBulk: deleteBulk,
   insertBulk: insertBulk,

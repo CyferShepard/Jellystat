@@ -37,7 +37,10 @@
       "description": "Jellystat Log Endpoints"
     }
   ],
-  "schemes": ["http", "https"],
+  "schemes": [
+    "http",
+    "https"
+  ],
   "securityDefinitions": {
     "apiKey": {
       "type": "apiKey",
@@ -48,7 +51,9 @@
   "paths": {
     "/auth/login": {
       "post": {
-        "tags": ["Auth"],
+        "tags": [
+          "Auth"
+        ],
         "description": "",
         "parameters": [
           {
@@ -74,6 +79,9 @@
           "401": {
             "description": "Unauthorized"
           },
+          "404": {
+            "description": "Not Found"
+          },
           "500": {
             "description": "Internal Server Error"
           }
@@ -82,11 +90,16 @@
     },
     "/auth/isConfigured": {
       "get": {
-        "tags": ["Auth"],
+        "tags": [
+          "Auth"
+        ],
         "description": "",
         "responses": {
           "200": {
             "description": "OK"
+          },
+          "404": {
+            "description": "Not Found"
           },
           "500": {
             "description": "Internal Server Error"
@@ -96,7 +109,9 @@
     },
     "/auth/createuser": {
       "post": {
-        "tags": ["Auth"],
+        "tags": [
+          "Auth"
+        ],
         "description": "",
         "parameters": [
           {
@@ -122,6 +137,9 @@
           "403": {
             "description": "Forbidden"
           },
+          "404": {
+            "description": "Not Found"
+          },
           "500": {
             "description": "Internal Server Error"
           }
@@ -130,7 +148,9 @@
     },
     "/auth/configSetup": {
       "post": {
-        "tags": ["Auth"],
+        "tags": [
+          "Auth"
+        ],
         "description": "",
         "parameters": [
           {
@@ -156,6 +176,9 @@
           "400": {
             "description": "Bad Request"
           },
+          "404": {
+            "description": "Not Found"
+          },
           "500": {
             "description": "Internal Server Error"
           }
@@ -164,7 +187,9 @@
     },
     "/proxy/web/assets/img/devices/": {
       "get": {
-        "tags": ["Proxy"],
+        "tags": [
+          "Proxy"
+        ],
         "description": "",
         "parameters": [
           {
@@ -177,6 +202,9 @@
           "200": {
             "description": "OK"
           },
+          "404": {
+            "description": "Not Found"
+          },
           "500": {
             "description": "Internal Server Error"
           }
@@ -185,7 +213,9 @@
     },
     "/proxy/Items/Images/Backdrop/": {
       "get": {
-        "tags": ["Proxy"],
+        "tags": [
+          "Proxy"
+        ],
         "description": "",
         "parameters": [
           {
@@ -213,6 +243,9 @@
           "200": {
             "description": "OK"
           },
+          "404": {
+            "description": "Not Found"
+          },
           "500": {
             "description": "Internal Server Error"
           }
@@ -221,7 +254,9 @@
     },
     "/proxy/Items/Images/Primary/": {
       "get": {
-        "tags": ["Proxy"],
+        "tags": [
+          "Proxy"
+        ],
         "description": "",
         "parameters": [
           {
@@ -243,6 +278,9 @@
         "responses": {
           "200": {
             "description": "OK"
+          },
+          "404": {
+            "description": "Not Found"
           },
           "500": {
             "description": "Internal Server Error"
@@ -252,7 +290,9 @@
     },
     "/proxy/Users/Images/Primary/": {
       "get": {
-        "tags": ["Proxy"],
+        "tags": [
+          "Proxy"
+        ],
         "description": "",
         "parameters": [
           {
@@ -275,6 +315,9 @@
           "200": {
             "description": "OK"
           },
+          "404": {
+            "description": "Not Found"
+          },
           "500": {
             "description": "Internal Server Error"
           }
@@ -283,11 +326,16 @@
     },
     "/proxy/getSessions": {
       "get": {
-        "tags": ["Proxy"],
+        "tags": [
+          "Proxy"
+        ],
         "description": "",
         "responses": {
           "200": {
             "description": "OK"
+          },
+          "404": {
+            "description": "Not Found"
           },
           "503": {
             "description": "Service Unavailable"
@@ -297,11 +345,16 @@
     },
     "/proxy/getAdminUsers": {
       "get": {
-        "tags": ["Proxy"],
+        "tags": [
+          "Proxy"
+        ],
         "description": "",
         "responses": {
           "200": {
             "description": "OK"
+          },
+          "404": {
+            "description": "Not Found"
           },
           "503": {
             "description": "Service Unavailable"
@@ -311,7 +364,9 @@
     },
     "/proxy/getRecentlyAdded": {
       "get": {
-        "tags": ["Proxy"],
+        "tags": [
+          "Proxy"
+        ],
         "description": "",
         "parameters": [
           {
@@ -324,6 +379,9 @@
           "200": {
             "description": "OK"
           },
+          "404": {
+            "description": "Not Found"
+          },
           "503": {
             "description": "Service Unavailable"
           }
@@ -332,7 +390,9 @@
     },
     "/proxy/validateSettings": {
       "post": {
-        "tags": ["Proxy"],
+        "tags": [
+          "Proxy"
+        ],
         "description": "",
         "parameters": [
           {
@@ -357,13 +417,18 @@
           },
           "400": {
             "description": "Bad Request"
+          },
+          "404": {
+            "description": "Not Found"
           }
         }
       }
     },
     "/api/getconfig": {
       "get": {
-        "tags": ["API"],
+        "tags": [
+          "API"
+        ],
         "description": "",
         "parameters": [
           {
@@ -403,7 +468,9 @@
     },
     "/api/getLibraries": {
       "get": {
-        "tags": ["API"],
+        "tags": [
+          "API"
+        ],
         "description": "",
         "parameters": [
           {
@@ -440,7 +507,9 @@
     },
     "/api/getRecentlyAdded": {
       "get": {
-        "tags": ["API"],
+        "tags": [
+          "API"
+        ],
         "description": "",
         "parameters": [
           {
@@ -495,7 +564,9 @@
     },
     "/api/setconfig": {
       "post": {
-        "tags": ["API"],
+        "tags": [
+          "API"
+        ],
         "description": "",
         "parameters": [
           {
@@ -548,9 +619,68 @@
         }
       }
     },
+    "/api/setExternalUrl": {
+      "post": {
+        "tags": [
+          "API"
+        ],
+        "description": "",
+        "parameters": [
+          {
+            "name": "authorization",
+            "in": "header",
+            "type": "string"
+          },
+          {
+            "name": "x-api-token",
+            "in": "header",
+            "type": "string"
+          },
+          {
+            "name": "req",
+            "in": "query",
+            "type": "string"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "ExternalUrl": {
+                  "example": "any"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "404": {
+            "description": "Not Found"
+          },
+          "503": {
+            "description": "Service Unavailable"
+          }
+        }
+      }
+    },
     "/api/setPreferredAdmin": {
       "post": {
-        "tags": ["API"],
+        "tags": [
+          "API"
+        ],
         "description": "",
         "parameters": [
           {
@@ -605,7 +735,9 @@
     },
     "/api/setRequireLogin": {
       "post": {
-        "tags": ["API"],
+        "tags": [
+          "API"
+        ],
         "description": "",
         "parameters": [
           {
@@ -657,7 +789,9 @@
     },
     "/api/updateCredentials": {
       "post": {
-        "tags": ["API"],
+        "tags": [
+          "API"
+        ],
         "description": "",
         "parameters": [
           {
@@ -718,7 +852,9 @@
     },
     "/api/updatePassword": {
       "post": {
-        "tags": ["API"],
+        "tags": [
+          "API"
+        ],
         "description": "",
         "parameters": [
           {
@@ -770,7 +906,9 @@
     },
     "/api/TrackedLibraries": {
       "get": {
-        "tags": ["API"],
+        "tags": [
+          "API"
+        ],
         "description": "",
         "parameters": [
           {
@@ -810,7 +948,9 @@
     },
     "/api/setExcludedLibraries": {
       "post": {
-        "tags": ["API"],
+        "tags": [
+          "API"
+        ],
         "description": "",
         "parameters": [
           {
@@ -862,7 +1002,9 @@
     },
     "/api/UntrackedUsers": {
       "get": {
-        "tags": ["API"],
+        "tags": [
+          "API"
+        ],
         "description": "",
         "parameters": [
           {
@@ -902,7 +1044,9 @@
     },
     "/api/setUntrackedUsers": {
       "post": {
-        "tags": ["API"],
+        "tags": [
+          "API"
+        ],
         "description": "",
         "parameters": [
           {
@@ -954,7 +1098,9 @@
     },
     "/api/keys": {
       "get": {
-        "tags": ["API"],
+        "tags": [
+          "API"
+        ],
         "description": "",
         "parameters": [
           {
@@ -989,7 +1135,9 @@
         }
       },
       "delete": {
-        "tags": ["API"],
+        "tags": [
+          "API"
+        ],
         "description": "",
         "parameters": [
           {
@@ -1039,7 +1187,9 @@
         }
       },
       "post": {
-        "tags": ["API"],
+        "tags": [
+          "API"
+        ],
         "description": "",
         "parameters": [
           {
@@ -1091,7 +1241,9 @@
     },
     "/api/getTaskSettings": {
       "get": {
-        "tags": ["API"],
+        "tags": [
+          "API"
+        ],
         "description": "",
         "parameters": [
           {
@@ -1131,7 +1283,9 @@
     },
     "/api/setTaskSettings": {
       "post": {
-        "tags": ["API"],
+        "tags": [
+          "API"
+        ],
         "description": "",
         "parameters": [
           {
@@ -1189,7 +1343,9 @@
     },
     "/api/CheckForUpdates": {
       "get": {
-        "tags": ["API"],
+        "tags": [
+          "API"
+        ],
         "description": "",
         "parameters": [
           {
@@ -1226,7 +1382,9 @@
     },
     "/api/getUserDetails": {
       "post": {
-        "tags": ["API"],
+        "tags": [
+          "API"
+        ],
         "description": "",
         "parameters": [
           {
@@ -1281,7 +1439,9 @@
     },
     "/api/getLibrary": {
       "post": {
-        "tags": ["API"],
+        "tags": [
+          "API"
+        ],
         "description": "",
         "parameters": [
           {
@@ -1336,7 +1496,9 @@
     },
     "/api/getLibraryItems": {
       "post": {
-        "tags": ["API"],
+        "tags": [
+          "API"
+        ],
         "description": "",
         "parameters": [
           {
@@ -1388,7 +1550,9 @@
     },
     "/api/getSeasons": {
       "post": {
-        "tags": ["API"],
+        "tags": [
+          "API"
+        ],
         "description": "",
         "parameters": [
           {
@@ -1440,7 +1604,9 @@
     },
     "/api/getEpisodes": {
       "post": {
-        "tags": ["API"],
+        "tags": [
+          "API"
+        ],
         "description": "",
         "parameters": [
           {
@@ -1492,7 +1658,9 @@
     },
     "/api/getItemDetails": {
       "post": {
-        "tags": ["API"],
+        "tags": [
+          "API"
+        ],
         "description": "",
         "parameters": [
           {
@@ -1544,7 +1712,9 @@
     },
     "/api/item/purge": {
       "delete": {
-        "tags": ["API"],
+        "tags": [
+          "API"
+        ],
         "description": "",
         "parameters": [
           {
@@ -1602,7 +1772,9 @@
     },
     "/api/library/purge": {
       "delete": {
-        "tags": ["API"],
+        "tags": [
+          "API"
+        ],
         "description": "",
         "parameters": [
           {
@@ -1660,7 +1832,9 @@
     },
     "/api/libraryItems/purge": {
       "delete": {
-        "tags": ["API"],
+        "tags": [
+          "API"
+        ],
         "description": "",
         "parameters": [
           {
@@ -1716,9 +1890,11 @@
         }
       }
     },
-    "/api/getHistory": {
+    "/api/getBackupTables": {
       "get": {
-        "tags": ["API"],
+        "tags": [
+          "API"
+        ],
         "description": "",
         "parameters": [
           {
@@ -1749,13 +1925,18 @@
           },
           "404": {
             "description": "Not Found"
+          },
+          "503": {
+            "description": "Service Unavailable"
           }
         }
       }
     },
-    "/api/getLibraryHistory": {
+    "/api/setExcludedBackupTable": {
       "post": {
-        "tags": ["API"],
+        "tags": [
+          "API"
+        ],
         "description": "",
         "parameters": [
           {
@@ -1770,6 +1951,182 @@
           },
           {
             "name": "req",
+            "in": "query",
+            "type": "string"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "table": {
+                  "example": "any"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "404": {
+            "description": "Not Found"
+          }
+        }
+      }
+    },
+    "/api/getHistory": {
+      "get": {
+        "tags": [
+          "API"
+        ],
+        "description": "",
+        "parameters": [
+          {
+            "name": "authorization",
+            "in": "header",
+            "type": "string"
+          },
+          {
+            "name": "x-api-token",
+            "in": "header",
+            "type": "string"
+          },
+          {
+            "name": "req",
+            "in": "query",
+            "type": "string"
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "type": "string"
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "type": "string"
+          },
+          {
+            "name": "search",
+            "in": "query",
+            "type": "string"
+          },
+          {
+            "name": "sort",
+            "in": "query",
+            "type": "string",
+            "enum": [
+              "UserName",
+              "RemoteEndPoint",
+              "NowPlayingItemName",
+              "Client",
+              "DeviceName",
+              "ActivityDateInserted",
+              "PlaybackDuration",
+              "TotalPlays"
+            ]
+          },
+          {
+            "name": "desc",
+            "in": "query",
+            "type": "string"
+          },
+          {
+            "name": "filters",
+            "in": "query",
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "404": {
+            "description": "Not Found"
+          }
+        }
+      }
+    },
+    "/api/getLibraryHistory": {
+      "post": {
+        "tags": [
+          "API"
+        ],
+        "description": "",
+        "parameters": [
+          {
+            "name": "authorization",
+            "in": "header",
+            "type": "string"
+          },
+          {
+            "name": "x-api-token",
+            "in": "header",
+            "type": "string"
+          },
+          {
+            "name": "req",
+            "in": "query",
+            "type": "string"
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "type": "string"
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "type": "string"
+          },
+          {
+            "name": "search",
+            "in": "query",
+            "type": "string"
+          },
+          {
+            "name": "sort",
+            "in": "query",
+            "type": "string",
+            "enum": [
+              "UserName",
+              "RemoteEndPoint",
+              "NowPlayingItemName",
+              "Client",
+              "DeviceName",
+              "ActivityDateInserted",
+              "PlaybackDuration",
+              "TotalPlays"
+            ]
+          },
+          {
+            "name": "desc",
+            "in": "query",
+            "type": "string"
+          },
+          {
+            "name": "filters",
             "in": "query",
             "type": "string"
           },
@@ -1810,7 +2167,9 @@
     },
     "/api/getItemHistory": {
       "post": {
-        "tags": ["API"],
+        "tags": [
+          "API"
+        ],
         "description": "",
         "parameters": [
           {
@@ -1825,6 +2184,45 @@
           },
           {
             "name": "req",
+            "in": "query",
+            "type": "string"
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "type": "string"
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "type": "string"
+          },
+          {
+            "name": "search",
+            "in": "query",
+            "type": "string"
+          },
+          {
+            "name": "sort",
+            "in": "query",
+            "type": "string",
+            "enum": [
+              "UserName",
+              "RemoteEndPoint",
+              "NowPlayingItemName",
+              "Client",
+              "DeviceName",
+              "ActivityDateInserted",
+              "PlaybackDuration"
+            ]
+          },
+          {
+            "name": "desc",
+            "in": "query",
+            "type": "string"
+          },
+          {
+            "name": "filters",
             "in": "query",
             "type": "string"
           },
@@ -1865,7 +2263,9 @@
     },
     "/api/getUserHistory": {
       "post": {
-        "tags": ["API"],
+        "tags": [
+          "API"
+        ],
         "description": "",
         "parameters": [
           {
@@ -1880,6 +2280,45 @@
           },
           {
             "name": "req",
+            "in": "query",
+            "type": "string"
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "type": "string"
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "type": "string"
+          },
+          {
+            "name": "search",
+            "in": "query",
+            "type": "string"
+          },
+          {
+            "name": "sort",
+            "in": "query",
+            "type": "string",
+            "enum": [
+              "UserName",
+              "RemoteEndPoint",
+              "NowPlayingItemName",
+              "Client",
+              "DeviceName",
+              "ActivityDateInserted",
+              "PlaybackDuration"
+            ]
+          },
+          {
+            "name": "desc",
+            "in": "query",
+            "type": "string"
+          },
+          {
+            "name": "filters",
             "in": "query",
             "type": "string"
           },
@@ -1920,7 +2359,9 @@
     },
     "/api/deletePlaybackActivity": {
       "post": {
-        "tags": ["API"],
+        "tags": [
+          "API"
+        ],
         "description": "",
         "parameters": [
           {
@@ -1973,83 +2414,11 @@
         }
       }
     },
-    "/sync/beginSync": {
-      "get": {
-        "tags": ["Sync"],
-        "description": "",
-        "parameters": [
-          {
-            "name": "authorization",
-            "in": "header",
-            "type": "string"
-          },
-          {
-            "name": "x-api-token",
-            "in": "header",
-            "type": "string"
-          },
-          {
-            "name": "req",
-            "in": "query",
-            "type": "string"
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK"
-          },
-          "401": {
-            "description": "Unauthorized"
-          },
-          "403": {
-            "description": "Forbidden"
-          },
-          "404": {
-            "description": "Not Found"
-          }
-        }
-      }
-    },
-    "/sync/beginPartialSync": {
-      "get": {
-        "tags": ["Sync"],
-        "description": "",
-        "parameters": [
-          {
-            "name": "authorization",
-            "in": "header",
-            "type": "string"
-          },
-          {
-            "name": "x-api-token",
-            "in": "header",
-            "type": "string"
-          },
-          {
-            "name": "req",
-            "in": "query",
-            "type": "string"
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK"
-          },
-          "401": {
-            "description": "Unauthorized"
-          },
-          "403": {
-            "description": "Forbidden"
-          },
-          "404": {
-            "description": "Not Found"
-          }
-        }
-      }
-    },
-    "/sync/fetchItem": {
+    "/api/getActivityTimeLine": {
       "post": {
-        "tags": ["Sync"],
+        "tags": [
+          "API"
+        ],
         "description": "",
         "parameters": [
           {
@@ -2073,7 +2442,10 @@
             "schema": {
               "type": "object",
               "properties": {
-                "itemId": {
+                "userId": {
+                  "example": "any"
+                },
+                "libraries": {
                   "example": "any"
                 }
               }
@@ -2096,55 +2468,17 @@
           "404": {
             "description": "Not Found"
           },
-          "500": {
-            "description": "Internal Server Error"
-          },
           "503": {
             "description": "Service Unavailable"
           }
         }
       }
     },
-    "/sync/syncPlaybackPluginData": {
-      "get": {
-        "tags": ["Sync"],
-        "description": "",
-        "parameters": [
-          {
-            "name": "authorization",
-            "in": "header",
-            "type": "string"
-          },
-          {
-            "name": "x-api-token",
-            "in": "header",
-            "type": "string"
-          },
-          {
-            "name": "req",
-            "in": "query",
-            "type": "string"
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK"
-          },
-          "401": {
-            "description": "Unauthorized"
-          },
-          "403": {
-            "description": "Forbidden"
-          },
-          "404": {
-            "description": "Not Found"
-          }
-        }
-      }
-    },
     "/stats/getLibraryOverview": {
       "get": {
-        "tags": ["Stats"],
+        "tags": [
+          "Stats"
+        ],
         "description": "",
         "parameters": [
           {
@@ -2184,7 +2518,9 @@
     },
     "/stats/getMostViewedByType": {
       "post": {
-        "tags": ["Stats"],
+        "tags": [
+          "Stats"
+        ],
         "description": "",
         "parameters": [
           {
@@ -2239,7 +2575,9 @@
     },
     "/stats/getMostPopularByType": {
       "post": {
-        "tags": ["Stats"],
+        "tags": [
+          "Stats"
+        ],
         "description": "",
         "parameters": [
           {
@@ -2294,7 +2632,9 @@
     },
     "/stats/getMostViewedLibraries": {
       "post": {
-        "tags": ["Stats"],
+        "tags": [
+          "Stats"
+        ],
         "description": "",
         "parameters": [
           {
@@ -2346,7 +2686,9 @@
     },
     "/stats/getMostUsedClient": {
       "post": {
-        "tags": ["Stats"],
+        "tags": [
+          "Stats"
+        ],
         "description": "",
         "parameters": [
           {
@@ -2398,7 +2740,9 @@
     },
     "/stats/getMostActiveUsers": {
       "post": {
-        "tags": ["Stats"],
+        "tags": [
+          "Stats"
+        ],
         "description": "",
         "parameters": [
           {
@@ -2450,7 +2794,9 @@
     },
     "/stats/getPlaybackActivity": {
       "get": {
-        "tags": ["Stats"],
+        "tags": [
+          "Stats"
+        ],
         "description": "",
         "parameters": [
           {
@@ -2490,7 +2836,9 @@
     },
     "/stats/getAllUserActivity": {
       "get": {
-        "tags": ["Stats"],
+        "tags": [
+          "Stats"
+        ],
         "description": "",
         "parameters": [
           {
@@ -2527,7 +2875,9 @@
     },
     "/stats/getUserLastPlayed": {
       "post": {
-        "tags": ["Stats"],
+        "tags": [
+          "Stats"
+        ],
         "description": "",
         "parameters": [
           {
@@ -2579,7 +2929,9 @@
     },
     "/stats/getGlobalUserStats": {
       "post": {
-        "tags": ["Stats"],
+        "tags": [
+          "Stats"
+        ],
         "description": "",
         "parameters": [
           {
@@ -2634,7 +2986,9 @@
     },
     "/stats/getGlobalItemStats": {
       "post": {
-        "tags": ["Stats"],
+        "tags": [
+          "Stats"
+        ],
         "description": "",
         "parameters": [
           {
@@ -2689,7 +3043,9 @@
     },
     "/stats/getGlobalLibraryStats": {
       "post": {
-        "tags": ["Stats"],
+        "tags": [
+          "Stats"
+        ],
         "description": "",
         "parameters": [
           {
@@ -2744,7 +3100,9 @@
     },
     "/stats/getLibraryCardStats": {
       "get": {
-        "tags": ["Stats"],
+        "tags": [
+          "Stats"
+        ],
         "description": "",
         "parameters": [
           {
@@ -2782,7 +3140,9 @@
         }
       },
       "post": {
-        "tags": ["Stats"],
+        "tags": [
+          "Stats"
+        ],
         "description": "",
         "parameters": [
           {
@@ -2834,7 +3194,9 @@
     },
     "/stats/getLibraryMetadata": {
       "get": {
-        "tags": ["Stats"],
+        "tags": [
+          "Stats"
+        ],
         "description": "",
         "parameters": [
           {
@@ -2874,7 +3236,9 @@
     },
     "/stats/getLibraryItemsWithStats": {
       "post": {
-        "tags": ["Stats"],
+        "tags": [
+          "Stats"
+        ],
         "description": "",
         "parameters": [
           {
@@ -2923,7 +3287,9 @@
     },
     "/stats/getLibraryItemsPlayMethodStats": {
       "post": {
-        "tags": ["Stats"],
+        "tags": [
+          "Stats"
+        ],
         "description": "",
         "parameters": [
           {
@@ -2984,7 +3350,9 @@
     },
     "/stats/getPlaybackMethodStats": {
       "post": {
-        "tags": ["Stats"],
+        "tags": [
+          "Stats"
+        ],
         "description": "",
         "parameters": [
           {
@@ -3036,7 +3404,9 @@
     },
     "/stats/getLibraryLastPlayed": {
       "post": {
-        "tags": ["Stats"],
+        "tags": [
+          "Stats"
+        ],
         "description": "",
         "parameters": [
           {
@@ -3088,7 +3458,9 @@
     },
     "/stats/getViewsOverTime": {
       "post": {
-        "tags": ["Stats"],
+        "tags": [
+          "Stats"
+        ],
         "description": "",
         "parameters": [
           {
@@ -3140,7 +3512,9 @@
     },
     "/stats/getViewsByDays": {
       "post": {
-        "tags": ["Stats"],
+        "tags": [
+          "Stats"
+        ],
         "description": "",
         "parameters": [
           {
@@ -3192,7 +3566,9 @@
     },
     "/stats/getViewsByHour": {
       "post": {
-        "tags": ["Stats"],
+        "tags": [
+          "Stats"
+        ],
         "description": "",
         "parameters": [
           {
@@ -3244,7 +3620,9 @@
     },
     "/backup/beginBackup": {
       "get": {
-        "tags": ["Backup"],
+        "tags": [
+          "Backup"
+        ],
         "description": "",
         "parameters": [
           {
@@ -3284,7 +3662,9 @@
     },
     "/backup/restore/{filename}": {
       "get": {
-        "tags": ["Backup"],
+        "tags": [
+          "Backup"
+        ],
         "description": "",
         "parameters": [
           {
@@ -3330,7 +3710,9 @@
     },
     "/backup/files": {
       "get": {
-        "tags": ["Backup"],
+        "tags": [
+          "Backup"
+        ],
         "description": "",
         "parameters": [
           {
@@ -3370,7 +3752,9 @@
     },
     "/backup/files/{filename}": {
       "get": {
-        "tags": ["Backup"],
+        "tags": [
+          "Backup"
+        ],
         "description": "",
         "parameters": [
           {
@@ -3396,6 +3780,9 @@
           }
         ],
         "responses": {
+          "200": {
+            "description": "OK"
+          },
           "401": {
             "description": "Unauthorized"
           },
@@ -3408,7 +3795,9 @@
         }
       },
       "delete": {
-        "tags": ["Backup"],
+        "tags": [
+          "Backup"
+        ],
         "description": "",
         "parameters": [
           {
@@ -3454,7 +3843,9 @@
     },
     "/backup/upload": {
       "post": {
-        "tags": ["Backup"],
+        "tags": [
+          "Backup"
+        ],
         "description": "",
         "parameters": [
           {
@@ -3491,7 +3882,9 @@
     },
     "/logs/getLogs": {
       "get": {
-        "tags": ["Logs"],
+        "tags": [
+          "Logs"
+        ],
         "description": "",
         "parameters": [
           {
@@ -3528,7 +3921,9 @@
     },
     "/utils/geolocateIp": {
       "post": {
-        "tags": ["Utils"],
+        "tags": [
+          "Utils"
+        ],
         "description": "",
         "parameters": [
           {

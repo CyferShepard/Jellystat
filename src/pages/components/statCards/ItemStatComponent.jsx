@@ -7,6 +7,7 @@ import Row from "react-bootstrap/Row";
 import Col from "react-bootstrap/Col";
 import Tooltip from "@mui/material/Tooltip";
 import ArchiveDrawerFillIcon from "remixicon-react/ArchiveDrawerFillIcon";
+import "../../css/items/item-stat-component.css";
 
 function ItemStatComponent(props) {
   const [loaded, setLoaded] = useState(false);
@@ -36,8 +37,8 @@ function ItemStatComponent(props) {
   return (
     <Card className="stat-card rounded-2" style={cardStyle}>
       <div style={cardBgStyle} className="rounded-2">
-        <Row className="h-100 rounded-2">
-          <Col className="d-none d-lg-block stat-card-banner">
+        <Row className="row-max-witdh rounded-2 no-gutters">
+          <Col className="d-none d-lg-block stat-card-banner px-0">
             {props.icon ? (
               <div className="stat-card-icon">{props.icon}</div>
             ) : (
@@ -80,7 +81,7 @@ function ItemStatComponent(props) {
               </>
             )}
           </Col>
-          <Col className="w-100">
+          <Col className="stat-card-details px-0">
             <Card.Body className="w-100">
               <Card.Header className="d-flex justify-content-between border-0 p-0 bg-transparent">
                 <div>
@@ -98,30 +99,30 @@ function ItemStatComponent(props) {
                       {item.UserId ? (
                         <Link to={`/users/${item.UserId}`} className="item-name">
                           <Tooltip title={item.Name}>
-                            <Card.Text>{item.Name}</Card.Text>
+                            <Card.Text className="item-text">{item.Name}</Card.Text>
                           </Tooltip>
                         </Link>
                       ) : !item.Client && !props.icon ? (
                         <Link to={`/libraries/item/${item.Id}`} className="item-name">
                           <Tooltip title={item.Name}>
-                            <Card.Text>{item.Name}</Card.Text>
+                            <Card.Text className="item-text">{item.Name}</Card.Text>
                           </Tooltip>
                         </Link>
                       ) : !item.Client && props.icon ? (
                         item.Id ? (
                           <Link to={`/libraries/${item.Id}`} className="item-name">
                             <Tooltip title={item.Name}>
-                              <Card.Text>{item.Name}</Card.Text>
+                              <Card.Text className="item-text">{item.Name}</Card.Text>
                             </Tooltip>
                           </Link>
                         ) : (
                           <Tooltip title={item.Name}>
-                            <Card.Text>{item.Name}</Card.Text>
+                            <Card.Text className="item-text">{item.Name}</Card.Text>
                           </Tooltip>
                         )
                       ) : (
                         <Tooltip title={item.Client}>
-                          <Card.Text>{item.Client}</Card.Text>
+                          <Card.Text className="item-text">{item.Client}</Card.Text>
                         </Tooltip>
                       )}
                     </div>

@@ -133,14 +133,14 @@ function Row(file) {
           <div className="d-flex justify-content-center">
             <DropdownButton title={i18next.t("ACTIONS")} variant="outline-primary" disabled={disabled}>
               <Dropdown.Item as="button" variant="primary" onClick={() => downloadBackup(data.name)}>
-              <Trans i18nKey={"DOWNLOAD"}/>
+                <Trans i18nKey={"DOWNLOAD"} />
               </Dropdown.Item>
               <Dropdown.Item as="button" variant="warning" onClick={() => restoreBackup(data.name)}>
-              <Trans i18nKey={"RESTORE"}/>
+                <Trans i18nKey={"RESTORE"} />
               </Dropdown.Item>
               <Dropdown.Divider></Dropdown.Divider>
               <Dropdown.Item as="button" variant="danger" onClick={() => deleteBackup(data.name)}>
-              <Trans i18nKey={"DELETE"}/>
+                <Trans i18nKey={"DELETE"} />
               </Dropdown.Item>
             </DropdownButton>
           </div>
@@ -222,7 +222,7 @@ export default function BackupFiles() {
         <Trans i18nKey={"SETTINGS_PAGE.BACKUPS"} />
       </h1>
       {showAlert && showAlert.visible && (
-        <Alert variant={showAlert.type} onClose={handleCloseAlert} dismissible>
+        <Alert variant={showAlert.type} bg="dark" data-bs-theme="dark" onClose={handleCloseAlert} dismissible>
           <Alert.Heading>{showAlert.title}</Alert.Heading>
           <p>{showAlert.message}</p>
         </Alert>
@@ -233,10 +233,14 @@ export default function BackupFiles() {
           <TableHead>
             <TableRow>
               <TableCell>
-                <Trans i18nKey={"FILE_NAME"}/>
+                <Trans i18nKey={"FILE_NAME"} />
               </TableCell>
-              <TableCell><Trans i18nKey={"DATE"}/></TableCell>
-              <TableCell><Trans i18nKey={"SETTINGS_PAGE.SIZE"}/></TableCell>
+              <TableCell>
+                <Trans i18nKey={"DATE"} />
+              </TableCell>
+              <TableCell>
+                <Trans i18nKey={"SETTINGS_PAGE.SIZE"} />
+              </TableCell>
               <TableCell></TableCell>
             </TableRow>
           </TableHead>
@@ -249,7 +253,7 @@ export default function BackupFiles() {
             {files.length === 0 ? (
               <tr>
                 <td colSpan="5" style={{ textAlign: "center", fontStyle: "italic", color: "grey" }} className="py-2">
-                <Trans i18nKey={"ERROR_MESSAGES.NO_BACKUPS"}/>
+                  <Trans i18nKey={"ERROR_MESSAGES.NO_BACKUPS"} />
                 </td>
               </tr>
             ) : (
@@ -275,11 +279,11 @@ export default function BackupFiles() {
       <div className="d-flex justify-content-end my-2">
         <ButtonGroup className="pagination-buttons">
           <Button className="page-btn" onClick={() => setPage(0)} disabled={page === 0}>
-          <Trans i18nKey={"TABLE_NAV_BUTTONS.FIRST"}/>
+            <Trans i18nKey={"TABLE_NAV_BUTTONS.FIRST"} />
           </Button>
 
           <Button className="page-btn" onClick={handlePreviousPageClick} disabled={page === 0}>
-          <Trans i18nKey={"TABLE_NAV_BUTTONS.PREVIOUS"}/>
+            <Trans i18nKey={"TABLE_NAV_BUTTONS.PREVIOUS"} />
           </Button>
 
           <div className="page-number d-flex align-items-center justify-content-center">{`${page * rowsPerPage + 1}-${Math.min(
@@ -288,7 +292,7 @@ export default function BackupFiles() {
           )} of ${files.length}`}</div>
 
           <Button className="page-btn" onClick={handleNextPageClick} disabled={page >= Math.ceil(files.length / rowsPerPage) - 1}>
-          <Trans i18nKey={"TABLE_NAV_BUTTONS.NEXT"}/>
+            <Trans i18nKey={"TABLE_NAV_BUTTONS.NEXT"} />
           </Button>
 
           <Button
@@ -296,7 +300,7 @@ export default function BackupFiles() {
             onClick={() => setPage(Math.ceil(files.length / rowsPerPage) - 1)}
             disabled={page >= Math.ceil(files.length / rowsPerPage) - 1}
           >
-            <Trans i18nKey={"TABLE_NAV_BUTTONS.LAST"}/>
+            <Trans i18nKey={"TABLE_NAV_BUTTONS.LAST"} />
           </Button>
         </ButtonGroup>
       </div>

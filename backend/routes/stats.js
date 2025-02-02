@@ -236,7 +236,9 @@ router.post("/getGlobalLibraryStats", async (req, res) => {
 
 router.get("/getLibraryCardStats", async (req, res) => {
   try {
-    const { rows } = await db.query("select * from js_library_stats_overview");
+    const { rows } = await db.query(
+      `select *, now() - js_library_stats_overview."ActivityDateInserted" AS "LastActivity" from js_library_stats_overview`
+    );
     res.send(rows);
   } catch (error) {
     res.status(503);
@@ -252,7 +254,10 @@ router.post("/getLibraryCardStats", async (req, res) => {
       return res.send("Invalid Library Id");
     }
 
-    const { rows } = await db.query(`select * from js_library_stats_overview where "Id"=$1`, [libraryid]);
+    const { rows } = await db.query(
+      `select *, now() - js_library_stats_overview."ActivityDateInserted" AS "LastActivity" from js_library_stats_overview where "Id"=$1`,
+      [libraryid]
+    );
     res.send(rows[0]);
   } catch (error) {
     console.log(error);

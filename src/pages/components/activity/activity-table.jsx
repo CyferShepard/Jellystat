@@ -14,7 +14,7 @@ import StreamInfo from "./stream_info";
 import "../../css/activity/activity-table.css";
 import i18next from "i18next";
 import IpInfoModal from "../ip-info";
-// import Loading from "../general/loading";
+import BusyLoader from "../general/busyLoader.jsx";
 import { MRT_TablePagination, MaterialReactTable, useMaterialReactTable } from "material-react-table";
 import { Box, ThemeProvider, Typography, createTheme } from "@mui/material";
 
@@ -34,7 +34,9 @@ function formatTotalWatchTime(seconds) {
   }
 
   if (minutes > 0) {
-    timeString += `${minutes} ${minutes === 1 ? i18next.t("UNITS.MINUTE").toLowerCase() : i18next.t("UNITS.MINUTES").toLowerCase()} `;
+    timeString += `${minutes} ${
+      minutes === 1 ? i18next.t("UNITS.MINUTE").toLowerCase() : i18next.t("UNITS.MINUTES").toLowerCase()
+    } `;
   }
 
   if (remainingSeconds > 0) {
@@ -58,17 +60,31 @@ const token = localStorage.getItem("token");
 export default function ActivityTable(props) {
   const twelve_hr = JSON.parse(localStorage.getItem("12hr"));
   const [data, setData] = React.useState(props.data ?? []);
-  const uniqueUserNames = [...new Set(data.map((item) => item.UserName))];
-  const uniqueClients = [...new Set(data.map((item) => item.Client))];
+  const pages = props.pageCount || 1;
+  const isBusy = props.isBusy;
 
   const [rowSelection, setRowSelection] = React.useState({});
   const [pagination, setPagination] = React.useState({
+    pageSize: 10,
     pageIndex: 0,
-    pageSize: 10, //customize the default page size
   });
+  const [sorting, setSorting] = React.useState([{ id: "Date", desc: true }]);
+
+  const [columnFilters, setColumnFilters] = React.useState([]);
 
   const [modalState, setModalState] = React.useState(false);
   const [modalData, setModalData] = React.useState();
+
+  const handlePageChange = (updater) => {
+    setPagination((old) => {
+      const newPaginationState = typeof updater === "function" ? updater(old) : updater;
+      const newPage = newPaginationState.pageIndex; // MaterialReactTable uses 0-based index
+      if (props.onPageChange) {
+        props.onPageChange(newPage + 1);
+      }
+      return newPaginationState;
+    });
+  };
 
   //IP MODAL
 
@@ -136,8 +152,6 @@ export default function ActivityTable(props) {
     {
       accessorKey: "UserName",
       header: i18next.t("USER"),
-      filterVariant: "select",
-      filterSelectOptions: uniqueUserNames,
       Cell: ({ row }) => {
         row = row.original;
         return (
@@ -174,6 +188,7 @@ export default function ActivityTable(props) {
             ? row.NowPlayingItemName
             : row.SeriesName + " : S" + row.SeasonNumber + "E" + row.EpisodeNumber + " - " + row.NowPlayingItemName
         }`,
+      field: "NowPlayingItemName",
       header: i18next.t("TITLE"),
       minSize: 300,
       Cell: ({ row }) => {
@@ -190,8 +205,6 @@ export default function ActivityTable(props) {
     {
       accessorKey: "Client",
       header: i18next.t("ACTIVITY_TABLE.CLIENT"),
-      filterVariant: "select",
-      filterSelectOptions: uniqueClients,
       Cell: ({ row }) => {
         row = row.original;
         return (
@@ -207,6 +220,7 @@ export default function ActivityTable(props) {
     },
     {
       accessorFn: (row) => new Date(row.ActivityDateInserted),
+      field: "ActivityDateInserted",
       header: i18next.t("DATE"),
       size: 110,
       filterVariant: "date-range",
@@ -228,18 +242,64 @@ export default function ActivityTable(props) {
       accessorKey: "PlaybackDuration",
       header: i18next.t("ACTIVITY_TABLE.TOTAL_PLAYBACK"),
       minSize: 200,
-      filterFn: (row, id, filterValue) => formatTotalWatchTime(row.getValue(id)).startsWith(filterValue),
-
+      // filterFn: (row, id, filterValue) => formatTotalWatchTime(row.getValue(id)).startsWith(filterValue),
+      filterVariant: "range",
       Cell: ({ cell }) => <span>{formatTotalWatchTime(cell.getValue())}</span>,
     },
     {
       accessorFn: (row) => Number(row.TotalPlays ?? 1),
+      field: "TotalPlays",
       header: i18next.t("TOTAL_PLAYS"),
       filterFn: "betweenInclusive",
 
       Cell: ({ cell }) => <span>{cell.getValue() ?? 1}</span>,
     },
   ];
+
+  const fieldMap = columns.map((column) => {
+    return { accessorKey: column.accessorKey ?? column.field, header: column.header };
+  });
+
+  const handleSortingChange = (updater) => {
+    setSorting((old) => {
+      const newSortingState = typeof updater === "function" ? updater(old) : updater;
+      const column = newSortingState.length > 0 ? newSortingState[0].id : "Date";
+      const desc = newSortingState.length > 0 ? newSortingState[0].desc : true;
+      if (props.onSortChange) {
+        props.onSortChange({ column: fieldMap.find((field) => field.header == column)?.accessorKey ?? column, desc: desc });
+      }
+      return newSortingState;
+    });
+  };
+
+  const handleFilteringChange = (updater) => {
+    setColumnFilters((old) => {
+      const newFilterState = typeof updater === "function" ? updater(old) : updater;
+
+      const modifiedFilterState = newFilterState.map((filter) => ({ ...filter }));
+
+      modifiedFilterState.map((filter) => {
+        filter.field = fieldMap.find((field) => field.header == filter.id)?.accessorKey ?? filter.id;
+        delete filter.id;
+        if (Array.isArray(filter.value)) {
+          filter.min = filter.value[0];
+          filter.max = filter.value[1];
+          delete filter.value;
+        } else {
+          const val = filter.value;
+          delete filter.value;
+          filter.value = val;
+        }
+
+        return filter;
+      });
+
+      if (props.onFilterChange) {
+        props.onFilterChange(modifiedFilterState);
+      }
+      return newFilterState;
+    });
+  };
 
   useEffect(() => {
     setData(props.data);
@@ -265,11 +325,21 @@ export default function ActivityTable(props) {
     enableExpandAll: false,
     enableExpanding: true,
     enableDensityToggle: false,
+    enableFilters: true,
+    manualFiltering: true,
+    onSortingChange: handleSortingChange,
+    onColumnFiltersChange: handleFilteringChange,
     enableTopToolbar: Object.keys(rowSelection).length > 0,
+    manualPagination: true,
+    manualSorting: true,
+    autoResetPageIndex: false,
     initialState: {
       expanded: false,
       showGlobalFilter: true,
-      pagination: { pageSize: 10, pageIndex: 0 },
+      pagination: {
+        pageSize: 10,
+        pageIndex: 0,
+      },
       sorting: [
         {
           id: "Date",
@@ -277,6 +347,8 @@ export default function ActivityTable(props) {
         },
       ],
     },
+    pageCount: pages,
+    rowCount: pagination.pageSize, // fix for bug causing pagination index to reset when row count changes
     showAlertBanner: false,
     enableHiding: false,
     enableFullScreenToggle: false,
@@ -333,7 +405,7 @@ export default function ActivityTable(props) {
         },
       },
     },
-    state: { rowSelection, pagination },
+    state: { rowSelection, pagination, sorting, columnFilters },
     filterFromLeafRows: true,
     getSubRows: (row) => {
       if (Array.isArray(row.results) && row.results.length == 1) {
@@ -342,8 +414,7 @@ export default function ActivityTable(props) {
 
       return row.results;
     },
-    paginateExpandedRows: false,
-    onPaginationChange: setPagination,
+    onPaginationChange: handlePageChange,
     getRowId: (row) => row.Id,
     muiExpandButtonProps: ({ row }) => ({
       children: row.getIsExpanded() ? <IndeterminateCircleFillIcon /> : <AddCircleFillIcon />,
@@ -417,6 +488,8 @@ export default function ActivityTable(props) {
 
   return (
     <LocalizationProvider dateAdapter={AdapterDayjs}>
+      {isBusy && <BusyLoader />}
+
       <IpInfoModal show={ipModalVisible} onHide={() => setIPModalVisible(false)} ipAddress={ipAddressLookup} />
       <Modal
         show={confirmDeleteShow}

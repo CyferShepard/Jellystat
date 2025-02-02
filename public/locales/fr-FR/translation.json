@@ -17,7 +17,9 @@
     "LIBRARY_OVERVIEW": "Vue d'ensemble des médiathèques"
   },
   "SESSIONS": {
-    "NO_SESSIONS": "Aucune lecture en cours n'a été trouvée"
+    "NO_SESSIONS": "Aucune lecture en cours n'a été trouvée",
+    "DIRECT_PLAY": "",
+    "TRANSCODE": ""
   },
   "STAT_CARDS": {
     "MOST_VIEWED_MOVIES": "FILMS LES PLUS VUS",
@@ -177,7 +179,7 @@
     "SIZE": "Taille",
     "JELLYFIN_URL": "URL du serveur Jellyfin",
     "EMBY_URL": "URL du serveur Emby",
-    "EXTERNAL_URL": "External URL",
+    "EXTERNAL_URL": "URL externe",
     "API_KEY": "Clé API",
     "API_KEYS": "Clés API",
     "KEY_NAME": "Nom de la clé",
@@ -301,5 +303,6 @@
   "LONGITUDE": "Longitude",
   "TIMEZONE": "Fuseau horaire",
   "POSTCODE": "Code postal",
-  "X_ROWS_SELECTED": "{ROWS} Ligne(s) sélectionnée(s)"
+  "X_ROWS_SELECTED": "{ROWS} Ligne(s) sélectionnée(s)",
+  "SUBTITLES": ""
 }

@@ -11,4 +11,8 @@ export const languages = [
     id: "zh-CN",
     description: "简体中文",
   },
+  {
+    id: "it-IT",
+    description: "Italiano",
+  },
 ];

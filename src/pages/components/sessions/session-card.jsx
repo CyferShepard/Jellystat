@@ -43,20 +43,6 @@ function getETAFromTicks(ticks) {
   return eta.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
 }
 
-function convertBitrate(bitrate) {
-  if (!bitrate) {
-    return "N/A";
-  }
-  const kbps = (bitrate / 1000).toFixed(1);
-  const mbps = (bitrate / 1000000).toFixed(1);
-
-  if (kbps >= 1000) {
-    return mbps + " Mbps";
-  } else {
-    return kbps + " Kbps";
-  }
-}
-
 function SessionCard(props) {
   const cardStyle = {
     backgroundImage: `url(proxy/Items/Images/Backdrop?id=${
@@ -136,30 +122,22 @@ function SessionCard(props) {
                       </Col>
                     </Row>
                     <Row className="d-flex flex-column flex-md-row">
+                      {props.data.session.NowPlayingItem.VideoStream !== "" &&
+                        <Col className="col-auto ellipse">
+                            <span>{props.data.session.NowPlayingItem.VideoStream}</span>
+                        </Col>
+                      }
                       <Col className="col-auto ellipse">
-                        {props.data.session.PlayState.PlayMethod +
-                          (props.data.session.NowPlayingItem.MediaStreams
-                            ? " ( " +
-                              props.data.session.NowPlayingItem.MediaStreams.find(
-                                (stream) => stream.Type === "Video"
-                              )?.Codec.toUpperCase() +
-                              (props.data.session.TranscodingInfo
-                                ? " - " + props.data.session.TranscodingInfo.VideoCodec.toUpperCase()
-                                : "") +
-                              " - " +
-                              convertBitrate(
-                                props.data.session.TranscodingInfo
-                                  ? props.data.session.TranscodingInfo.Bitrate
-                                  : props.data.session.NowPlayingItem.MediaStreams.find((stream) => stream.Type === "Video")
-                                      ?.BitRate
-                              ) +
-                              " )"
-                            : "")}
+                        {props.data.session.NowPlayingItem.AudioStream !== "" &&
+                          <span>{props.data.session.NowPlayingItem.AudioStream}</span>
+                        }
                       </Col>
                       <Col className="col-auto ellipse">
-                        <Tooltip title={props.data.session.NowPlayingItem.SubtitleStream}>
-                          <span>{props.data.session.NowPlayingItem.SubtitleStream}</span>
-                        </Tooltip>
+                        {props.data.session.NowPlayingItem.SubtitleStream !== "" &&
+                          <Tooltip title={props.data.session.NowPlayingItem.SubtitleStream}>
+                            <span>{props.data.session.NowPlayingItem.SubtitleStream}</span>
+                          </Tooltip>
+                        }
                       </Col>
                     </Row>
                     <Row>
@@ -213,7 +191,14 @@ function SessionCard(props) {
                         </Link>
                       </Card.Text>
                     </Row>
-                  ) : (
+                  ) : (props.data.session.NowPlayingItem.Type === "Audio" && props.data.session.NowPlayingItem.Artists.length > 0) ? (
+                    <Col className="col-auto p-0">
+                      <Card.Text>
+                        {props.data.session.NowPlayingItem.Artists[0]}
+                      </Card.Text>
+                    </Col>
+                  ) :
+                  (
                     <></>
                   )}
                   <Row className="d-flex flex-row justify-content-between p-0 m-0">

@@ -13,13 +13,33 @@ import Config from "../../../lib/config.jsx";
 function UserActivity(props) {
   const [data, setData] = useState();
   const token = localStorage.getItem("token");
-  const [itemCount, setItemCount] = useState(10);
+  const [itemCount, setItemCount] = useState(parseInt(localStorage.getItem("PREF_ACTIVITY_ItemCount") ?? "10"));
   const [searchQuery, setSearchQuery] = useState("");
+  const [debouncedSearchQuery, setDebouncedSearchQuery] = useState(searchQuery);
   const [streamTypeFilter, setStreamTypeFilter] = useState("All");
   const [libraryFilters, setLibraryFilters] = useState([]);
   const [libraries, setLibraries] = useState([]);
   const [showLibraryFilters, setShowLibraryFilters] = useState(false);
   const [config, setConfig] = useState();
+  const [currentPage, setCurrentPage] = useState(1);
+  const [sorting, setSorting] = useState({ column: "ActivityDateInserted", desc: true });
+  const [filterParams, setFilterParams] = useState([]);
+  const [isBusy, setIsBusy] = useState(false);
+
+  function setItemLimit(limit) {
+    setItemCount(parseInt(limit));
+    localStorage.setItem("PREF_ACTIVITY_ItemCount", limit);
+  }
+
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      setDebouncedSearchQuery(searchQuery);
+    }, 300); // Adjust the delay as needed
+
+    return () => {
+      clearTimeout(handler);
+    };
+  }, [searchQuery]);
 
   useEffect(() => {
     const fetchConfig = async () => {
@@ -51,9 +71,22 @@ function UserActivity(props) {
     }
   };
 
+  const handlePageChange = (newPage) => {
+    setCurrentPage(newPage);
+  };
+
+  const onSortChange = (sort) => {
+    setSorting({ column: sort.column, desc: sort.desc });
+  };
+
+  const onFilterChange = (filter) => {
+    setFilterParams(filter);
+  };
+
   useEffect(() => {
     const fetchHistory = async () => {
       try {
+        setIsBusy(true);
         const itemData = await axios.post(
           `/api/getUserHistory`,
           {
@@ -64,9 +97,18 @@ function UserActivity(props) {
               Authorization: `Bearer ${token}`,
               "Content-Type": "application/json",
             },
+            params: {
+              size: itemCount,
+              page: currentPage,
+              search: debouncedSearchQuery,
+              sort: sorting.column,
+              desc: sorting.desc,
+              filters: filterParams != undefined ? JSON.stringify(filterParams) : null,
+            },
           }
         );
         setData(itemData.data);
+        setIsBusy(false);
       } catch (error) {
         console.log(error);
       }
@@ -97,26 +139,37 @@ function UserActivity(props) {
         });
     };
 
-    fetchHistory();
+    if (
+      !data ||
+      (data.current_page && data.current_page !== currentPage) ||
+      (data.size && data.size !== itemCount) ||
+      (data?.search ?? "") !== debouncedSearchQuery.trim() ||
+      (data?.sort ?? "") !== sorting.column ||
+      (data?.desc ?? true) !== sorting.desc ||
+      JSON.stringify(data?.filters ?? []) !== JSON.stringify(filterParams ?? [])
+    ) {
+      fetchHistory();
+    }
+
     fetchLibraries();
 
     const intervalId = setInterval(fetchHistory, 60000 * 5);
     return () => clearInterval(intervalId);
-  }, [props.UserId, token]);
+  }, [props.UserId, token, itemCount, currentPage, debouncedSearchQuery, sorting, filterParams]);
 
-  if (!data) {
+  if (!data || !data.results) {
     return <></>;
   }
 
-  let filteredData = data;
+  let filteredData = data.results;
 
-  if (searchQuery) {
-    filteredData = data.filter((item) =>
-      (!item.SeriesName ? item.NowPlayingItemName : item.SeriesName + " - " + item.NowPlayingItemName)
-        .toLowerCase()
-        .includes(searchQuery.toLowerCase())
-    );
-  }
+  // if (searchQuery) {
+  //   filteredData = data.results.filter((item) =>
+  //     (!item.SeriesName ? item.NowPlayingItemName : item.SeriesName + " - " + item.NowPlayingItemName)
+  //       .toLowerCase()
+  //       .includes(searchQuery.toLowerCase())
+  //   );
+  // }
 
   filteredData = filteredData.filter(
     (item) =>
@@ -182,7 +235,7 @@ function UserActivity(props) {
             </div>
             <FormSelect
               onChange={(event) => {
-                setItemCount(event.target.value);
+                setItemLimit(event.target.value);
               }}
               value={itemCount}
               className="my-md-3 w-md-75 rounded-0 rounded-end"
@@ -204,7 +257,15 @@ function UserActivity(props) {
       </div>
 
       <div className="Activity">
-        <ActivityTable data={filteredData} itemCount={itemCount} />
+        <ActivityTable
+          data={filteredData}
+          itemCount={itemCount}
+          onPageChange={handlePageChange}
+          onSortChange={onSortChange}
+          onFilterChange={onFilterChange}
+          pageCount={data.pages}
+          isBusy={isBusy}
+        />
       </div>
     </div>
   );

@@ -2,6 +2,8 @@
 const express = require("express");
 
 const db = require("../db");
+const dbHelper = require("../classes/db-helper");
+
 const pgp = require("pg-promise")();
 const { randomUUID } = require("crypto");
 
@@ -15,38 +17,48 @@ const { tables } = require("../global/backup_tables");
 
 const router = express.Router();
 
+//consts
+const groupedSortMap = [
+  { field: "UserName", column: "a.UserName" },
+  { field: "RemoteEndPoint", column: "a.RemoteEndPoint" },
+  { field: "NowPlayingItemName", column: "FullName" },
+  { field: "Client", column: "a.Client" },
+  { field: "DeviceName", column: "a.DeviceName" },
+  { field: "ActivityDateInserted", column: "a.ActivityDateInserted" },
+  { field: "PlaybackDuration", column: `COALESCE(ar."TotalDuration", a."PlaybackDuration")` },
+  { field: "TotalPlays", column: `COALESCE("TotalPlays",1)` },
+];
+
+const unGroupedSortMap = [
+  { field: "UserName", column: "a.UserName" },
+  { field: "RemoteEndPoint", column: "a.RemoteEndPoint" },
+  { field: "NowPlayingItemName", column: "FullName" },
+  { field: "Client", column: "a.Client" },
+  { field: "DeviceName", column: "a.DeviceName" },
+  { field: "ActivityDateInserted", column: "a.ActivityDateInserted" },
+  { field: "PlaybackDuration", column: "a.PlaybackDuration" },
+];
+
+const filterFields = [
+  { field: "UserName", column: `LOWER(a."UserName")` },
+  { field: "RemoteEndPoint", column: `LOWER(a."RemoteEndPoint")` },
+  {
+    field: "NowPlayingItemName",
+    column: `LOWER(
+          CASE 
+            WHEN a."SeriesName" is null THEN a."NowPlayingItemName"
+            ELSE CONCAT(a."SeriesName" , ' : S' , a."SeasonNumber" , 'E' , a."EpisodeNumber" , ' - ' , a."NowPlayingItemName")
+          END 
+          )`,
+  },
+  { field: "Client", column: `LOWER(a."Client")` },
+  { field: "DeviceName", column: `LOWER(a."DeviceName")` },
+  { field: "ActivityDateInserted", column: "a.ActivityDateInserted", isColumn: true },
+  { field: "PlaybackDuration", column: `a.PlaybackDuration`, isColumn: true, applyToCTE: true },
+  { field: "TotalPlays", column: `COALESCE("TotalPlays",1)` },
+];
+
 //Functions
-function groupActivity(rows) {
-  const groupedResults = {};
-  rows.forEach((row) => {
-    const key = row.NowPlayingItemId + row.EpisodeId + row.UserId;
-    if (groupedResults[key]) {
-      if (row.ActivityDateInserted > groupedResults[key].ActivityDateInserted) {
-        groupedResults[key] = {
-          ...row,
-          results: groupedResults[key].results,
-        };
-      }
-      groupedResults[key].results.push(row);
-    } else {
-      groupedResults[key] = {
-        ...row,
-        results: [],
-      };
-      groupedResults[key].results.push(row);
-    }
-  });
-
-  // Update GroupedResults with playbackDurationSum
-  Object.values(groupedResults).forEach((row) => {
-    if (row.results && row.results.length > 0) {
-      row.PlaybackDuration = row.results.reduce((acc, item) => acc + parseInt(item.PlaybackDuration), 0);
-      row.TotalPlays = row.results.length;
-    }
-  });
-  return groupedResults;
-}
-
 function groupRecentlyAdded(rows) {
   const groupedResults = {};
   rows.forEach((row) => {
@@ -122,11 +134,102 @@ async function purgeLibraryItems(id, withActivity, purgeAll = false) {
       text: `DELETE FROM jf_playback_activity WHERE${
         episodeIds.length > 0 ? ` "EpisodeId" IN (${pgp.as.csv(episodeIds)})  OR` : ""
       }${seasonIds.length > 0 ? ` "SeasonId" IN (${pgp.as.csv(seasonIds)}) OR` : ""} "NowPlayingItemId"='${id}'`,
+      refreshViews: true,
     };
     await db.query(deleteQuery);
   }
 }
 
+function buildFilterList(query, filtersArray) {
+  if (filtersArray.length > 0) {
+    query.where = query.where || [];
+    filtersArray.forEach((filter) => {
+      const findField = filterFields.find((item) => item.field === filter.field);
+      const column = findField?.column || "a.ActivityDateInserted";
+      const isColumn = findField?.isColumn || false;
+      const applyToCTE = findField?.applyToCTE || false;
+      if (filter.min) {
+        query.where.push({
+          column: column,
+          operator: ">=",
+          value: `$${query.values.length + 1}`,
+        });
+
+        query.values.push(filter.min);
+
+        if (applyToCTE) {
+          if (query.cte) {
+            if (!query.cte.where) {
+              query.cte.where = [];
+            }
+            query.cte.where.push({
+              column: column,
+              operator: ">=",
+              value: `$${query.values.length + 1}`,
+            });
+
+            query.values.push(filter.min);
+          }
+        }
+      }
+
+      if (filter.max) {
+        query.where.push({
+          column: column,
+          operator: "<=",
+          value: `$${query.values.length + 1}`,
+        });
+
+        query.values.push(filter.max);
+
+        if (applyToCTE) {
+          if (query.cte) {
+            if (!query.cte.where) {
+              query.cte.where = [];
+            }
+            query.cte.where.push({
+              column: column,
+              operator: "<=",
+              value: `$${query.values.length + 1}`,
+            });
+
+            query.values.push(filter.max);
+          }
+        }
+      }
+
+      if (filter.value) {
+        const whereClause = {
+          operator: "LIKE",
+          value: `$${query.values.length + 1}`,
+        };
+
+        query.values.push(`%${filter.value.toLowerCase()}%`);
+
+        if (isColumn) {
+          whereClause.column = column;
+        } else {
+          whereClause.field = column;
+        }
+        query.where.push(whereClause);
+
+        if (applyToCTE) {
+          if (query.cte) {
+            if (!query.cte.where) {
+              query.cte.where = [];
+            }
+            whereClause.value = `$${query.values.length + 1}`;
+            query.cte.where.push(whereClause);
+
+            query.values.push(`%${filter.value.toLowerCase()}%`);
+          }
+        }
+      }
+    });
+  }
+}
+
+//////////////////////////////
 router.get("/getconfig", async (req, res) => {
   try {
     const config = await new configClass().getConfig();
@@ -952,6 +1055,7 @@ router.delete("/item/purge", async (req, res) => {
           }${
             seasons.length > 0 ? ` "SeasonId" IN (${pgp.as.csv(seasons.map((item) => item.SeasonId))}) OR` : ""
           } "NowPlayingItemId"='${id}'`,
+          refreshViews: true,
         };
         await db.query(deleteQuery);
       }
@@ -1085,20 +1189,150 @@ router.post("/setExcludedBackupTable", async (req, res) => {
 
 //DB Queries - History
 router.get("/getHistory", async (req, res) => {
+  const { size = 50, page = 1, search, sort = "ActivityDateInserted", desc = true, filters } = req.query;
+
+  let filtersArray = [];
+  if (filters) {
+    try {
+      filtersArray = JSON.parse(filters);
+    } catch (error) {
+      return res.status(400).json({
+        error: "Invalid filters parameter",
+        example: [
+          {
+            field: "ActivityDateInserted",
+            min: "2024-12-31T22:00:00.000Z",
+            max: "2024-12-31T22:00:00.000Z",
+          },
+          {
+            field: "PlaybackDuration",
+            min: "1",
+            max: "10",
+          },
+          {
+            field: "TotalPlays",
+            min: "1",
+            max: "10",
+          },
+          {
+            field: "DeviceName",
+            value: "test",
+          },
+          {
+            field: "Client",
+            value: "test",
+          },
+          {
+            field: "NowPlayingItemName",
+            value: "test",
+          },
+          {
+            field: "RemoteEndPoint",
+            value: "127.0.0.1",
+          },
+          {
+            field: "UserName",
+            value: "test",
+          },
+        ],
+      });
+    }
+  }
+
+  const sortField = groupedSortMap.find((item) => item.field === sort)?.column || "a.ActivityDateInserted";
+
+  const values = [];
+
   try {
-    const { rows } = await db.query(`
-    SELECT a.*, e."IndexNumber" "EpisodeNumber",e."ParentIndexNumber" "SeasonNumber" , i."ParentId"
-    FROM jf_playback_activity a
-    left join jf_library_episodes e
-    on a."EpisodeId"=e."EpisodeId"
-    and a."SeasonId"=e."SeasonId"
-    left join jf_library_items i
-    on i."Id"=a."NowPlayingItemId" or e."SeriesId"=i."Id"
-     order by a."ActivityDateInserted" desc`);
+    const cte = {
+      cteAlias: "activity_results",
+      select: [
+        "a.NowPlayingItemId",
+        `COALESCE(a."EpisodeId", '1') as "EpisodeId"`,
+        "a.UserId",
+        `json_agg(row_to_json(a) ORDER BY "ActivityDateInserted" DESC) as results`,
+        `COUNT(a.*) as "TotalPlays"`,
+        `SUM(a."PlaybackDuration") as "TotalDuration"`,
+      ],
+      table: "jf_playback_activity_with_metadata",
+      alias: "a",
+      group_by: ["a.NowPlayingItemId", `COALESCE(a."EpisodeId", '1')`, "a.UserId"],
+    };
 
-    const groupedResults = groupActivity(rows);
+    const query = {
+      cte: cte,
+      select: [
+        "a.*",
+        "a.EpisodeNumber",
+        "a.SeasonNumber",
+        "a.ParentId",
+        "ar.results",
+        "ar.TotalPlays",
+        "ar.TotalDuration",
+        `
+        CASE 
+          WHEN a."SeriesName" is null THEN a."NowPlayingItemName"
+          ELSE CONCAT(a."SeriesName" , ' : S' , a."SeasonNumber" , 'E' , a."EpisodeNumber" , ' - ' , a."NowPlayingItemName")
+        END AS "FullName"
+        `,
+      ],
+      table: "js_latest_playback_activity",
+      alias: "a",
+      joins: [
+        {
+          type: "left",
+          table: "activity_results",
+          alias: "ar",
+          conditions: [
+            { first: "a.NowPlayingItemId", operator: "=", second: "ar.NowPlayingItemId" },
+            { first: "a.EpisodeId", operator: "=", second: "ar.EpisodeId", type: "and" },
+            { first: "a.UserId", operator: "=", second: "ar.UserId", type: "and" },
+          ],
+        },
+      ],
 
-    res.send(Object.values(groupedResults));
+      order_by: sortField,
+      sort_order: desc ? "desc" : "asc",
+      pageNumber: page,
+      pageSize: size,
+    };
+
+    if (search && search.length > 0) {
+      query.where = [
+        {
+          field: `LOWER(
+          CASE 
+            WHEN a."SeriesName" is null THEN a."NowPlayingItemName"
+            ELSE CONCAT(a."SeriesName" , ' : S' , a."SeasonNumber" , 'E' , a."EpisodeNumber" , ' - ' , a."NowPlayingItemName")
+          END 
+          )`,
+          operator: "LIKE",
+          value: `$${values.length + 1}`,
+        },
+      ];
+
+      values.push(`%${search.toLowerCase()}%`);
+    }
+
+    query.values = values;
+
+    buildFilterList(query, filtersArray);
+    const result = await dbHelper.query(query);
+
+    result.results = result.results.map((item) => ({
+      ...item,
+      PlaybackDuration: item.TotalDuration ? item.TotalDuration : item.PlaybackDuration,
+    }));
+    const response = { current_page: page, pages: result.pages, size: size, sort: sort, desc: desc, results: result.results };
+    if (search && search.length > 0) {
+      response.search = search;
+    }
+
+    if (filtersArray.length > 0) {
+      response.filters = filtersArray;
+    }
+
+    res.send(response);
   } catch (error) {
     console.log(error);
   }
@@ -1106,6 +1340,55 @@ router.get("/getHistory", async (req, res) => {
 
 router.post("/getLibraryHistory", async (req, res) => {
   try {
+    const { size = 50, page = 1, search, sort = "ActivityDateInserted", desc = true, filters } = req.query;
+
+    let filtersArray = [];
+    if (filters) {
+      try {
+        filtersArray = JSON.parse(filters);
+      } catch (error) {
+        return res.status(400).json({
+          error: "Invalid filters parameter",
+          example: [
+            {
+              field: "ActivityDateInserted",
+              min: "2024-12-31T22:00:00.000Z",
+              max: "2024-12-31T22:00:00.000Z",
+            },
+            {
+              field: "PlaybackDuration",
+              min: "1",
+              max: "10",
+            },
+            {
+              field: "TotalPlays",
+              min: "1",
+              max: "10",
+            },
+            {
+              field: "DeviceName",
+              value: "test",
+            },
+            {
+              field: "Client",
+              value: "test",
+            },
+            {
+              field: "NowPlayingItemName",
+              value: "test",
+            },
+            {
+              field: "RemoteEndPoint",
+              value: "127.0.0.1",
+            },
+            {
+              field: "UserName",
+              value: "test",
+            },
+          ],
+        });
+      }
+    }
     const { libraryid } = req.body;
 
     if (libraryid === undefined) {
@@ -1114,20 +1397,109 @@ router.post("/getLibraryHistory", async (req, res) => {
       return;
     }
 
-    const { rows } = await db.query(
-      `select a.* , e."IndexNumber" "EpisodeNumber",e."ParentIndexNumber" "SeasonNumber" 
-      from jf_playback_activity a 
-      join jf_library_items i 
-      on i."Id"=a."NowPlayingItemId" 
-      left join jf_library_episodes e
-      on a."EpisodeId"=e."EpisodeId"
-      and a."SeasonId"=e."SeasonId"  
-      where i."ParentId"=$1 
-      order by a."ActivityDateInserted" desc`,
-      [libraryid]
-    );
-    const groupedResults = groupActivity(rows);
-    res.send(Object.values(groupedResults));
+    const sortField = groupedSortMap.find((item) => item.field === sort)?.column || "a.ActivityDateInserted";
+    const values = [];
+
+    const cte = {
+      cteAlias: "activity_results",
+      select: [
+        "a.NowPlayingItemId",
+        `COALESCE(a."EpisodeId", '1') as "EpisodeId"`,
+        "a.UserId",
+        `json_agg(row_to_json(a) ORDER BY "ActivityDateInserted" DESC) as results`,
+        `COUNT(a.*) as "TotalPlays"`,
+        `SUM(a."PlaybackDuration") as "TotalDuration"`,
+      ],
+      table: "jf_playback_activity_with_metadata",
+      alias: "a",
+      group_by: ["a.NowPlayingItemId", `COALESCE(a."EpisodeId", '1')`, "a.UserId"],
+    };
+
+    const query = {
+      cte: cte,
+      select: [
+        "a.*",
+        "a.EpisodeNumber",
+        "a.SeasonNumber",
+        "a.ParentId",
+        "ar.results",
+        "ar.TotalPlays",
+        "ar.TotalDuration",
+        `
+        CASE 
+          WHEN a."SeriesName" is null THEN a."NowPlayingItemName"
+          ELSE CONCAT(a."SeriesName" , ' : S' , a."SeasonNumber" , 'E' , a."EpisodeNumber" , ' - ' , a."NowPlayingItemName")
+        END AS "FullName"
+        `,
+      ],
+      table: "js_latest_playback_activity",
+      alias: "a",
+      joins: [
+        {
+          type: "inner",
+          table: "jf_library_items",
+          alias: "i",
+          conditions: [
+            { first: "i.Id", operator: "=", second: "a.NowPlayingItemId" },
+            { first: "i.ParentId", operator: "=", value: `$${values.length + 1}` },
+          ],
+        },
+        {
+          type: "left",
+          table: "activity_results",
+          alias: "ar",
+          conditions: [
+            { first: "a.NowPlayingItemId", operator: "=", second: "ar.NowPlayingItemId" },
+            { first: "a.EpisodeId", operator: "=", second: "ar.EpisodeId", type: "and" },
+            { first: "a.UserId", operator: "=", second: "ar.UserId", type: "and" },
+          ],
+        },
+      ],
+
+      order_by: sortField,
+      sort_order: desc ? "desc" : "asc",
+      pageNumber: page,
+      pageSize: size,
+    };
+
+    values.push(libraryid);
+
+    if (search && search.length > 0) {
+      query.where = [
+        {
+          field: `LOWER(
+          CASE 
+            WHEN a."SeriesName" is null THEN a."NowPlayingItemName"
+            ELSE CONCAT(a."SeriesName" , ' : S' , a."SeasonNumber" , 'E' , a."EpisodeNumber" , ' - ' , a."NowPlayingItemName")
+          END 
+          )`,
+          operator: "LIKE",
+          value: `$${values.length + 1}`,
+        },
+      ];
+
+      values.push(`%${search.toLowerCase()}%`);
+    }
+
+    query.values = values;
+
+    buildFilterList(query, filtersArray);
+
+    const result = await dbHelper.query(query);
+
+    result.results = result.results.map((item) => ({
+      ...item,
+      PlaybackDuration: item.TotalDuration ? item.TotalDuration : item.PlaybackDuration,
+    }));
+
+    const response = { current_page: page, pages: result.pages, size: size, sort: sort, desc: desc, results: result.results };
+    if (search && search.length > 0) {
+      response.search = search;
+    }
+    if (filtersArray.length > 0) {
+      response.filters = filtersArray;
+    }
+    res.send(response);
   } catch (error) {
     console.log(error);
     res.status(503);
@@ -1137,6 +1509,7 @@ router.post("/getLibraryHistory", async (req, res) => {
 
 router.post("/getItemHistory", async (req, res) => {
   try {
+    const { size = 50, page = 1, search, sort = "ActivityDateInserted", desc = true, filters } = req.query;
     const { itemid } = req.body;
 
     if (itemid === undefined) {
@@ -1145,23 +1518,119 @@ router.post("/getItemHistory", async (req, res) => {
       return;
     }
 
-    const { rows } = await db.query(
-      `select a.*, e."IndexNumber" "EpisodeNumber",e."ParentIndexNumber" "SeasonNumber" 
-      from jf_playback_activity a
-      left join jf_library_episodes e
-    on a."EpisodeId"=e."EpisodeId"
-    and a."SeasonId"=e."SeasonId"
-      where
-      (a."EpisodeId"=$1 OR a."SeasonId"=$1 OR a."NowPlayingItemId"=$1);`,
-      [itemid]
-    );
+    let filtersArray = [];
+    if (filters) {
+      try {
+        filtersArray = JSON.parse(filters);
+        filtersArray = filtersArray.filter((filter) => filter.field !== "TotalPlays");
+      } catch (error) {
+        return res.status(400).json({
+          error: "Invalid filters parameter",
+          example: [
+            {
+              field: "ActivityDateInserted",
+              min: "2024-12-31T22:00:00.000Z",
+              max: "2024-12-31T22:00:00.000Z",
+            },
+            {
+              field: "PlaybackDuration",
+              min: "1",
+              max: "10",
+            },
+            {
+              field: "TotalPlays",
+              min: "1",
+              max: "10",
+            },
+            {
+              field: "DeviceName",
+              value: "test",
+            },
+            {
+              field: "Client",
+              value: "test",
+            },
+            {
+              field: "NowPlayingItemName",
+              value: "test",
+            },
+            {
+              field: "RemoteEndPoint",
+              value: "127.0.0.1",
+            },
+            {
+              field: "UserName",
+              value: "test",
+            },
+          ],
+        });
+      }
+    }
 
-    const groupedResults = rows.map((item) => ({
-      ...item,
-      results: [],
-    }));
+    const sortField = unGroupedSortMap.find((item) => item.field === sort)?.column || "a.ActivityDateInserted";
+    const values = [];
+    const query = {
+      select: [
+        "a.*",
+        "a.EpisodeNumber",
+        "a.SeasonNumber",
+        "a.ParentId",
+        `
+        CASE 
+          WHEN a."SeriesName" is null THEN a."NowPlayingItemName"
+          ELSE CONCAT(a."SeriesName" , ' : S' , a."SeasonNumber" , 'E' , a."EpisodeNumber" , ' - ' , a."NowPlayingItemName")
+        END AS "FullName"
+        `,
+      ],
+      table: "jf_playback_activity_with_metadata",
+      alias: "a",
+      where: [
+        [
+          { column: "a.EpisodeId", operator: "=", value: `$${values.length + 1}` },
+          { column: "a.SeasonId", operator: "=", value: `$${values.length + 2}`, type: "or" },
+          { column: "a.NowPlayingItemId", operator: "=", value: `$${values.length + 3}`, type: "or" },
+        ],
+      ],
+      order_by: sortField,
+      sort_order: desc ? "desc" : "asc",
+      pageNumber: page,
+      pageSize: size,
+    };
 
-    res.send(groupedResults);
+    values.push(itemid);
+    values.push(itemid);
+    values.push(itemid);
+
+    if (search && search.length > 0) {
+      query.where = [
+        {
+          field: `LOWER(
+          CASE 
+            WHEN a."SeriesName" is null THEN a."NowPlayingItemName"
+            ELSE CONCAT(a."SeriesName" , ' : S' , a."SeasonNumber" , 'E' , a."EpisodeNumber" , ' - ' , a."NowPlayingItemName")
+          END 
+          )`,
+          operator: "LIKE",
+          value: `$${values.length + 1}`,
+        },
+      ];
+      values.push(`%${search.toLowerCase()}%`);
+    }
+
+    query.values = values;
+    buildFilterList(query, filtersArray);
+    const result = await dbHelper.query(query);
+
+    const response = { current_page: page, pages: result.pages, size: size, sort: sort, desc: desc, results: result.results };
+    if (search && search.length > 0) {
+      response.search = search;
+    }
+
+    if (filters) {
+      response.filters = JSON.parse(filters);
+    }
+
+    res.send(response);
   } catch (error) {
     console.log(error);
     res.status(503);
@@ -1171,6 +1640,56 @@ router.post("/getItemHistory", async (req, res) => {
 
 router.post("/getUserHistory", async (req, res) => {
   try {
+    const { size = 50, page = 1, search, sort = "ActivityDateInserted", desc = true, filters } = req.query;
+
+    let filtersArray = [];
+    if (filters) {
+      try {
+        filtersArray = JSON.parse(filters);
+        filtersArray = filtersArray.filter((filter) => filter.field !== "TotalPlays");
+      } catch (error) {
+        return res.status(400).json({
+          error: "Invalid filters parameter",
+          example: [
+            {
+              field: "ActivityDateInserted",
+              min: "2024-12-31T22:00:00.000Z",
+              max: "2024-12-31T22:00:00.000Z",
+            },
+            {
+              field: "PlaybackDuration",
+              min: "1",
+              max: "10",
+            },
+            {
+              field: "TotalPlays",
+              min: "1",
+              max: "10",
+            },
+            {
+              field: "DeviceName",
+              value: "test",
+            },
+            {
+              field: "Client",
+              value: "test",
+            },
+            {
+              field: "NowPlayingItemName",
+              value: "test",
+            },
+            {
+              field: "RemoteEndPoint",
+              value: "127.0.0.1",
+            },
+            {
+              field: "UserName",
+              value: "test",
+            },
+          ],
+        });
+      }
+    }
     const { userid } = req.body;
 
     if (userid === undefined) {
@@ -1179,21 +1698,66 @@ router.post("/getUserHistory", async (req, res) => {
       return;
     }
 
-    const { rows } = await db.query(
-      `select a.*, e."IndexNumber" "EpisodeNumber",e."ParentIndexNumber" "SeasonNumber" , i."ParentId"
-      from jf_playback_activity a
-      left join jf_library_episodes e
-      on a."EpisodeId"=e."EpisodeId"
-      and a."SeasonId"=e."SeasonId"
-      left join jf_library_items i
-    on i."Id"=a."NowPlayingItemId" or e."SeriesId"=i."Id"
-      where a."UserId"=$1;`,
-      [userid]
-    );
+    const sortField = unGroupedSortMap.find((item) => item.field === sort)?.column || "a.ActivityDateInserted";
 
-    const groupedResults = groupActivity(rows);
+    const values = [];
+    const query = {
+      select: [
+        "a.*",
+        "a.EpisodeNumber",
+        "a.SeasonNumber",
+        "a.ParentId",
+        `
+        CASE 
+          WHEN a."SeriesName" is null THEN a."NowPlayingItemName"
+          ELSE CONCAT(a."SeriesName" , ' : S' , a."SeasonNumber" , 'E' , a."EpisodeNumber" , ' - ' , a."NowPlayingItemName")
+        END AS "FullName"
+        `,
+      ],
+      table: "jf_playback_activity_with_metadata",
+      alias: "a",
+      where: [[{ column: "a.UserId", operator: "=", value: `$${values.length + 1}` }]],
+      order_by: sortField,
+      sort_order: desc ? "desc" : "asc",
+      pageNumber: page,
+      pageSize: size,
+    };
 
-    res.send(Object.values(groupedResults));
+    values.push(userid);
+
+    if (search && search.length > 0) {
+      query.where = [
+        {
+          field: `LOWER(
+          CASE 
+            WHEN a."SeriesName" is null THEN a."NowPlayingItemName"
+            ELSE CONCAT(a."SeriesName" , ' : S' , a."SeasonNumber" , 'E' , a."EpisodeNumber" , ' - ' , a."NowPlayingItemName")
+          END 
+          )`,
+          operator: "LIKE",
+          value: `$${values.length + 1}`,
+        },
+      ];
+      values.push(`%${search.toLowerCase()}%`);
+    }
+
+    query.values = values;
+
+    buildFilterList(query, filtersArray);
+
+    const result = await dbHelper.query(query);
+
+    const response = { current_page: page, pages: result.pages, size: size, sort: sort, desc: desc, results: result.results };
+
+    if (search && search.length > 0) {
+      response.search = search;
+    }
+
+    if (filters) {
+      response.filters = JSON.parse(filters);
+    }
+
+    res.send(response);
   } catch (error) {
     console.log(error);
     res.status(503);
@@ -1211,9 +1775,33 @@ router.post("/deletePlaybackActivity", async (req, res) => {
       return;
     }
 
-    await db.query(`DELETE from jf_playback_activity where "Id" = ANY($1)`, [ids]);
-    // const groupedResults = groupActivity(rows);
+    await db.query(`DELETE from jf_playback_activity where "Id" = ANY($1)`, [ids], true);
     res.send(`${ids.length} Records Deleted`);
+  } catch (error) {
+    console.log(error);
+    res.status(503);
+    res.send(error);
+  }
+});
+
+router.post("/getActivityTimeLine", async (req, res) => {
+  try {
+    const { userId, libraries } = req.body;
+
+    if (libraries === undefined || !Array.isArray(libraries)) {
+      res.status(400);
+      res.send("A list of IDs is required. EG: [1,2,3]");
+      return;
+    }
+
+    if (userId === undefined) {
+      res.status(400);
+      res.send("A userId is required.");
+      return;
+    }
+
+    const { rows } = await db.query(`SELECT * FROM fs_get_user_activity($1, $2);`, [userId, libraries]);
+    res.send(rows);
   } catch (error) {
     console.log(error);
     res.status(503);

@@ -12,13 +12,30 @@ function LibraryActivity(props) {
   const token = localStorage.getItem("token");
   const [itemCount, setItemCount] = useState(parseInt(localStorage.getItem("PREF_LIBRARY_ACTIVITY_ItemCount") ?? "10"));
   const [searchQuery, setSearchQuery] = useState("");
+  const [debouncedSearchQuery, setDebouncedSearchQuery] = useState(searchQuery);
   const [streamTypeFilter, setStreamTypeFilter] = useState(
     localStorage.getItem("PREF_LIBRARY_ACTIVITY_StreamTypeFilter") ?? "All"
   );
   const [config, setConfig] = useState();
+  const [currentPage, setCurrentPage] = useState(1);
+  const [sorting, setSorting] = useState({ column: "ActivityDateInserted", desc: true });
+  const [filterParams, setFilterParams] = useState([]);
+  const [isBusy, setIsBusy] = useState(false);
+
+  const handlePageChange = (newPage) => {
+    setCurrentPage(newPage);
+  };
+
+  const onSortChange = (sort) => {
+    setSorting({ column: sort.column, desc: sort.desc });
+  };
+
+  const onFilterChange = (filter) => {
+    setFilterParams(filter);
+  };
 
   function setItemLimit(limit) {
-    setItemCount(limit);
+    setItemCount(parseInt(limit));
     localStorage.setItem("PREF_LIBRARY_ACTIVITY_ItemCount", limit);
   }
 
@@ -26,6 +43,16 @@ function LibraryActivity(props) {
     setStreamTypeFilter(filter);
     localStorage.setItem("PREF_LIBRARY_ACTIVITY_StreamTypeFilter", filter);
   }
+
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      setDebouncedSearchQuery(searchQuery);
+    }, 300); // Adjust the delay as needed
+
+    return () => {
+      clearTimeout(handler);
+    };
+  }, [searchQuery]);
 
   useEffect(() => {
     const fetchConfig = async () => {
@@ -42,7 +69,8 @@ function LibraryActivity(props) {
     }
     const fetchData = async () => {
       try {
-        const libraryrData = await axios.post(
+        setIsBusy(true);
+        const libraryData = await axios.post(
           `/api/getLibraryHistory`,
           {
             libraryid: props.LibraryId,
@@ -52,35 +80,52 @@ function LibraryActivity(props) {
               Authorization: `Bearer ${token}`,
               "Content-Type": "application/json",
             },
+            params: {
+              size: itemCount,
+              page: currentPage,
+              search: debouncedSearchQuery,
+              sort: sorting.column,
+              desc: sorting.desc,
+              filters: filterParams != undefined ? JSON.stringify(filterParams) : null,
+            },
           }
         );
-        setData(libraryrData.data);
+        setData(libraryData.data);
+        setIsBusy(false);
       } catch (error) {
         console.log(error);
       }
     };
 
-    if (!data) {
+    if (
+      !data ||
+      (data.current_page && data.current_page !== currentPage) ||
+      (data.size && data.size !== itemCount) ||
+      (data?.search ?? "") !== debouncedSearchQuery.trim() ||
+      (data?.sort ?? "") !== sorting.column ||
+      (data?.desc ?? true) !== sorting.desc ||
+      JSON.stringify(data?.filters ?? []) !== JSON.stringify(filterParams ?? [])
+    ) {
       fetchData();
     }
 
     const intervalId = setInterval(fetchData, 60000 * 5);
     return () => clearInterval(intervalId);
-  }, [data, props.LibraryId, token]);
+  }, [data, props.LibraryId, token, itemCount, currentPage, debouncedSearchQuery, sorting, filterParams]);
 
-  if (!data) {
+  if (!data || !data.results) {
     return <></>;
   }
 
-  let filteredData = data;
+  let filteredData = data.results;
 
-  if (searchQuery) {
-    filteredData = data.filter((item) =>
-      (!item.SeriesName ? item.NowPlayingItemName : item.SeriesName + " - " + item.NowPlayingItemName)
-        .toLowerCase()
-        .includes(searchQuery.toLowerCase())
-    );
-  }
+  // if (searchQuery) {
+  //   filteredData = data.results.filter((item) =>
+  //     (!item.SeriesName ? item.NowPlayingItemName : item.SeriesName + " - " + item.NowPlayingItemName)
+  //       .toLowerCase()
+  //       .includes(searchQuery.toLowerCase())
+  //   );
+  // }
 
   filteredData = filteredData.filter((item) =>
     streamTypeFilter == "All"
@@ -147,7 +192,15 @@ function LibraryActivity(props) {
       </div>
 
       <div className="Activity">
-        <ActivityTable data={filteredData} itemCount={itemCount} />
+        <ActivityTable
+          data={filteredData}
+          itemCount={itemCount}
+          onPageChange={handlePageChange}
+          onSortChange={onSortChange}
+          onFilterChange={onFilterChange}
+          pageCount={data.pages}
+          isBusy={isBusy}
+        />
       </div>
     </div>
   );

@@ -1,18 +1,19 @@
-const express = require("express");
-const { Pool } = require("pg");
-const fs = require("fs");
-const path = require("path");
-const { randomUUID } = require("crypto");
-const multer = require("multer");
+const express = require('express');
+const { Pool } = require('pg');
+const fs = require('fs');
+const path = require('path');
+const { randomUUID } = require('crypto');
+const multer = require('multer');
 
-const Logging = require("../classes/logging");
-const backup = require("../classes/backup");
-const triggertype = require("../logging/triggertype");
-const taskstate = require("../logging/taskstate");
-const taskName = require("../logging/taskName");
+const Logging = require('../classes/logging');
+const backup = require('../classes/backup');
+const triggertype = require('../logging/triggertype');
+const taskstate = require('../logging/taskstate');
+const taskName = require('../logging/taskName');
+const sanitizeFilename = require('../utils/sanitizer');
 
-const { sendUpdate } = require("../ws");
-const db = require("../db");
+const { sendUpdate } = require('../ws');
+const db = require('../db');
 
 const router = express.Router();
 
@@ -21,14 +22,14 @@ const postgresUser = process.env.POSTGRES_USER;
 const postgresPassword = process.env.POSTGRES_PASSWORD;
 const postgresIp = process.env.POSTGRES_IP;
 const postgresPort = process.env.POSTGRES_PORT;
-const postgresDatabase = process.env.POSTGRES_DB || "jfstat";
-const backupfolder = "backup-data";
+const postgresDatabase = process.env.POSTGRES_DB || 'jfstat';
+const backupfolder = 'backup-data';
 
 // Restore function
 
 function readFile(path) {
   return new Promise((resolve, reject) => {
-    fs.readFile(path, "utf8", (err, data) => {
+    fs.readFile(path, 'utf8', (err, data) => {
       if (err) {
         reject(err);
         return;
@@ -40,8 +41,11 @@ function readFile(path) {
 }
 
 async function restore(file, refLog) {
-  refLog.logData.push({ color: "lawngreen", Message: "Starting Restore" });
-  refLog.logData.push({ color: "yellow", Message: "Restoring from Backup: " + file });
+  refLog.logData.push({ color: 'lawngreen', Message: 'Starting Restore' });
+  refLog.logData.push({
+    color: 'yellow',
+    Message: 'Restoring from Backup: ' + file,
+  });
   const pool = new Pool({
     user: postgresUser,
     password: postgresPassword,
@@ -58,49 +62,57 @@ async function restore(file, refLog) {
     // Use await to wait for the Promise to resolve
     jsonData = await readFile(backupPath);
   } catch (err) {
-    refLog.logData.push({ color: "red", key: tableName, Message: `Failed to read backup file` });
+    refLog.logData.push({
+      color: 'red',
+      key: tableName,
+      Message: `Failed to read backup file`,
+    });
     Logging.updateLog(refLog.uuid, refLog.logData, taskstate.FAILED);
     console.error(err);
   }
 
   // console.log(jsonData);
   if (!jsonData) {
-    console.log("No Data");
+    console.log('No Data');
     return;
   }
 
   for (let table of jsonData) {
     const data = Object.values(table)[0];
     const tableName = Object.keys(table)[0];
-    refLog.logData.push({ color: "dodgerblue", key: tableName, Message: `Restoring ${tableName}` });
+    refLog.logData.push({
+      color: 'dodgerblue',
+      key: tableName,
+      Message: `Restoring ${tableName}`,
+    });
     for (let index in data) {
-      const keysWithQuotes = Object.keys(data[index]).map((key) => `"${key}"`);
-      const keyString = keysWithQuotes.join(", ");
+      const keysWithQuotes = Object.keys(data[index]).map(key => `"${key}"`);
+      const keyString = keysWithQuotes.join(', ');
 
-      const valuesWithQuotes = Object.values(data[index]).map((col) => {
+      const valuesWithQuotes = Object.values(data[index]).map(col => {
         if (col === null) {
-          return "NULL";
-        } else if (typeof col === "string") {
+          return 'NULL';
+        } else if (typeof col === 'string') {
           return `'${col.replace(/'/g, "''")}'`;
-        } else if (typeof col === "object") {
+        } else if (typeof col === 'object') {
           return `'${JSON.stringify(col).replace(/'/g, "''")}'`;
         } else {
           return `'${col}'`;
         }
       });
 
-      const valueString = valuesWithQuotes.join(", ");
+      const valueString = valuesWithQuotes.join(', ');
 
       const query = `INSERT INTO ${tableName} (${keyString}) VALUES(${valueString})  ON CONFLICT DO NOTHING`;
       const { rows } = await pool.query(query);
     }
   }
   await pool.end();
-  refLog.logData.push({ color: "lawngreen", Message: "Restore Complete" });
+  refLog.logData.push({ color: 'lawngreen', Message: 'Restore Complete' });
 }
 
 // Route handler for backup endpoint
-router.get("/beginBackup", async (req, res) => {
+router.get('/beginBackup', async (req, res) => {
   try {
     const last_execution = await db
       .query(
@@ -110,11 +122,11 @@ router.get("/beginBackup", async (req, res) => {
     ORDER BY "TimeRun" DESC
     LIMIT 1`
       )
-      .then((res) => res.rows);
+      .then(res => res.rows);
 
     if (last_execution.length !== 0) {
       if (last_execution[0].Result === taskstate.RUNNING) {
-        sendUpdate("TaskError", "Error: Backup is already running");
+        sendUpdate('TaskError', 'Error: Backup is already running');
         res.send();
         return;
       }
@@ -125,43 +137,50 @@ router.get("/beginBackup", async (req, res) => {
     await Logging.insertLog(uuid, triggertype.Manual, taskName.backup);
     await backup(refLog);
     Logging.updateLog(uuid, refLog.logData, taskstate.SUCCESS);
-    res.send("Backup completed successfully");
-    sendUpdate("TaskComplete", { message: triggertype + " Backup Completed" });
+    res.send('Backup completed successfully');
+    sendUpdate('TaskComplete', { message: triggertype + ' Backup Completed' });
   } catch (error) {
     console.error(error);
-    res.status(500).send("Backup failed");
+    res.status(500).send('Backup failed');
   }
 });
 
-router.get("/restore/:filename", async (req, res) => {
+router.get('/restore/:filename', async (req, res) => {
   try {
     const uuid = randomUUID();
     let refLog = { logData: [], uuid: uuid };
     Logging.insertLog(uuid, triggertype.Manual, taskName.restore);
 
-    const filePath = path.join(__dirname, "..", backupfolder, req.params.filename);
+    const filename = sanitizeFilename(req.params.filename);
+    const filePath = path.join(
+      process.cwd(),
+      __dirname,
+      '..',
+      backupfolder,
+      filename
+    );
 
     await restore(filePath, refLog);
     Logging.updateLog(uuid, refLog.logData, taskstate.SUCCESS);
 
-    res.send("Restore completed successfully");
-    sendUpdate("TaskComplete", { message: "Restore completed successfully" });
+    res.send('Restore completed successfully');
+    sendUpdate('TaskComplete', { message: 'Restore completed successfully' });
   } catch (error) {
     console.error(error);
-    res.status(500).send("Restore failed");
+    res.status(500).send('Restore failed');
   }
 });
 
-router.get("/files", (req, res) => {
+router.get('/files', (req, res) => {
   try {
-    const directoryPath = path.join(__dirname, "..", backupfolder);
+    const directoryPath = path.join(__dirname, '..', backupfolder);
     fs.readdir(directoryPath, (err, files) => {
       if (err) {
-        res.status(500).send("Unable to read directory");
+        res.status(500).send('Unable to read directory');
       } else {
         const fileData = files
-          .filter((file) => file.endsWith(".json"))
-          .map((file) => {
+          .filter(file => file.endsWith('.json'))
+          .map(file => {
             const filePath = path.join(directoryPath, file);
             const stats = fs.statSync(filePath);
             return {
@@ -179,20 +198,34 @@ router.get("/files", (req, res) => {
 });
 
 //download backup file
-router.get("/files/:filename", (req, res) => {
-  const filePath = path.join(__dirname, "..", backupfolder, req.params.filename);
+router.get('/files/:filename', (req, res) => {
+  const filename = sanitizeFilename(req.params.filename);
+  const filePath = path.join(
+    process.cwd(),
+    __dirname,
+    '..',
+    backupfolder,
+    filename
+  );
   res.download(filePath);
 });
 
 //delete backup
-router.delete("/files/:filename", (req, res) => {
+router.delete('/files/:filename', (req, res) => {
   try {
-    const filePath = path.join(__dirname, "..", backupfolder, req.params.filename);
+    const filename = sanitizeFilename(req.params.filename);
+    const filePath = path.join(
+      process.cwd(),
+      __dirname,
+      '..',
+      backupfolder,
+      filename
+    );
 
-    fs.unlink(filePath, (err) => {
+    fs.unlink(filePath, err => {
       if (err) {
         console.error(err);
-        res.status(500).send("An error occurred while deleting the file.");
+        res.status(500).send('An error occurred while deleting the file.');
         return;
       }
 
@@ -200,13 +233,13 @@ router.delete("/files/:filename", (req, res) => {
       res.status(200).send(`${filePath} has been deleted.`);
     });
   } catch (error) {
-    res.status(500).send("An error occurred while deleting the file.");
+    res.status(500).send('An error occurred while deleting the file.');
   }
 });
 
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
-    cb(null, path.join(__dirname, "..", backupfolder)); // Set the destination folder for uploaded files
+    cb(null, path.join(__dirname, '..', backupfolder)); // Set the destination folder for uploaded files
   },
   filename: function (req, file, cb) {
     cb(null, file.originalname); // Set the file name
@@ -215,7 +248,7 @@ const storage = multer.diskStorage({
 
 const upload = multer({ storage: storage });
 
-router.post("/upload", upload.single("file"), (req, res) => {
+router.post('/upload', upload.single('file'), (req, res) => {
   // Handle the uploaded file here
   res.json({
     fileName: req.file.originalname,
@@ -225,7 +258,7 @@ router.post("/upload", upload.single("file"), (req, res) => {
 
 // Handle other routes
 router.use((req, res) => {
-  res.status(404).send({ error: "Not Found" });
+  res.status(404).send({ error: 'Not Found' });
 });
 
 module.exports = router;

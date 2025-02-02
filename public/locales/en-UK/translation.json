@@ -8,7 +8,8 @@
     "STATISTICS": "Statistics",
     "SETTINGS": "Settings",
     "ABOUT": "About",
-    "LOGOUT": "Logout"
+    "LOGOUT": "Logout",
+    "TIMELINE": "Timeline"
   },
   "HOME_PAGE": {
     "SESSIONS": "Sessions",
@@ -17,7 +18,9 @@
     "LIBRARY_OVERVIEW": "Library Overview"
   },
   "SESSIONS": {
-    "NO_SESSIONS": "No Active Sessions Found"
+    "NO_SESSIONS": "No Active Sessions Found",
+    "DIRECT_PLAY": "Direct Play",
+    "TRANSCODE": "Transcode"
   },
   "STAT_CARDS": {
     "MOST_VIEWED_MOVIES": "MOST VIEWED MOVIES",
@@ -75,7 +78,8 @@
   "TAB_CONTROLS": {
     "OVERVIEW": "Overview",
     "ACTIVITY": "Activity",
-    "OPTIONS": "Options"
+    "OPTIONS": "Options",
+    "TIMELINE": "Timeline"
   },
   "ITEM_ACTIVITY": "Item Activity",
   "ACTIVITY_TABLE": {
@@ -228,6 +232,10 @@
     "GITHUB": "Github",
     "Backup": "Backup Jellystat"
   },
+  "TIMELINE_PAGE": {
+    "TIMELINE": "Timeline",
+    "EPISODES":"Episodes"
+  },
   "SEARCH": "Search",
   "TOTAL": "Total",
   "LAST": "Last",
@@ -301,5 +309,6 @@
   "LONGITUDE": "Longitude",
   "TIMEZONE": "Timezone",
   "POSTCODE": "Postcode",
-  "X_ROWS_SELECTED": "{ROWS} Rows Selected"
+  "X_ROWS_SELECTED": "{ROWS} Rows Selected",
+  "SUBTITLES": "Subtitles"
 }
