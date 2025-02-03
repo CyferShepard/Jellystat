@@ -1,5 +1,3 @@
-import "./css/stats.css";
-
 import { Trans } from "react-i18next";
 import ActivityTimelineComponent from "./components/activity-timeline/activity-timeline";
 import { useEffect, useState } from "react";
@@ -42,8 +40,6 @@ function ActivityTimeline(props) {
     );
   };
   const handleUserSelection = (selectedUser) => {
-    console.log(selectedUser);
-
     setSelectedUser(selectedUser);
     localStorage.setItem("PREF_ACTIVITY_TIMELINE_selectedUser", selectedUser);
   };
@@ -93,6 +89,9 @@ function ActivityTimeline(props) {
         })
         .then((users) => {
           setUsers(users.data);
+          if (!selectedUser && users.data[0]) {
+            setSelectedUser(users.data[0].UserId);
+          }
         })
         .catch((error) => {
           console.log(error);
@@ -112,6 +111,13 @@ function ActivityTimeline(props) {
         })
         .then((libraries) => {
           setLibraries(libraries.data);
+          if (
+            selectedLibraries?.length === 0 &&
+            !localStorage.getItem("PREF_ACTIVITY_TIMELINE_selectedLibraries") &&
+            libraries.data.length > 0
+          ) {
+            setSelectedLibraries(libraries.data.map((library) => library.Id));
+          }
         })
         .catch((error) => {
           console.log(error);
