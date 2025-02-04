@@ -1,7 +1,7 @@
-const sanitizer = require("sanitize-filename");
+const sanitizeFilename = require("sanitize-filename");
 
-const sanitizeFilename = (filename) => {
-  return sanitizer(filename);
+const sanitizeFile = (filename) => {
+  return sanitizeFilename(filename);
 };
 
-module.export = { sanitizeFilename };
+module.exports = sanitizeFile;
