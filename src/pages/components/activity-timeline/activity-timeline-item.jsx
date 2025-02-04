@@ -5,12 +5,14 @@ import TimelineItem from "@mui/lab/TimelineItem";
 import TimelineSeparator from "@mui/lab/TimelineSeparator";
 import TimelineConnector from "@mui/lab/TimelineConnector";
 import TimelineContent from "@mui/lab/TimelineContent";
+import TimelineOppositeContent from "@mui/lab/TimelineOppositeContent";
 import Typography from "@mui/material/Typography";
 import Card from "react-bootstrap/Card";
 import baseUrl from "../../../lib/baseurl";
 
 import "../../css/timeline/activity-timeline.css";
 
+import { useMediaQuery, useTheme } from "@mui/material";
 import moment from "moment";
 import TvLineIcon from "remixicon-react/TvLineIcon.js";
 import FilmLineIcon from "remixicon-react/FilmLineIcon.js";
@@ -18,8 +20,7 @@ import { MEDIA_TYPES } from "./helpers";
 import { Link } from "react-router-dom";
 import { Trans } from "react-i18next";
 
-function formatEntryDates(entry) {
-  const { FirstActivityDate, LastActivityDate, MediaType } = entry;
+function formatEntryDates(FirstActivityDate, LastActivityDate, MediaType) {
   const startDate = moment(FirstActivityDate);
   const endDate = moment(LastActivityDate);
 
@@ -31,19 +32,49 @@ function formatEntryDates(entry) {
 }
 const DefaultImage = (props) => {
   const { MediaType } = props;
+  const SeriesIcon = <TvLineIcon size={"50%"} color="white" />;
+  const MovieIcon = <FilmLineIcon size={"50%"} color="white" />;
   return (
     <div className="default_library_image default_library_image_hover d-flex justify-content-center align-items-center">
       {MediaType === MEDIA_TYPES.Shows ? SeriesIcon : MovieIcon}
     </div>
   );
 };
-const SeriesIcon = <TvLineIcon size={"50%"} color="white" />;
-const MovieIcon = <FilmLineIcon size={"50%"} color="white" />;
 
-export default function ActivityTimelineItem(entry) {
-  const { Title, SeasonName, NowPlayingItemId, EpisodeCount, MediaType } =
-    entry;
+const TimeLineTextContent = (props) => {
+  const {
+    Title,
+    SeasonName,
+    MediaType,
+    EpisodeCount,
+    FirstActivityDate,
+    LastActivityDate,
+  } = props;
+
+  return (
+    <div className="activity-description">
+      <Typography variant="h6" component="span">
+        {Title}
+      </Typography>
+      {SeasonName && <Typography>{SeasonName}</Typography>}
+      <Typography>
+        {formatEntryDates(FirstActivityDate, LastActivityDate, MediaType)}
+      </Typography>
+      {MediaType === MEDIA_TYPES.Shows && EpisodeCount && (
+        <Typography>
+          {EpisodeCount} <Trans i18nKey="TIMELINE_PAGE.EPISODES" />
+        </Typography>
+      )}
+    </div>
+  );
+};
+
+export default function ActivityTimelineItem(props) {
+  const { NowPlayingItemId } = props;
   const [useDefaultImage, setUseDefaultImage] = useState(false);
+  const theme = useTheme();
+  const shouldRenderVertically = useMediaQuery(theme.breakpoints.down("sm"));
+
   return (
     <TimelineItem>
       <TimelineSeparator>
@@ -63,24 +94,20 @@ export default function ActivityTimelineItem(entry) {
                 onError={() => setUseDefaultImage(true)}
               />
             ) : (
-              <DefaultImage {...entry} />
+              <DefaultImage {...props} />
             )}
           </Link>
         </div>
+        {shouldRenderVertically && <TimeLineTextContent {...props} />}
         <TimelineConnector />
       </TimelineSeparator>
-      <TimelineContent>
-        <Typography variant="h6" component="span">
-          {Title}
-        </Typography>
-        {SeasonName && <Typography>{SeasonName}</Typography>}
-        <Typography>{formatEntryDates(entry)}</Typography>
-        {MediaType === MEDIA_TYPES.Shows && EpisodeCount && (
-          <Typography>
-            {EpisodeCount} <Trans i18nKey="TIMELINE_PAGE.EPISODES" />
-          </Typography>
-        )}
-      </TimelineContent>
+      {!shouldRenderVertically ? (
+        <TimelineContent>
+          <TimeLineTextContent {...props} />
+        </TimelineContent>
+      ) : (
+        <TimelineOppositeContent></TimelineOppositeContent>
+      )}
     </TimelineItem>
   );
 }

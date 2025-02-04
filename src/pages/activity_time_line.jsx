@@ -1,13 +1,13 @@
+import { useEffect, useState } from "react";
 import { Trans } from "react-i18next";
 import ActivityTimelineComponent from "./components/activity-timeline/activity-timeline";
-import { useEffect, useState } from "react";
 
+import { Button, FormSelect, Modal } from "react-bootstrap";
 import axios from "../lib/axios_instance.jsx";
 import Config from "../lib/config.jsx";
-import "./css/timeline/activity-timeline.css";
 import Loading from "./components/general/loading";
-import { Button, FormSelect, Modal } from "react-bootstrap";
 import LibraryFilterModal from "./components/library/library-filter-modal";
+import "./css/timeline/activity-timeline.css";
 
 function ActivityTimeline(props) {
   const { preselectedUser } = props;
@@ -132,11 +132,11 @@ function ActivityTimeline(props) {
           <Trans i18nKey={"TIMELINE_PAGE.TIMELINE"} />
         </h1>
         <div
-          className="d-flex flex-column flex-md-row"
+          className="d-flex flex-column flex-sm-row"
           style={{ whiteSpace: "nowrap" }}
         >
           <div className="user-selection">
-            <div className="d-flex flex-row w-100 ms-md-3 w-sm-100 w-md-75 mb-3 my-md-3">
+            <div className="d-flex flex-row w-100 ms-sm-3 w-sm-100 w-sm-75 mb-3 my-sm-1">
               {!preselectedUser && (
                 <>
                   <div className="d-flex flex-col rounded-0 rounded-start  align-items-center px-2 bg-primary-1">
@@ -145,7 +145,7 @@ function ActivityTimeline(props) {
                   <FormSelect
                     onChange={(e) => handleUserSelection(e.target.value)}
                     value={selectedUser}
-                    className="w-md-75 rounded-0 rounded-end"
+                    className="w-sm-75 rounded-0 rounded-end"
                   >
                     {users.map((user) => (
                       <option key={user.UserId} value={user.UserId}>
@@ -157,10 +157,10 @@ function ActivityTimeline(props) {
               )}
             </div>
           </div>
-          <div className="library-selection">
+          <div className="library-selection d-flex flex-column flex-sm-row">
             <Button
               onClick={() => setShowLibraryFilters(true)}
-              className="ms-md-3 mb-3 my-md-3"
+              className="ms-sm-3 mb-3 my-sm-1"
             >
               <Trans i18nKey="MENU_TABS.LIBRARIES" />
             </Button>
