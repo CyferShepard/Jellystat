@@ -20,14 +20,28 @@ import { MEDIA_TYPES } from "./helpers";
 import { Link } from "react-router-dom";
 import { Trans } from "react-i18next";
 
+const localization = localStorage.getItem("i18nextLng");
+
+const dateFormatOptions = {
+  year: "numeric",
+  month: "numeric",
+  day: "numeric",
+};
+
 function formatEntryDates(FirstActivityDate, LastActivityDate, MediaType) {
   const startDate = moment(FirstActivityDate);
   const endDate = moment(LastActivityDate);
 
   if (startDate.isSame(endDate, "day") || MediaType === MEDIA_TYPES.Movies) {
-    return startDate.format("L");
+    return Intl.DateTimeFormat(localization, dateFormatOptions).format(
+      startDate.toDate()
+    );
   } else {
-    return `${startDate.format("L")} - ${endDate.format("L")}`;
+    return `${Intl.DateTimeFormat(localization, dateFormatOptions).format(
+      startDate.toDate()
+    )} - ${Intl.DateTimeFormat(localization, dateFormatOptions).format(
+      endDate.toDate()
+    )}`;
   }
 }
 const DefaultImage = (props) => {
