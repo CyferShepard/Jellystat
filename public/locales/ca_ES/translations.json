@@ -212,8 +212,8 @@
       "1_WEEK": "1 Setmana"
     },
     "SELECT_LIBRARIES_TO_IMPORT": "Seleccionar Biblioteques per Importar",
-    "SELECT_LIBRARIES_TO_IMPORT_TOOLTIP": "Activity for Items within these libraries are still Tracked - Even when not imported.",
-    "DATE_ADDED": "Data d'afegit"
+    "SELECT_LIBRARIES_TO_IMPORT_TOOLTIP": "L'activitat dels elements d'aquestes biblioteques segueix monitoriztat - Encara que no s'importin.",
+    "DATE_ADDED": "Dades afegides"
   },
   "TASK_TYPE": {
     "JOB": "Tasca",
@@ -221,8 +221,8 @@
   },
   "TASK_DESCRIPTION": {
     "PartialJellyfinSync": "Sincronitzar elements afegits recentment",
-    "JellyfinSync": "Sincronització ccmpleta amb Jellyfin",
-    "Jellyfin_Playback_Reporting_Plugin_Sync": "Importar les dades de plugin de reproducció",
+    "JellyfinSync": "Sincronització completa amb Jellyfin",
+    "Jellyfin_Playback_Reporting_Plugin_Sync": "Importar les dades del plugin de reproducció",
     "Backup": "Còpia de seguretat de Jellystat"
   },
   "ABOUT_PAGE": {
@@ -234,7 +234,7 @@
   },
   "TIMELINE_PAGE": {
     "TIMELINE": "Cronologia",
-    "EPISODES":"Episodis"
+    "EPISODES": "Capítols"
   },
   "SEARCH": "Buscar",
   "TOTAL": "Total",
@@ -242,8 +242,8 @@
   "SERIES": "Sèries",
   "SEASON": "Temporada",
   "SEASONS": "Temporades",
-  "EPISODE": "Episodi",
-  "EPISODES": "Episodis",
+  "EPISODE": "Capítol",
+  "EPISODES": "Capítols",
   "MOVIES": "Pel·lícules",
   "MUSIC": "Música",
   "SONGS": "Cançons",
@@ -252,7 +252,7 @@
   "USER": "Usuari",
   "USERS": "Usuaris",
   "TYPE": "Tipus",
-  "NEW_VERSION_AVAILABLE": "Nova versió disponibile",
+  "NEW_VERSION_AVAILABLE": "Nova versió disponible",
   "ARCHIVED": "Arxivat",
   "NOT_ARCHIVED": "No arxivat",
   "ALL": "Tots",
@@ -262,7 +262,7 @@
   "VIEWS": "Visualitzacions",
   "WATCH_TIME": "Temps de visualització",
   "LAST_WATCHED": "Últim vist",
-  "MEDIA": "Multimedia",
+  "MEDIA": "Mitjans",
   "SAVE": "Guardar",
   "YES": "Si",
   "NO": "No",
@@ -270,10 +270,10 @@
   "DATE": "Data",
   "START": "Començar",
   "DOWNLOAD": "Descarregar",
-  "RESTORE": "Restaurar",
+  "RESTORE": "Restablir",
   "ACTIONS": "Accions",
   "DELETE": "Esborrar",
-  "BITRATE": "Bitrate",
+  "BITRATE": "Taxa de bits",
   "CONTAINER": "Contenidor",
   "VIDEO": "Vídeo",
   "CODEC": "Codec",
