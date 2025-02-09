@@ -298,59 +298,102 @@ router.get("/getRecentlyAdded", async (req, res) => {
     });
 
     if (libraryid !== undefined) {
-      const { rows } = await db.query(
+      const { rows: items } = await db.query(
         `SELECT i."Name", null "SeriesName", "Id", null "SeriesId", null "SeasonId", null "EpisodeId", null "SeasonNumber", null "EpisodeNumber",  "PrimaryImageHash",i."DateCreated", "Type", i."ParentId"
         FROM public.jf_library_items i
         where i.archived=false
+          and i."Type" != 'Series'
           and i."ParentId"=$1
-      union
-      SELECT e."Name",  e."SeriesName",e."Id" , e."SeriesId", e."SeasonId", e."EpisodeId",  e."ParentIndexNumber" "SeasonNumber",  e."IndexNumber" "EpisodeNumber", e."PrimaryImageHash", e."DateCreated", e."Type", i."ParentId"
-        FROM public.jf_library_episodes e
-        JOIN public.jf_library_items i
-        on i."Id"=e."SeriesId"
-        where e.archived=false
-        and i."ParentId"=$1
-      order by "DateCreated" desc
-      limit $2`,
+        order by "DateCreated" desc
+        limit $2`,
         [libraryid, limit]
       );
-      if (rows[0].DateCreated !== undefined && rows[0].DateCreated !== null) {
-        let lastSynctedItemDate = moment(rows[0].DateCreated, "YYYY-MM-DD HH:mm:ss.SSSZ");
 
+      const { rows: episodes } = await db.query(
+        `
+        SELECT e."Name",  e."SeriesName",e."Id" , e."SeriesId", e."SeasonId", e."EpisodeId",  e."ParentIndexNumber"  "SeasonNumber",  e."IndexNumber" "EpisodeNumber", e."PrimaryImageHash", e."DateCreated", e."Type", i."ParentId"    
+        FROM public.jf_library_episodes e
+        JOIN public.jf_library_items i
+              on i."Id"=e."SeriesId"
+        where e."DateCreated" is not null
+              and e.archived=false
+               and i."ParentId"=$1
+        order by e."DateCreated" desc
+        limit $2`,
+        [libraryid, limit]
+      );
+
+      let lastSynctedItemDate;
+      if (items.length > 0 && items[0].DateCreated !== undefined && items[0].DateCreated !== null) {
+        lastSynctedItemDate = moment(items[0].DateCreated, "YYYY-MM-DD HH:mm:ss.SSSZ");
+      }
+
+      if (episodes.length > 0 && episodes[0].DateCreated !== undefined && episodes[0].DateCreated !== null) {
+        const newLastSynctedItemDate = moment(episodes[0].DateCreated, "YYYY-MM-DD HH:mm:ss.SSSZ");
+
+        if (lastSynctedItemDate === undefined || newLastSynctedItemDate.isAfter(lastSynctedItemDate)) {
+          lastSynctedItemDate = newLastSynctedItemDate;
+        }
+      }
+
+      if (lastSynctedItemDate !== undefined) {
         recentlyAddedFromJellystatMapped = recentlyAddedFromJellystatMapped.filter((item) =>
           moment(item.DateCreated, "YYYY-MM-DD HH:mm:ss.SSSZ").isAfter(lastSynctedItemDate)
         );
       }
 
-      const filteredDbRows = rows.filter((item) => !excluded_libraries.includes(item.ParentId));
+      const filteredDbRows = [
+        ...items.filter((item) => !excluded_libraries.includes(item.ParentId)),
+        ...episodes.filter((item) => !excluded_libraries.includes(item.ParentId)),
+      ];
 
       res.send([...recentlyAddedFromJellystatMapped, ...filteredDbRows]);
       return;
     }
-    const { rows } = await db.query(
+    const { rows: items } = await db.query(
       `SELECT i."Name", null "SeriesName", "Id", null "SeriesId", null "SeasonId", null "EpisodeId", null "SeasonNumber" , null "EpisodeNumber" ,  "PrimaryImageHash",i."DateCreated", "Type", i."ParentId"
       FROM public.jf_library_items i
       where i.archived=false
-    union
-    SELECT e."Name",  e."SeriesName",e."Id" , e."SeriesId", e."SeasonId", e."EpisodeId",  e."ParentIndexNumber"  "SeasonNumber",  e."IndexNumber" "EpisodeNumber", e."PrimaryImageHash", e."DateCreated", e."Type", i."ParentId"
-      FROM public.jf_library_episodes e
-       JOIN public.jf_library_items i
-        on i."Id"=e."SeriesId"
-      where e.archived=false
-    order by "DateCreated" desc
-    limit $1`,
+      order by "DateCreated" desc
+      limit $1`,
       [limit]
     );
 
-    if (rows[0].DateCreated !== undefined && rows[0].DateCreated !== null) {
-      let lastSynctedItemDate = moment(rows[0].DateCreated, "YYYY-MM-DD HH:mm:ss.SSSZ");
+    const { rows: episodes } = await db.query(
+      `
+      SELECT e."Name",  e."SeriesName",e."Id" , e."SeriesId", e."SeasonId", e."EpisodeId",  e."ParentIndexNumber"  "SeasonNumber",  e."IndexNumber" "EpisodeNumber", e."PrimaryImageHash", e."DateCreated", e."Type", i."ParentId"    
+	    FROM public.jf_library_episodes e
+	    JOIN public.jf_library_items i
+            on i."Id"=e."SeriesId"
+	    where e."DateCreated" is not null
+	          and e.archived=false
+      order by e."DateCreated" desc
+      limit $1`,
+      [limit]
+    );
+    let lastSynctedItemDate;
+    if (items.length > 0 && items[0].DateCreated !== undefined && items[0].DateCreated !== null) {
+      lastSynctedItemDate = moment(items[0].DateCreated, "YYYY-MM-DD HH:mm:ss.SSSZ");
+    }
 
+    if (episodes.length > 0 && episodes[0].DateCreated !== undefined && episodes[0].DateCreated !== null) {
+      const newLastSynctedItemDate = moment(episodes[0].DateCreated, "YYYY-MM-DD HH:mm:ss.SSSZ");
+
+      if (lastSynctedItemDate === undefined || newLastSynctedItemDate.isAfter(lastSynctedItemDate)) {
+        lastSynctedItemDate = newLastSynctedItemDate;
+      }
+    }
+
+    if (lastSynctedItemDate !== undefined) {
       recentlyAddedFromJellystatMapped = recentlyAddedFromJellystatMapped.filter((item) =>
         moment(item.DateCreated, "YYYY-MM-DD HH:mm:ss.SSSZ").isAfter(lastSynctedItemDate)
       );
     }
 
-    const filteredDbRows = rows.filter((item) => !excluded_libraries.includes(item.ParentId));
+    const filteredDbRows = [
+      ...items.filter((item) => !excluded_libraries.includes(item.ParentId)),
+      ...episodes.filter((item) => !excluded_libraries.includes(item.ParentId)),
+    ];
 
     let recentlyAdded = [...recentlyAddedFromJellystatMapped, ...filteredDbRows];
     recentlyAdded = recentlyAdded.filter((item) => item.Type !== "Series");

@@ -4,6 +4,10 @@ export const languages = [
     description: "English",
   },
   {
+    id: "en-US",
+    description: "English US",
+  },
+  {
     id: "fr-FR",
     description: "Français",
   },
