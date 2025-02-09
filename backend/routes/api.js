@@ -347,7 +347,13 @@ router.get("/getRecentlyAdded", async (req, res) => {
         ...episodes.filter((item) => !excluded_libraries.includes(item.ParentId)),
       ];
 
-      res.send([...recentlyAddedFromJellystatMapped, ...filteredDbRows]);
+      const recentlyAdded = [...recentlyAddedFromJellystatMapped, ...filteredDbRows];
+      // Sort recentlyAdded by DateCreated in descending order
+      recentlyAdded.sort(
+        (a, b) => moment(b.DateCreated, "YYYY-MM-DD HH:mm:ss.SSSZ") - moment(a.DateCreated, "YYYY-MM-DD HH:mm:ss.SSSZ")
+      );
+
+      res.send(recentlyAdded);
       return;
     }
     const { rows: items } = await db.query(
@@ -401,6 +407,11 @@ router.get("/getRecentlyAdded", async (req, res) => {
     if (GroupResults == true) {
       recentlyAdded = groupRecentlyAdded(recentlyAdded);
     }
+
+    // Sort recentlyAdded by DateCreated in descending order
+    recentlyAdded.sort(
+      (a, b) => moment(b.DateCreated, "YYYY-MM-DD HH:mm:ss.SSSZ") - moment(a.DateCreated, "YYYY-MM-DD HH:mm:ss.SSSZ")
+    );
 
     res.send(recentlyAdded);
     return;
