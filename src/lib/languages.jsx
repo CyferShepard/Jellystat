@@ -19,4 +19,8 @@ export const languages = [
     id: "it-IT",
     description: "Italiano",
   },
+  {
+    id: "ca_ES",
+    description: "Català",
+  },
 ];
