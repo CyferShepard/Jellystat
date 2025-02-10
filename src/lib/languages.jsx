@@ -20,7 +20,7 @@ export const languages = [
     description: "Italiano",
   },
   {
-    id: "ca_ES",
+    id: "ca-ES",
     description: "Català",
   },
 ];
