@@ -122,6 +122,7 @@ function Setup() {
                 onChange={handleFormChange}
                 type={showPassword ? "text" : "password"}
                 placeholder=" "
+                autoComplete="off"
               />
               <Button className="login-show-password" type="button" onClick={() => setShowPassword(!showPassword)}>
                 {showPassword ? <EyeFillIcon /> : <EyeOffFillIcon />}
