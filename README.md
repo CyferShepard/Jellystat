@@ -40,6 +40,7 @@
 | JS_GEOLITE_ACCOUNT_ID               | `null`   | `123456`                        | maxmind.com user id to be used for Geolocating IP Addresses (Can be found at https://www.maxmind.com/en/accounts/current/edit)           |
 | JS_GEOLITE_LICENSE_KEY              | `null`   | `ASDWdaSdawe2sd186`             | License key you need to generate on maxmind to use their services                                                                        |
 | MINIMUM_SECONDS_TO_INCLUDE_PLAYBACK | `1`      | `10`                            | The minimum time (in seconds) to include a playback record, which can be used to exclude short playbacks                                 |
+| IS_EMBY_API                         | `false`  | `true`                          | Set to true if using Emby instead of Jellyfin                                                                                            |
 
 ## Getting Started with Development
 

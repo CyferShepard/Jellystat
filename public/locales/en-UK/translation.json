@@ -289,6 +289,7 @@
   "SOURCE_DETAILS": "Source Details",
   "DIRECT": "Direct",
   "TRANSCODE": "Transcode",
+  "DIRECT_STREAM": "Direct Stream",
   "USERNAME": "Username",
   "PASSWORD": "Password",
   "LOGIN": "Login",
