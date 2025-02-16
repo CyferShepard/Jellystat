@@ -289,6 +289,7 @@
   "SOURCE_DETAILS": "Detalls de la font",
   "DIRECT": "Directe",
   "TRANSCODE": "Transcodificar",
+  "DIRECT_STREAM": "",
   "USERNAME": "Nom d'usuari",
   "PASSWORD": "Contrasenya",
   "LOGIN": "Iniciar sessió",

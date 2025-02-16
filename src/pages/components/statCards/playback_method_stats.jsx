@@ -10,7 +10,8 @@ import BarChartGroupedLineIcon from "remixicon-react/BarChartGroupedLineIcon";
 function PlaybackMethodStats(props) {
   const translations = {
     DirectPlay: <Trans i18nKey="DIRECT" />,
-    Transocde: <Trans i18nKey="TRANSCODE" />,
+    Transcode: <Trans i18nKey="TRANSCODE" />,
+    DirectStream: <Trans i18nKey="DIRECT_STREAM" />,
   };
   const chartIcon = <BarChartGroupedLineIcon size={"100%"} />;
 
@@ -79,7 +80,7 @@ function PlaybackMethodStats(props) {
     <ItemStatComponent
       base_url={config.settings?.EXTERNAL_URL ?? config.hostUrl}
       data={data.map((stream) =>
-        stream.Name == "DirectPlay" ? { ...stream, Name: translations.DirectPlay } : { ...stream, Name: translations.Transocde }
+        stream.Name == "DirectPlay" ? { ...stream, Name: translations.DirectPlay } : stream.Name == "DirectStream" ? { ...stream, Name: translations.DirectStream } : { ...stream, Name: translations.Transcode }
       )}
       icon={chartIcon}
       heading={<Trans i18nKey="STAT_CARDS.CONCURRENT_STREAMS" />}

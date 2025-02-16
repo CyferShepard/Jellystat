@@ -283,6 +283,7 @@
   "SOURCE_DETAILS": "Détails de la source",
   "DIRECT": "Direct",
   "TRANSCODE": "Transcodage",
+  "DIRECT_STREAM": "",
   "USERNAME": "Nom d'utilisateur",
   "PASSWORD": "Mot de passe",
   "LOGIN": "Connexion",
