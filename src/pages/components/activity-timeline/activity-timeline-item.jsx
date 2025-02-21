@@ -76,7 +76,8 @@ const TimeLineTextContent = (props) => {
       </Typography>
       {MediaType === MEDIA_TYPES.Shows && EpisodeCount && (
         <Typography>
-          {EpisodeCount} <Trans i18nKey="TIMELINE_PAGE.EPISODES" />
+          {EpisodeCount}{" "}
+          <Trans i18nKey="TIMELINE_PAGE.EPISODES" count={+EpisodeCount} />
         </Typography>
       )}
     </div>
