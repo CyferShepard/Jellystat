@@ -8,7 +8,8 @@
     "STATISTICS": "Statistiques",
     "SETTINGS": "Paramètres",
     "ABOUT": "À propos",
-    "LOGOUT": "Déconnexion"
+    "LOGOUT": "Déconnexion",
+    "TIMELINE": "Fil chronologie"
   },
   "HOME_PAGE": {
     "SESSIONS": "Lecture(s)",
@@ -72,7 +73,8 @@
   },
   "LIBRARY_INFO": {
     "LIBRARY_STATS": "Statistiques de la médiathèque",
-    "LIBRARY_ACTIVITY": "Activité de la médiathèque"
+    "LIBRARY_ACTIVITY": "Activité de la médiathèque",
+    "TIMELINE": "Fil chronologique"
   },
   "TAB_CONTROLS": {
     "OVERVIEW": "Vue d'ensemble",
@@ -229,6 +231,11 @@
     "UPDATE_AVAILABLE": "Mise à jour disponible",
     "GITHUB": "Github",
     "Backup": "Sauvegarde de Jellystat"
+  },
+  "TIMELINE_PAGE": {
+    "TIMELINE": "Fil chronologique",
+    "EPISODES_one":"Épisode",
+    "EPISODES_other":"Épisodes"
   },
   "SEARCH": "Recherche",
   "TOTAL": "Total",
