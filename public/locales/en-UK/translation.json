@@ -234,7 +234,8 @@
   },
   "TIMELINE_PAGE": {
     "TIMELINE": "Timeline",
-    "EPISODES":"Episodes"
+    "EPISODES_one":"Episode",
+    "EPISODES_other":"Episodes"
   },
   "SEARCH": "Search",
   "TOTAL": "Total",
