@@ -6,6 +6,7 @@ class EmbyAPI {
     this.config = null;
     this.configReady = false;
     this.#checkReadyStatus();
+    this.sessionErrorCounter = 0;
   }
   //Helper classes
   #checkReadyStatus() {
@@ -59,6 +60,9 @@ class EmbyAPI {
 
   #getErrorLineNumber(error) {
     const stackTrace = this.#getStackTrace(error);
+    if (stackTrace.length < 1) {
+      return "Unknown";
+    }
     const errorLine = stackTrace[1].trim();
     const lineNumber = errorLine.substring(errorLine.lastIndexOf("\\") + 1, errorLine.lastIndexOf(")"));
     return lineNumber;
@@ -82,6 +86,7 @@ class EmbyAPI {
   }
 
   #getStackTrace(error) {
+    if (!error.stack) return [];
     const stackTrace = error.stack.split("\n");
     return stackTrace;
   }
@@ -400,11 +405,26 @@ class EmbyAPI {
     try {
       let url = `${this.config.JF_HOST}/sessions`;
 
-      const response = await axios.get(url, {
-        headers: {
-          "X-MediaBrowser-Token": this.config.JF_API_KEY,
-        },
-      });
+      const response = await axios
+        .get(url, {
+          headers: {
+            "X-MediaBrowser-Token": this.config.JF_API_KEY,
+          },
+        })
+        .then((response) => {
+          if (this.sessionErrorCounter > 0) {
+            console.log("[EMBY-API]: /sessions - Connection restored");
+            this.sessionErrorCounter = 0;
+          }
+          return response;
+        })
+        .catch((error) => {
+          if (this.sessionErrorCounter == 0) {
+            this.sessionErrorCounter++;
+            console.log("[EMBY-API]: /sessions - Unable to connect. Please check the URL and your network connection");
+          }
+          return { data: [] };
+        });
       let result = response.data && Array.isArray(response.data) ? response.data : [];
 
       if (result.length > 0) {
