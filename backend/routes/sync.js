@@ -1,5 +1,4 @@
 const express = require("express");
-const pgp = require("pg-promise")();
 const db = require("../db");
 
 const moment = require("moment");
@@ -13,6 +12,8 @@ const triggertype = require("../logging/triggertype");
 
 const configClass = require("../classes/config");
 const API = require("../classes/api-loader");
+const TaskManager = require("../classes/task-manager-singleton");
+const TaskScheduler = require("../classes/task-scheduler-singleton");
 
 const router = express.Router();
 
@@ -441,97 +442,113 @@ async function migrateArchivedActivty() {
 }
 
 async function syncPlaybackPluginData() {
-  PlaybacksyncTask.loggedData.push({ color: "lawngreen", Message: "Syncing..." });
+  try {
+    const uuid = randomUUID();
+    PlaybacksyncTask = { loggedData: [], uuid: uuid };
 
-  //Playback Reporting Plugin Check
-  const installed_plugins = await API.getInstalledPlugins();
+    await logging.insertLog(uuid, triggertype.Manual, taskName.import);
+    sendUpdate("PlaybackSyncTask", { type: "Start", message: "Playback Plugin Sync Started" });
 
-  const hasPlaybackReportingPlugin = installed_plugins.filter(
-    (plugins) => ["playback_reporting.xml", "Jellyfin.Plugin.PlaybackReporting.xml"].includes(plugins?.ConfigurationFileName) //TO-DO Change this to the correct plugin name
-  );
+    PlaybacksyncTask.loggedData.push({ color: "lawngreen", Message: "Syncing..." });
 
-  if (!hasPlaybackReportingPlugin || hasPlaybackReportingPlugin.length === 0) {
+    //Playback Reporting Plugin Check
+    const installed_plugins = await API.getInstalledPlugins();
+
+    const hasPlaybackReportingPlugin = installed_plugins.filter(
+      (plugins) => ["playback_reporting.xml", "Jellyfin.Plugin.PlaybackReporting.xml"].includes(plugins?.ConfigurationFileName) //TO-DO Change this to the correct plugin name
+    );
+
     if (!hasPlaybackReportingPlugin || hasPlaybackReportingPlugin.length === 0) {
-      PlaybacksyncTask.loggedData.push({ color: "dodgerblue", Message: `No new data to insert.` });
-    } else {
-      PlaybacksyncTask.loggedData.push({ color: "lawngreen", Message: "Playback Reporting Plugin not detected. Skipping step." });
-    }
-  } else {
-    //
-
-    PlaybacksyncTask.loggedData.push({ color: "dodgerblue", Message: "Determining query constraints." });
-    const OldestPlaybackActivity = await db
-      .query('SELECT  MIN("ActivityDateInserted") "OldestPlaybackActivity" FROM public.jf_playback_activity')
-      .then((res) => res.rows[0]?.OldestPlaybackActivity);
-
-    const NewestPlaybackActivity = await db
-      .query('SELECT  MAX("ActivityDateInserted") "OldestPlaybackActivity" FROM public.jf_playback_activity')
-      .then((res) => res.rows[0]?.OldestPlaybackActivity);
-
-    const MaxPlaybackReportingPluginID = await db
-      .query('SELECT MAX(rowid) "MaxRowId" FROM jf_playback_reporting_plugin_data')
-      .then((res) => res.rows[0]?.MaxRowId);
-
-    //Query Builder
-    let query = `SELECT rowid, * FROM PlaybackActivity`;
-
-    if (OldestPlaybackActivity && NewestPlaybackActivity) {
-      const formattedDateTimeOld = moment(OldestPlaybackActivity).format("YYYY-MM-DD HH:mm:ss");
-      const formattedDateTimeNew = moment(NewestPlaybackActivity).format("YYYY-MM-DD HH:mm:ss");
-      query = query + ` WHERE (DateCreated < '${formattedDateTimeOld}' or DateCreated > '${formattedDateTimeNew}')`;
-    }
-
-    if (OldestPlaybackActivity && !NewestPlaybackActivity) {
-      const formattedDateTimeOld = moment(OldestPlaybackActivity).format("YYYY-MM-DD HH:mm:ss");
-      query = query + ` WHERE DateCreated < '${formattedDateTimeOld}'`;
-      if (MaxPlaybackReportingPluginID) {
-        query = query + ` AND rowid > ${MaxPlaybackReportingPluginID}`;
-      }
-    }
-
-    if (!OldestPlaybackActivity && NewestPlaybackActivity) {
-      const formattedDateTimeNew = moment(NewestPlaybackActivity).format("YYYY-MM-DD HH:mm:ss");
-      query = query + ` WHERE DateCreated > '${formattedDateTimeNew}'`;
-      if (MaxPlaybackReportingPluginID) {
-        query = query + ` AND rowid > ${MaxPlaybackReportingPluginID}`;
-      }
-    }
-
-    if (!OldestPlaybackActivity && !NewestPlaybackActivity && MaxPlaybackReportingPluginID) {
-      query = query + ` WHERE rowid > ${MaxPlaybackReportingPluginID}`;
-    }
-
-    query += " order by rowid";
-
-    PlaybacksyncTask.loggedData.push({ color: "dodgerblue", Message: "Query built. Executing." });
-    //
-
-    const PlaybackData = await API.StatsSubmitCustomQuery(query);
-
-    let DataToInsert = await PlaybackData.map(mappingPlaybackReporting);
-
-    if (DataToInsert.length > 0) {
-      PlaybacksyncTask.loggedData.push({ color: "dodgerblue", Message: `Inserting ${DataToInsert.length} Rows.` });
-      let result = await db.insertBulk("jf_playback_reporting_plugin_data", DataToInsert, columnsPlaybackReporting);
-
-      if (result.Result === "SUCCESS") {
-        PlaybacksyncTask.loggedData.push({ color: "dodgerblue", Message: `${DataToInsert.length} Rows have been inserted.` });
-        PlaybacksyncTask.loggedData.push({
-          color: "yellow",
-          Message: "Running process to format data to be inserted into the Activity Table",
-        });
+      if (!hasPlaybackReportingPlugin || hasPlaybackReportingPlugin.length === 0) {
+        PlaybacksyncTask.loggedData.push({ color: "dodgerblue", Message: `No new data to insert.` });
       } else {
-        PlaybacksyncTask.loggedData.push({ color: "red", Message: "Error: " + result.message });
-        await logging.updateLog(PlaybacksyncTask.uuid, PlaybacksyncTask.loggedData, taskstate.FAILED);
+        PlaybacksyncTask.loggedData.push({
+          color: "lawngreen",
+          Message: "Playback Reporting Plugin not detected. Skipping step.",
+        });
       }
+    } else {
+      //
+
+      PlaybacksyncTask.loggedData.push({ color: "dodgerblue", Message: "Determining query constraints." });
+      const OldestPlaybackActivity = await db
+        .query('SELECT  MIN("ActivityDateInserted") "OldestPlaybackActivity" FROM public.jf_playback_activity')
+        .then((res) => res.rows[0]?.OldestPlaybackActivity);
+
+      const NewestPlaybackActivity = await db
+        .query('SELECT  MAX("ActivityDateInserted") "OldestPlaybackActivity" FROM public.jf_playback_activity')
+        .then((res) => res.rows[0]?.OldestPlaybackActivity);
+
+      const MaxPlaybackReportingPluginID = await db
+        .query('SELECT MAX(rowid) "MaxRowId" FROM jf_playback_reporting_plugin_data')
+        .then((res) => res.rows[0]?.MaxRowId);
+
+      //Query Builder
+      let query = `SELECT rowid, * FROM PlaybackActivity`;
+
+      if (OldestPlaybackActivity && NewestPlaybackActivity) {
+        const formattedDateTimeOld = moment(OldestPlaybackActivity).format("YYYY-MM-DD HH:mm:ss");
+        const formattedDateTimeNew = moment(NewestPlaybackActivity).format("YYYY-MM-DD HH:mm:ss");
+        query = query + ` WHERE (DateCreated < '${formattedDateTimeOld}' or DateCreated > '${formattedDateTimeNew}')`;
+      }
+
+      if (OldestPlaybackActivity && !NewestPlaybackActivity) {
+        const formattedDateTimeOld = moment(OldestPlaybackActivity).format("YYYY-MM-DD HH:mm:ss");
+        query = query + ` WHERE DateCreated < '${formattedDateTimeOld}'`;
+        if (MaxPlaybackReportingPluginID) {
+          query = query + ` AND rowid > ${MaxPlaybackReportingPluginID}`;
+        }
+      }
+
+      if (!OldestPlaybackActivity && NewestPlaybackActivity) {
+        const formattedDateTimeNew = moment(NewestPlaybackActivity).format("YYYY-MM-DD HH:mm:ss");
+        query = query + ` WHERE DateCreated > '${formattedDateTimeNew}'`;
+        if (MaxPlaybackReportingPluginID) {
+          query = query + ` AND rowid > ${MaxPlaybackReportingPluginID}`;
+        }
+      }
+
+      if (!OldestPlaybackActivity && !NewestPlaybackActivity && MaxPlaybackReportingPluginID) {
+        query = query + ` WHERE rowid > ${MaxPlaybackReportingPluginID}`;
+      }
+
+      query += " order by rowid";
+
+      PlaybacksyncTask.loggedData.push({ color: "dodgerblue", Message: "Query built. Executing." });
+      //
+
+      const PlaybackData = await API.StatsSubmitCustomQuery(query);
+
+      let DataToInsert = await PlaybackData.map(mappingPlaybackReporting);
+
+      if (DataToInsert.length > 0) {
+        PlaybacksyncTask.loggedData.push({ color: "dodgerblue", Message: `Inserting ${DataToInsert.length} Rows.` });
+        let result = await db.insertBulk("jf_playback_reporting_plugin_data", DataToInsert, columnsPlaybackReporting);
+
+        if (result.Result === "SUCCESS") {
+          PlaybacksyncTask.loggedData.push({ color: "dodgerblue", Message: `${DataToInsert.length} Rows have been inserted.` });
+          PlaybacksyncTask.loggedData.push({
+            color: "yellow",
+            Message: "Running process to format data to be inserted into the Activity Table",
+          });
+        } else {
+          PlaybacksyncTask.loggedData.push({ color: "red", Message: "Error: " + result.message });
+          await logging.updateLog(PlaybacksyncTask.uuid, PlaybacksyncTask.loggedData, taskstate.FAILED);
+        }
+      }
+
+      PlaybacksyncTask.loggedData.push({ color: "dodgerblue", Message: "Process complete. Data has been imported." });
     }
+    await db.query("CALL ji_insert_playback_plugin_data_to_activity_table()");
+    PlaybacksyncTask.loggedData.push({ color: "dodgerblue", Message: "Any imported data has been processed." });
 
-    PlaybacksyncTask.loggedData.push({ color: "dodgerblue", Message: "Process complete. Data has been imported." });
+    PlaybacksyncTask.loggedData.push({ color: "lawngreen", Message: `Playback Reporting Plugin Sync Complete` });
+    await logging.updateLog(PlaybacksyncTask.uuid, PlaybacksyncTask.loggedData, taskstate.SUCCESS);
+  } catch (error) {
+    PlaybacksyncTask.loggedData.push({ color: "red", Message: `Error: ${error}` });
+    await logging.updateLog(PlaybacksyncTask.uuid, PlaybacksyncTask.loggedData, taskstate.FAILED);
+    sendUpdate("PlaybackSyncTask", { type: "Error", message: "Error: Playback Plugin Sync failed" });
   }
-  await db.query("CALL ji_insert_playback_plugin_data_to_activity_table()");
-  PlaybacksyncTask.loggedData.push({ color: "dodgerblue", Message: "Any imported data has been processed." });
-
-  PlaybacksyncTask.loggedData.push({ color: "lawngreen", Message: `Playback Reporting Plugin Sync Complete` });
 }
 
 async function updateLibraryStatsData() {
@@ -970,63 +987,73 @@ async function partialSync(triggertype) {
 
 ///////////////////////////////////////Sync All
 router.get("/beginSync", async (req, res) => {
-  const config = await new configClass().getConfig();
+  try {
+    const taskManager = new TaskManager().getInstance();
+    const taskScheduler = new TaskScheduler().getInstance();
+    const success = taskManager.addTask({
+      task: taskManager.taskList.JellyfinSync,
+      onComplete: async () => {
+        console.log("Full Sync completed successfully");
+        await taskScheduler.getTaskHistory();
+        res.send("Full Sync completed successfully");
 
-  if (config.error) {
-    res.send({ error: "Config Details Not Found" });
-    return;
-  }
-
-  const last_execution = await db
-    .query(
-      `SELECT "Result"
-  FROM public.jf_logging
-  WHERE "Name"='${taskName.fullsync}'
-  ORDER BY "TimeRun" DESC
-  LIMIT 1`
-    )
-    .then((res) => res.rows);
-
-  if (last_execution.length !== 0) {
-    if (last_execution[0].Result === taskstate.RUNNING) {
-      sendUpdate("TaskError", "Error: Sync is already running");
-      res.send();
+        sendUpdate("FullSyncTask", { type: "Success", message: triggertype.Manual + " Full Sync Completed" });
+      },
+      onError: async (error) => {
+        console.error(error);
+        await taskScheduler.getTaskHistory();
+        res.status(500).send("Full Sync failed");
+        sendUpdate("FullSyncTask", { type: "Error", message: "Error: Full Sync failed" });
+      },
+    });
+    if (!success) {
+      res.status(500).send("Full Sync already running");
+      sendUpdate("FullSyncTask", { type: "Error", message: "Full Sync is already running" });
       return;
     }
-  }
 
-  await fullSync(triggertype.Manual);
-  res.send();
+    taskManager.startTask(taskManager.taskList.JellyfinSync, triggertype.Manual);
+  } catch (error) {
+    console.error(error);
+    res.status(500).send("Full Sync failed");
+  }
 });
 
 router.get("/beginPartialSync", async (req, res) => {
-  const config = await new configClass().getConfig();
+  try {
+    const taskManager = new TaskManager().getInstance();
+    const taskScheduler = new TaskScheduler().getInstance();
+    const success = taskManager.addTask({
+      task: taskManager.taskList.PartialJellyfinSync,
+      onComplete: async () => {
+        console.log("Recently Added Items Sync completed successfully");
+        await taskScheduler.getTaskHistory();
+        res.send("Recently Added Items Sync completed successfully");
 
-  if (config.error) {
-    res.send({ error: config.error });
-    return;
-  }
-
-  const last_execution = await db
-    .query(
-      `SELECT "Result"
-  FROM public.jf_logging
-  WHERE "Name"='${taskName.partialsync}'
-  ORDER BY "TimeRun" DESC
-  LIMIT 1`
-    )
-    .then((res) => res.rows);
-
-  if (last_execution.length !== 0) {
-    if (last_execution[0].Result === taskstate.RUNNING) {
-      sendUpdate("TaskError", "Error: Sync is already running");
-      res.send();
+        sendUpdate("PartialSyncTask", { type: "Success", message: triggertype.Manual + " Recently Added Items Sync Completed" });
+      },
+      onError: async (error) => {
+        await taskScheduler.getTaskHistory();
+        console.error(error);
+        res.status(500).send("Recently Added Items Sync failed");
+        sendUpdate("PartialSyncTask", { type: "Error", message: "Error: Recently Added Items Sync failed" });
+      },
+      onExit: async () => {
+        await taskScheduler.getTaskHistory();
+        sendUpdate("PartialSyncTask", { type: "Error", message: "Task Stopped" });
+      },
+    });
+    if (!success) {
+      res.status(500).send("Recently Added Items Sync already running");
+      sendUpdate("PartialSyncTask", { type: "Error", message: "Recently Added Items Sync is already running" });
       return;
     }
-  }
 
-  await partialSync(triggertype.Manual);
-  res.send();
+    taskManager.startTask(taskManager.taskList.PartialJellyfinSync, triggertype.Manual);
+  } catch (error) {
+    console.error(error);
+    res.status(500).send("Recently Added Items Sync failed");
+  }
 });
 
 ///////////////////////////////////////Write Users
@@ -1143,31 +1170,37 @@ router.post("/fetchItem", async (req, res) => {
 
 //////////////////////////////////////////////////////syncPlaybackPluginData
 router.get("/syncPlaybackPluginData", async (req, res) => {
-  const config = await new configClass().getConfig();
-
-  const uuid = randomUUID();
-  PlaybacksyncTask = { loggedData: [], uuid: uuid };
   try {
-    await logging.insertLog(uuid, triggertype.Manual, taskName.import);
-    sendUpdate("PlaybackSyncTask", { type: "Start", message: "Playback Plugin Sync Started" });
+    const taskManager = new TaskManager().getInstance();
+    const taskScheduler = new TaskScheduler().getInstance();
+    const success = taskManager.addTask({
+      task: taskManager.taskList.JellyfinPlaybackReportingPluginSync,
+      onComplete: async () => {
+        console.log("Playback Plugin Sync completed successfully");
 
-    if (config.error) {
-      res.send({ error: config.error });
-      PlaybacksyncTask.loggedData.push({ Message: config.error });
-      await logging.updateLog(uuid, PlaybacksyncTask.loggedData, taskstate.FAILED);
+        await taskScheduler.getTaskHistory();
+        res.send("Playback Plugin Sync completed successfully");
+      },
+      onError: async (error) => {
+        await taskScheduler.getTaskHistory();
+        console.error(error);
+        res.status(500).send("Playback Plugin Sync failed");
+      },
+      onExit: async () => {
+        await taskScheduler.getTaskHistory();
+        sendUpdate("PlaybackSyncTask", { type: "Error", message: "Task Stopped" });
+      },
+    });
+    if (!success) {
+      res.status(500).send("Playback Plugin Sync already running");
+      sendUpdate("PlaybackSyncTask", { type: "Error", message: "Playback Plugin Sync is already running" });
       return;
     }
 
-    await sleep(5000);
-    await syncPlaybackPluginData();
-
-    await logging.updateLog(PlaybacksyncTask.uuid, PlaybacksyncTask.loggedData, taskstate.SUCCESS);
-    sendUpdate("PlaybackSyncTask", { type: "Success", message: "Playback Plugin Sync Completed" });
-    res.send("syncPlaybackPluginData Complete");
+    taskManager.startTask(taskManager.taskList.JellyfinPlaybackReportingPluginSync, triggertype.Manual, PlaybacksyncTask);
   } catch (error) {
-    PlaybacksyncTask.loggedData.push({ color: "red", Message: getErrorLineNumber(error) + ": Error: " + error });
-    await logging.updateLog(PlaybacksyncTask.uuid, PlaybacksyncTask.loggedData, taskstate.FAILED);
-    res.send("syncPlaybackPluginData Halted with Errors");
+    console.error(error);
+    res.status(500).send("Playback Plugin Sync failed");
   }
 });
 
@@ -1188,4 +1221,5 @@ module.exports = {
   router,
   fullSync,
   partialSync,
+  syncPlaybackPluginData,
 };

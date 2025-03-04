@@ -28,7 +28,9 @@ const utilsRouter = require("./routes/utils");
 
 // tasks
 const ActivityMonitor = require("./tasks/ActivityMonitor");
-const tasks = require("./tasks/tasks");
+const TaskManager = require("./classes/task-manager-singleton");
+const TaskScheduler = require("./classes/task-scheduler-singleton");
+// const tasks = require("./tasks/tasks");
 
 // websocket
 const { setupWebSocketServer } = require("./ws");
@@ -239,9 +241,8 @@ try {
       server.listen(PORT, LISTEN_IP, async () => {
         console.log(`[JELLYSTAT] Server listening on http://127.0.0.1:${PORT}`);
         ActivityMonitor.ActivityMonitor(1000);
-        tasks.FullSyncTask();
-        tasks.RecentlyAddedItemsSyncTask();
-        tasks.BackupTask();
+        new TaskManager();
+        new TaskScheduler();
       });
     });
   });

@@ -7,13 +7,14 @@ const dbHelper = require("../classes/db-helper");
 const pgp = require("pg-promise")();
 const { randomUUID } = require("crypto");
 
-const { axios } = require("../classes/axios");
 const configClass = require("../classes/config");
 const { checkForUpdates } = require("../version-control");
 const API = require("../classes/api-loader");
 const { sendUpdate } = require("../ws");
 const moment = require("moment");
 const { tables } = require("../global/backup_tables");
+const TaskScheduler = require("../classes/task-scheduler-singleton");
+const TaskManager = require("../classes/task-manager-singleton.js");
 
 const router = express.Router();
 
@@ -873,6 +874,9 @@ router.post("/setTaskSettings", async (req, res) => {
       let query = 'UPDATE app_config SET settings=$1 where "ID"=1';
 
       await db.query(query, [settings]);
+      const taskScheduler = new TaskScheduler().getInstance();
+      await taskScheduler.updateIntervalsFromDB();
+      await taskScheduler.getTaskHistory();
       res.status(200);
       res.send(tasksettings);
     } else {
@@ -1860,6 +1864,36 @@ router.post("/getActivityTimeLine", async (req, res) => {
     console.log(error);
     res.status(503);
     res.send(error);
+  }
+});
+
+//Tasks
+
+router.get("/stopTask", async (req, res) => {
+  const { task } = req.query;
+
+  if (task === undefined) {
+    res.status(400);
+    res.send("No Task provided");
+    return;
+  }
+  const taskManager = new TaskManager().getInstance();
+  if (taskManager.taskList[task] === undefined) {
+    res.status(404);
+    res.send("Task not found");
+    return;
+  }
+
+  const _task = taskManager.taskList[task];
+
+  if (taskManager.isTaskRunning(_task.name)) {
+    taskManager.stopTask(_task);
+    res.send("Task Stopped");
+    return;
+  } else {
+    res.status(400);
+    res.send("Task is not running");
+    return;
   }
 });
 

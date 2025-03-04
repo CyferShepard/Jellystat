@@ -6,16 +6,16 @@ const { randomUUID } = require("crypto");
 const multer = require("multer");
 
 const Logging = require("../classes/logging");
-const backup = require("../classes/backup");
 const triggertype = require("../logging/triggertype");
 const taskstate = require("../logging/taskstate");
 const taskName = require("../logging/taskName");
 const sanitizeFilename = require("../utils/sanitizer");
 
 const { sendUpdate } = require("../ws");
-const db = require("../db");
 
 const router = express.Router();
+const TaskManager = require("../classes/task-manager-singleton");
+const TaskScheduler = require("../classes/task-scheduler-singleton");
 
 // Database connection parameters
 const postgresUser = process.env.POSTGRES_USER;
@@ -114,31 +114,28 @@ async function restore(file, refLog) {
 // Route handler for backup endpoint
 router.get("/beginBackup", async (req, res) => {
   try {
-    const last_execution = await db
-      .query(
-        `SELECT "Result"
-    FROM public.jf_logging
-    WHERE "Name"='${taskName.backup}'
-    ORDER BY "TimeRun" DESC
-    LIMIT 1`
-      )
-      .then((res) => res.rows);
-
-    if (last_execution.length !== 0) {
-      if (last_execution[0].Result === taskstate.RUNNING) {
-        sendUpdate("TaskError", "Error: Backup is already running");
-        res.send();
-        return;
-      }
+    const taskManager = new TaskManager().getInstance();
+    const taskScheduler = new TaskScheduler().getInstance();
+    const success = taskManager.addTask({
+      task: taskManager.taskList.Backup,
+      onComplete: async () => {
+        console.log("Backup completed successfully");
+        await taskScheduler.getTaskHistory();
+        res.send("Backup completed successfully");
+      },
+      onError: (error) => {
+        console.error(error);
+        res.status(500).send("Backup failed");
+        sendUpdate("BackupTask", { type: "Error", message: "Error: Backup failed" });
+      },
+    });
+    if (!success) {
+      res.status(500).send("Backup already running");
+      sendUpdate("BackupTask", { type: "Error", message: "Backup is already running" });
+      return;
     }
 
-    const uuid = randomUUID();
-    let refLog = { logData: [], uuid: uuid };
-    await Logging.insertLog(uuid, triggertype.Manual, taskName.backup);
-    await backup(refLog);
-    Logging.updateLog(uuid, refLog.logData, taskstate.SUCCESS);
-    res.send("Backup completed successfully");
-    sendUpdate("TaskComplete", { message: triggertype + " Backup Completed" });
+    taskManager.startTask(taskManager.taskList.Backup, triggertype.Manual);
   } catch (error) {
     console.error(error);
     res.status(500).send("Backup failed");

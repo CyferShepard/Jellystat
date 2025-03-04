@@ -11,13 +11,21 @@ class JellyfinAPI {
   //Helper classes
   #checkReadyStatus() {
     let checkConfigError = setInterval(async () => {
-      const _config = await new configClass().getConfig();
-      if (!_config.error && _config.state === 2) {
+      const success = await this.#fetchConfig();
+      if (success) {
         clearInterval(checkConfigError);
-        this.config = _config;
-        this.configReady = true;
       }
     }, 5000); // Check every 5 seconds
+  }
+
+  async #fetchConfig() {
+    const _config = await new configClass().getConfig();
+    if (!_config.error && _config.state === 2) {
+      this.config = _config;
+      this.configReady = true;
+      return true;
+    }
+    return false;
   }
 
   #errorHandler(error, url) {
@@ -289,7 +297,10 @@ class JellyfinAPI {
 
   async getLibraries() {
     if (!this.configReady) {
-      return [];
+      const success = await this.#fetchConfig();
+      if (!success) {
+        return [];
+      }
     }
     try {
       let url = `${this.config.JF_HOST}/Library/MediaFolders`;

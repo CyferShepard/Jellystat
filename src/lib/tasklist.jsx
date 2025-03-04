@@ -17,7 +17,7 @@ export const taskList = [
   },
   {
     id: 2,
-    name: "Jellyfin Playback Reporting Plugin Sync",
+    name: "JellyfinPlaybackReportingPluginSync",
     description: <Trans i18nKey={"TASK_DESCRIPTION.Jellyfin_Playback_Reporting_Plugin_Sync"} />,
     type: "IMPORT",
     link: "/sync/syncPlaybackPluginData",

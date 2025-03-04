@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import axios from "../../../lib/axios_instance";
 import Table from "@mui/material/Table";
 import TableBody from "@mui/material/TableBody";
@@ -6,8 +6,9 @@ import TableCell from "@mui/material/TableCell";
 import TableContainer from "@mui/material/TableContainer";
 import TableHead from "@mui/material/TableHead";
 import TableRow from "@mui/material/TableRow";
-import { taskList } from "../../../lib/tasklist";
+import { taskList } from "../../../lib/tasklist.jsx";
 import Task from "./Task";
+import socket from "../../../socket";
 
 import "../../css/settings/settings.css";
 import { Trans } from "react-i18next";
@@ -16,6 +17,18 @@ export default function Tasks() {
   const [processing, setProcessing] = useState(false);
   const [taskIntervals, setTaskIntervals] = useState([]);
   const token = localStorage.getItem("token");
+  const [taskStateList, setTaskStateList] = useState();
+
+  useEffect(() => {
+    socket.on("task-list", (data) => {
+      if (typeof data === "object" && Array.isArray(data)) {
+        setTaskStateList(data);
+      }
+    });
+    return () => {
+      socket.off("task-list");
+    };
+  }, [taskStateList]);
 
   async function executeTask(url) {
     setProcessing(true);
@@ -31,6 +44,19 @@ export default function Tasks() {
         console.log(error);
       });
     setProcessing(false);
+  }
+
+  async function stopTask(task) {
+    await axios
+      .get(`/api/stopTask?task=${task}`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+      })
+      .catch((error) => {
+        console.log(error);
+      });
   }
 
   async function updateTaskSettings(taskName, Interval) {
@@ -100,15 +126,17 @@ export default function Tasks() {
           </TableHead>
           <TableBody>
             {taskList.map((task) => (
-              <Task 
-                key={task.id} 
-                task={task} 
-                processing={processing} 
+              <Task
+                key={task.id}
+                task={task}
+                taskState={taskStateList}
+                processing={processing}
                 taskIntervals={taskIntervals}
-                updateTask={updateTaskSettings} 
-                onClick={executeTask} 
-                />
-              ))}
+                updateTask={updateTaskSettings}
+                onClick={executeTask}
+                stopTask={stopTask}
+              />
+            ))}
           </TableBody>
         </Table>
       </TableContainer>
