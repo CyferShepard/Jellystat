@@ -234,8 +234,8 @@
   },
   "TIMELINE_PAGE": {
     "TIMELINE": "Timeline",
-    "EPISODES_one":"Episode",
-    "EPISODES_other":"Episodes"
+    "EPISODES_one": "Episode",
+    "EPISODES_other": "Episodes"
   },
   "SEARCH": "Search",
   "TOTAL": "Total",
@@ -270,6 +270,7 @@
   "FILE_NAME": "File Name",
   "DATE": "Date",
   "START": "Start",
+  "STOP": "Stop",
   "DOWNLOAD": "Download",
   "RESTORE": "Restore",
   "ACTIONS": "Actions",
