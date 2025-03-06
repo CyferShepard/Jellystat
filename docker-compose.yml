@@ -1,8 +1,6 @@
-version: '3'
-
 services:
   jellystat-db:
-    image: postgres:15.2
+    image: postgres:15
     shm_size: '1gb'
     container_name: jellystat-db
     restart: unless-stopped
@@ -12,31 +10,25 @@ services:
         max-file: "5"
         max-size: "10m"
     environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: mypassword
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    ports:
+      - "${POSTGRES_PORT}:5432"
     volumes:
       - postgres-data:/var/lib/postgresql/data
-
-  jellystat:
-    image: cyfershepard/jellystat:latest
-    container_name: jellystat
+  pgadmin:
+    image: dpage/pgadmin4
+    container_name: pgadmin
     restart: unless-stopped
-    logging:
-      driver: "json-file"
-      options:
-        max-file: "5"
-        max-size: "10m"
     environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: mypassword
-      POSTGRES_IP: jellystat-db
-      POSTGRES_PORT: 5432
-      JWT_SECRET: "my-secret-jwt-key"
-      TZ: mytimezone # timezone (ex: Europe/Paris)
-    volumes:
-      - jellystat-backup-data:/app/backend/backup-data
+      POSTGRES_USER:  ${POSTGRES_USER}  
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_EMAIL:-admin@admin.com}
+      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_PASSWORD:-admin}
     ports:
-      - "3000:3000"
+      - "5050:80"
+    volumes:
+      - pgadmin-data:/var/lib/pgadmin
     depends_on:
       - jellystat-db
       
@@ -46,3 +38,4 @@ networks:
 volumes:
   postgres-data:
   jellystat-backup-data:
+  pgadmin-data:
