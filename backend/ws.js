@@ -15,8 +15,14 @@ const setupWebSocketServer = (server, namespacePath) => {
     // console.log("Client connected to namespace:", namespacePath);
 
     socket.on("message", (message) => {
-      const payload = JSON.parse(message);
-      sendUpdate(payload.tag, payload.message);
+      try {
+        const payload = JSON.parse(message);
+        if (typeof payload === "object" && payload !== null) {
+          if (payload.tag && payload.message) {
+            sendUpdate(payload.tag, payload.message);
+          }
+        }
+      } catch (error) {}
     });
   });
 
