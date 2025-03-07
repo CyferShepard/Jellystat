@@ -454,7 +454,10 @@ class EmbyAPI {
 
   async getInstalledPlugins() {
     if (!this.configReady) {
-      return [];
+      const success = await this.#fetchConfig();
+      if (!success) {
+        return [];
+      }
     }
     try {
       let url = `${this.config.JF_HOST}/plugins`;
