@@ -543,6 +543,10 @@ async function syncPlaybackPluginData() {
     PlaybacksyncTask.loggedData.push({ color: "dodgerblue", Message: "Any imported data has been processed." });
 
     PlaybacksyncTask.loggedData.push({ color: "lawngreen", Message: `Playback Reporting Plugin Sync Complete` });
+
+    for (const view of db.materializedViews) {
+      await db.refreshMaterializedView(view);
+    }
     await logging.updateLog(PlaybacksyncTask.uuid, PlaybacksyncTask.loggedData, taskstate.SUCCESS);
   } catch (error) {
     PlaybacksyncTask.loggedData.push({ color: "red", Message: `Error: ${error}` });
