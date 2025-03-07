@@ -1,6 +1,8 @@
 const { Worker } = require("worker_threads");
 const TaskList = require("../global/task-list");
 const { sendUpdate } = require("../ws");
+const taskstate = require("../logging/taskstate");
+const db = require("../db");
 
 class TaskManager {
   constructor() {
@@ -35,7 +37,7 @@ class TaskManager {
       delete this.tasks[task.name];
     });
 
-    worker.on("exit", (code) => {
+    worker.on("exit", async (code) => {
       if (code !== 0) {
         console.error(`Worker ${task.name} stopped with exit code ${code}`);
       }
@@ -43,6 +45,13 @@ class TaskManager {
         onExit();
       }
       delete this.tasks[task.name];
+      try {
+        await db.query(
+          `UPDATE jf_logging SET "Result"='${taskstate.FAILED}' WHERE "Result"='${taskstate.RUNNING}' AND "Name"='${task.name}'`
+        );
+      } catch (error) {
+        console.log("Clear Running Tasks Error: " + error);
+      }
     });
 
     this.tasks[task.name] = { worker };

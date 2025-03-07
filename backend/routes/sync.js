@@ -1009,6 +1009,10 @@ router.get("/beginSync", async (req, res) => {
         res.status(500).send("Full Sync failed");
         sendUpdate("FullSyncTask", { type: "Error", message: "Error: Full Sync failed" });
       },
+      onExit: async () => {
+        await taskScheduler.getTaskHistory();
+        sendUpdate("FullSyncTask", { type: "Error", message: "Task Stopped" });
+      },
     });
     if (!success) {
       res.status(500).send("Full Sync already running");

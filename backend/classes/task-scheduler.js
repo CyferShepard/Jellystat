@@ -185,6 +185,10 @@ class TaskScheduler {
         await this.getTaskHistory();
         console.error(error);
       },
+      onExit: async () => {
+        await this.getTaskHistory();
+        sendUpdate("PartialSyncTask", { type: "Error", message: "Task Stopped" });
+      },
     });
     if (success) {
       this.taskManager.startTask(this.taskManager.taskList.PartialJellyfinSync, triggertype.Automatic);
@@ -201,6 +205,10 @@ class TaskScheduler {
       onError: async (error) => {
         await this.getTaskHistory();
         console.error(error);
+      },
+      onExit: async () => {
+        await this.getTaskHistory();
+        sendUpdate("FullSyncTask", { type: "Error", message: "Task Stopped" });
       },
     });
     if (success) {
