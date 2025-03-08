@@ -53,7 +53,7 @@ const ensureSlashes = (url) => {
 };
 
 const PORT = 3000;
-const LISTEN_IP = "0.0.0.0";
+const LISTEN_IP = process.env.JS_LISTEN_IP || "0.0.0.0";
 const JWT_SECRET = process.env.JWT_SECRET;
 const BASE_NAME = process.env.JS_BASE_URL ? ensureSlashes(process.env.JS_BASE_URL) : "";
 
@@ -239,7 +239,7 @@ try {
 
       setupWebSocketServer(server, BASE_NAME);
       server.listen(PORT, LISTEN_IP, async () => {
-        console.log(`[JELLYSTAT] Server listening on http://127.0.0.1:${PORT}`);
+        console.log(`[JELLYSTAT] Server listening on http://${LISTEN_IP}:${PORT}`);
         ActivityMonitor.ActivityMonitor(1000);
         new TaskManager();
         new TaskScheduler();
