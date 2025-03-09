@@ -30,6 +30,7 @@
 | POSTGRES_PASSWORD `REQUIRED`        | `null`   | `postgres`                      | Password that will be used in postgres database                                                                                          |
 | POSTGRES_IP `REQUIRED`              | `null`   | `jellystat-db` or `192.168.0.5` | Hostname/IP of postgres instance                                                                                                         |
 | POSTGRES_PORT `REQUIRED`            | `null`   | `5432`                          | Port Postgres is running on                                                                                                              |
+| JS_LISTEN_IP                        | `0.0.0.0`| `0.0.0.0` or `::`               | Enable listening on specific IP or `::` for IPv6 |
 | JWT_SECRET `REQUIRED`               | `null`   | `my-secret-jwt-key`             | JWT Key to be used to encrypt JWT tokens for authentication                                                                              |
 | TZ `REQUIRED`                       | `null`   | `Etc/UTC`                       | Server timezone (Can be found at https://en.wikipedia.org/wiki/List_of_tz_database_time_zones#List)                                      |
 | JS_BASE_URL                         | `/`      | `/`                             | Base url                                                                                                                                 |
