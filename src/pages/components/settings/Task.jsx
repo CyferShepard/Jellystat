@@ -31,7 +31,7 @@ function Task({ task, taskState, processing, taskIntervals, updateTask, onClick,
           <Dropdown className="w-100" key={task.id}>
             <Dropdown.Toggle variant="outline-primary" className="w-100 dropdown-basic">
               {taskIntervals &&
-                intervals.find((interval) => interval.value === (taskIntervals[task.name]?.Interval || 15)).display}
+                intervals.find((interval) => interval.value === (taskIntervals[task.name]?.Interval || 15))?.display}
             </Dropdown.Toggle>
             <Dropdown.Menu className="w-100">
               {taskIntervals &&
