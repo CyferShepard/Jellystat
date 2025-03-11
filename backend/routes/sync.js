@@ -145,6 +145,10 @@ async function syncLibraryFolders(data, existing_excluded_libraries) {
 
     await _sync.updateSingleFieldOnDB("jf_libraries", toArchiveLibraryIds, "archived", true);
   }
+
+  for (const view of db.materializedViews) {
+    await db.refreshMaterializedView(view);
+  }
   syncTask.loggedData.push({ color: "yellow", Message: "Library Sync Complete" });
 }
 async function syncLibraryItems(data) {
