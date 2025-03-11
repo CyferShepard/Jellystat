@@ -8,7 +8,8 @@
     "STATISTICS": "统计",
     "SETTINGS": "设置",
     "ABOUT": "关于",
-    "LOGOUT": "注销"
+    "LOGOUT": "注销",
+    "TIMELINE": "时间线"
   },
   "HOME_PAGE": {
     "SESSIONS": "会话",
@@ -18,8 +19,8 @@
   },
   "SESSIONS": {
     "NO_SESSIONS": "未找到活动会话",
-    "DIRECT_PLAY": "",
-    "TRANSCODE": ""
+    "DIRECT_PLAY": "直接播放",
+    "TRANSCODE": "转码"
   },
   "STAT_CARDS": {
     "MOST_VIEWED_MOVIES": "最多观看电影",
@@ -77,7 +78,8 @@
   "TAB_CONTROLS": {
     "OVERVIEW": "总览",
     "ACTIVITY": "活动",
-    "OPTIONS": "选项"
+    "OPTIONS": "选项",
+    "TIMELINE": "时间线"
   },
   "ITEM_ACTIVITY": "活动项目",
   "ACTIVITY_TABLE": {
@@ -116,7 +118,7 @@
     "PURGE_LIBRARY_CACHE_WITH_ACTIVITY": "清除已缓存媒体库、项目及活动",
     "PURGE_LIBRARY_ITEMS_CACHE": "仅清除已缓存媒体库项目",
     "PURGE_LIBRARY_ITEMS_CACHE_WITH_ACTIVITY": "仅清除已缓存媒体库项目和活动",
-    "PURGE_ACTIVITY": "确定要清除已选中的播放活动？"
+    "PURGE_ACTIVITY": "确定要删除已选中的播放活动？"
   },
   "ERROR_MESSAGES": {
     "FETCH_THIS_ITEM": "从 Jellyfin 获取此项目",
@@ -179,7 +181,7 @@
     "SIZE": "大小",
     "JELLYFIN_URL": "Jellyfin URL",
     "EMBY_URL": "Emby URL",
-    "EXTERNAL_URL": "External URL",
+    "EXTERNAL_URL": "外部链接",
     "API_KEY": "API 密钥",
     "API_KEYS": "API 密钥",
     "KEY_NAME": "密钥名称",
@@ -231,7 +233,7 @@
     "Backup": "备份 Jellystat"
   },
   "SEARCH": "搜索",
-  "TOTAL": "Total",
+  "TOTAL": "总计",
   "LAST": "过去",
   "SERIES": "剧集",
   "SEASON": "季",
@@ -283,7 +285,7 @@
   "SOURCE_DETAILS": "媒体源信息",
   "DIRECT": "直接播放",
   "TRANSCODE": "转码",
-  "DIRECT_STREAM": "直接流",
+  "DIRECT_STREAM": "直接串流",
   "USERNAME": "用户名",
   "PASSWORD": "密码",
   "LOGIN": "登录",
@@ -306,5 +308,9 @@
   "POSTCODE": "邮编",
   "X_ROWS_SELECTED": "已选中 {ROWS} 行",
   "TRANSCODE_REASONS": "转码原因",
-  "SUBTITLES": ""
+  "SUBTITLES": "字幕",
+  "TIMELINE_PAGE": {
+    "TIMELINE": "时间线",
+    "EPISODES": "集数"
+  }
 }
