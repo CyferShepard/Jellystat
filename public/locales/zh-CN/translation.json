@@ -283,6 +283,7 @@
   "SOURCE_DETAILS": "媒体源信息",
   "DIRECT": "直接播放",
   "TRANSCODE": "转码",
+  "DIRECT_STREAM": "直接流",
   "USERNAME": "用户名",
   "PASSWORD": "密码",
   "LOGIN": "登录",

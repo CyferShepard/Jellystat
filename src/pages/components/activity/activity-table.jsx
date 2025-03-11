@@ -215,6 +215,37 @@ export default function ActivityTable(props) {
       },
     },
     {
+      accessorKey: "PlayMethod",
+      header: i18next.t("TRANSCODE"),
+      size: 150,
+      Cell: ({ row }) => {
+        row = row.original;
+        if (row.PlayMethod === "Transcode") {
+          return (
+            <span className="text-warning" style={{ fontWeight: 'bold' }}>
+              {i18next.t("TRANSCODE")}
+              {row.TranscodingInfo ? 
+                <span>
+                  {!row.TranscodingInfo.IsVideoDirect && 
+                    <span> ({i18next.t("VIDEO")})</span>
+                  }
+                  {!row.TranscodingInfo.IsAudioDirect && 
+                    <span> ({i18next.t("AUDIO")})</span>
+                  }
+                </span> : ""
+              }
+            </span>
+          );
+        } else if (row.PlayMethod === "DirectPlay") {
+          return <span className="text-success" style={{ fontWeight: 'bold' }}>{i18next.t("DIRECT")}</span>;
+        } else if (row.PlayMethod === "DirectStream") {
+          return <span className="text-info" style={{ fontWeight: 'bold' }}>{i18next.t("DIRECT_STREAM")}</span>;
+        } else {
+          return <span style={{ color: 'gray' }}>-</span>;
+        }
+      },
+    },
+    {
       accessorKey: "DeviceName",
       header: i18next.t("ACTIVITY_TABLE.DEVICE"),
     },
