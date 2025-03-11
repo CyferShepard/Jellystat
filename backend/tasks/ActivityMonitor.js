@@ -17,12 +17,16 @@ async function getSessionsInWatchDog(SessionData, WatchdogData) {
       let matchesEpisodeId =
         sessionData.NowPlayingItem.SeriesId != undefined ? wdData.EpisodeId === sessionData.NowPlayingItem.Id : true;
 
+      // check if the same device
+      let sameDevice = wdData.DeviceId === sessionData.DeviceId;
+
       let matchingSessionFound =
         // wdData.Id === sessionData.Id &&
         wdData.UserId === sessionData.UserId &&
         wdData.DeviceId === sessionData.DeviceId &&
         wdData.NowPlayingItemId === NowPlayingItemId &&
-        matchesEpisodeId;
+        matchesEpisodeId &&
+        sameDevice;
 
       if (matchingSessionFound && wdData.IsPaused != sessionData.PlayState.IsPaused) {
         wdData.IsPaused = sessionData.PlayState.IsPaused;
@@ -58,12 +62,15 @@ async function getSessionsNotInWatchDog(SessionData, WatchdogData) {
       let matchesEpisodeId =
         sessionData.NowPlayingItem.SeriesId != undefined ? wdData.EpisodeId === sessionData.NowPlayingItem.Id : true;
 
+      let sameDevice = wdData.DeviceId === sessionData.DeviceId;
+
       let matchingSessionFound =
         // wdData.Id === sessionData.Id &&
         wdData.UserId === sessionData.UserId &&
         wdData.DeviceId === sessionData.DeviceId &&
         wdData.NowPlayingItemId === NowPlayingItemId &&
-        matchesEpisodeId;
+        matchesEpisodeId &&
+        sameDevice;
 
       return matchingSessionFound;
     });
@@ -81,12 +88,16 @@ function getWatchDogNotInSessions(SessionData, WatchdogData) {
       let matchesEpisodeId =
         sessionData.NowPlayingItem.SeriesId != undefined ? wdData.EpisodeId === sessionData.NowPlayingItem.Id : true;
 
+      let sameDevice = wdData.DeviceId === sessionData.DeviceId;
+
       let noMatchingSessionFound =
         // wdData.Id === sessionData.Id &&
         wdData.UserId === sessionData.UserId &&
         wdData.DeviceId === sessionData.DeviceId &&
         wdData.NowPlayingItemId === NowPlayingItemId &&
-        matchesEpisodeId;
+        matchesEpisodeId &&
+        sameDevice;
+        
       return noMatchingSessionFound;
     });
   });
@@ -191,11 +202,16 @@ async function ActivityMonitor(interval) {
                 (Number(existing.PlaybackDuration) + Number(playbackData.PlaybackDuration)) * 10000000 <=
                 Number(existing.RunTimeTicks);
             }
+            
+            // check if user switched playback device
+            const sameDevice = existing.DeviceId === playbackData.DeviceId;
+            
             return (
               existing.NowPlayingItemId === playbackData.NowPlayingItemId &&
               existing.EpisodeId === playbackData.EpisodeId &&
               existing.UserId === playbackData.UserId &&
-              newDurationWithingRunTime
+              newDurationWithingRunTime &&
+              sameDevice
             );
           });
 
@@ -214,7 +230,11 @@ async function ActivityMonitor(interval) {
         (pb) =>
           pb.PlaybackDuration >= MINIMUM_SECONDS_TO_INCLUDE_PLAYBACK &&
           !ExistingRecords.some(
-            (er) => er.NowPlayingItemId === pb.NowPlayingItemId && er.EpisodeId === pb.EpisodeId && er.UserId === pb.UserId
+            (er) => 
+              er.NowPlayingItemId === pb.NowPlayingItemId && 
+              er.EpisodeId === pb.EpisodeId && 
+              er.UserId === pb.UserId &&
+              er.DeviceId === pb.DeviceId
           )
       );
 
