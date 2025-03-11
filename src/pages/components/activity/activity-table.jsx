@@ -59,6 +59,7 @@ const token = localStorage.getItem("token");
 
 export default function ActivityTable(props) {
   const twelve_hr = JSON.parse(localStorage.getItem("12hr"));
+  const localization = localStorage.getItem("i18nextLng");
   const [data, setData] = React.useState(props.data ?? []);
   const pages = props.pageCount || 1;
   const isBusy = props.isBusy;
@@ -266,7 +267,7 @@ export default function ActivityTable(props) {
           hour12: twelve_hr,
         };
         row = row.original;
-        return <span>{Intl.DateTimeFormat("en-UK", options).format(new Date(row.ActivityDateInserted))}</span>;
+        return <span>{Intl.DateTimeFormat(localization, options).format(new Date(row.ActivityDateInserted))}</span>;
       },
     },
     {

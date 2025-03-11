@@ -160,7 +160,7 @@ export default function SettingsConfig() {
                 name="JS_USERNAME"
                 value={formValues.JS_USERNAME || ""}
                 onChange={handleFormChange}
-                t
+                autoComplete="username"
               />
             </InputGroup>
           </Col>
@@ -178,6 +178,7 @@ export default function SettingsConfig() {
                 value={formValues.JS_C_PASSWORD || ""}
                 onChange={handleFormChange}
                 type={showCurrentPassword ? "text" : "password"}
+                autoComplete="current-password"
               />
               <Button variant="outline-primary" type="button" onClick={() => setShowCurrentPassword(!showCurrentPassword)}>
                 {showCurrentPassword ? <EyeFillIcon /> : <EyeOffFillIcon />}
@@ -198,6 +199,7 @@ export default function SettingsConfig() {
                 value={formValues.JS_PASSWORD || ""}
                 onChange={handleFormChange}
                 type={showPassword ? "text" : "password"}
+                autoComplete="new-password"
               />
               <Button variant="outline-primary" type="button" onClick={() => setShowPassword(!showPassword)}>
                 {showPassword ? <EyeFillIcon /> : <EyeOffFillIcon />}

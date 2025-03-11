@@ -215,5 +215,8 @@ module.exports = {
   insertBulk: insertBulk,
   updateSingleFieldBulk: updateSingleFieldBulk,
   querySingle: querySingle,
+  refreshMaterializedView: refreshMaterializedView,
+  materializedViews: materializedViews,
+
   // initDB: initDB,
 };

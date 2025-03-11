@@ -148,7 +148,7 @@ function GlobalStats(props) {
             return (
               <div key={stat.key} style={{ padding: "10px" }}>
                 <FormControlLabel
-                  control={<Checkbox checked={!prefs.includes(stat.key)} onChange={() => toggleStat(stat)} name={stat.heading} />}
+                  control={<Checkbox checked={!prefs.includes(stat.key)} onChange={() => toggleStat(stat)} />}
                   label={stat.heading}
                 />
               </div>
@@ -158,7 +158,7 @@ function GlobalStats(props) {
       </div>
       <div className="global-stats-container">
         {stats.map((stat) => {
-          if (!prefs.includes(stat.key)) return <WatchTimeStats data={stat.data} heading={stat.heading} />;
+          if (!prefs.includes(stat.key)) return <WatchTimeStats key={stat.key} data={stat.data} heading={stat.heading} />;
         })}
       </div>
     </div>

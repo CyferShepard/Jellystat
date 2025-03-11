@@ -1,10 +1,9 @@
 const { parentPort } = require("worker_threads");
-const triggertype = require("../logging/triggertype");
 const sync = require("../routes/sync");
 
-async function runFullSyncTask(triggerType = triggertype.Automatic) {
+async function runPlaybackReportingPluginSyncTask() {
   try {
-    await sync.fullSync(triggerType);
+    await sync.syncPlaybackPluginData();
 
     parentPort.postMessage({ status: "complete" });
   } catch (error) {
@@ -17,6 +16,6 @@ async function runFullSyncTask(triggerType = triggertype.Automatic) {
 
 parentPort.on("message", (message) => {
   if (message.command === "start") {
-    runFullSyncTask(message.triggertype);
+    runPlaybackReportingPluginSyncTask();
   }
 });
