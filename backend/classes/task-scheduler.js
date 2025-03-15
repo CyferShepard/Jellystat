@@ -4,6 +4,7 @@ const TaskList = require("../global/task-list");
 const { sendUpdate } = require("../ws");
 const triggertype = require("../logging/triggertype");
 const taskstate = require("../logging/taskstate");
+const configClass = require("../classes/config");
 
 class TaskScheduler {
   constructor() {
@@ -37,6 +38,17 @@ class TaskScheduler {
   }
 
   async initializeTasks() {
+    let canTaskSchedulerRun = false;
+    const _config = new configClass();
+
+    while (!canTaskSchedulerRun) {
+      const config = await _config.getConfig();
+      if (config.error || config.state != 2) {
+        await this.delay(10000);
+      } else {
+        canTaskSchedulerRun = true;
+      }
+    }
     await this.updateIntervalsFromDB();
     await this.getTaskHistory();
     await this.clearRunningTasks();
@@ -131,7 +143,7 @@ class TaskScheduler {
         const currentTime = new Date().getTime();
         if (!lastRun) {
           const nextRunTime = currentTime + interval * 60000;
-          this.defaultIntervals[taskEnumKey].NextRunTime = taskEnumKey == "JellyfinSync" ? 0 : nextRunTime;
+          this.defaultIntervals[taskEnumKey].NextRunTime = taskEnumKey == "JellyfinSync" ? 10000 : nextRunTime;
         } else {
           const lastRunTime = new Date(lastRun.TimeRun).getTime();
           const nextRunTime = lastRunTime + interval * 60000;
