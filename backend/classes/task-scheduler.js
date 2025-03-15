@@ -105,7 +105,7 @@ class TaskScheduler {
           if (taskSettings.Interval) {
             this.defaultIntervals[taskEnumKey].Interval = taskSettings.Interval;
           } else {
-            taskSettings.Interval = this.defaultIntervals[taskEnumKey];
+            taskSettings.Interval = this.defaultIntervals[taskEnumKey].Interval;
           }
 
           if (!settings.Tasks) {
