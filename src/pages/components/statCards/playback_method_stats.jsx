@@ -11,7 +11,7 @@ function PlaybackMethodStats(props) {
   const translations = {
     DirectPlay: <Trans i18nKey="DIRECT" />,
     Transcode: <Trans i18nKey="TRANSCODE" />,
-    DirectStream: <Trans i18nKey="DIRECT_STREAM" />,
+    DirectStream: <Trans i18nKey="DIRECT_STREAM" />
   };
   const chartIcon = <BarChartGroupedLineIcon size={"100%"} />;
 
@@ -79,9 +79,15 @@ function PlaybackMethodStats(props) {
   return (
     <ItemStatComponent
       base_url={config.settings?.EXTERNAL_URL ?? config.hostUrl}
-      data={data.map((stream) =>
-        stream.Name == "DirectPlay" ? { ...stream, Name: translations.DirectPlay } : stream.Name == "DirectStream" ? { ...stream, Name: translations.DirectStream } : { ...stream, Name: translations.Transcode }
-      )}
+      data={data.map((stream) => {
+        if (stream.Name === "DirectPlay") {
+          return { ...stream, Name: translations.DirectPlay };
+        } else if (stream.Name === "DirectStream") {
+          return { ...stream, Name: translations.DirectStream };
+        } else {
+          return { ...stream, Name: translations.Transcode };
+        }
+      })}
       icon={chartIcon}
       heading={<Trans i18nKey="STAT_CARDS.CONCURRENT_STREAMS" />}
       units={<Trans i18nKey="UNITS.STREAMS" />}
