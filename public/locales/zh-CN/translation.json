@@ -232,6 +232,10 @@
     "GITHUB": "Github",
     "Backup": "备份 Jellystat"
   },
+  "TIMELINE_PAGE": {
+    "TIMELINE": "时间线",
+    "EPISODES": "集数"
+  },
   "SEARCH": "搜索",
   "TOTAL": "总计",
   "LAST": "过去",
@@ -309,9 +313,5 @@
   "POSTCODE": "邮编",
   "X_ROWS_SELECTED": "已选中 {ROWS} 行",
   "TRANSCODE_REASONS": "转码原因",
-  "SUBTITLES": "字幕",
-  "TIMELINE_PAGE": {
-    "TIMELINE": "时间线",
-    "EPISODES": "集数"
-  }
+  "SUBTITLES": "字幕"
 }

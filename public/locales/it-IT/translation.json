@@ -228,6 +228,11 @@
     "GITHUB": "Github",
     "Backup": "Backup Jellystat"
   },
+  "TIMELINE_PAGE": {
+    "TIMELINE": "Cronologia",
+    "EPISODES_one": "Episodio",
+    "EPISODES_other": "Episodi"
+  },
   "SEARCH": "Cerca",
   "TOTAL": "Totale",
   "LAST": "Ultimo",
@@ -303,5 +308,7 @@
   "LONGITUDE": "Longitudine",
   "TIMEZONE": "Fuso orario",
   "POSTCODE": "CAP",
-  "X_ROWS_SELECTED": "{ROWS} righe selezionate"
+  "X_ROWS_SELECTED": "{ROWS} righe selezionate",
+  "TRANSCODE_REASONS": "",
+  "SUBTITLES": ""
 }

@@ -313,5 +313,6 @@
   "TIMEZONE": "Fuseau horaire",
   "POSTCODE": "Code postal",
   "X_ROWS_SELECTED": "{ROWS} Ligne(s) sélectionnée(s)",
+  "TRANSCODE_REASONS": "",
   "SUBTITLES": ""
 }

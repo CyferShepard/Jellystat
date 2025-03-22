@@ -28,6 +28,7 @@ const groupedSortMap = [
   { field: "ActivityDateInserted", column: "a.ActivityDateInserted" },
   { field: "PlaybackDuration", column: `COALESCE(ar."TotalDuration", a."PlaybackDuration")` },
   { field: "TotalPlays", column: `COALESCE("TotalPlays",1)` },
+  { field: "PlayMethod", column: "a.PlayMethod" },
 ];
 
 const unGroupedSortMap = [
@@ -38,6 +39,7 @@ const unGroupedSortMap = [
   { field: "DeviceName", column: "a.DeviceName" },
   { field: "ActivityDateInserted", column: "a.ActivityDateInserted" },
   { field: "PlaybackDuration", column: "a.PlaybackDuration" },
+  { field: "PlayMethod", column: "a.PlayMethod" },
 ];
 
 const filterFields = [
@@ -57,6 +59,7 @@ const filterFields = [
   { field: "ActivityDateInserted", column: "a.ActivityDateInserted", isColumn: true },
   { field: "PlaybackDuration", column: `a.PlaybackDuration`, isColumn: true, applyToCTE: true },
   { field: "TotalPlays", column: `COALESCE("TotalPlays",1)` },
+  { field: "PlayMethod", column: `LOWER(a."PlayMethod")` },
 ];
 
 //Functions
