@@ -218,7 +218,6 @@ export default function ActivityTable(props) {
     {
       accessorKey: "PlayMethod",
       header: i18next.t("TRANSCODE"),
-      size: 150,
       Cell: ({ row }) => {
         row = row.original;
         if (row.PlayMethod === "Transcode") {
