@@ -222,24 +222,38 @@ export default function ActivityTable(props) {
         row = row.original;
         if (row.PlayMethod === "Transcode") {
           return (
-            <span className="text-secondary-custom">
-              {i18next.t("TRANSCODE")}
-              {row.TranscodingInfo ? (
-                <span>
-                  {!row.TranscodingInfo.IsVideoDirect && <span> ({i18next.t("VIDEO")})</span>}
-                  {!row.TranscodingInfo.IsAudioDirect && <span> ({i18next.t("AUDIO")})</span>}
-                </span>
-              ) : (
-                ""
-              )}
-            </span>
+            <Link onClick={() => openModal(row)} className="text-decoration-none">
+              <span className="text-secondary-custom">
+                {i18next.t("TRANSCODE")}
+                {row.TranscodingInfo ? (
+                  <span>
+                    {!row.TranscodingInfo.IsVideoDirect && <span> ({i18next.t("VIDEO")})</span>}
+                    {!row.TranscodingInfo.IsAudioDirect && <span> ({i18next.t("AUDIO")})</span>}
+                  </span>
+                ) : (
+                  ""
+                )}
+              </span>
+            </Link>
           );
         } else if (row.PlayMethod === "DirectPlay") {
-          return <span>{i18next.t("DIRECT")}</span>;
+          return (
+            <Link onClick={() => openModal(row)} className="text-decoration-none">
+              {i18next.t("DIRECT")}{" "}
+            </Link>
+          );
         } else if (row.PlayMethod === "DirectStream") {
-          return <span>{i18next.t("DIRECT_STREAM")}</span>;
+          return (
+            <Link onClick={() => openModal(row)} className="text-decoration-none">
+              {i18next.t("DIRECT_STREAM")}{" "}
+            </Link>
+          );
         } else {
-          return <span style={{ color: "gray" }}>-</span>;
+          return (
+            <Link onClick={() => openModal(row)} className="text-decoration-none" style={{ color: "gray" }}>
+              -
+            </Link>
+          );
         }
       },
     },
@@ -558,7 +572,8 @@ export default function ActivityTable(props) {
       <Modal show={modalState} onHide={() => setModalState(false)}>
         <Modal.Header>
           <Modal.Title>
-            <Trans i18nKey="ACTIVITY_TABLE.MODAL.HEADER" />:
+            <Trans i18nKey="ACTIVITY_TABLE.MODAL.HEADER" />
+            {": "}
             {!modalData?.SeriesName
               ? modalData?.NowPlayingItemName
               : modalData?.SeriesName + " - " + modalData?.NowPlayingItemName}{" "}
