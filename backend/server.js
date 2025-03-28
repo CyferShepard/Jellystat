@@ -50,8 +50,8 @@ const ensureSlashes = (url) => {
   return url;
 };
 
-const PORT = process.env.PORT;
-const LISTEN_IP = "0.0.0.0";
+const PORT = process.env.PORT || 3000;
+const LISTEN_IP = process.env.LISTEN_IP || "0.0.0.0";
 const JWT_SECRET = process.env.JWT_SECRET;
 const BASE_NAME = process.env.JS_BASE_URL ? ensureSlashes(process.env.JS_BASE_URL) : "";
 
