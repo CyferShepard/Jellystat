@@ -16,7 +16,7 @@ const client = new Client({
 const createDatabase = async () => {
   try {
     await client.connect(); // gets connection
-    await client.query('CREATE DATABASE ' + _POSTGRES_DATABASE); // sends queries
+    await client.query(CREATE DATABASE IF NOT EXIST _POSTGRES_DATABASE); // sends queries
     return true;
   } catch (error) {
     if (!error.stack.includes('already exists')) {
