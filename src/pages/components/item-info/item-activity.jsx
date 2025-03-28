@@ -122,7 +122,7 @@ function ItemActivity(props) {
   // }
 
   filteredData = filteredData.filter((item) =>
-    streamTypeFilter == "All"
+    streamTypeFilter === "All"
       ? true
       : item.PlayMethod === (config?.IS_JELLYFIN ? streamTypeFilter : streamTypeFilter.replace("Play", "Stream"))
   );
@@ -154,6 +154,9 @@ function ItemActivity(props) {
               </option>
               <option value="DirectPlay">
                 <Trans i18nKey="DIRECT" />
+              </option>
+              <option value="DirectStream">
+                <Trans i18nKey="DirectStream" /> (<Trans i18nKey="DirectStream" />)
               </option>
             </FormSelect>
           </div>

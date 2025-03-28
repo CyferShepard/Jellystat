@@ -59,6 +59,7 @@ const token = localStorage.getItem("token");
 
 export default function ActivityTable(props) {
   const twelve_hr = JSON.parse(localStorage.getItem("12hr"));
+  const localization = localStorage.getItem("i18nextLng");
   const [data, setData] = React.useState(props.data ?? []);
   const pages = props.pageCount || 1;
   const isBusy = props.isBusy;
@@ -215,6 +216,48 @@ export default function ActivityTable(props) {
       },
     },
     {
+      accessorKey: "PlayMethod",
+      header: i18next.t("TRANSCODE"),
+      Cell: ({ row }) => {
+        row = row.original;
+        if (row.PlayMethod === "Transcode") {
+          return (
+            <Link onClick={() => openModal(row)} className="text-decoration-none">
+              <span className="text-secondary-custom">
+                {i18next.t("TRANSCODE")}
+                {row.TranscodingInfo ? (
+                  <span>
+                    {!row.TranscodingInfo.IsVideoDirect && <span> ({i18next.t("VIDEO")})</span>}
+                    {!row.TranscodingInfo.IsAudioDirect && <span> ({i18next.t("AUDIO")})</span>}
+                  </span>
+                ) : (
+                  ""
+                )}
+              </span>
+            </Link>
+          );
+        } else if (row.PlayMethod === "DirectPlay") {
+          return (
+            <Link onClick={() => openModal(row)} className="text-decoration-none">
+              {i18next.t("DIRECT")}{" "}
+            </Link>
+          );
+        } else if (row.PlayMethod === "DirectStream") {
+          return (
+            <Link onClick={() => openModal(row)} className="text-decoration-none">
+              {i18next.t("DIRECT_STREAM")}{" "}
+            </Link>
+          );
+        } else {
+          return (
+            <Link onClick={() => openModal(row)} className="text-decoration-none" style={{ color: "gray" }}>
+              -
+            </Link>
+          );
+        }
+      },
+    },
+    {
       accessorKey: "DeviceName",
       header: i18next.t("ACTIVITY_TABLE.DEVICE"),
     },
@@ -235,7 +278,7 @@ export default function ActivityTable(props) {
           hour12: twelve_hr,
         };
         row = row.original;
-        return <span>{Intl.DateTimeFormat("en-UK", options).format(new Date(row.ActivityDateInserted))}</span>;
+        return <span>{Intl.DateTimeFormat(localization, options).format(new Date(row.ActivityDateInserted))}</span>;
       },
     },
     {
@@ -529,7 +572,8 @@ export default function ActivityTable(props) {
       <Modal show={modalState} onHide={() => setModalState(false)}>
         <Modal.Header>
           <Modal.Title>
-            <Trans i18nKey="ACTIVITY_TABLE.MODAL.HEADER" />:
+            <Trans i18nKey="ACTIVITY_TABLE.MODAL.HEADER" />
+            {": "}
             {!modalData?.SeriesName
               ? modalData?.NowPlayingItemName
               : modalData?.SeriesName + " - " + modalData?.NowPlayingItemName}{" "}

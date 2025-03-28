@@ -1,25 +1,34 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import axios from "../../../lib/axios_instance";
-import Button from "react-bootstrap/Button";
-
 import Table from "@mui/material/Table";
 import TableBody from "@mui/material/TableBody";
 import TableCell from "@mui/material/TableCell";
 import TableContainer from "@mui/material/TableContainer";
 import TableHead from "@mui/material/TableHead";
 import TableRow from "@mui/material/TableRow";
-import Dropdown from "react-bootstrap/Dropdown";
-
-import { taskList } from "../../../lib/tasklist";
+import { taskList } from "../../../lib/tasklist.jsx";
+import Task from "./Task";
+import socket from "../../../socket";
 
 import "../../css/settings/settings.css";
 import { Trans } from "react-i18next";
-import i18next from "i18next";
 
 export default function Tasks() {
   const [processing, setProcessing] = useState(false);
   const [taskIntervals, setTaskIntervals] = useState([]);
   const token = localStorage.getItem("token");
+  const [taskStateList, setTaskStateList] = useState();
+
+  useEffect(() => {
+    socket.on("task-list", (data) => {
+      if (typeof data === "object" && Array.isArray(data)) {
+        setTaskStateList(data);
+      }
+    });
+    return () => {
+      socket.off("task-list");
+    };
+  }, [taskStateList]);
 
   async function executeTask(url) {
     setProcessing(true);
@@ -35,6 +44,19 @@ export default function Tasks() {
         console.log(error);
       });
     setProcessing(false);
+  }
+
+  async function stopTask(task) {
+    await axios
+      .get(`/api/stopTask?task=${task}`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+      })
+      .catch((error) => {
+        console.log(error);
+      });
   }
 
   async function updateTaskSettings(taskName, Interval) {
@@ -81,21 +103,11 @@ export default function Tasks() {
     getTaskSettings();
   }
 
-  const intervals = [
-    { value: 15, display: i18next.t("SETTINGS_PAGE.INTERVALS.15_MIN") },
-    { value: 30, display: i18next.t("SETTINGS_PAGE.INTERVALS.30_MIN") },
-    { value: 60, display: i18next.t("SETTINGS_PAGE.INTERVALS.1_HOUR") },
-    { value: 720, display: i18next.t("SETTINGS_PAGE.INTERVALS.12_HOURS") },
-    { value: 1440, display: i18next.t("SETTINGS_PAGE.INTERVALS.1_DAY") },
-    { value: 10080, display: i18next.t("SETTINGS_PAGE.INTERVALS.1_WEEK") },
-  ];
-
   return (
     <div className="tasks">
       <h1 className="py-3">
         <Trans i18nKey={"SETTINGS_PAGE.TASKS"} />
       </h1>
-
       <TableContainer className="rounded-2">
         <Table aria-label="collapsible table">
           <TableHead>
@@ -109,54 +121,22 @@ export default function Tasks() {
               <TableCell>
                 <Trans i18nKey={"SETTINGS_PAGE.INTERVAL"} />
               </TableCell>
-              <TableCell></TableCell>
+              <TableCell />
             </TableRow>
           </TableHead>
           <TableBody>
-            {taskList &&
-              taskList.map((task) => (
-                <TableRow key={task.id}>
-                  <TableCell>{task.description}</TableCell>
-                  <TableCell>
-                    <Trans i18nKey={task.type} />
-                  </TableCell>
-
-                  <TableCell>
-                    {task.type.props.i18nKey === "TASK_TYPE.JOB" ? (
-                      <Dropdown className="w-100" key={task.id}>
-                        <Dropdown.Toggle variant="outline-primary" id="dropdown-basic" className="w-100">
-                          {taskIntervals &&
-                            intervals.find((interval) => interval.value === (taskIntervals[task.name]?.Interval || 15)).display}
-                        </Dropdown.Toggle>
-                        <Dropdown.Menu className="w-100">
-                          {taskIntervals &&
-                            intervals.map((interval) => (
-                              <Dropdown.Item
-                                onClick={() => updateTaskSettings(task.name, interval.value)}
-                                value={interval.value}
-                                key={interval.value}
-                              >
-                                {interval.display}
-                              </Dropdown.Item>
-                            ))}
-                        </Dropdown.Menu>
-                      </Dropdown>
-                    ) : (
-                      <></>
-                    )}
-                  </TableCell>
-                  <TableCell className="d-flex justify-content-center">
-                    {" "}
-                    <Button
-                      variant={!processing ? "outline-primary" : "outline-light"}
-                      disabled={processing}
-                      onClick={() => executeTask(task.link)}
-                    >
-                      <Trans i18nKey={"START"} />
-                    </Button>
-                  </TableCell>
-                </TableRow>
-              ))}
+            {taskList.map((task) => (
+              <Task
+                key={task.id}
+                task={task}
+                taskState={taskStateList}
+                processing={processing}
+                taskIntervals={taskIntervals}
+                updateTask={updateTaskSettings}
+                onClick={executeTask}
+                stopTask={stopTask}
+              />
+            ))}
           </TableBody>
         </Table>
       </TableContainer>

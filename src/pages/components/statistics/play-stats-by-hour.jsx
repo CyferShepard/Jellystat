@@ -55,7 +55,7 @@ function PlayStatsByHour(props) {
       <div className="statistics-widget small">
         <h1><Trans i18nKey={"STAT_PAGE.PLAY_COUNT_BY"}/> <Trans i18nKey={"UNITS.HOUR"}/>  - <Trans i18nKey={"LAST"}/> {days} <Trans i18nKey={`UNITS.DAY${days>1 ? 'S':''}`}/></h1>
 
-        <h1>No Stats to display</h1>
+        <h5><Trans i18nKey={"ERROR_MESSAGES.NO_STATS"}/></h5>
       </div>
     );
   }

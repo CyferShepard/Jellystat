@@ -6,19 +6,27 @@ class EmbyAPI {
     this.config = null;
     this.configReady = false;
     this.#checkReadyStatus();
+    this.sessionErrorCounter = 0;
   }
   //Helper classes
   #checkReadyStatus() {
     let checkConfigError = setInterval(async () => {
-      const _config = await new configClass().getConfig();
-      if (!_config.error && _config.state === 2) {
+      const success = await this.#fetchConfig();
+      if (success) {
         clearInterval(checkConfigError);
-        this.config = _config;
-        this.configReady = true;
       }
     }, 5000); // Check every 5 seconds
   }
 
+  async #fetchConfig() {
+    const _config = await new configClass().getConfig();
+    if (!_config.error && _config.state === 2) {
+      this.config = _config;
+      this.configReady = true;
+      return true;
+    }
+    return false;
+  }
   #errorHandler(error, url) {
     if (error.response) {
       console.log("[EMBY-API]: " + this.#httpErrorMessageHandler(error));
@@ -59,6 +67,9 @@ class EmbyAPI {
 
   #getErrorLineNumber(error) {
     const stackTrace = this.#getStackTrace(error);
+    if (stackTrace.length < 1) {
+      return "Unknown";
+    }
     const errorLine = stackTrace[1].trim();
     const lineNumber = errorLine.substring(errorLine.lastIndexOf("\\") + 1, errorLine.lastIndexOf(")"));
     return lineNumber;
@@ -82,6 +93,7 @@ class EmbyAPI {
   }
 
   #getStackTrace(error) {
+    if (!error.stack) return [];
     const stackTrace = error.stack.split("\n");
     return stackTrace;
   }
@@ -287,7 +299,10 @@ class EmbyAPI {
 
   async getLibraries() {
     if (!this.configReady) {
-      return [];
+      const success = await this.#fetchConfig();
+      if (!success) {
+        return [];
+      }
     }
     try {
       let url = `${this.config.JF_HOST}/Library/MediaFolders`;
@@ -400,11 +415,26 @@ class EmbyAPI {
     try {
       let url = `${this.config.JF_HOST}/sessions`;
 
-      const response = await axios.get(url, {
-        headers: {
-          "X-MediaBrowser-Token": this.config.JF_API_KEY,
-        },
-      });
+      const response = await axios
+        .get(url, {
+          headers: {
+            "X-MediaBrowser-Token": this.config.JF_API_KEY,
+          },
+        })
+        .then((response) => {
+          if (this.sessionErrorCounter > 0) {
+            console.log("[EMBY-API]: /sessions - Connection restored");
+            this.sessionErrorCounter = 0;
+          }
+          return response;
+        })
+        .catch((error) => {
+          if (this.sessionErrorCounter == 0) {
+            this.sessionErrorCounter++;
+            console.log("[EMBY-API]: /sessions - Unable to connect. Please check the URL and your network connection");
+          }
+          return { data: [] };
+        });
       let result = response.data && Array.isArray(response.data) ? response.data : [];
 
       if (result.length > 0) {
@@ -424,7 +454,10 @@ class EmbyAPI {
 
   async getInstalledPlugins() {
     if (!this.configReady) {
-      return [];
+      const success = await this.#fetchConfig();
+      if (!success) {
+        return [];
+      }
     }
     try {
       let url = `${this.config.JF_HOST}/plugins`;

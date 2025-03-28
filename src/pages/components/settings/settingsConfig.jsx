@@ -206,6 +206,7 @@ export default function SettingsConfig() {
               value={formValues.JF_HOST || ""}
               onChange={handleFormChange}
               placeholder="http://127.0.0.1:8096 or http://example.jellyfin.server"
+              autoComplete="off"
             />
           </Col>
         </Form.Group>
@@ -222,6 +223,7 @@ export default function SettingsConfig() {
                 value={formValues.JF_API_KEY || ""}
                 onChange={handleFormChange}
                 type={showKey ? "text" : "password"}
+                autoComplete="off"
               />
               <Button variant="outline-primary" type="button" onClick={() => setKeyState(!showKey)}>
                 {showKey ? <EyeFillIcon /> : <EyeOffFillIcon />}
@@ -284,7 +286,7 @@ export default function SettingsConfig() {
           </Form.Label>
           <Col>
             <Dropdown className="w-100">
-              <Dropdown.Toggle variant="outline-primary" id="dropdown-basic" className="w-100">
+              <Dropdown.Toggle variant="outline-primary" className="w-100 dropdown-basic">
                 {selectedAdmin ? selectedAdmin.username : <Trans i18nKey={"SETTINGS_PAGE.SELECT_AN_ADMIN"} />}
               </Dropdown.Toggle>
 
@@ -339,7 +341,7 @@ export default function SettingsConfig() {
           </Form.Label>
           <Col>
             <Dropdown className="w-100">
-              <Dropdown.Toggle variant="outline-primary" id="dropdown-basic" className="w-100">
+              <Dropdown.Toggle variant="outline-primary" className="w-100 dropdown-basic">
                 {languages.find((language) => language.id === selectedLanguage)?.description || "English"}
               </Dropdown.Toggle>
 

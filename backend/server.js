@@ -28,7 +28,9 @@ const utilsRouter = require("./routes/utils");
 
 // tasks
 const ActivityMonitor = require("./tasks/ActivityMonitor");
-const tasks = require("./tasks/tasks");
+const TaskManager = require("./classes/task-manager-singleton");
+const TaskScheduler = require("./classes/task-scheduler-singleton");
+// const tasks = require("./tasks/tasks");
 
 // websocket
 const { setupWebSocketServer } = require("./ws");
@@ -50,8 +52,9 @@ const ensureSlashes = (url) => {
   return url;
 };
 
+
 const PORT = process.env.PORT || 3000;
-const LISTEN_IP = process.env.LISTEN_IP || "0.0.0.0";
+const JS_LISTEN_IP = process.env.JS_LISTEN_IP || "0.0.0.0";
 const JWT_SECRET = process.env.JWT_SECRET;
 const BASE_NAME = process.env.JS_BASE_URL ? ensureSlashes(process.env.JS_BASE_URL) : "";
 
@@ -237,11 +240,10 @@ try {
 
       setupWebSocketServer(server, BASE_NAME);
       server.listen(PORT, LISTEN_IP, async () => {
-        console.log(`[JELLYSTAT] Server listening on http://127.0.0.1:${PORT}`);
+        console.log(`[JELLYSTAT] Server listening on http://${LISTEN_IP}:${PORT}`);
         ActivityMonitor.ActivityMonitor(1000);
-        tasks.FullSyncTask();
-        tasks.RecentlyAddedItemsSyncTask();
-        tasks.BackupTask();
+        new TaskManager();
+        new TaskScheduler();
       });
     });
   });

@@ -2,6 +2,16 @@
 
 .Heading {
   justify-content: space-between;
+  flex-wrap: wrap;
+  @media (max-width: 576px) {
+    h1 {
+      width: 100%;
+      padding-bottom: 1rem;
+    }
+    * {
+      flex-grow: 1;
+    }
+  }
 }
 .activity-card {
   display: flex;
@@ -21,6 +31,24 @@
 
 .MuiTimelineItem-root {
   height: 20rem;
+  @media (max-width: 576px) {
+    height: 25rem;
+    ::before {
+      padding: 0;
+      flex: 0;
+    }
+    .MuiTimelineSeparator-root {
+      flex: 1;
+    }
+    .MuiTimelineOppositeContent-root {
+      display: none;
+    }
+    .activity-description {
+      max-width: 50%;
+      padding: 0.5rem 0;
+      text-align: center;
+    }
+  }
 }
 
 .MuiTimelineContent-root {

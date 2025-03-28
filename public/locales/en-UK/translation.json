@@ -234,7 +234,8 @@
   },
   "TIMELINE_PAGE": {
     "TIMELINE": "Timeline",
-    "EPISODES":"Episodes"
+    "EPISODES_one": "Episode",
+    "EPISODES_other": "Episodes"
   },
   "SEARCH": "Search",
   "TOTAL": "Total",
@@ -269,6 +270,7 @@
   "FILE_NAME": "File Name",
   "DATE": "Date",
   "START": "Start",
+  "STOP": "Stop",
   "DOWNLOAD": "Download",
   "RESTORE": "Restore",
   "ACTIONS": "Actions",
@@ -289,6 +291,7 @@
   "SOURCE_DETAILS": "Source Details",
   "DIRECT": "Direct",
   "TRANSCODE": "Transcode",
+  "DIRECT_STREAM": "Direct Stream",
   "USERNAME": "Username",
   "PASSWORD": "Password",
   "LOGIN": "Login",
@@ -310,5 +313,6 @@
   "TIMEZONE": "Timezone",
   "POSTCODE": "Postcode",
   "X_ROWS_SELECTED": "{ROWS} Rows Selected",
+  "TRANSCODE_REASONS": "Transcode Reasons",
   "SUBTITLES": "Subtitles"
 }
