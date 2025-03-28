@@ -37,9 +37,10 @@
 | JS_PASSWORD                         | `null`   | `Password`                      | Master Override Password in case username or password used during setup is forgotten (Both `JS_USER` and `JS_PASSWORD` required to work) |
 | POSTGRES_DB                         | `jfstat` | `jfstat`                        | Name of postgres database                                                                                                                |
 | REJECT_SELF_SIGNED_CERTIFICATES     | `true`   | `false`                         | Allow or deny self signed SSL certificates                                                                                               |
-| JS_GEOLITE_ACCOUNT_ID               | `null`   | `123456`                        | maxmind.com user id to be used for Geolocating IP Addresses (Can be found at https://www.maxmind.com/en/accounts/current/edit)           |
+| JS_GEOLITE_ACCOUNT_ID               | `null`   | `123456`                        | maxmind.com user id to be used for Geolocating IP Addresses (Can be found at https://www.maxmind.com/en/accounts/current/edit)    |
 | JS_GEOLITE_LICENSE_KEY              | `null`   | `ASDWdaSdawe2sd186`             | License key you need to generate on maxmind to use their services                                                                        |
 | MINIMUM_SECONDS_TO_INCLUDE_PLAYBACK | `1`      | `10`                            | The minimum time (in seconds) to include a playback record, which can be used to exclude short playbacks                                 |
+| PORT                                | `3000`   | `3001`                          | The port used by Jellystat                                                                                                               |
 
 ## Getting Started with Development
 
