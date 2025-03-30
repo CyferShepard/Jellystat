@@ -12,6 +12,7 @@ import { Trans } from "react-i18next";
 import baseUrl from "../../lib/baseurl";
 import GlobalStats from "./general/globalStats";
 import ActivityTimeline from "../activity_time_line";
+import GenreStats from "./user-info/genre-stats.jsx";
 
 function UserInfo() {
   const { UserId } = useParams();
@@ -78,12 +79,7 @@ function UserInfo() {
           ) : (
             <img
               className="user-image"
-              src={
-                baseUrl +
-                "/proxy/Users/Images/Primary?id=" +
-                UserId +
-                "&quality=100"
-              }
+              src={baseUrl + "/proxy/Users/Images/Primary?id=" + UserId + "&quality=100"}
               onError={handleImageError}
               alt=""
             ></img>
@@ -121,11 +117,7 @@ function UserInfo() {
         </div>
       </div>
 
-      <Tabs
-        defaultActiveKey="tabOverview"
-        activeKey={activeTab}
-        variant="pills"
-      >
+      <Tabs defaultActiveKey="tabOverview" activeKey={activeTab} variant="pills">
         <Tab eventKey="tabOverview" className="bg-transparent">
           <GlobalStats
             id={UserId}
@@ -133,6 +125,7 @@ function UserInfo() {
             endpoint={"getGlobalUserStats"}
             title={<Trans i18nKey="USERS_PAGE.USER_STATS" />}
           />
+          <GenreStats UserId={UserId} />
           <LastPlayed UserId={UserId} />
         </Tab>
         <Tab eventKey="tabActivity" className="bg-transparent">

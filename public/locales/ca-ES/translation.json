@@ -313,5 +313,6 @@
   "POSTCODE": "Codi postal",
   "X_ROWS_SELECTED": "{ROWS} files seleccionades",
   "TRANSCODE_REASONS": "",
-  "SUBTITLES": "Subtítols"
+  "SUBTITLES": "Subtítols",
+  "GENRES": "Gèneres"
 }

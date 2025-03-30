@@ -104,6 +104,7 @@ async function query({
   joins = [],
   where = [],
   values = [],
+  group_by = [],
   order_by = "Id",
   sort_order = "desc",
   pageNumber = 1,
@@ -120,9 +121,9 @@ async function query({
       const joinConditions = join.conditions
         .map((condition, index) => {
           const conjunction = index === 0 ? "" : condition.type ? condition.type.toUpperCase() : "AND";
-          return `${conjunction} ${wrapField(condition.first)} ${condition.operator} ${
-            condition.second ? wrapField(condition.second) : `${condition.value}`
-          }`;
+          return `${conjunction} ${condition.wrap == false ? condition.first : wrapField(condition.first)} ${
+            condition.operator
+          } ${condition.second ? wrapField(condition.second) : `${condition.value}`}`;
         })
         .join(" ");
       const joinQuery = ` ${join.type.toUpperCase()} JOIN ${join.table} AS ${join.alias} ON ${joinConditions}`;
@@ -137,6 +138,12 @@ async function query({
       countQuery += ` WHERE ${whereClause}`;
     }
 
+    // Add group by
+    if (group_by.length > 0) {
+      query += ` GROUP BY ${group_by.map(wrapField).join(", ")}`;
+      countQuery += ` GROUP BY ${group_by.map(wrapField).join(", ")}`;
+    }
+
     // Add order by and pagination
     query += ` ORDER BY ${wrapField(order_by)} ${sort_order}`;
     query += ` LIMIT ${pageSize} OFFSET ${(pageNumber - 1) * pageSize}`;
@@ -146,7 +153,7 @@ async function query({
 
     // Count total rows
     const countResult = await client.query(countQuery, values);
-    const totalRows = parseInt(countResult.rows[0].count, 10);
+    const totalRows = parseInt(countResult.rows.length > 0 ? countResult.rows[0].count : 0, 10);
 
     // Return the structured response
     return {

@@ -196,9 +196,15 @@ function Row(row) {
           )}
         </TableCell>
         <TableCell style={{ textTransform: data.LastWatched ? "none" : "lowercase" }}>
-          <Link to={`/libraries/item/${data.NowPlayingItemId}`} className="text-decoration-none">
-            {data.LastWatched || i18next.t("ERROR_MESSAGES.NEVER")}
-          </Link>
+          {data.NowPlayingItemId ? (
+            <Link to={`/libraries/item/${data.NowPlayingItemId}`} className="text-decoration-none">
+              {data.LastWatched || i18next.t("ERROR_MESSAGES.NEVER")}
+            </Link>
+          ) : (
+            <span to={`/libraries/item/${data.NowPlayingItemId}`} className="text-decoration-none">
+              {data.LastWatched || i18next.t("ERROR_MESSAGES.NEVER")}
+            </span>
+          )}
         </TableCell>
         <TableCell style={{ textTransform: data.LastClient ? "none" : "lowercase" }}>
           {data.LastClient || i18next.t("ERROR_MESSAGES.N/A")}

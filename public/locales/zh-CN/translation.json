@@ -313,5 +313,6 @@
   "POSTCODE": "邮编",
   "X_ROWS_SELECTED": "已选中 {ROWS} 行",
   "TRANSCODE_REASONS": "转码原因",
-  "SUBTITLES": "字幕"
+  "SUBTITLES": "字幕",
+  "GENRES": "类型"
 }

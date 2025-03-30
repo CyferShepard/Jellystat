@@ -314,5 +314,6 @@
   "POSTCODE": "Postcode",
   "X_ROWS_SELECTED": "{ROWS} Rows Selected",
   "TRANSCODE_REASONS": "Transcode Reasons",
-  "SUBTITLES": "Subtitles"
+  "SUBTITLES": "Subtitles",
+  "GENRES": "Genres"
 }

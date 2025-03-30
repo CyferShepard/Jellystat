@@ -309,6 +309,7 @@
   "TIMEZONE": "Fuso orario",
   "POSTCODE": "CAP",
   "X_ROWS_SELECTED": "{ROWS} righe selezionate",
-  "TRANSCODE_REASONS": "",
-  "SUBTITLES": ""
+  "TRANSCODE_REASONS": "Motivo della transcodifica",
+  "SUBTITLES": "Sottotitoli",
+  "GENRES": "Generi"
 }

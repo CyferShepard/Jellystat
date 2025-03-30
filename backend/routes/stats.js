@@ -1,6 +1,7 @@
 // api.js
 const express = require("express");
 const db = require("../db");
+const dbHelper = require("../classes/db-helper");
 const moment = require("moment");
 
 const router = express.Router();
@@ -508,6 +509,69 @@ router.post("/getViewsByHour", async (req, res) => {
     });
     const finalData = { libraries: libraries, stats: Object.values(reorganizedData) };
     res.send(finalData);
+  } catch (error) {
+    console.log(error);
+    res.status(503);
+    res.send(error);
+  }
+});
+
+router.get("/getGenreStats", async (req, res) => {
+  try {
+    const { size = 50, page = 1, userid } = req.query;
+
+    if (userid === undefined) {
+      res.status(400);
+      res.send("No User ID provided");
+      return;
+    }
+
+    const values = [];
+    const query = {
+      select: ["COALESCE(g.genre, 'No Genre') AS genre", `SUM(a."PlaybackDuration") AS duration`, "COUNT(*) AS plays"],
+      table: "jf_playback_activity_with_metadata",
+      alias: "a",
+      joins: [
+        {
+          type: "inner",
+          table: "jf_library_items",
+          alias: "i",
+          conditions: [{ first: "a.NowPlayingItemId", operator: "=", second: "i.Id" }],
+        },
+        {
+          type: "left",
+          table: `
+                  LATERAL (
+                    SELECT 
+                      jsonb_array_elements_text(
+                        CASE 
+                          WHEN jsonb_array_length(COALESCE(i."Genres", '[]'::jsonb)) = 0 THEN '["No Genre"]'::jsonb
+                          ELSE i."Genres"
+                        END
+                      ) AS genre
+                )
+                 `,
+          alias: "g",
+          conditions: [{ first: 1, operator: "=", value: 1, wrap: false }],
+        },
+      ],
+
+      where: [[{ column: "a.UserId", operator: "=", value: `$${values.length + 1}` }]],
+      group_by: [`COALESCE(g.genre, 'No Genre')`],
+      order_by: "genre",
+      pageNumber: page,
+      pageSize: size,
+    };
+
+    values.push(userid);
+
+    query.values = values;
+
+    const result = await dbHelper.query(query);
+
+    const response = { current_page: page, pages: result.pages, size: size, results: result.results };
+
+    res.send(response);
   } catch (error) {
     console.log(error);
     res.status(503);
