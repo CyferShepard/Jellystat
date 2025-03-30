@@ -70,7 +70,7 @@ function GenreStatCard(props) {
           <RadarChart cx="50%" cy="50%" outerRadius="80%" data={props.data}>
             <PolarGrid gridType="circle" />
             <PolarAngleAxis dataKey="genre" />
-            <PolarRadiusAxis domain={[0, maxRange]} tick={false} />
+            <PolarRadiusAxis domain={[0, maxRange]} tick={false} axisLine={false} />
             <Radar
               name="Duration"
               dataKey={props.dataKey}
