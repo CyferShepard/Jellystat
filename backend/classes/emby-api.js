@@ -106,7 +106,10 @@ class EmbyAPI {
 
   async getUsers() {
     if (!this.configReady) {
-      return [];
+      const success = await this.#fetchConfig();
+      if (!success) {
+        return [];
+      }
     }
     try {
       const url = `${this.config.JF_HOST}/Users`;
@@ -190,7 +193,10 @@ class EmbyAPI {
 
   async getItemsFromParentId({ id, itemid, params, ws, syncTask, wsMessage }) {
     if (!this.configReady) {
-      return [];
+      const success = await this.#fetchConfig();
+      if (!success) {
+        return [];
+      }
     }
     try {
       let url = `${this.config.JF_HOST}/Items?ParentId=${id}`;
@@ -269,7 +275,10 @@ class EmbyAPI {
 
   async getItemInfo({ itemID, userid }) {
     if (!this.configReady) {
-      return [];
+      const success = await this.#fetchConfig();
+      if (!success) {
+        return [];
+      }
     }
     try {
       if (!userid || userid == null) {
@@ -325,7 +334,10 @@ class EmbyAPI {
 
   async getSeasons(SeriesId) {
     if (!this.configReady) {
-      return [];
+      const success = await this.#fetchConfig();
+      if (!success) {
+        return [];
+      }
     }
     let url = `${this.config.JF_HOST}/Shows/${SeriesId}/Seasons`;
     try {
@@ -344,7 +356,10 @@ class EmbyAPI {
 
   async getEpisodes({ SeriesId, SeasonId }) {
     if (!this.configReady) {
-      return [];
+      const success = await this.#fetchConfig();
+      if (!success) {
+        return [];
+      }
     }
     try {
       let url = `${this.config.JF_HOST}/Shows/${SeriesId}/Episodes?seasonId=${SeasonId}`;
@@ -364,7 +379,10 @@ class EmbyAPI {
 
   async getRecentlyAdded({ libraryid, limit = 20, userid }) {
     if (!this.configReady) {
-      return [];
+      const success = await this.#fetchConfig();
+      if (!success) {
+        return [];
+      }
     }
     try {
       if (!userid || userid == null) {
@@ -476,7 +494,10 @@ class EmbyAPI {
 
   async StatsSubmitCustomQuery(query) {
     if (!this.configReady) {
-      return [];
+      const success = await this.#fetchConfig();
+      if (!success) {
+        return [];
+      }
     }
     try {
       let url = `${this.config.JF_HOST}/user_usage_stats/submit_custom_query`;
