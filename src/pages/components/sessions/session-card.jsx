@@ -86,20 +86,37 @@ function SessionCard(props) {
   }
 
   return (
-    <Card className="stat-card" style={cardStyle}>
+    <Card className="session-card" style={cardStyle}>
+      <div className="card-device-image-overlay">
+        <img
+          className="card-device-image"
+          src={
+            baseUrl +
+            "/proxy/web/assets/img/devices/?devicename=" +
+            (props.data.session.Client.toLowerCase() === "jellyfin mobile (ios)" &&
+            props.data.session.DeviceName.toLowerCase() === "iphone"
+              ? "apple"
+              : props.data.session.Client.toLowerCase().includes("web")
+              ? clientData.find((item) => props.data.session.DeviceName.toLowerCase().includes(item)) || "other"
+              : clientData.find((item) => props.data.session.Client.toLowerCase().includes(item)) || "other")
+          }
+          alt=""
+        />
+      </div>
       <IpInfoModal show={ipModalVisible} onHide={() => setIPModalVisible(false)} ipAddress={ipAddressLookup} />
       <div style={cardBgStyle} className="rounded-top">
-        <Row className="h-100">
-          <Col className="d-none d-lg-block stat-card-banner">
+        <Row className="h-100 p-0 m-0">
+          <Col className="d-none d-lg-block session-card-banner-image">
             <Card.Img
               variant="top"
               className={
                 props.data.session.NowPlayingItem.Type === "Audio"
                   ? "stat-card-image-audio rounded-0 rounded-start"
-                  : "stat-card-image rounded-0 rounded-start"
+                  : "session-card-item-image"
               }
               src={
-                baseUrl+"/proxy/Items/Images/Primary?id=" +
+                baseUrl +
+                "/proxy/Items/Images/Primary?id=" +
                 (props.data.session.NowPlayingItem.SeriesId
                   ? props.data.session.NowPlayingItem.SeriesId
                   : props.data.session.NowPlayingItem.Id) +
@@ -107,72 +124,81 @@ function SessionCard(props) {
               }
             />
           </Col>
-          <Col className="w-100 h-100">
+          <Col className="w-100 h-100 m-0 px-0">
             <Card.Body className="w-100 h-100 p-1 pb-2">
               <Container className="h-100 d-flex flex-column justify-content-between g-0">
-                <Row className="d-flex justify-content-end" style={{ fontSize: "smaller" }}>
+                <Row className="d-flex justify-content-start session-details" style={{ fontSize: "smaller" }}>
                   <Col className="col-10">
                     <Row>
+                      <Col className="col-auto session-details-title text-end text-uppercase">
+                        <Trans i18nKey="ACTIVITY_TABLE.DEVICE" />
+                      </Col>
+                      <Col className="col-auto ellipse">{props.data.session.DeviceName}</Col>
+                    </Row>
+                    <Row>
+                      <Col className="col-auto session-details-title text-end text-uppercase">
+                        <Trans i18nKey="ACTIVITY_TABLE.CLIENT" />
+                      </Col>
                       <Col className="col-auto ellipse">
-                        {props.data.session.DeviceName +
-                          " - " +
-                          props.data.session.Client +
-                          " " +
-                          props.data.session.ApplicationVersion}
+                        {props.data.session.Client + " " + props.data.session.ApplicationVersion}
                       </Col>
                     </Row>
-                    <Row className="d-flex flex-column flex-md-row">
-                      {props.data.session.NowPlayingItem.VideoStream !== "" &&
-                        <Col className="col-auto ellipse">
-                            <span>{props.data.session.NowPlayingItem.VideoStream}</span>
+                    {props.data.session.NowPlayingItem.VideoStream !== "" && (
+                      <Row>
+                        <Col className="col-auto session-details-title text-end text-uppercase">
+                          <Trans i18nKey="VIDEO" />
                         </Col>
-                      }
-                      <Col className="col-auto ellipse">
-                        {props.data.session.NowPlayingItem.AudioStream !== "" &&
-                          <span>{props.data.session.NowPlayingItem.AudioStream}</span>
-                        }
-                      </Col>
-                      <Col className="col-auto ellipse">
-                        {props.data.session.NowPlayingItem.SubtitleStream !== "" &&
+                        <Col className="col-auto ellipse">{props.data.session.NowPlayingItem.VideoStream}</Col>
+                      </Row>
+                    )}
+                    {props.data.session.NowPlayingItem.AudioStream !== "" && (
+                      <Row>
+                        <Col className="col-auto session-details-title text-end text-uppercase">
+                          <Trans i18nKey="AUDIO" />
+                        </Col>
+                        <Col className="col-auto ellipse">{props.data.session.NowPlayingItem.AudioStream}</Col>
+                      </Row>
+                    )}
+                    {props.data.session.NowPlayingItem.SubtitleStream !== "" && (
+                      <Row>
+                        <Col className="col-auto session-details-title text-end text-uppercase">
+                          <Trans i18nKey="SUBTITLES" />
+                        </Col>
+                        <Col className="col-auto ellipse">
                           <Tooltip title={props.data.session.NowPlayingItem.SubtitleStream}>
                             <span>{props.data.session.NowPlayingItem.SubtitleStream}</span>
                           </Tooltip>
-                        }
-                      </Col>
-                    </Row>
+                        </Col>
+                      </Row>
+                    )}
+
                     <Row>
+                      <Col className="col-auto session-details-title text-end text-uppercase">
+                        <Trans i18nKey="ACTIVITY_TABLE.IP_ADDRESS" />
+                      </Col>
                       <Col className="col-auto ellipse">
                         {isRemoteSession(props.data.session.RemoteEndPoint) &&
-                        (window.env.JS_GEOLITE_ACCOUNT_ID ?? import.meta.env.JS_GEOLITE_ACCOUNT_ID)  ? (
+                        (window.env.JS_GEOLITE_ACCOUNT_ID ?? import.meta.env.JS_GEOLITE_ACCOUNT_ID) ? (
                           <Link
                             className="text-decoration-none text-white"
                             onClick={() => showIPDataModal(props.data.session.RemoteEndPoint)}
                           >
-                            <Trans i18nKey="ACTIVITY_TABLE.IP_ADDRESS" />: {props.data.session.RemoteEndPoint}
+                            {props.data.session.RemoteEndPoint}
                           </Link>
                         ) : (
-                          <span>
-                            <Trans i18nKey="ACTIVITY_TABLE.IP_ADDRESS" />: {props.data.session.RemoteEndPoint}
-                          </span>
+                          <span>{props.data.session.RemoteEndPoint}</span>
                         )}
                       </Col>
                     </Row>
-                  </Col>
 
-                  <Col className="col-2 d-flex justify-content-center">
-                    <img
-                      className="card-device-image"
-                      src={
-                        baseUrl+"/proxy/web/assets/img/devices/?devicename=" +
-                        (props.data.session.Client.toLowerCase() === "jellyfin mobile (ios)" &&
-                        props.data.session.DeviceName.toLowerCase() === "iphone"
-                          ? "apple"
-                          : props.data.session.Client.toLowerCase().includes("web")
-                          ? clientData.find((item) => props.data.session.DeviceName.toLowerCase().includes(item)) || "other"
-                          : clientData.find((item) => props.data.session.Client.toLowerCase().includes(item)) || "other")
-                      }
-                      alt=""
-                    />
+                    <Row>
+                      <Col className="col-auto session-details-title text-end text-uppercase">ETA</Col>
+                      <Col className="col-auto ellipse">
+                        {getETAFromTicks(
+                          props.data.session.NowPlayingItem.RunTimeTicks - props.data.session.PlayState.PositionTicks
+                        )}
+                      </Col>
+                    </Row>
                   </Col>
                 </Row>
 
@@ -191,14 +217,12 @@ function SessionCard(props) {
                         </Link>
                       </Card.Text>
                     </Row>
-                  ) : (props.data.session.NowPlayingItem.Type === "Audio" && props.data.session.NowPlayingItem.Artists.length > 0) ? (
+                  ) : props.data.session.NowPlayingItem.Type === "Audio" &&
+                    props.data.session.NowPlayingItem.Artists.length > 0 ? (
                     <Col className="col-auto p-0">
-                      <Card.Text>
-                        {props.data.session.NowPlayingItem.Artists[0]}
-                      </Card.Text>
+                      <Card.Text>{props.data.session.NowPlayingItem.Artists[0]}</Card.Text>
                     </Col>
-                  ) :
-                  (
+                  ) : (
                     <></>
                   )}
                   <Row className="d-flex flex-row justify-content-between p-0 m-0">
@@ -231,7 +255,7 @@ function SessionCard(props) {
                       {props.data.session.UserPrimaryImageTag !== undefined ? (
                         <img
                           className="session-card-user-image"
-                          src={baseUrl+"/proxy/Users/Images/Primary?id=" + props.data.session.UserId + "&quality=50"}
+                          src={baseUrl + "/proxy/Users/Images/Primary?id=" + props.data.session.UserId + "&quality=50"}
                           alt=""
                         />
                       ) : (

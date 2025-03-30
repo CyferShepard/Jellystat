@@ -63,25 +63,21 @@ function Sessions() {
       return "";
     }
 
-    
     let transcodeType = i18next.t("SESSIONS.DIRECT_PLAY");
     let transcodeVideoCodec = "";
-    if (row.TranscodingInfo && !row.TranscodingInfo.IsVideoDirect){
+    if (row.TranscodingInfo && !row.TranscodingInfo.IsVideoDirect) {
       transcodeType = i18next.t("SESSIONS.TRANSCODE");
       transcodeVideoCodec = ` -> ${row.TranscodingInfo.VideoCodec.toUpperCase()}`;
     }
-    let bitRate = convertBitrate(
-      row.TranscodingInfo
-        ? row.TranscodingInfo.Bitrate
-        : videoStream.BitRate);
+    let bitRate = convertBitrate(row.TranscodingInfo ? row.TranscodingInfo.Bitrate : videoStream.BitRate);
 
     const originalVideoCodec = videoStream.Codec.toUpperCase();
-    
-    return `${i18next.t("VIDEO")}: ${transcodeType} (${originalVideoCodec}${transcodeVideoCodec} - ${bitRate})`;
-  }
+
+    return `${transcodeType} (${originalVideoCodec}${transcodeVideoCodec} - ${bitRate})`;
+  };
 
   const getAudioStream = (row) => {
-    let mediaTypeAudio = row.NowPlayingItem.Type === 'Audio';
+    let mediaTypeAudio = row.NowPlayingItem.Type === "Audio";
     let streamIndex = row.PlayState.AudioStreamIndex;
     if ((streamIndex === undefined || streamIndex === -1) && !mediaTypeAudio) {
       return "";
@@ -89,31 +85,29 @@ function Sessions() {
 
     let transcodeType = i18next.t("SESSIONS.DIRECT_PLAY");
     let transcodeCodec = "";
-    if (row.TranscodingInfo && !row.TranscodingInfo.IsAudioDirect){
+    if (row.TranscodingInfo && !row.TranscodingInfo.IsAudioDirect) {
       transcodeType = i18next.t("SESSIONS.TRANSCODE");
       transcodeCodec = ` -> ${row.TranscodingInfo.AudioCodec.toUpperCase()}`;
     }
 
     let bitRate = "";
     if (mediaTypeAudio) {
-      bitRate = " - " + convertBitrate(
-        row.TranscodingInfo
-          ? row.TranscodingInfo.Bitrate
-          : row.NowPlayingItem.Bitrate);
+      bitRate = " - " + convertBitrate(row.TranscodingInfo ? row.TranscodingInfo.Bitrate : row.NowPlayingItem.Bitrate);
     }
 
     let originalCodec = "";
-    if (mediaTypeAudio){
-      
+    if (mediaTypeAudio) {
       originalCodec = `${row.NowPlayingItem.Container.toUpperCase()}`;
-    }
-    else if (row.NowPlayingItem.MediaStreams && row.NowPlayingItem.MediaStreams.length && streamIndex < row.NowPlayingItem.MediaStreams.length) {
-        originalCodec = row.NowPlayingItem.MediaStreams[streamIndex].Codec.toUpperCase();
+    } else if (
+      row.NowPlayingItem.MediaStreams &&
+      row.NowPlayingItem.MediaStreams.length &&
+      streamIndex < row.NowPlayingItem.MediaStreams.length
+    ) {
+      originalCodec = row.NowPlayingItem.MediaStreams[streamIndex].Codec.toUpperCase();
     }
 
-    return originalCodec != "" ? `${i18next.t("AUDIO")}: ${transcodeType} (${originalCodec}${transcodeCodec}${bitRate})`
-                               : `${i18next.t("AUDIO")}: ${transcodeType}`;
-  }
+    return originalCodec != "" ? `${transcodeType} (${originalCodec}${transcodeCodec}${bitRate})` : `${transcodeType}`;
+  };
 
   const getSubtitleStream = (row) => {
     let result = "";
@@ -129,7 +123,7 @@ function Sessions() {
     }
 
     if (row.NowPlayingItem.MediaStreams && row.NowPlayingItem.MediaStreams.length) {
-      result = `${i18next.t("SUBTITLES")}: ${row.NowPlayingItem.MediaStreams[subStreamIndex].DisplayTitle}`;
+      result = `${row.NowPlayingItem.MediaStreams[subStreamIndex].DisplayTitle}`;
     }
 
     return result;
