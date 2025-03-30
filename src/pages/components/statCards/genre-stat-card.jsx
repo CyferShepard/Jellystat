@@ -24,7 +24,9 @@ function GenreStatCard(props) {
         <div className="radial-tooltip">
           <p className="tooltip-header">{payload[0].payload.genre}</p>
           <p>
-            {props.dataKey == "duration" ? formatTotalWatchTime(payload[0].value) : payload[0].value} {i18next.t("UNITS.PLAYS")}
+            {props.dataKey == "duration"
+              ? formatTotalWatchTime(payload[0].value)
+              : `${payload[0].value} ${i18next.t("UNITS.PLAYS")}`}
           </p>
         </div>
       );

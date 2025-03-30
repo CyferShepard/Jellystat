@@ -1,12 +1,12 @@
 import { useState, useEffect } from "react";
 import { Row, Col } from "react-bootstrap";
-import GenreStatCard from "./genre-stat-card.jsx";
+import GenreStatCard from "../statCards/genre-stat-card.jsx";
 import { Trans } from "react-i18next";
 import "../../css/genres.css";
 import Config from "../../../lib/config";
 import axios from "../../../lib/axios_instance";
 
-function GenreStats(props) {
+function GenreLibraryStats(props) {
   const [data, setData] = useState();
   const [config, setConfig] = useState();
 
@@ -23,9 +23,9 @@ function GenreStats(props) {
     const fetchData = async () => {
       if (config) {
         try {
-          const itemData = await axios.get(`/stats/getGenreStats`, {
+          const itemData = await axios.get(`/stats/getGenreLibraryStats`, {
             params: {
-              userid: props.UserId,
+              libraryid: props.LibraryId,
             },
             headers: {
               Authorization: `Bearer ${config.token}`,
@@ -50,7 +50,7 @@ function GenreStats(props) {
 
     const intervalId = setInterval(fetchData, 60000 * 5);
     return () => clearInterval(intervalId);
-  }, [data, config, props.UserId]);
+  }, [data, config, props.LibraryId]);
 
   if (!data || data.length == 0 || !config) {
     return <></>;
@@ -74,4 +74,4 @@ function GenreStats(props) {
   );
 }
 
-export default GenreStats;
+export default GenreLibraryStats;

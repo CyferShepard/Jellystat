@@ -12,7 +12,7 @@ import { Trans } from "react-i18next";
 import baseUrl from "../../lib/baseurl";
 import GlobalStats from "./general/globalStats";
 import ActivityTimeline from "../activity_time_line";
-import GenreStats from "./user-info/genre-stats.jsx";
+import GenreUserStats from "./user-info/genre-user-stats.jsx";
 
 function UserInfo() {
   const { UserId } = useParams();
@@ -125,7 +125,7 @@ function UserInfo() {
             endpoint={"getGlobalUserStats"}
             title={<Trans i18nKey="USERS_PAGE.USER_STATS" />}
           />
-          <GenreStats UserId={UserId} />
+          <GenreUserStats UserId={UserId} />
           <LastPlayed UserId={UserId} />
         </Tab>
         <Tab eventKey="tabActivity" className="bg-transparent">

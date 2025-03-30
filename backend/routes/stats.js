@@ -516,7 +516,7 @@ router.post("/getViewsByHour", async (req, res) => {
   }
 });
 
-router.get("/getGenreStats", async (req, res) => {
+router.get("/getGenreUserStats", async (req, res) => {
   try {
     const { size = 50, page = 1, userid } = req.query;
 
@@ -564,6 +564,69 @@ router.get("/getGenreStats", async (req, res) => {
     };
 
     values.push(userid);
+
+    query.values = values;
+
+    const result = await dbHelper.query(query);
+
+    const response = { current_page: page, pages: result.pages, size: size, results: result.results };
+
+    res.send(response);
+  } catch (error) {
+    console.log(error);
+    res.status(503);
+    res.send(error);
+  }
+});
+
+router.get("/getGenreLibraryStats", async (req, res) => {
+  try {
+    const { size = 50, page = 1, libraryid } = req.query;
+
+    if (libraryid === undefined) {
+      res.status(400);
+      res.send("No Library ID provided");
+      return;
+    }
+
+    const values = [];
+    const query = {
+      select: ["COALESCE(g.genre, 'No Genre') AS genre", `SUM(a."PlaybackDuration") AS duration`, "COUNT(*) AS plays"],
+      table: "jf_playback_activity_with_metadata",
+      alias: "a",
+      joins: [
+        {
+          type: "inner",
+          table: "jf_library_items",
+          alias: "i",
+          conditions: [{ first: "a.NowPlayingItemId", operator: "=", second: "i.Id" }],
+        },
+        {
+          type: "left",
+          table: `
+                  LATERAL (
+                    SELECT 
+                      jsonb_array_elements_text(
+                        CASE 
+                          WHEN jsonb_array_length(COALESCE(i."Genres", '[]'::jsonb)) = 0 THEN '["No Genre"]'::jsonb
+                          ELSE i."Genres"
+                        END
+                      ) AS genre
+                )
+                 `,
+          alias: "g",
+          conditions: [{ first: 1, operator: "=", value: 1, wrap: false }],
+        },
+      ],
+
+      where: [[{ column: "a.ParentId", operator: "=", value: `$${values.length + 1}` }]],
+      group_by: [`COALESCE(g.genre, 'No Genre')`],
+      order_by: "genre",
+      pageNumber: page,
+      pageSize: size,
+    };
+
+    values.push(libraryid);
 
     query.values = values;
 
