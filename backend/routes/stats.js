@@ -559,6 +559,7 @@ router.get("/getGenreUserStats", async (req, res) => {
       where: [[{ column: "a.UserId", operator: "=", value: `$${values.length + 1}` }]],
       group_by: [`COALESCE(g.genre, 'No Genre')`],
       order_by: "genre",
+      sort_order: "asc",
       pageNumber: page,
       pageSize: size,
     };
@@ -622,6 +623,7 @@ router.get("/getGenreLibraryStats", async (req, res) => {
       where: [[{ column: "a.ParentId", operator: "=", value: `$${values.length + 1}` }]],
       group_by: [`COALESCE(g.genre, 'No Genre')`],
       order_by: "genre",
+      sort_order: "asc",
       pageNumber: page,
       pageSize: size,
     };

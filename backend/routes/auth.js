@@ -20,6 +20,11 @@ router.post("/login", async (req, res) => {
   try {
     const { username, password } = req.body;
 
+    if (!username || !password || password === CryptoJS.SHA3("").toString()) {
+      res.sendStatus(401);
+      return;
+    }
+
     const query = 'SELECT * FROM app_config WHERE ("APP_USER" = $1 AND "APP_PASSWORD" = $2) OR "REQUIRE_LOGIN" = false';
     const values = [username, password];
     const { rows: login } = await db.query(query, values);
