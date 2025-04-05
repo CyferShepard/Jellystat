@@ -96,6 +96,11 @@ function buildCTE(cte) {
   return query;
 }
 
+// Helper function to check if a value is numeric
+function isNumeric(value) {
+  return !isNaN(value) && !isNaN(parseFloat(value));
+}
+
 async function query({
   cte,
   select = ["*"],
@@ -155,10 +160,25 @@ async function query({
     const countResult = await client.query(countQuery, values);
     const totalRows = parseInt(countResult.rows.length > 0 ? countResult.rows[0].count : 0, 10);
 
+    const skippedColumns = ["Name"];
+    // Convert integer fields in the result rows
+    const convertedRows = result.rows.map((row) => {
+      return Object.keys(row).reduce((acc, key) => {
+        const value = row[key];
+        if (skippedColumns.includes(key)) {
+          acc[key] = value; // Keep the original value for skipped columns
+          return acc; // Skip the rowid field
+        }
+        // Convert numeric strings to integers if applicable
+        acc[key] = isNumeric(value) ? parseInt(value, 10) : value;
+        return acc;
+      }, {});
+    });
+
     // Return the structured response
     return {
       pages: Math.ceil(totalRows / pageSize),
-      results: result.rows,
+      results: convertedRows,
     };
   } catch (error) {
     // console.timeEnd("queryWithPagingAndJoins");
