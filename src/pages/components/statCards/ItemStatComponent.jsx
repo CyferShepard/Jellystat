@@ -8,6 +8,7 @@ import Col from "react-bootstrap/Col";
 import Tooltip from "@mui/material/Tooltip";
 import ArchiveDrawerFillIcon from "remixicon-react/ArchiveDrawerFillIcon";
 import "../../css/items/item-stat-component.css";
+import "../../css/statCard.css";
 
 function ItemStatComponent(props) {
   const [loaded, setLoaded] = useState(false);

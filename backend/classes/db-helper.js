@@ -96,6 +96,11 @@ function buildCTE(cte) {
   return query;
 }
 
+// Helper function to check if a value is numeric
+function isNumeric(value) {
+  return !isNaN(value) && !isNaN(parseFloat(value));
+}
+
 async function query({
   cte,
   select = ["*"],
@@ -104,6 +109,7 @@ async function query({
   joins = [],
   where = [],
   values = [],
+  group_by = [],
   order_by = "Id",
   sort_order = "desc",
   pageNumber = 1,
@@ -120,9 +126,9 @@ async function query({
       const joinConditions = join.conditions
         .map((condition, index) => {
           const conjunction = index === 0 ? "" : condition.type ? condition.type.toUpperCase() : "AND";
-          return `${conjunction} ${wrapField(condition.first)} ${condition.operator} ${
-            condition.second ? wrapField(condition.second) : `${condition.value}`
-          }`;
+          return `${conjunction} ${condition.wrap == false ? condition.first : wrapField(condition.first)} ${
+            condition.operator
+          } ${condition.second ? wrapField(condition.second) : `${condition.value}`}`;
         })
         .join(" ");
       const joinQuery = ` ${join.type.toUpperCase()} JOIN ${join.table} AS ${join.alias} ON ${joinConditions}`;
@@ -137,6 +143,12 @@ async function query({
       countQuery += ` WHERE ${whereClause}`;
     }
 
+    // Add group by
+    if (group_by.length > 0) {
+      query += ` GROUP BY ${group_by.map(wrapField).join(", ")}`;
+      countQuery += ` GROUP BY ${group_by.map(wrapField).join(", ")}`;
+    }
+
     // Add order by and pagination
     query += ` ORDER BY ${wrapField(order_by)} ${sort_order}`;
     query += ` LIMIT ${pageSize} OFFSET ${(pageNumber - 1) * pageSize}`;
@@ -146,12 +158,27 @@ async function query({
 
     // Count total rows
     const countResult = await client.query(countQuery, values);
-    const totalRows = parseInt(countResult.rows[0].count, 10);
+    const totalRows = parseInt(countResult.rows.length > 0 ? countResult.rows[0].count : 0, 10);
+
+    const skippedColumns = ["Name", "NowPlayingItemName"];
+    // Convert integer fields in the result rows
+    const convertedRows = result.rows.map((row) => {
+      return Object.keys(row).reduce((acc, key) => {
+        const value = row[key];
+        if (skippedColumns.includes(key)) {
+          acc[key] = value; // Keep the original value for skipped columns
+          return acc; // Skip the rowid field
+        }
+        // Convert numeric strings to integers if applicable
+        acc[key] = isNumeric(value) ? parseInt(value, 10) : value;
+        return acc;
+      }, {});
+    });
 
     // Return the structured response
     return {
       pages: Math.ceil(totalRows / pageSize),
-      results: result.rows,
+      results: convertedRows,
     };
   } catch (error) {
     // console.timeEnd("queryWithPagingAndJoins");

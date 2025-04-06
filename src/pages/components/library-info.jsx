@@ -16,6 +16,7 @@ import { Tabs, Tab, Button, ButtonGroup } from "react-bootstrap";
 import { Trans } from "react-i18next";
 import LibraryOptions from "./library/library-options";
 import GlobalStats from "./general/globalStats";
+import GenreLibraryStats from "./library/genre-library-stats.jsx";
 
 function LibraryInfo() {
   const { LibraryId } = useParams();
@@ -109,6 +110,8 @@ function LibraryInfo() {
             endpoint={"getGlobalLibraryStats"}
             title={<Trans i18nKey="LIBRARY_INFO.LIBRARY_STATS" />}
           />
+
+          <GenreLibraryStats LibraryId={LibraryId} />
 
           {!data.archived && (
             <ErrorBoundary>

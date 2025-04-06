@@ -9,6 +9,7 @@
 /backend/backup-data
 .vscode
 .idea
+.env
 
 # production
 /build

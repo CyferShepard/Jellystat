@@ -191,7 +191,7 @@ async function handleFormSubmit(event) {
                           .map((apikey,index) => (
                             <CustomRow key={index} data={apikey} handleRowActionMessage={handleRowActionMessage}/>
                           ))}
-                          {keys.length===0 ? <tr><td colSpan="3" style={{ textAlign: "center", fontStyle: "italic" ,color:"grey"}}  className='py-2'><Trans i18nKey={"ERROR_MESSAGES.NO_API_KEYS"}/></td></tr> :''}
+                          {keys.length===0 ? <tr><td colSpan="3" style={{ textAlign: "center", fontStyle: "italic" ,color:"grey", height:"200px"}}  className='py-2'><Trans i18nKey={"ERROR_MESSAGES.NO_API_KEYS"}/></td></tr> :''}
 
                       </TableBody>
                     </Table>

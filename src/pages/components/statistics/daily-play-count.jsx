@@ -60,7 +60,7 @@ function DailyPlayStats(props) {
       <div className="main-widget">
         <h1><Trans i18nKey={"STAT_PAGE.DAILY_PLAY_PER_LIBRARY"}/> - {days} <Trans i18nKey={`UNITS.DAY${days>1 ? 'S':''}`}/></h1>
 
-        <h1><Trans i18nKey={"ERROR_MESSAGES.NO_STATS"}/></h1>
+        <h5><Trans i18nKey={"ERROR_MESSAGES.NO_STATS"}/></h5>
       </div>
     );
   }

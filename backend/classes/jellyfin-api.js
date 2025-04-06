@@ -6,17 +6,26 @@ class JellyfinAPI {
     this.config = null;
     this.configReady = false;
     this.#checkReadyStatus();
+    this.sessionErrorCounter = 0;
   }
   //Helper classes
   #checkReadyStatus() {
     let checkConfigError = setInterval(async () => {
-      const _config = await new configClass().getConfig();
-      if (!_config.error && _config.state === 2) {
+      const success = await this.#fetchConfig();
+      if (success) {
         clearInterval(checkConfigError);
-        this.config = _config;
-        this.configReady = true;
       }
     }, 5000); // Check every 5 seconds
+  }
+
+  async #fetchConfig() {
+    const _config = await new configClass().getConfig();
+    if (!_config.error && _config.state === 2) {
+      this.config = _config;
+      this.configReady = true;
+      return true;
+    }
+    return false;
   }
 
   #errorHandler(error, url) {
@@ -59,6 +68,9 @@ class JellyfinAPI {
 
   #getErrorLineNumber(error) {
     const stackTrace = this.#getStackTrace(error);
+    if (stackTrace.length < 1) {
+      return "Unknown";
+    }
     const errorLine = stackTrace[1].trim();
     const lineNumber = errorLine.substring(errorLine.lastIndexOf("\\") + 1, errorLine.lastIndexOf(")"));
     return lineNumber;
@@ -82,6 +94,7 @@ class JellyfinAPI {
   }
 
   #getStackTrace(error) {
+    if (!error.stack) return [];
     const stackTrace = error.stack.split("\n");
     return stackTrace;
   }
@@ -94,7 +107,10 @@ class JellyfinAPI {
 
   async getUsers() {
     if (!this.configReady) {
-      return [];
+      const success = await this.#fetchConfig();
+      if (!success) {
+        return [];
+      }
     }
     try {
       const url = `${this.config.JF_HOST}/Users`;
@@ -146,7 +162,7 @@ class JellyfinAPI {
             "X-MediaBrowser-Token": this.config.JF_API_KEY,
           },
           params: {
-            fields: "MediaSources,DateCreated",
+            fields: "MediaSources,DateCreated,Genres",
             startIndex: startIndex,
             recursive: recursive,
             limit: limit,
@@ -177,7 +193,10 @@ class JellyfinAPI {
 
   async getItemsFromParentId({ id, itemid, params, ws, syncTask, wsMessage }) {
     if (!this.configReady) {
-      return [];
+      const success = await this.#fetchConfig();
+      if (!success) {
+        return [];
+      }
     }
     try {
       let url = `${this.config.JF_HOST}/Items?ParentId=${id}`;
@@ -209,7 +228,7 @@ class JellyfinAPI {
             "X-MediaBrowser-Token": this.config.JF_API_KEY,
           },
           params: {
-            fields: "MediaSources,DateCreated",
+            fields: "MediaSources,DateCreated,Genres",
             startIndex: startIndex,
             recursive: recursive,
             limit: limit,
@@ -254,7 +273,10 @@ class JellyfinAPI {
 
   async getItemInfo({ itemID, userid }) {
     if (!this.configReady) {
-      return [];
+      const success = await this.#fetchConfig();
+      if (!success) {
+        return [];
+      }
     }
     try {
       if (!userid || userid == null) {
@@ -284,7 +306,10 @@ class JellyfinAPI {
 
   async getLibraries() {
     if (!this.configReady) {
-      return [];
+      const success = await this.#fetchConfig();
+      if (!success) {
+        return [];
+      }
     }
     try {
       let url = `${this.config.JF_HOST}/Library/MediaFolders`;
@@ -307,7 +332,10 @@ class JellyfinAPI {
 
   async getSeasons(SeriesId) {
     if (!this.configReady) {
-      return [];
+      const success = await this.#fetchConfig();
+      if (!success) {
+        return [];
+      }
     }
     let url = `${this.config.JF_HOST}/Shows/${SeriesId}/Seasons`;
     try {
@@ -326,7 +354,10 @@ class JellyfinAPI {
 
   async getEpisodes({ SeriesId, SeasonId }) {
     if (!this.configReady) {
-      return [];
+      const success = await this.#fetchConfig();
+      if (!success) {
+        return [];
+      }
     }
     try {
       let url = `${this.config.JF_HOST}/Shows/${SeriesId}/Episodes?seasonId=${SeasonId}`;
@@ -346,7 +377,10 @@ class JellyfinAPI {
 
   async getRecentlyAdded({ libraryid, limit = 20, userid }) {
     if (!this.configReady) {
-      return [];
+      const success = await this.#fetchConfig();
+      if (!success) {
+        return [];
+      }
     }
     try {
       if (!userid || userid == null) {
@@ -377,7 +411,7 @@ class JellyfinAPI {
           "X-MediaBrowser-Token": this.config.JF_API_KEY,
         },
         params: {
-          fields: "MediaSources,DateCreated",
+          fields: "MediaSources,DateCreated,Genres",
         },
       });
 
@@ -397,11 +431,26 @@ class JellyfinAPI {
     try {
       let url = `${this.config.JF_HOST}/sessions`;
 
-      const response = await axios.get(url, {
-        headers: {
-          "X-MediaBrowser-Token": this.config.JF_API_KEY,
-        },
-      });
+      const response = await axios
+        .get(url, {
+          headers: {
+            "X-MediaBrowser-Token": this.config.JF_API_KEY,
+          },
+        })
+        .then((response) => {
+          if (this.sessionErrorCounter > 0) {
+            console.log("[JELLYFIN-API]: /sessions - Connection restored");
+            this.sessionErrorCounter = 0;
+          }
+          return response;
+        })
+        .catch((error) => {
+          if (this.sessionErrorCounter == 0) {
+            this.sessionErrorCounter++;
+            console.log("[JELLYFIN-API]: /sessions - Unable to connect. Please check the URL and your network connection");
+          }
+          return { data: [] };
+        });
       let result = response.data && Array.isArray(response.data) ? response.data : [];
 
       if (result.length > 0) {
@@ -421,7 +470,10 @@ class JellyfinAPI {
 
   async getInstalledPlugins() {
     if (!this.configReady) {
-      return [];
+      const success = await this.#fetchConfig();
+      if (!success) {
+        return [];
+      }
     }
     try {
       let url = `${this.config.JF_HOST}/plugins`;
@@ -440,7 +492,10 @@ class JellyfinAPI {
 
   async StatsSubmitCustomQuery(query) {
     if (!this.configReady) {
-      return [];
+      const success = await this.#fetchConfig();
+      if (!success) {
+        return [];
+      }
     }
     try {
       let url = `${this.config.JF_HOST}/user_usage_stats/submit_custom_query`;

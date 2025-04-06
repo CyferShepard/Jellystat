@@ -28,7 +28,7 @@
     "MOST_POPULAR_MUSIC": "MUSICA PIÙ POPOLARE",
     "MOST_VIEWED_LIBRARIES": "LIBRERIE PIÙ VISTE",
     "MOST_USED_CLIENTS": "CLIENTS PIÙ UTILIZZATI",
-    "MOST_ACTIVE_USERS": "UTENTI PIÙ ATTIVI"
+    "MOST_ACTIVE_USERS": "UTENTI PIÙ ATTIVI",
     "CONCURRENT_STREAMS": "FLUSSI SIMULTANEI"
   },
   "LIBRARY_OVERVIEW": {
@@ -148,7 +148,7 @@
     "SECOND": "Secondo",
     "SECONDS": "Secondi",
     "PLAYS": "Riproduzioni",
-    "ITEMS": "Elementi"
+    "ITEMS": "Elementi",
     "STREAMS": "Flussi"
   },
   "USERS_PAGE": {
@@ -228,6 +228,11 @@
     "GITHUB": "Github",
     "Backup": "Backup Jellystat"
   },
+  "TIMELINE_PAGE": {
+    "TIMELINE": "Cronologia",
+    "EPISODES_one": "Episodio",
+    "EPISODES_other": "Episodi"
+  },
   "SEARCH": "Cerca",
   "TOTAL": "Totale",
   "LAST": "Ultimo",
@@ -261,6 +266,7 @@
   "FILE_NAME": "Nome file",
   "DATE": "Data",
   "START": "Inizia",
+  "STOP": "Ferma",
   "DOWNLOAD": "Scarica",
   "RESTORE": "Ripristina",
   "ACTIONS": "Azioni",
@@ -281,6 +287,7 @@
   "SOURCE_DETAILS": "Dettagli sorgente",
   "DIRECT": "Diretto",
   "TRANSCODE": "Transcodifica",
+  "DIRECT_STREAM": "",
   "USERNAME": "Nome utente",
   "PASSWORD": "Password",
   "LOGIN": "Accedi",
@@ -301,5 +308,8 @@
   "LONGITUDE": "Longitudine",
   "TIMEZONE": "Fuso orario",
   "POSTCODE": "CAP",
-  "X_ROWS_SELECTED": "{ROWS} righe selezionate"
+  "X_ROWS_SELECTED": "{ROWS} righe selezionate",
+  "TRANSCODE_REASONS": "Motivo della transcodifica",
+  "SUBTITLES": "Sottotitoli",
+  "GENRES": "Generi"
 }

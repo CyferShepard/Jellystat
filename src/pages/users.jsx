@@ -196,9 +196,15 @@ function Row(row) {
           )}
         </TableCell>
         <TableCell style={{ textTransform: data.LastWatched ? "none" : "lowercase" }}>
-          <Link to={`/libraries/item/${data.NowPlayingItemId}`} className="text-decoration-none">
-            {data.LastWatched || i18next.t("ERROR_MESSAGES.NEVER")}
-          </Link>
+          {data.NowPlayingItemId ? (
+            <Link to={`/libraries/item/${data.NowPlayingItemId}`} className="text-decoration-none">
+              {data.LastWatched || i18next.t("ERROR_MESSAGES.NEVER")}
+            </Link>
+          ) : (
+            <span to={`/libraries/item/${data.NowPlayingItemId}`} className="text-decoration-none">
+              {data.LastWatched || i18next.t("ERROR_MESSAGES.NEVER")}
+            </span>
+          )}
         </TableCell>
         <TableCell style={{ textTransform: data.LastClient ? "none" : "lowercase" }}>
           {data.LastClient || i18next.t("ERROR_MESSAGES.N/A")}
@@ -295,7 +301,7 @@ function Users() {
     return () => clearInterval(intervalId);
   }, [config]);
 
-  if (!data || data.length === 0) {
+  if (!data) {
     return <Loading />;
   }
 
@@ -419,7 +425,7 @@ function Users() {
           <Trans i18nKey="USERS_PAGE.ALL_USERS" />
         </h1>
 
-        <div className="d-flex flex-column flex-md-row" style={{whiteSpace: "nowrap"}}>
+        <div className="d-flex flex-column flex-md-row" style={{ whiteSpace: "nowrap" }}>
           <div className="d-flex flex-row w-100">
             <div className="d-flex flex-col my-md-3 rounded-0 rounded-start  align-items-center px-2 bg-primary-1">
               <Trans i18nKey="UNITS.ITEMS" />
@@ -454,11 +460,16 @@ function Users() {
           <EnhancedTableHead order={order} orderBy={orderBy} onRequestSort={handleRequestSort} rowCount={rowsPerPage} />
           <TableBody>
             {filteredData.map((row) => (
-              <Row key={row.UserId} data={row} updateTrackedState={updateTrackedState} hostUrl={config.settings?.EXTERNAL_URL ?? config.hostUrl} />
+              <Row
+                key={row.UserId}
+                data={row}
+                updateTrackedState={updateTrackedState}
+                hostUrl={config.settings?.EXTERNAL_URL ?? config.hostUrl}
+              />
             ))}
             {data.length === 0 ? (
               <tr>
-                <td colSpan="5" style={{ textAlign: "center", fontStyle: "italic", color: "grey" }}>
+                <td colSpan="8" style={{ textAlign: "center", fontStyle: "italic", color: "grey", height: "200px" }}>
                   No Users Found
                 </td>
               </tr>

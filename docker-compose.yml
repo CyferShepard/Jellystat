@@ -6,6 +6,11 @@ services:
     shm_size: '1gb'
     container_name: jellystat-db
     restart: unless-stopped
+    logging:
+      driver: "json-file"
+      options:
+        max-file: "5"
+        max-size: "10m"
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: mypassword
@@ -16,6 +21,11 @@ services:
     image: cyfershepard/jellystat:latest
     container_name: jellystat
     restart: unless-stopped
+    logging:
+      driver: "json-file"
+      options:
+        max-file: "5"
+        max-size: "10m"
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: mypassword
@@ -36,9 +46,3 @@ networks:
 volumes:
   postgres-data:
   jellystat-backup-data:
-
-logging:
-  driver: "json-file"
-  options:
-    max-file: "5" # number of files or file count
-    max-size: "10m" # file size

@@ -61,7 +61,13 @@ function Row(logs) {
 
         <TableRow>
           <TableCell ><strong><Trans i18nKey={"VIDEO"}/></strong></TableCell>
-          <TableCell colSpan="2" style={{textTransform:"uppercase"}}><strong>{data.TranscodingInfo ? (data.TranscodingInfo?.IsVideoDirect ? i18next.t("DIRECT") :i18next.t("TRANSCODE")):i18next.t("DIRECT")}</strong></TableCell>
+          <TableCell colSpan="2" style={{textTransform:"uppercase"}}><strong>
+            {data.PlayMethod === "DirectStream" ? 
+              i18next.t("DIRECT_STREAM") : 
+              (data.TranscodingInfo ? 
+                (data.TranscodingInfo?.IsVideoDirect ? i18next.t("DIRECT") : i18next.t("TRANSCODE")) : 
+                i18next.t("DIRECT"))}
+          </strong></TableCell>
         </TableRow>
 
         <TableRow>
@@ -108,7 +114,13 @@ function Row(logs) {
 
         <TableRow>
           <TableCell ><strong><Trans i18nKey={"AUDIO"}/></strong></TableCell>
-          <TableCell colSpan="2" style={{textTransform:"uppercase"}}><strong>{data.TranscodingInfo ? (data.TranscodingInfo?.IsAudioDirect ? i18next.t("DIRECT") :i18next.t("TRANSCODE")):i18next.t("DIRECT")}</strong></TableCell>
+          <TableCell colSpan="2" style={{textTransform:"uppercase"}}><strong>
+            {data.PlayMethod === "DirectStream" ? 
+              i18next.t("DIRECT_STREAM") : 
+              (data.TranscodingInfo ? 
+                (data.TranscodingInfo?.IsAudioDirect ? i18next.t("DIRECT") : i18next.t("TRANSCODE")) : 
+                i18next.t("DIRECT"))}
+          </strong></TableCell>
         </TableRow>
 
         <TableRow>
@@ -135,7 +147,16 @@ function Row(logs) {
           <TableCell className="py-0 pb-3" >{data.MediaStreams ? data.MediaStreams.find(stream => stream.Type === 'Audio' &&  stream.Index===data.PlayState?.AudioStreamIndex)?.Language?.toUpperCase() : '-'}</TableCell>
         </TableRow>
 
-
+        {data.TranscodingInfo && data.TranscodingInfo?.TranscodeReasons && data.TranscodingInfo.TranscodeReasons.length > 0 && (
+          <>
+            <TableRow>
+              <TableCell colSpan="3"><strong><Trans i18nKey={"TRANSCODE_REASONS"}/></strong></TableCell>
+            </TableRow>
+            <TableRow>
+              <TableCell className="py-0 pb-3" colSpan="3">{data.TranscodingInfo.TranscodeReasons.join(", ")}</TableCell>
+            </TableRow>
+          </>
+        )}
 
       </React.Fragment>
     );

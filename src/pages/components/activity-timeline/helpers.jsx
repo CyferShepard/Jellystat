@@ -19,11 +19,13 @@ export function groupAdjacentSeasons(timelineEntries) {
         if (entry.Title === entryArray[potentialNextSeasonIndex]?.Title) {
           let highestSeasonName = entry.SeasonName;
           let lastSeasonInSession;
+          let totalEpisodeCount = +entry.EpisodeCount;
           //merge all further seasons as well
           while (entry.Title === entryArray[potentialNextSeasonIndex]?.Title) {
             const potentialNextSeason = entryArray[potentialNextSeasonIndex];
             if (entry.Title === potentialNextSeason?.Title) {
               lastSeasonInSession = potentialNextSeason;
+              totalEpisodeCount += +potentialNextSeason.EpisodeCount ?? 0;
               //remove season from list after usage
               entryArray[potentialNextSeasonIndex] = undefined;
 
@@ -47,6 +49,7 @@ export function groupAdjacentSeasons(timelineEntries) {
             ...entry,
             SeasonName: newSeasonName,
             LastActivityDate: newLastActivityDate,
+            EpisodeCount: totalEpisodeCount,
           };
         }
       }

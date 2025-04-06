@@ -61,9 +61,9 @@ function PlayMethodStats(props) {
           <Trans i18nKey={"STAT_PAGE.DAILY_PLAY_PER_LIBRARY"} /> - {hours} <Trans i18nKey={`UNITS.HOUR${hours > 1 ? "S" : ""}`} />
         </h1>
 
-        <h1>
+        <h5>
           <Trans i18nKey={"ERROR_MESSAGES.NO_STATS"} />
-        </h1>
+        </h5>
       </div>
     );
   }

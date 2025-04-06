@@ -179,25 +179,33 @@ export default function BackupFiles() {
     if (event.target.files[0]) {
       uploadFile(event.target.files[0], (progressEvent) => {
         setProgress(Math.round((progressEvent.loaded / progressEvent.total) * 100));
+      })
+        .then(() => {
+          setshowAlert({ visible: true, title: "Success", type: "success", message: "Upload complete!" });
+          fetchData(); // Refresh the file list after upload
+          setProgress(0);
+        })
+        .catch((error) => {
+          setshowAlert({ visible: true, title: "Error", type: "danger", message: error.response.data });
+        });
+    }
+  };
+
+  const fetchData = async () => {
+    try {
+      const backupFiles = await axios.get(`/backup/files`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
       });
+      setFiles(backupFiles.data);
+    } catch (error) {
+      console.log(error);
     }
   };
 
   useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const backupFiles = await axios.get(`/backup/files`, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json",
-          },
-        });
-        setFiles(backupFiles.data);
-      } catch (error) {
-        console.log(error);
-      }
-    };
-
     fetchData();
 
     const intervalId = setInterval(fetchData, 60000 * 5);
@@ -213,7 +221,9 @@ export default function BackupFiles() {
   };
 
   const handleRowActionMessage = (alertState) => {
-    setshowAlert({ visible: alertState.visible, title: alertState.title, type: alertState.type, message: alertState.message });
+    fetchData().then(() => {
+      setshowAlert({ visible: alertState.visible, title: alertState.title, type: alertState.type, message: alertState.message });
+    });
   };
 
   return (
@@ -228,7 +238,7 @@ export default function BackupFiles() {
         </Alert>
       )}
 
-      <TableContainer className="rounded-2">
+      <TableContainer className="rounded-2 h-100">
         <Table aria-label="collapsible table">
           <TableHead>
             <TableRow>
@@ -252,7 +262,11 @@ export default function BackupFiles() {
                 .map((file, index) => <Row key={index} data={file} handleRowActionMessage={handleRowActionMessage} />)}
             {files.length === 0 ? (
               <tr>
-                <td colSpan="5" style={{ textAlign: "center", fontStyle: "italic", color: "grey" }} className="py-2">
+                <td
+                  colSpan="5"
+                  style={{ textAlign: "center", fontStyle: "italic", color: "grey", height: "200px" }}
+                  className="py-2"
+                >
                   <Trans i18nKey={"ERROR_MESSAGES.NO_BACKUPS"} />
                 </td>
               </tr>

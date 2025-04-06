@@ -166,6 +166,10 @@ async function insertBulk(table_name, data, columns) {
   };
 }
 
+function isNumeric(value) {
+  return !isNaN(value) && !isNaN(parseFloat(value));
+}
+
 async function query(text, params, refreshViews = false) {
   try {
     const result = await pool.query(text, params);
@@ -175,6 +179,24 @@ async function query(text, params, refreshViews = false) {
         refreshMaterializedView(view);
       }
     }
+
+    const skippedColumns = ["Name", "NowPlayingItemName"];
+    // Convert integer fields in the result rows
+    const convertedRows = result.rows.map((row) => {
+      return Object.keys(row).reduce((acc, key) => {
+        const value = row[key];
+        if (skippedColumns.includes(key)) {
+          acc[key] = value; // Keep the original value for skipped columns
+          return acc; // Skip the rowid field
+        }
+
+        // Convert numeric strings to integers if applicable
+        acc[key] = isNumeric(value) ? parseInt(value, 10) : value;
+        return acc;
+      }, {});
+    });
+
+    result.rows = convertedRows;
     return result;
   } catch (error) {
     if (error?.routine === "auth_failed") {
@@ -215,5 +237,8 @@ module.exports = {
   insertBulk: insertBulk,
   updateSingleFieldBulk: updateSingleFieldBulk,
   querySingle: querySingle,
+  refreshMaterializedView: refreshMaterializedView,
+  materializedViews: materializedViews,
+
   // initDB: initDB,
 };

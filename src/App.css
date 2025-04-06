@@ -155,3 +155,11 @@ h2 {
 ::placeholder {
   color: #a7a7a7 !important; /* Replace with your desired color */
 }
+
+.text-primary-custom {
+  color: var(--primary-color) !important;
+}
+
+.text-secondary-custom {
+  color: var(--secondary-color) !important;
+}

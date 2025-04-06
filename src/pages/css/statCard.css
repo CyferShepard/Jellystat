@@ -55,9 +55,14 @@
   width: 120px !important;
 
   position: relative;
-  top: 50%;
-  left: 65%;
+  top: 70%;
+  left: 55%;
   transform: translate(-50%, -50%);
+}
+
+.stat-card-icon > img {
+  aspect-ratio: 1/1;
+  object-fit: cover;
 }
 
 .stat-items {

@@ -1,38 +1,31 @@
-@import '../variables.module.css';
+@import "../variables.module.css";
 
-.user-detail-container
-{
-    color:white;
-    background-color:  var(--secondary-background-color);
-    padding: 20px;
-    margin: 20px 0;
-    border-radius: 8px;
+.user-detail-container {
+  color: white;
+  background-color: var(--secondary-background-color);
+  padding: 20px;
+  margin: 20px 0;
+  border-radius: 8px;
 
-    display: flex;
-    align-items: center;
-    
+  display: flex;
+  align-items: center;
 }
 
-.user-name
-{
-    font-size: 2.5em;
-    font-weight: 500;
-    margin: 0;
+.user-name {
+  font-size: 2.5em;
+  font-weight: 500;
+  margin: 0;
 }
-.user-image
-{
-    width: 100px;
-    height: 100px;
-    border-radius: 50%;
-    object-fit: cover;
-    box-shadow: 0 0 10px 5px  var(--secondary-background-color);
+.user-image {
+  width: 100px;
+  height: 100px;
+  border-radius: 50%;
+  object-fit: cover;
+  box-shadow: 0 0 10px 5px var(--secondary-background-color);
 }
 
-.user-image-container
-{
-    width: 100px;
-    height: 100px;
-    margin-right: 20px;
-
-
+.user-image-container {
+  width: 100px;
+  height: 100px;
+  margin-right: 20px;
 }

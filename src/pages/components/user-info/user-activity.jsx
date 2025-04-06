@@ -226,6 +226,9 @@ function UserActivity(props) {
               <option value="DirectPlay">
                 <Trans i18nKey="DIRECT" />
               </option>
+              <option value="DirectStream">
+                <Trans i18nKey="DIRECT_STREAM" />
+              </option>
             </FormSelect>
           </div>
 
