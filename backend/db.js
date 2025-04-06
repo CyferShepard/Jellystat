@@ -180,7 +180,7 @@ async function query(text, params, refreshViews = false) {
       }
     }
 
-    const skippedColumns = ["Name"];
+    const skippedColumns = ["Name", "NowPlayingItemName"];
     // Convert integer fields in the result rows
     const convertedRows = result.rows.map((row) => {
       return Object.keys(row).reduce((acc, key) => {
