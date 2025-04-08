@@ -4,6 +4,19 @@ const sync = require("../routes/sync");
 
 async function runFullSyncTask(triggerType = triggertype.Automatic) {
   try {
+    console.log = (...args) => {
+      const formattedArgs = args.map((arg) => {
+        if (typeof arg === "object" && arg !== null) {
+          try {
+            return JSON.stringify(arg, null, 2);
+          } catch (e) {
+            return "[Circular]";
+          }
+        }
+        return arg;
+      });
+      parentPort.postMessage({ type: "log", message: formattedArgs.join(" ") });
+    };
     await sync.fullSync(triggerType);
 
     parentPort.postMessage({ status: "complete" });

@@ -9,6 +9,19 @@ const { sendUpdate } = require("../ws");
 
 async function runBackupTask(triggerType = triggertype.Automatic) {
   try {
+    console.log = (...args) => {
+      const formattedArgs = args.map((arg) => {
+        if (typeof arg === "object" && arg !== null) {
+          try {
+            return JSON.stringify(arg, null, 2);
+          } catch (e) {
+            return "[Circular]";
+          }
+        }
+        return arg;
+      });
+      parentPort.postMessage({ type: "log", message: formattedArgs.join(" ") });
+    };
     const uuid = randomUUID();
     const refLog = { logData: [], uuid: uuid };
 

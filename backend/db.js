@@ -77,6 +77,7 @@ async function updateSingleFieldBulk(table_name, data, field_name, new_value, wh
       const updateQuery = {
         text: `UPDATE ${table_name} SET "${field_name}"='${new_value}' WHERE "${where_field}" IN (${pgp.as.csv(data)})`,
       };
+      message = updateQuery.text;
       //  console.log(deleteQuery);
       await client.query(updateQuery);
     }
@@ -84,6 +85,8 @@ async function updateSingleFieldBulk(table_name, data, field_name, new_value, wh
     await client.query("COMMIT");
     message = data.length + " Rows updated.";
   } catch (error) {
+    error.query = message;
+    console.log(error);
     await client.query("ROLLBACK");
     message = "Bulk update error: " + error;
     result = "ERROR";

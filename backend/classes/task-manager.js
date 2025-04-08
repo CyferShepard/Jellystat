@@ -20,6 +20,10 @@ class TaskManager {
     const worker = new Worker(task.path);
 
     worker.on("message", (message) => {
+      if (message.type === "log") {
+        // Handle console.log messages
+        console.log(`[Worker Log]: ${message.message}`);
+      }
       if (message.status === "complete" && onComplete) {
         onComplete();
       }
