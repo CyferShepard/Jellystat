@@ -183,7 +183,19 @@ async function query(text, params, refreshViews = false) {
       }
     }
 
-    const skippedColumns = ["Name", "NowPlayingItemName"];
+    const skippedColumns = [
+      "Name",
+      "NowPlayingItemName",
+      "SeriesName",
+      "SeasonName",
+      "Id",
+      "NowPlayingItemId",
+      "ParentId",
+      "SeriesId",
+      "SeasonId",
+      "EpisodeId",
+      "ServerId",
+    ];
     // Convert integer fields in the result rows
     const convertedRows = result.rows.map((row) => {
       return Object.keys(row).reduce((acc, key) => {
