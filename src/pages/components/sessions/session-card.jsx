@@ -134,7 +134,12 @@ function SessionCard(props) {
                       <Col className="col-auto session-details-title text-end text-uppercase">
                         <Trans i18nKey="ACTIVITY_TABLE.DEVICE" />
                       </Col>
-                      <Col className="col-auto ellipse">
+                      <Col
+                        className="col-auto ellipse"
+                        style={{
+                          maxWidth: "200px",
+                        }}
+                      >
                         <Tooltip title={props.data.session.DeviceName}>
                           <span
                             style={{
@@ -152,7 +157,12 @@ function SessionCard(props) {
                       <Col className="col-auto session-details-title text-end text-uppercase">
                         <Trans i18nKey="ACTIVITY_TABLE.CLIENT" />
                       </Col>
-                      <Col className="col-auto ellipse">
+                      <Col
+                        className="col-auto ellipse"
+                        style={{
+                          maxWidth: "200px",
+                        }}
+                      >
                         <Tooltip title={props.data.session.Client + " " + props.data.session.ApplicationVersion}>
                           <span
                             style={{
@@ -171,7 +181,12 @@ function SessionCard(props) {
                         <Col className="col-auto session-details-title text-end text-uppercase">
                           <Trans i18nKey="VIDEO" />
                         </Col>
-                        <Col className="col-auto ellipse">
+                        <Col
+                          className="col-auto ellipse"
+                          style={{
+                            maxWidth: "200px",
+                          }}
+                        >
                           <Tooltip title={props.data.session.NowPlayingItem.VideoStream}>
                             <span
                               style={{
