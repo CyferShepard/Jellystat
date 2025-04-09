@@ -134,14 +134,36 @@ function SessionCard(props) {
                       <Col className="col-auto session-details-title text-end text-uppercase">
                         <Trans i18nKey="ACTIVITY_TABLE.DEVICE" />
                       </Col>
-                      <Col className="col-auto ellipse">{props.data.session.DeviceName}</Col>
+                      <Col className="col-auto ellipse">
+                        <Tooltip title={props.data.session.DeviceName}>
+                          <span
+                            style={{
+                              display: "-webkit-box",
+                              WebkitBoxOrient: "vertical",
+                              WebkitLineClamp: 1,
+                            }}
+                          >
+                            {props.data.session.DeviceName}
+                          </span>
+                        </Tooltip>
+                      </Col>
                     </Row>
                     <Row>
                       <Col className="col-auto session-details-title text-end text-uppercase">
                         <Trans i18nKey="ACTIVITY_TABLE.CLIENT" />
                       </Col>
                       <Col className="col-auto ellipse">
-                        {props.data.session.Client + " " + props.data.session.ApplicationVersion}
+                        <Tooltip title={props.data.session.Client + " " + props.data.session.ApplicationVersion}>
+                          <span
+                            style={{
+                              display: "-webkit-box",
+                              WebkitBoxOrient: "vertical",
+                              WebkitLineClamp: 1,
+                            }}
+                          >
+                            {props.data.session.Client + " " + props.data.session.ApplicationVersion}
+                          </span>
+                        </Tooltip>
                       </Col>
                     </Row>
                     {props.data.session.NowPlayingItem.VideoStream !== "" && (
@@ -149,7 +171,19 @@ function SessionCard(props) {
                         <Col className="col-auto session-details-title text-end text-uppercase">
                           <Trans i18nKey="VIDEO" />
                         </Col>
-                        <Col className="col-auto ellipse">{props.data.session.NowPlayingItem.VideoStream}</Col>
+                        <Col className="col-auto ellipse">
+                          <Tooltip title={props.data.session.NowPlayingItem.VideoStream}>
+                            <span
+                              style={{
+                                display: "-webkit-box",
+                                WebkitBoxOrient: "vertical",
+                                WebkitLineClamp: 1,
+                              }}
+                            >
+                              {props.data.session.NowPlayingItem.VideoStream}
+                            </span>
+                          </Tooltip>
+                        </Col>
                       </Row>
                     )}
                     {props.data.session.NowPlayingItem.AudioStream !== "" && (
@@ -157,7 +191,24 @@ function SessionCard(props) {
                         <Col className="col-auto session-details-title text-end text-uppercase">
                           <Trans i18nKey="AUDIO" />
                         </Col>
-                        <Col className="col-auto ellipse">{props.data.session.NowPlayingItem.AudioStream}</Col>
+                        <Col
+                          className="col-auto ellipse"
+                          style={{
+                            maxWidth: "200px",
+                          }}
+                        >
+                          <Tooltip title={props.data.session.NowPlayingItem.AudioStream}>
+                            <span
+                              style={{
+                                display: "-webkit-box",
+                                WebkitBoxOrient: "vertical",
+                                WebkitLineClamp: 1,
+                              }}
+                            >
+                              {props.data.session.NowPlayingItem.AudioStream}
+                            </span>
+                          </Tooltip>
+                        </Col>
                       </Row>
                     )}
                     {props.data.session.NowPlayingItem.SubtitleStream !== "" && (
