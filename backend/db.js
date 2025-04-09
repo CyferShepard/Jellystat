@@ -63,6 +63,13 @@ async function deleteBulk(table_name, data, pkName) {
   return { Result: result, message: "" + message };
 }
 
+function formatForCsv(value) {
+  if (typeof value === "number") {
+    return value.toString();
+  }
+  return value;
+}
+
 async function updateSingleFieldBulk(table_name, data, field_name, new_value, where_field) {
   const client = await pool.connect();
   let result = "SUCCESS";
@@ -74,11 +81,12 @@ async function updateSingleFieldBulk(table_name, data, field_name, new_value, wh
     await client.query("BEGIN");
 
     if (data && data.length !== 0) {
+      data = data.map((item) => formatForCsv(item));
       const updateQuery = {
         text: `UPDATE ${table_name} SET "${field_name}"='${new_value}' WHERE "${where_field}" IN (${pgp.as.csv(data)})`,
       };
       message = updateQuery.text;
-      //  console.log(deleteQuery);
+      console.log(updateQuery.text);
       await client.query(updateQuery);
     }
 
