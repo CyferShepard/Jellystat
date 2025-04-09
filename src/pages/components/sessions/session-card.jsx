@@ -15,6 +15,7 @@ import Tooltip from "@mui/material/Tooltip";
 import IpInfoModal from "../ip-info";
 import { Trans } from "react-i18next";
 import baseUrl from "../../../lib/baseurl";
+import { lineHeight } from "@mui/system";
 
 function ticksToTimeString(ticks) {
   // Convert ticks to seconds
@@ -164,9 +165,22 @@ function SessionCard(props) {
                         <Col className="col-auto session-details-title text-end text-uppercase">
                           <Trans i18nKey="SUBTITLES" />
                         </Col>
-                        <Col className="col-auto ellipse">
+                        <Col
+                          className="col-auto ellipse"
+                          style={{
+                            maxWidth: "200px",
+                          }}
+                        >
                           <Tooltip title={props.data.session.NowPlayingItem.SubtitleStream}>
-                            <span>{props.data.session.NowPlayingItem.SubtitleStream}</span>
+                            <span
+                              style={{
+                                display: "-webkit-box",
+                                WebkitBoxOrient: "vertical",
+                                WebkitLineClamp: 1,
+                              }}
+                            >
+                              {props.data.session.NowPlayingItem.SubtitleStream}
+                            </span>
                           </Tooltip>
                         </Col>
                       </Row>
