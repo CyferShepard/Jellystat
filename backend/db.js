@@ -63,6 +63,13 @@ async function deleteBulk(table_name, data, pkName) {
   return { Result: result, message: "" + message };
 }
 
+function formatForCsv(value) {
+  if (typeof value === "number") {
+    return value.toString();
+  }
+  return value;
+}
+
 async function updateSingleFieldBulk(table_name, data, field_name, new_value, where_field) {
   const client = await pool.connect();
   let result = "SUCCESS";
@@ -74,16 +81,20 @@ async function updateSingleFieldBulk(table_name, data, field_name, new_value, wh
     await client.query("BEGIN");
 
     if (data && data.length !== 0) {
+      data = data.map((item) => formatForCsv(item));
       const updateQuery = {
         text: `UPDATE ${table_name} SET "${field_name}"='${new_value}' WHERE "${where_field}" IN (${pgp.as.csv(data)})`,
       };
-      //  console.log(deleteQuery);
+      message = updateQuery.text;
+      console.log(updateQuery.text);
       await client.query(updateQuery);
     }
 
     await client.query("COMMIT");
     message = data.length + " Rows updated.";
   } catch (error) {
+    error.query = message;
+    console.log(error);
     await client.query("ROLLBACK");
     message = "Bulk update error: " + error;
     result = "ERROR";
@@ -180,7 +191,19 @@ async function query(text, params, refreshViews = false) {
       }
     }
 
-    const skippedColumns = ["Name", "NowPlayingItemName"];
+    const skippedColumns = [
+      "Name",
+      "NowPlayingItemName",
+      "SeriesName",
+      "SeasonName",
+      "Id",
+      "NowPlayingItemId",
+      "ParentId",
+      "SeriesId",
+      "SeasonId",
+      "EpisodeId",
+      "ServerId",
+    ];
     // Convert integer fields in the result rows
     const convertedRows = result.rows.map((row) => {
       return Object.keys(row).reduce((acc, key) => {

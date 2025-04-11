@@ -7,7 +7,9 @@ const configClass = require("../classes/config");
 const API = require("../classes/api-loader");
 const { sendUpdate } = require("../ws");
 const { isNumber } = require("@mui/x-data-grid/internals");
-const MINIMUM_SECONDS_TO_INCLUDE_PLAYBACK = process.env.MINIMUM_SECONDS_TO_INCLUDE_PLAYBACK ? Number(process.env.MINIMUM_SECONDS_TO_INCLUDE_PLAYBACK) : 1;
+const MINIMUM_SECONDS_TO_INCLUDE_PLAYBACK = process.env.MINIMUM_SECONDS_TO_INCLUDE_PLAYBACK
+  ? Number(process.env.MINIMUM_SECONDS_TO_INCLUDE_PLAYBACK)
+  : 1;
 
 async function getSessionsInWatchDog(SessionData, WatchdogData) {
   let existingData = await WatchdogData.filter((wdData) => {
@@ -170,18 +172,26 @@ async function ActivityMonitor(interval) {
       /////get data from jf_playback_activity within the last hour with progress of <=80% for current items in session
 
       const ExistingRecords = await db
-        .query(`SELECT * FROM jf_recent_playback_activity(1)`)
-        .then((res) =>
-          res.rows.filter(
-            (row) =>
-              playbackToInsert.some((pbi) => pbi.NowPlayingItemId === row.NowPlayingItemId && pbi.EpisodeId === row.EpisodeId) &&
-              row.Progress <= 80.0
-          )
-        );
+        .query(`SELECT * FROM jf_recent_playback_activity(1) limit 0`)
+        .then((res) => {
+          if (res.rows && Array.isArray(res.rows) && res.rows.length > 0) {
+            return res.rows.filter(
+              (row) =>
+                playbackToInsert.some(
+                  (pbi) => pbi.NowPlayingItemId === row.NowPlayingItemId && pbi.EpisodeId === row.EpisodeId
+                ) && row.Progress <= 80.0
+            );
+          } else {
+            return [];
+          }
+        })
+        .catch((err) => {
+          console.error("Error fetching existing records:", err);
+        });
       let ExistingDataToUpdate = [];
 
       //for each item in playbackToInsert, check if it exists in the recent playback activity and update accordingly. insert new row if updating existing exceeds the runtime
-      if (playbackToInsert.length >0 && ExistingRecords.length >0) {
+      if (playbackToInsert.length > 0 && ExistingRecords.length > 0) {
         ExistingDataToUpdate = playbackToInsert.filter((playbackData) => {
           const existingrow = ExistingRecords.find((existing) => {
             let newDurationWithingRunTime = true;

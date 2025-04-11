@@ -160,7 +160,19 @@ async function query({
     const countResult = await client.query(countQuery, values);
     const totalRows = parseInt(countResult.rows.length > 0 ? countResult.rows[0].count : 0, 10);
 
-    const skippedColumns = ["Name", "NowPlayingItemName"];
+    const skippedColumns = [
+      "Name",
+      "NowPlayingItemName",
+      "SeriesName",
+      "SeasonName",
+      "Id",
+      "NowPlayingItemId",
+      "ParentId",
+      "SeriesId",
+      "SeasonId",
+      "EpisodeId",
+      "ServerId",
+    ];
     // Convert integer fields in the result rows
     const convertedRows = result.rows.map((row) => {
       return Object.keys(row).reduce((acc, key) => {

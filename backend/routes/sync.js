@@ -71,9 +71,10 @@ class sync {
     let result = await db.updateSingleFieldBulk(tablename, dataToUpdate, field_name, field_value, where_field);
     if (result.Result === "SUCCESS") {
       syncTask.loggedData.push({ color: "dodgerblue", Message: dataToUpdate.length + " Rows updated." });
+      return true;
     } else {
-      syncTask.loggedData.push({ color: "red", Message: "Error: " + result.message });
-      throw new Error("Error :" + result.message);
+      syncTask.loggedData.push({ color: "red", Message: result.message });
+      return false;
     }
   }
 }
@@ -139,11 +140,21 @@ async function syncLibraryFolders(data, existing_excluded_libraries) {
         )
         .then((res) => res.rows.map((row) => row.Id));
       if (ItemsToArchive.length > 0) {
-        await _sync.updateSingleFieldOnDB("jf_library_items", ItemsToArchive, "archived", true);
+        const success = await _sync.updateSingleFieldOnDB("jf_library_items", ItemsToArchive, "archived", true);
+        if (!success) {
+          syncTask.loggedData.push({ color: "red", Message: "Error archiving library items" });
+          await logging.updateLog(syncTask.uuid, syncTask.loggedData, taskstate.FAILED);
+          throw new Error("Error archiving library items");
+        }
       }
     }
 
-    await _sync.updateSingleFieldOnDB("jf_libraries", toArchiveLibraryIds, "archived", true);
+    const success = await _sync.updateSingleFieldOnDB("jf_libraries", toArchiveLibraryIds, "archived", true);
+    if (!success) {
+      syncTask.loggedData.push({ color: "red", Message: "Error archiving library" });
+      await logging.updateLog(syncTask.uuid, syncTask.loggedData, taskstate.FAILED);
+      throw new Error("Error archiving library");
+    }
   }
 
   for (const view of db.materializedViews) {
@@ -183,7 +194,12 @@ async function archiveLibraryItems(fetchedData) {
   let toArchiveIds = existingIds.filter((id) => !fetchedData.some((row) => row === id));
 
   if (toArchiveIds.length > 0) {
-    await _sync.updateSingleFieldOnDB("jf_library_items", toArchiveIds, "archived", true);
+    const success = await _sync.updateSingleFieldOnDB("jf_library_items", toArchiveIds, "archived", true);
+    if (!success) {
+      syncTask.loggedData.push({ color: "red", Message: "Error archiving library items" });
+      await logging.updateLog(syncTask.uuid, syncTask.loggedData, taskstate.FAILED);
+      throw new Error("Error archiving library items");
+    }
     syncTask.loggedData.push({ color: "orange", Message: toArchiveIds.length + " Library Items Archived." });
   }
 }
@@ -282,11 +298,21 @@ async function archiveSeasonsAndEpisodes(fetchedSeasons, fetchedEpisodes) {
   let toArchiveEpisodes = existingIdsEpisodes.filter((EpisodeId) => !fetchedEpisodes.some((row) => row === EpisodeId));
 
   if (toArchiveSeasons.length > 0) {
-    await _sync.updateSingleFieldOnDB("jf_library_seasons", toArchiveSeasons, "archived", true);
+    const success = await _sync.updateSingleFieldOnDB("jf_library_seasons", toArchiveSeasons, "archived", true);
+    if (!success) {
+      syncTask.loggedData.push({ color: "red", Message: "Error archiving library seasons" });
+      await logging.updateLog(syncTask.uuid, syncTask.loggedData, taskstate.FAILED);
+      throw new Error("Error archiving library seasons");
+    }
     syncTask.loggedData.push({ color: "orange", Message: toArchiveSeasons.length + " Seasons Archived." });
   }
   if (toArchiveEpisodes.length > 0) {
-    await _sync.updateSingleFieldOnDB("jf_library_episodes", toArchiveEpisodes, "archived", true, "EpisodeId");
+    const success = await _sync.updateSingleFieldOnDB("jf_library_episodes", toArchiveEpisodes, "archived", true, "EpisodeId");
+    if (!success) {
+      syncTask.loggedData.push({ color: "red", Message: "Error archiving library episodes" });
+      await logging.updateLog(syncTask.uuid, syncTask.loggedData, taskstate.FAILED);
+      throw new Error("Error archiving library episodes");
+    }
 
     syncTask.loggedData.push({ color: "orange", Message: toArchiveEpisodes.length + " Episodes Archived." });
   }
@@ -375,9 +401,21 @@ async function removeOrphanedData() {
   const archived_seasons = await db
     .query(`select "Id" from jf_library_seasons where archived=true`)
     .then((res) => res.rows.map((row) => row.Id));
-  await _sync.updateSingleFieldOnDB("jf_library_seasons", archived_items, "archived", true, "SeriesId");
-  await _sync.updateSingleFieldOnDB("jf_library_episodes", archived_items, "archived", true, "SeriesId");
-  await _sync.updateSingleFieldOnDB("jf_library_episodes", archived_seasons, "archived", true, "SeasonId");
+  if (!(await _sync.updateSingleFieldOnDB("jf_library_seasons", archived_items, "archived", true, "SeriesId"))) {
+    syncTask.loggedData.push({ color: "red", Message: "Error archiving library seasons" });
+    await logging.updateLog(syncTask.uuid, syncTask.loggedData, taskstate.FAILED);
+    throw new Error("Error archiving library seasons");
+  }
+  if (!(await _sync.updateSingleFieldOnDB("jf_library_episodes", archived_items, "archived", true, "SeriesId"))) {
+    syncTask.loggedData.push({ color: "red", Message: "Error archiving library episodes" });
+    await logging.updateLog(syncTask.uuid, syncTask.loggedData, taskstate.FAILED);
+    throw new Error("Error archiving library episodes");
+  }
+  if (!(await _sync.updateSingleFieldOnDB("jf_library_episodes", archived_seasons, "archived", true, "SeasonId"))) {
+    syncTask.loggedData.push({ color: "red", Message: "Error archiving library episodes" });
+    await logging.updateLog(syncTask.uuid, syncTask.loggedData, taskstate.FAILED);
+    throw new Error("Error archiving library episodes");
+  }
 
   await db.query(`DELETE FROM public.jf_library_episodes
   where "SeasonId" is null
