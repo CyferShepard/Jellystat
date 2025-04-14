@@ -28,8 +28,9 @@ async function runFullSyncTask(triggerType = triggertype.Automatic) {
   }
 }
 
-parentPort.on("message", (message) => {
+parentPort.on("message", async (message) => {
   if (message.command === "start") {
-    runFullSyncTask(message.triggertype);
+    await runFullSyncTask(message.triggertype);
+    process.exit(0); // Exit the worker after the task is done
   }
 });
