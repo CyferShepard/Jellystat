@@ -407,9 +407,9 @@ router.post("/getLibraryLastPlayed", async (req, res) => {
   }
 });
 
-router.post("/getViewsOverTime", async (req, res) => {
+router.get("/getViewsOverTime", async (req, res) => {
   try {
-    const { days } = req.body;
+    const { days } = req.query;
     let _days = days;
     if (days === undefined) {
       _days = 30;
@@ -446,9 +446,9 @@ router.post("/getViewsOverTime", async (req, res) => {
   }
 });
 
-router.post("/getViewsByDays", async (req, res) => {
+router.get("/getViewsByDays", async (req, res) => {
   try {
-    const { days } = req.body;
+    const { days } = req.query;
     let _days = days;
     if (days === undefined) {
       _days = 30;
@@ -481,9 +481,9 @@ router.post("/getViewsByDays", async (req, res) => {
   }
 });
 
-router.post("/getViewsByHour", async (req, res) => {
+router.get("/getViewsByHour", async (req, res) => {
   try {
-    const { days } = req.body;
+    const { days } = req.query;
     let _days = days;
     if (days === undefined) {
       _days = 30;
