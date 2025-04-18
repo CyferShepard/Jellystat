@@ -3504,7 +3504,7 @@
       }
     },
     "/stats/getViewsOverTime": {
-      "post": {
+      "get": {
         "tags": [
           "Stats"
         ],
@@ -3526,16 +3526,9 @@
             "type": "string"
           },
           {
-            "name": "body",
-            "in": "body",
-            "schema": {
-              "type": "object",
-              "properties": {
-                "days": {
-                  "example": "any"
-                }
-              }
-            }
+            "name": "days",
+            "in": "query",
+            "type": "string"
           }
         ],
         "responses": {
@@ -3558,7 +3551,7 @@
       }
     },
     "/stats/getViewsByDays": {
-      "post": {
+      "get": {
         "tags": [
           "Stats"
         ],
@@ -3580,16 +3573,9 @@
             "type": "string"
           },
           {
-            "name": "body",
-            "in": "body",
-            "schema": {
-              "type": "object",
-              "properties": {
-                "days": {
-                  "example": "any"
-                }
-              }
-            }
+            "name": "days",
+            "in": "query",
+            "type": "string"
           }
         ],
         "responses": {
@@ -3612,7 +3598,7 @@
       }
     },
     "/stats/getViewsByHour": {
-      "post": {
+      "get": {
         "tags": [
           "Stats"
         ],
@@ -3634,16 +3620,9 @@
             "type": "string"
           },
           {
-            "name": "body",
-            "in": "body",
-            "schema": {
-              "type": "object",
-              "properties": {
-                "days": {
-                  "example": "any"
-                }
-              }
-            }
+            "name": "days",
+            "in": "query",
+            "type": "string"
           }
         ],
         "responses": {
