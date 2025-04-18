@@ -13,12 +13,11 @@ function PlayStatsByDay(props) {
 
   useEffect(() => {
     const fetchLibraries = () => {
-      const url = `/stats/getViewsByDays`;
+      const url = `/stats/getViewsByDays?days=${props.days}`;
 
       axios
-        .post(
+        .get(
           url,
-          { days: props.days },
           {
             headers: {
               Authorization: `Bearer ${token}`,
