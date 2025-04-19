@@ -537,6 +537,11 @@ router.get("/getViewsByLibraryType", async (req, res) => {
       reorganizedData[type] = count;
     });
 
+    supportedTypes.forEach((type) => {
+      if (Object.prototype.hasOwnProperty.call(reorganizedData, type)) return;
+      reorganizedData[type] = 0;
+    });
+
     res.send(reorganizedData);
   } catch (error) {
     console.log(error);
