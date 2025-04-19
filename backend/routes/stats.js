@@ -516,6 +516,35 @@ router.get("/getViewsByHour", async (req, res) => {
   }
 });
 
+router.get("/getViewsByLibraryType", async (req, res) => {
+  try {
+    const { days = 30 } = req.query;
+
+    const { rows } = await db.query(`
+      SELECT COALESCE(i."Type", 'Other') AS type, COUNT(a."NowPlayingItemId") AS count
+      FROM jf_playback_activity a LEFT JOIN jf_library_items i ON i."Id" = a."NowPlayingItemId"
+      WHERE a."ActivityDateInserted" BETWEEN NOW() - CAST($1 || ' days' as INTERVAL) AND NOW()
+      GROUP BY i."Type"
+    `, [days]);
+
+    const supportedTypes = new Set(["Audio", "Movie", "Series", "Other"]);
+    const reorganizedData = {};
+
+    rows.forEach((item) => {
+      const { type, count } = item;
+
+      if (!supportedTypes.has(type)) return;
+      reorganizedData[type] = count;
+    });
+
+    res.send(reorganizedData);
+  } catch (error) {
+    console.log(error);
+    res.status(503);
+    res.send(error);
+  }
+});
+
 router.get("/getGenreUserStats", async (req, res) => {
   try {
     const { size = 50, page = 1, userid } = req.query;
