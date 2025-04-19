@@ -528,21 +528,22 @@ router.get("/getViewsByLibraryType", async (req, res) => {
     `, [days]);
 
     const supportedTypes = new Set(["Audio", "Movie", "Series", "Other"]);
-    const reorganizedData = {};
+    /** @type {Map<string, number>} */
+    const reorganizedData = new Map();
 
     rows.forEach((item) => {
       const { type, count } = item;
 
       if (!supportedTypes.has(type)) return;
-      reorganizedData[type] = count;
+      reorganizedData.set(type, count);
     });
 
     supportedTypes.forEach((type) => {
-      if (Object.prototype.hasOwnProperty.call(reorganizedData, type)) return;
-      reorganizedData[type] = 0;
+      if (reorganizedData.has(type)) return;
+      reorganizedData.set(type, 0);
     });
 
-    res.send(reorganizedData);
+    res.send(Object.fromEntries(reorganizedData));
   } catch (error) {
     console.log(error);
     res.status(503);
