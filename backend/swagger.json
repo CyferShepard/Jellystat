@@ -3504,7 +3504,7 @@
       }
     },
     "/stats/getViewsOverTime": {
-      "post": {
+      "get": {
         "tags": [
           "Stats"
         ],
@@ -3526,16 +3526,9 @@
             "type": "string"
           },
           {
-            "name": "body",
-            "in": "body",
-            "schema": {
-              "type": "object",
-              "properties": {
-                "days": {
-                  "example": "any"
-                }
-              }
-            }
+            "name": "days",
+            "in": "query",
+            "type": "string"
           }
         ],
         "responses": {
@@ -3558,7 +3551,7 @@
       }
     },
     "/stats/getViewsByDays": {
-      "post": {
+      "get": {
         "tags": [
           "Stats"
         ],
@@ -3580,16 +3573,9 @@
             "type": "string"
           },
           {
-            "name": "body",
-            "in": "body",
-            "schema": {
-              "type": "object",
-              "properties": {
-                "days": {
-                  "example": "any"
-                }
-              }
-            }
+            "name": "days",
+            "in": "query",
+            "type": "string"
           }
         ],
         "responses": {
@@ -3612,7 +3598,7 @@
       }
     },
     "/stats/getViewsByHour": {
-      "post": {
+      "get": {
         "tags": [
           "Stats"
         ],
@@ -3634,16 +3620,56 @@
             "type": "string"
           },
           {
-            "name": "body",
-            "in": "body",
-            "schema": {
-              "type": "object",
-              "properties": {
-                "days": {
-                  "example": "any"
-                }
-              }
-            }
+            "name": "days",
+            "in": "query",
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "404": {
+            "description": "Not Found"
+          },
+          "503": {
+            "description": "Service Unavailable"
+          }
+        }
+      }
+    },
+    "/stats/getViewsByLibraryType": {
+      "get": {
+        "tags": [
+          "Stats"
+        ],
+        "description": "",
+        "parameters": [
+          {
+            "name": "authorization",
+            "in": "header",
+            "type": "string"
+          },
+          {
+            "name": "x-api-token",
+            "in": "header",
+            "type": "string"
+          },
+          {
+            "name": "req",
+            "in": "query",
+            "type": "string"
+          },
+          {
+            "name": "days",
+            "in": "query",
+            "type": "string"
           }
         ],
         "responses": {
