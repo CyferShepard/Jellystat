@@ -50,7 +50,7 @@ const jf_library_items_mapping = (item) => ({
       ? item.ImageBlurHashes.Primary[item.ImageTags["Primary"]]
       : null,
   archived: false,
-  Genres: item.Genres && Array.isArray(item.Genres) ? JSON.stringify(filterInvalidGenres(item.Genres.map(titleCase))) : [],
+  Genres: item.Genres && Array.isArray(item.Genres) ? JSON.stringify(item.Genres.map(titleCase)) : [],
 });
 
 // Utility function to title-case a string
@@ -60,53 +60,6 @@ function titleCase(str) {
     .split(" ")
     .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
     .join(" ");
-}
-
-function filterInvalidGenres(genres) {
-  const validGenres = [
-    "Action",
-    "Adventure",
-    "Animated",
-    "Biography",
-    "Comedy",
-    "Crime",
-    "Dance",
-    "Disaster",
-    "Documentary",
-    "Drama",
-    "Erotic",
-    "Family",
-    "Fantasy",
-    "Found Footage",
-    "Historical",
-    "Horror",
-    "Independent",
-    "Legal",
-    "Live Action",
-    "Martial Arts",
-    "Musical",
-    "Mystery",
-    "Noir",
-    "Performance",
-    "Political",
-    "Romance",
-    "Satire",
-    "Science Fiction",
-    "Short",
-    "Silent",
-    "Slasher",
-    "Sports",
-    "Spy",
-    "Superhero",
-    "Supernatural",
-    "Suspense",
-    "Teen",
-    "Thriller",
-    "War",
-    "Western",
-  ];
-
-  return genres.filter((genre) => validGenres.map((g) => g.toLowerCase()).includes(genre.toLowerCase()));
 }
 
 module.exports = {

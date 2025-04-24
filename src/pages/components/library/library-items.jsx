@@ -23,8 +23,6 @@ function LibraryItems(props) {
     localStorage.getItem("PREF_sortAsc") != undefined ? localStorage.getItem("PREF_sortAsc") == "true" : true
   );
 
-  console.log(sortOrder);
-
   const archive = {
     all: "all",
     archived: "true",
@@ -212,7 +210,11 @@ function LibraryItems(props) {
             }
           })
           .map((item) => (
-            <MoreItemCards data={item} base_url={config.settings?.EXTERNAL_URL ?? config.hostUrl} key={item.Id + item.SeasonNumber + item.EpisodeNumber} />
+            <MoreItemCards
+              data={item}
+              base_url={config.settings?.EXTERNAL_URL ?? config.hostUrl}
+              key={item.Id + item.SeasonNumber + item.EpisodeNumber}
+            />
           ))}
       </div>
     </div>
