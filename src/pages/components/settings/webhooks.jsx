@@ -54,11 +54,11 @@ function WebhooksSettings() {
     const [error, setError] = useState(null);
     const [success, setSuccess] = useState(false);
     const [currentWebhook, setCurrentWebhook] = useState({
-        name: 'Rapport mensuel films et séries',
+        name: 'Monthly Report of Most watched movies and series',
         url: '',
         enabled: false,
         trigger_type: 'scheduled',
-        schedule: '0 9 1 * *', // 9h le 1er du mois
+        schedule: '0 9 1 * *',
         method: 'POST',
         webhook_type: 'discord'
     });
@@ -77,7 +77,7 @@ function WebhooksSettings() {
                 setWebhooks(response.data);
                 setLoading(false);
             } catch (err) {
-                console.log("Erreur lors du chargement des webhooks:", err);
+                console.error("Error loading webhooks:", err);
                 setLoading(false);
             }
         };
@@ -105,7 +105,7 @@ function WebhooksSettings() {
             setSuccess(false);
 
             if (!currentWebhook.url) {
-                setError("L'URL du webhook Discord est requise");
+                setError("Discord webhook URL is required");
                 setSaving(false);
                 return;
             }
@@ -129,7 +129,7 @@ function WebhooksSettings() {
             }
 
             setCurrentWebhook({
-                name: 'Nouveau webhook',
+                name: 'New Webhook',
                 url: '',
                 enabled: false,
                 trigger_type: 'scheduled',
@@ -137,10 +137,10 @@ function WebhooksSettings() {
                 method: 'POST',
                 webhook_type: 'discord'
             });
-            setSuccess("Webhook enregistré avec succès");
+            setSuccess("Webhook saved successfully!");
             setSaving(false);
         } catch (err) {
-            setError("Erreur lors de l'enregistrement du webhook: " + (err.response?.data?.error || err.message));
+            setError("Error during webhook saving: " + (err.response?.data?.error || err.message));
             setSaving(false);
         }
     };
@@ -151,7 +151,7 @@ function WebhooksSettings() {
 
     const handleTest = async (webhookId) => {
         if (!webhookId) {
-            setError("Impossible de tester ce webhook");
+            setError("Impossible to test the webhook: no ID provided");
             return;
         }
 
@@ -166,10 +166,10 @@ function WebhooksSettings() {
                 }
             });
 
-            setSuccess("Webhook testé avec succès !");
+            setSuccess("Webhook test triggered successfully!");
             setLoading(false);
         } catch (err) {
-            setError("Erreur lors du test du webhook: " + (err.response?.data?.message || err.message));
+            setError("Error during the test of the webhook: " + (err.response?.data?.message || err.message));
             setLoading(false);
         }
     };
