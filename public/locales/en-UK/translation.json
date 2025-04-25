@@ -213,7 +213,20 @@
     },
     "SELECT_LIBRARIES_TO_IMPORT": "Select Libraries to Import",
     "SELECT_LIBRARIES_TO_IMPORT_TOOLTIP": "Activity for Items within these libraries are still Tracked - Even when not imported.",
-    "DATE_ADDED": "Date Added"
+    "DATE_ADDED": "Date Added",
+    "WEBHOOKS": "Webhooks",
+    "WEBHOOK_TYPE": "Webhook Type",
+    "TEST_NOW": "Test Now",
+    "WEBHOOKS_CONFIGURATION": "Webhook Configuration",
+    "WEBHOOKS_TOOLTIP": "Webhook URL to send Playback Activity to",
+    "WEBHOOK_SAVED": "Webhook Saved",
+    "WEBHOOK_NAME": "Webhook Name",
+    "DISCORD_WEBHOOK_URL": "Discord Webhook URL",
+    "ENABLE_WEBHOOK": "Enable Webhook",
+    "URL": "URL",
+    "TYPE": "Type",
+    "TRIGGER": "Trigger",
+    "STATUS":  "Status"
   },
   "TASK_TYPE": {
     "JOB": "Job",
