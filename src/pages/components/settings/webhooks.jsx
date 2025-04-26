@@ -66,7 +66,6 @@ function WebhooksSettings() {
     useEffect(() => {
         const fetchWebhooks = async () => {
             try {
-                setLoading(true);
                 const response = await axios.get('/webhooks', {
                     headers: {
                         Authorization: `Bearer ${token}`,
@@ -74,17 +73,24 @@ function WebhooksSettings() {
                     },
                 });
 
-                setWebhooks(response.data);
-                setLoading(false);
+                if (response.data != webhooks) {
+                    setWebhooks(response.data);
+                  }
+          
+                  if (loading) {
+                    setLoading(false);
+                  }
             } catch (err) {
                 console.error("Error loading webhooks:", err);
-                setLoading(false);
+                if (loading) {
+                    setLoading(false);
+                  }
             }
         };
 
         fetchWebhooks();
 
-        const intervalId = setInterval(fetchWebhooks, 1000 * 5);
+        const intervalId = setInterval(fetchWebhooks, 1000 * 10);
         return () => clearInterval(intervalId);
     }, []);
 
@@ -267,8 +273,7 @@ function WebhooksSettings() {
                         </Col>
                     </Form.Group>
                 </Form>
-
-                {webhooks.length > 0 ? (
+                
                     <TableContainer className='rounded-2 mt-4'>
                         <Table aria-label="webhooks table">
                             <TableHead>
@@ -300,11 +305,7 @@ function WebhooksSettings() {
                             </TableBody>
                         </Table>
                     </TableContainer>
-                ) : (
-                    <div className="text-center my-5 text-muted">
-                        <p><Trans i18nKey={"ERROR_MESSAGES.NO_WEBHOOKS"} /></p>
-                    </div>
-                )}
+               
             </ErrorBoundary>
         </div>
     );
