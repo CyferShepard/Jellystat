@@ -190,7 +190,7 @@ class WebhookManager {
             const result = await dbInstance.query(query, [formattedStartDate, limit]);
             return result.rows || [];
         } catch (error) {
-            console.error(`[WEBHOOK] Erreur SQL (${contentType}):`, error.message);
+            console.error(`[WEBHOOK] SQL ERROR (${contentType}):`, error.message);
             return [];
         }
     }
@@ -237,7 +237,7 @@ class WebhookManager {
                 stats: generalStats
             };
         } catch (error) {
-            console.error("[WEBHOOK] Erreur récupération données:", error.message);
+            console.error("[WEBHOOK] Error while getting data:", error.message);
             throw error;
         }
     }
@@ -251,7 +251,7 @@ class WebhookManager {
             );
 
             if (result.rows.length === 0) {
-                console.error(`[WEBHOOK] Webhook ID ${webhookId} non trouvé ou désactivé`);
+                console.error(`[WEBHOOK] Webhook ID ${webhookId} not found or disable`);
                 return false;
             }
 
@@ -263,51 +263,51 @@ class WebhookManager {
 
                 const moviesFields = data.topMovies.map((movie, index) => ({
                     name: `${index + 1}. ${movie.title}`,
-                    value: `${Math.round(movie.total_minutes)} minutes • ${movie.unique_viewers} spectateurs`,
+                    value: `${Math.round(movie.total_minutes)} minutes • ${movie.unique_viewers} viewers`,
                     inline: false
                 }));
 
                 const seriesFields = data.topSeries.map((series, index) => ({
                     name: `${index + 1}. ${series.title}`,
-                    value: `${Math.round(series.total_minutes)} minutes • ${series.unique_viewers} spectateurs`,
+                    value: `${Math.round(series.total_minutes)} minutes • ${series.unique_viewers} viewers`,
                     inline: false
                 }));
 
                 const monthlyPayload = {
-                    content: `📊 **Rapport mensuel - ${data.period.name}**`,
+                    content: `📊 **Monthly Report - ${data.period.name}**`,
                     embeds: [
                         {
                             title: "🎬 Most Watched Movies",
-                            color: 15844367, // Orange
-                            fields: moviesFields.length > 0 ? moviesFields : [{ name: "Aucune donnée", value: "Pas de films regardés ce mois-ci" }]
+                            color: 15844367,
+                            fields: moviesFields.length > 0 ? moviesFields : [{ name: "No data", value: "No movies watch this month" }]
                         },
                         {
                             title: "📺 Most Watched Series",
-                            color: 5793266, // Bleu
-                            fields: seriesFields.length > 0 ? seriesFields : [{ name: "Aucune donnée", value: "Pas de séries regardées ce mois-ci" }]
+                            color: 5793266,
+                            fields: seriesFields.length > 0 ? seriesFields : [{ name: "No data", value: "No Series watch this month" }]
                         },
                         {
                             title: "📈 General Statistics",
-                            color: 5763719, // Vert
+                            color: 5763719,
                             fields: [
                                 {
-                                    name: "Utilisateurs actifs",
+                                    name: "Active Users",
                                     value: `${data.stats.active_users || 0}`,
                                     inline: true
                                 },
                                 {
-                                    name: "Lectures totales",
+                                    name: "Total Plays",
                                     value: `${data.stats.total_plays || 0}`,
                                     inline: true
                                 },
                                 {
-                                    name: "Heures visionnées",
+                                    name: "Total Hours Watched",
                                     value: `${Math.round(data.stats.total_hours || 0)}`,
                                     inline: true
                                 }
                             ],
                             footer: {
-                                text: `Période: du ${new Date(data.period.start).toLocaleDateString('fr-FR')} au ${new Date(data.period.end).toLocaleDateString('fr-FR')}`
+                                text: `Period: from ${new Date(data.period.start).toLocaleDateString('en-US')} to ${new Date(data.period.end).toLocaleDateString('en-US')}`
                             }
                         }
                     ]
@@ -322,7 +322,7 @@ class WebhookManager {
                     timeout: 10000
                 });
 
-                console.log(`[WEBHOOK] Rapport mensuel envoyé avec succès via ${webhook.name}`);
+                console.log(`[WEBHOOK] Monthly report webhook ${webhook.name} sent successfully`);
 
                 // Update the last triggered timestamp
                 await dbInstance.query(
@@ -332,11 +332,11 @@ class WebhookManager {
 
                 return true;
             } catch (dataError) {
-                console.error(`[WEBHOOK] Erreur préparation données:`, dataError.message);
+                console.error(`[WEBHOOK] Error while preparing the data:`, dataError.message);
                 return false;
             }
         } catch (error) {
-            console.error(`[WEBHOOK] Erreur lors de l'envoi du rapport mensuel:`, error.message);
+            console.error(`[WEBHOOK] Error while sending the monthly report:`, error.message);
             return false;
         }
     }

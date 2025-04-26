@@ -12,7 +12,7 @@ class WebhookScheduler {
     async loadScheduledWebhooks() {
         try {
             const webhooks = await this.webhookManager.getScheduledWebhooks();
-
+            if (webhooks) {
             // Clean existing tasks
             Object.values(this.cronJobs).forEach(job => job.stop());
             this.cronJobs = {};
@@ -27,6 +27,9 @@ class WebhookScheduler {
             });
 
             console.log(`[WEBHOOK] Scheduled ${Object.keys(this.cronJobs).length} webhooks`);
+            } else {
+                console.log('[WEBHOOK] No scheduled webhooks found');
+            }
         } catch (error) {
             console.error('[WEBHOOK] Failed to load scheduled webhooks:', error);
         }
