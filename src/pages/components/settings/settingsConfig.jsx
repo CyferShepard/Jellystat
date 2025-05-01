@@ -44,6 +44,20 @@ export default function SettingsConfig() {
     set12hr(Boolean(storage_12hr));
   }
 
+  const fetchAdmins = async () => {
+    try {
+      const adminData = await axios.get(`/proxy/getAdminUsers`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+      });
+      setAdmins(adminData.data);
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
   useEffect(() => {
     Config.getConfig()
       .then((config) => {
@@ -58,20 +72,6 @@ export default function SettingsConfig() {
         setloadSate("Critical");
         setsubmissionMessage("Error Retrieving Configuration. Unable to contact Backend Server");
       });
-
-    const fetchAdmins = async () => {
-      try {
-        const adminData = await axios.get(`/proxy/getAdminUsers`, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json",
-          },
-        });
-        setAdmins(adminData.data);
-      } catch (error) {
-        console.log(error);
-      }
-    };
 
     fetchAdmins();
   }, [token]);
@@ -91,6 +91,8 @@ export default function SettingsConfig() {
         console.log("Config updated successfully:", response.data);
         setisSubmitted("Success");
         setsubmissionMessage("Successfully updated configuration");
+        Config.setConfig();
+        fetchAdmins();
       })
       .catch((error) => {
         let errorMessage = error.response.data.errorMessage;
@@ -98,7 +100,6 @@ export default function SettingsConfig() {
         setisSubmitted("Failed");
         setsubmissionMessage(`Error Updating Configuration: ${errorMessage}`);
       });
-    Config.setConfig();
   }
 
   async function handleFormSubmitExternal(event) {
@@ -233,9 +234,13 @@ export default function SettingsConfig() {
         </Form.Group>
         {isSubmitted !== "" ? (
           isSubmitted === "Failed" ? (
-            <Alert bg="dark" data-bs-theme="dark" variant="danger">{submissionMessage}</Alert>
+            <Alert bg="dark" data-bs-theme="dark" variant="danger">
+              {submissionMessage}
+            </Alert>
           ) : (
-            <Alert bg="dark" data-bs-theme="dark" variant="success">{submissionMessage}</Alert>
+            <Alert bg="dark" data-bs-theme="dark" variant="success">
+              {submissionMessage}
+            </Alert>
           )
         ) : (
           <></>
@@ -265,9 +270,13 @@ export default function SettingsConfig() {
 
         {isSubmittedExternal !== "" ? (
           isSubmittedExternal === "Failed" ? (
-            <Alert bg="dark" data-bs-theme="dark" variant="danger">{submissionMessageExternal}</Alert>
+            <Alert bg="dark" data-bs-theme="dark" variant="danger">
+              {submissionMessageExternal}
+            </Alert>
           ) : (
-            <Alert bg="dark" data-bs-theme="dark" variant="success">{submissionMessageExternal}</Alert>
+            <Alert bg="dark" data-bs-theme="dark" variant="success">
+              {submissionMessageExternal}
+            </Alert>
           )
         ) : (
           <></>

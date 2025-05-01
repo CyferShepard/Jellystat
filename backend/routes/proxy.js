@@ -148,7 +148,7 @@ router.get("/getSessions", async (req, res) => {
 
 router.get("/getAdminUsers", async (req, res) => {
   try {
-    const adminUser = await API.getAdmins();
+    const adminUser = await API.getAdmins(true);
     res.send(adminUser);
   } catch (error) {
     res.status(503);
