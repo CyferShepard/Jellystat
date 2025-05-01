@@ -10,12 +10,26 @@ import i18next from "i18next";
 
 function GenreStatCard(props) {
   const [maxRange, setMaxRange] = useState(100);
+  const [data, setData] = useState(props.data);
 
   useEffect(() => {
     const maxDuration = props.data.reduce((max, item) => {
       return Math.max(max, parseFloat((props.dataKey == "duration" ? item.duration : item.plays) || 0));
     }, 0);
     setMaxRange(maxDuration);
+
+    let sorted = [...props.data]
+      .sort((a, b) => {
+        const valueA = parseFloat(props.dataKey === "duration" ? a.duration : a.plays) || 0;
+        const valueB = parseFloat(props.dataKey === "duration" ? b.duration : b.plays) || 0;
+        return valueB - valueA; // Descending order
+      })
+      .slice(0, 15); // Take only the top 10
+
+    // Sort top 10 genres alphabetically
+    sorted = sorted.sort((a, b) => a.genre.localeCompare(b.genre));
+
+    setData(sorted);
   }, [props.data, props.dataKey]);
 
   const CustomTooltip = ({ active, payload }) => {
@@ -67,7 +81,7 @@ function GenreStatCard(props) {
       </h1>
       <ErrorBoundary>
         <ResponsiveContainer width="100%" height="100%">
-          <RadarChart cx="50%" cy="50%" outerRadius="80%" data={props.data}>
+          <RadarChart cx="50%" cy="50%" outerRadius="80%" data={data}>
             <PolarGrid gridType="circle" />
             <PolarAngleAxis dataKey="genre" />
             <PolarRadiusAxis domain={[0, maxRange]} tick={false} axisLine={false} />

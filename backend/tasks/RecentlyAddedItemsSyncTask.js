@@ -28,8 +28,9 @@ async function runPartialSyncTask(triggerType = triggertype.Automatic) {
   }
 }
 
-parentPort.on("message", (message) => {
+parentPort.on("message", async (message) => {
   if (message.command === "start") {
-    runPartialSyncTask(message.triggertype);
+    await runPartialSyncTask(message.triggertype);
+    process.exit(0); // Exit the worker after the task is done
   }
 });
