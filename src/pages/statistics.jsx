@@ -56,7 +56,6 @@ function Statistics() {
             activeKey={activeTab}
             onSelect={setTab}
             variant="pills"
-            className="custom-tabs"
           >
             <Tab eventKey="tabCount" title={<Trans i18nKey="STAT_PAGE.COUNT_VIEW" />} />
             <Tab eventKey="tabTime" title={<Trans i18nKey="STAT_PAGE.TIME_VIEW" />} />
@@ -77,20 +76,20 @@ function Statistics() {
 
       {activeTab === "tabCount" && (
         <>
-          <DailyPlayStats days={days} />
+          <DailyPlayStats days={days} viewName="count" />
           <div className="statistics-graphs">
-            <PlayStatsByDay days={days} />
-            <PlayStatsByHour days={days} />
+            <PlayStatsByDay days={days} viewName="count" />
+            <PlayStatsByHour days={days} viewName="count" />
           </div>
         </>
       )}
 
       {activeTab === "tabTime" && (
         <>
-          <DailyPlayStats days={days} />
+          <DailyPlayStats days={days} viewName="watchTime" />
           <div className="statistics-graphs">
-            <PlayStatsByDay days={days} />
-            <PlayStatsByHour days={days} />
+            <PlayStatsByDay days={days} viewName="watchTime" />
+            <PlayStatsByHour days={days} viewName="watchTime" />
           </div>
         </>
       )}

@@ -167,7 +167,9 @@
   "STAT_PAGE": {
     "STATISTICS": "Statistics",
     "DAILY_PLAY_PER_LIBRARY": "Daily Play Count Per Library",
+    "DAILY_TIME_PER_LIBRARY": "Daily Watch Time Per Library",
     "PLAY_COUNT_BY": "Play Count By",
+    "PLAY_TIME_BY": "Play Time By",
     "COUNT_VIEW": "Total Count",
     "TIME_VIEW": "Total Time"
   },

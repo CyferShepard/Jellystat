@@ -423,6 +423,7 @@ router.get("/getViewsOverTime", async (req, res) => {
     stats.forEach((item) => {
       const library = item.Library;
       const count = item.Count;
+      const watchTime = item.TotalTime;
       const date = new Date(item.Date).toLocaleDateString("en-US", {
         year: "numeric",
         month: "short",
@@ -435,7 +436,7 @@ router.get("/getViewsOverTime", async (req, res) => {
         };
       }
 
-      reorganizedData[date] = { ...reorganizedData[date], [library]: count };
+      reorganizedData[date] = { ...reorganizedData[date], [library]: { count, watchTime } };
     });
     const finalData = { libraries: libraries, stats: Object.values(reorganizedData) };
     res.send(finalData);

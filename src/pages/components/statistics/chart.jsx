@@ -1,6 +1,6 @@
 import { ResponsiveContainer, AreaChart, Area, XAxis, YAxis, Tooltip, Legend } from "recharts";
 
-function Chart({ stats, libraries }) {
+function Chart({ stats, libraries, viewName }) {
   const colors = [
     "rgb(54, 162, 235)", // blue
     "rgb(255, 99, 132)", // pink
@@ -24,13 +24,25 @@ function Chart({ stats, libraries }) {
     "rgb(147, 112, 219)", // medium purple
   ];
 
+  const flattenedStats = stats.map(item => {
+    const flatItem = { Key: item.Key };
+    for (const [libraryName, data] of Object.entries(item)) {
+      if (libraryName === "Key") continue;
+      flatItem[libraryName] = data[viewName] ?? 0;
+    }
+    return flatItem;
+  });
+
   const CustomTooltip = ({ payload, label, active }) => {
     if (active) {
       return (
         <div style={{ backgroundColor: "rgba(0,0,0,0.8)", color: "white" }} className="p-2 rounded-2 border-0">
           <p className="text-center fs-5">{label}</p>
           {libraries.map((library, index) => (
-            <p key={library.Id} style={{ color: `${colors[index]}` }}>{`${library.Name} : ${payload[index].value} Views`}</p>
+            // <p key={library.Id} style={{ color: `${colors[index]}` }}>{`${library.Name} : ${payload[index].value} Views`}</p>
+            <p key={library.Id} style={{ color: `${colors[index]}` }}>
+              {`${library.Name} : ${payload?.find(p => p.dataKey === library.Name).value} ${viewName === "count" ? "Views" : "Minutes"}`}
+            </p>
           ))}
         </div>
       );
@@ -41,16 +53,14 @@ function Chart({ stats, libraries }) {
 
   const getMaxValue = () => {
     let max = 0;
-    if (stats) {
-      stats.forEach((datum) => {
-        Object.keys(datum).forEach((key) => {
-          if (key !== "Key") {
-            max = Math.max(max, parseInt(datum[key]));
-          }
-        });
+    flattenedStats.forEach(datum => {
+      libraries.forEach(library => {
+        const value = parseFloat(datum[library.Name]);
+        if (!isNaN(value)) {
+          max = Math.max(max, value);
+        }
       });
-    }
-
+    });
     return max;
   };
 
@@ -58,7 +68,7 @@ function Chart({ stats, libraries }) {
 
   return (
     <ResponsiveContainer width="100%">
-      <AreaChart data={stats} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
+      <AreaChart data={flattenedStats} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
         <defs>
           {libraries.map((library, index) => (
             <linearGradient key={library.Id} id={library.Id} x1="0" y1="0" x2="0" y2="1">
