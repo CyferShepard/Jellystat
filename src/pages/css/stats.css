@@ -47,6 +47,14 @@
   margin-bottom: 10px !important;
 }
 
+.stats-tab-nav {
+  background-color: var(--secondary-background-color);
+  display: flex;
+  border-radius: 8px;
+  align-self: flex-end;
+  justify-content: center;
+}
+
 .chart-canvas {
     width: 100%;
     height: 400px;

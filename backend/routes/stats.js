@@ -423,7 +423,7 @@ router.get("/getViewsOverTime", async (req, res) => {
     stats.forEach((item) => {
       const library = item.Library;
       const count = item.Count;
-      const watchTime = item.TotalTime;
+      const duration = item.Duration;
       const date = new Date(item.Date).toLocaleDateString("en-US", {
         year: "numeric",
         month: "short",
@@ -436,7 +436,7 @@ router.get("/getViewsOverTime", async (req, res) => {
         };
       }
 
-      reorganizedData[date] = { ...reorganizedData[date], [library]: { count, watchTime } };
+      reorganizedData[date] = { ...reorganizedData[date], [library]: { count, duration } };
     });
     const finalData = { libraries: libraries, stats: Object.values(reorganizedData) };
     res.send(finalData);
@@ -463,6 +463,7 @@ router.get("/getViewsByDays", async (req, res) => {
     stats.forEach((item) => {
       const library = item.Library;
       const count = item.Count;
+      const duration = item.Duration;
       const day = item.Day;
 
       if (!reorganizedData[day]) {
@@ -471,7 +472,7 @@ router.get("/getViewsByDays", async (req, res) => {
         };
       }
 
-      reorganizedData[day] = { ...reorganizedData[day], [library]: count };
+      reorganizedData[day] = { ...reorganizedData[day], [library]: { count, duration } };
     });
     const finalData = { libraries: libraries, stats: Object.values(reorganizedData) };
     res.send(finalData);
@@ -498,6 +499,7 @@ router.get("/getViewsByHour", async (req, res) => {
     stats.forEach((item) => {
       const library = item.Library;
       const count = item.Count;
+      const duration = item.Duration;
       const hour = item.Hour;
 
       if (!reorganizedData[hour]) {
@@ -506,7 +508,7 @@ router.get("/getViewsByHour", async (req, res) => {
         };
       }
 
-      reorganizedData[hour] = { ...reorganizedData[hour], [library]: count };
+      reorganizedData[hour] = { ...reorganizedData[hour], [library]: { count, duration } };
     });
     const finalData = { libraries: libraries, stats: Object.values(reorganizedData) };
     res.send(finalData);

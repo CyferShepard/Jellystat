@@ -5,7 +5,7 @@ exports.up = async function (knex) {
 
        CREATE OR REPLACE FUNCTION public.fs_watch_stats_over_time(
 	days integer)
-    RETURNS TABLE("Date" date, "Count" bigint, "TotalTime" bigint, "Library" text, "LibraryID" text) 
+    RETURNS TABLE("Date" date, "Count" bigint, "Duration" bigint, "Library" text, "LibraryID" text) 
     LANGUAGE 'plpgsql'
     COST 100
     VOLATILE PARALLEL UNSAFE
@@ -17,7 +17,7 @@ AS $BODY$
         SELECT 
           dates."Date",
           COALESCE(counts."Count", 0) AS "Count",
-          COALESCE(counts."TotalTime", 0) AS "TotalTime",
+          COALESCE(counts."Duration", 0) AS "Duration",
           l."Name" as "Library",
 	      l."Id" as "LibraryID"
         FROM 
@@ -32,7 +32,7 @@ AS $BODY$
             (SELECT 
               DATE_TRUNC('day', a."ActivityDateInserted")::DATE AS "Date",
               COUNT(*) AS "Count",
-              (SUM(a."PlaybackDuration") / 60)::bigint AS "TotalTime",
+              (SUM(a."PlaybackDuration") / 60)::bigint AS "Duration",
               l."Name" as "Library"
             FROM 
               jf_playback_activity a

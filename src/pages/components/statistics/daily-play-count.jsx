@@ -10,7 +10,7 @@ function DailyPlayStats(props) {
   const [stats, setStats] = useState();
   const [libraries, setLibraries] = useState();
   const [days, setDays] = useState(20);
-  const [viewName, setViewName] = useState("viewCount");
+  const [viewName, setViewName] = useState("count");
   const token = localStorage.getItem("token");
   
 
@@ -52,14 +52,14 @@ function DailyPlayStats(props) {
 
     const intervalId = setInterval(fetchLibraries, 60000 * 5);
     return () => clearInterval(intervalId);
-  }, [stats,libraries, days, props.days, token]);
+  }, [stats,libraries, days, props.days, props.viewName, token]);
 
   if (!stats) {
     return <></>;
   }
 
-  const titleKey = viewName === "count" ? "STAT_PAGE.DAILY_PLAY_PER_LIBRARY" : "STAT_PAGE.DAILY_TIME_PER_LIBRARY";
-  
+  const titleKey = viewName === "count" ? "STAT_PAGE.DAILY_PLAY_PER_LIBRARY" : "STAT_PAGE.DAILY_DURATION_PER_LIBRARY";
+
   if (stats.length === 0) {
     return (
       <div className="main-widget">

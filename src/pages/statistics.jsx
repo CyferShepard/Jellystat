@@ -51,14 +51,22 @@ function Statistics() {
         <h1>
           <Trans i18nKey={"STAT_PAGE.STATISTICS"} />
         </h1>
-        <div className="pill-wrapper">
+        <div className="stats-tab-nav">
           <Tabs
             activeKey={activeTab}
             onSelect={setTab}
             variant="pills"
           >
-            <Tab eventKey="tabCount" title={<Trans i18nKey="STAT_PAGE.COUNT_VIEW" />} />
-            <Tab eventKey="tabTime" title={<Trans i18nKey="STAT_PAGE.TIME_VIEW" />} />
+            <Tab
+              eventKey="tabCount"
+              className="bg-transparent"
+              title={<Trans i18nKey="STAT_PAGE.COUNT_VIEW" />} 
+            />
+            <Tab
+              eventKey="tabDuration"
+              className="bg-transparent"
+              title={<Trans i18nKey="STAT_PAGE.DURATION_VIEW" />}
+            />
           </Tabs>
         </div>
         <div className="date-range">
@@ -75,23 +83,23 @@ function Statistics() {
       </div>
 
       {activeTab === "tabCount" && (
-        <>
+        <div>
           <DailyPlayStats days={days} viewName="count" />
           <div className="statistics-graphs">
             <PlayStatsByDay days={days} viewName="count" />
             <PlayStatsByHour days={days} viewName="count" />
           </div>
-        </>
+        </div>
       )}
 
-      {activeTab === "tabTime" && (
-        <>
-          <DailyPlayStats days={days} viewName="watchTime" />
+      {activeTab === "tabDuration" && (
+        <div>
+          <DailyPlayStats days={days} viewName="duration" />
           <div className="statistics-graphs">
-            <PlayStatsByDay days={days} viewName="watchTime" />
-            <PlayStatsByHour days={days} viewName="watchTime" />
+            <PlayStatsByDay days={days} viewName="duration" />
+            <PlayStatsByHour days={days} viewName="duration" />
           </div>
-        </>
+        </div>
       )}
     </div>
   );
