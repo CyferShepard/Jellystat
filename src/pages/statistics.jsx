@@ -1,3 +1,4 @@
+import { Tabs, Tab } from "react-bootstrap";
 import { useState } from "react";
 
 import "./css/stats.css";
@@ -19,6 +20,13 @@ function Statistics() {
     setInput(event.target.value);
     localStorage.setItem("PREF_STATISTICS_STAT_DAYS_INPUT", event.target.value);
   };
+
+  const [activeTab, setActiveTab] = useState(localStorage.getItem(`PREF_STATISTICS_LAST_SELECTED_TAB`) ?? "tabCount");
+
+  function setTab(tabName) {
+    setActiveTab(tabName);
+    localStorage.setItem(`PREF_STATISTICS_LAST_SELECTED_TAB`, tabName);
+  }
 
   const handleKeyDown = (event) => {
     if (event.key === "Enter") {
@@ -43,6 +51,17 @@ function Statistics() {
         <h1>
           <Trans i18nKey={"STAT_PAGE.STATISTICS"} />
         </h1>
+        <div className="pill-wrapper">
+          <Tabs
+            activeKey={activeTab}
+            onSelect={setTab}
+            variant="pills"
+            className="custom-tabs"
+          >
+            <Tab eventKey="tabCount" title={<Trans i18nKey="STAT_PAGE.COUNT_VIEW" />} />
+            <Tab eventKey="tabTime" title={<Trans i18nKey="STAT_PAGE.TIME_VIEW" />} />
+          </Tabs>
+        </div>
         <div className="date-range">
           <div className="header">
             <Trans i18nKey={"LAST"} />
@@ -55,14 +74,26 @@ function Statistics() {
           </div>
         </div>
       </div>
-      <div>
-        <DailyPlayStats days={days} />
 
-        <div className="statistics-graphs">
-          <PlayStatsByDay days={days} />
-          <PlayStatsByHour days={days} />
-        </div>
-      </div>
+      {activeTab === "tabCount" && (
+        <>
+          <DailyPlayStats days={days} />
+          <div className="statistics-graphs">
+            <PlayStatsByDay days={days} />
+            <PlayStatsByHour days={days} />
+          </div>
+        </>
+      )}
+
+      {activeTab === "tabTime" && (
+        <>
+          <DailyPlayStats days={days} />
+          <div className="statistics-graphs">
+            <PlayStatsByDay days={days} />
+            <PlayStatsByHour days={days} />
+          </div>
+        </>
+      )}
     </div>
   );
 }

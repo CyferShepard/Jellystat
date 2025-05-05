@@ -143,3 +143,12 @@ input[type="number"] {
 .item-name :hover {
   color: var(--secondary-color) !important;
 }
+
+.pill-wrapper {
+  color: white;
+  display: flex;
+  border-radius: 8px;
+  font-size: 1.2em;
+  align-self: flex-end;
+  justify-content: center;
+}
