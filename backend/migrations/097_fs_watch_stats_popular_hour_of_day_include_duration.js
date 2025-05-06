@@ -96,7 +96,8 @@ AS $BODY$
               "ActivityDateInserted" BETWEEN NOW() - CAST(days || ' days' AS INTERVAL) AND NOW()
           ) a ON a."NowPlayingItemId" = i."Id" AND a."Hour"::integer = h."Hour"
         WHERE
-          l."Id" IN (SELECT "Id" FROM jf_libraries)
+	      l.archived=false
+          and l."Id" IN (SELECT "Id" FROM jf_libraries)
         GROUP BY
           h."Hour",
           l."Name"
@@ -106,9 +107,10 @@ AS $BODY$
     END;
     
 $BODY$;
-  
-      ALTER FUNCTION fs_watch_stats_popular_hour_of_day(integer)
-        OWNER TO "${process.env.POSTGRES_ROLE}";`);
+
+ALTER FUNCTION public.fs_watch_stats_popular_hour_of_day(integer)
+     OWNER TO "${process.env.POSTGRES_ROLE}";
+    `);
   } catch (error) {
     console.error(error);
   }

@@ -49,11 +49,18 @@
 
 .stats-tab-nav {
   background-color: var(--secondary-background-color);
-  display: flex;
   border-radius: 8px;
   align-self: flex-end;
+}
+
+.nav-item {
+  display: flex;
   justify-content: center;
 }
+
+/* .tab-content {
+  display: none;
+} */
 
 .chart-canvas {
     width: 100%;

@@ -53,6 +53,7 @@ function Statistics() {
         </h1>
         <div className="stats-tab-nav">
           <Tabs
+            defaultActiveKey={activeTab}
             activeKey={activeTab}
             onSelect={setTab}
             variant="pills"
@@ -62,6 +63,7 @@ function Statistics() {
               className="bg-transparent"
               title={<Trans i18nKey="STAT_PAGE.COUNT_VIEW" />} 
             />
+          
             <Tab
               eventKey="tabDuration"
               className="bg-transparent"
