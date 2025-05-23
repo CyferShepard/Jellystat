@@ -42,8 +42,9 @@ async function runBackupTask(triggerType = triggertype.Automatic) {
   }
 }
 
-parentPort.on("message", (message) => {
+parentPort.on("message", async (message) => {
   if (message.command === "start") {
-    runBackupTask(message.triggertype);
+    await runBackupTask(message.triggertype);
+    process.exit(0); // Exit the worker after the task is done
   }
 });

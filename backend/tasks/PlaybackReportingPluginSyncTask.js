@@ -27,8 +27,9 @@ async function runPlaybackReportingPluginSyncTask() {
   }
 }
 
-parentPort.on("message", (message) => {
+parentPort.on("message", async (message) => {
   if (message.command === "start") {
-    runPlaybackReportingPluginSyncTask();
+    await runPlaybackReportingPluginSyncTask();
+    process.exit(0); // Exit the worker after the task is done
   }
 });

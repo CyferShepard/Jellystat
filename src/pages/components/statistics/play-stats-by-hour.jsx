@@ -12,12 +12,11 @@ function PlayStatsByHour(props) {
 
   useEffect(() => {
     const fetchLibraries = () => {
-      const url = `/stats/getViewsByHour`;
+      const url = `/stats/getViewsByHour?days=${props.days}`;
 
       axios
-        .post(
+        .get(
           url,
-          { days: props.days },
           {
             headers: {
               Authorization: `Bearer ${token}`,

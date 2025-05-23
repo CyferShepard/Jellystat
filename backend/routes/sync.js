@@ -395,12 +395,13 @@ async function removeOrphanedData() {
   syncTask.loggedData.push({ color: "yellow", Message: "Removing Orphaned FileInfo/Episode/Season Records" });
 
   await db.query("CALL jd_remove_orphaned_data()");
-  const archived_items = await db
-    .query(`select "Id" from jf_library_items where archived=true and "Type"='Series'`)
-    .then((res) => res.rows.map((row) => row.Id));
-  const archived_seasons = await db
-    .query(`select "Id" from jf_library_seasons where archived=true`)
-    .then((res) => res.rows.map((row) => row.Id));
+  const archived_items_query = `select i."Id" from jf_library_items i join jf_library_seasons s on s."SeriesId"=i."Id" and s.archived=false where i.archived=true and i."Type"='Series'
+  union
+  select i."Id" from jf_library_items i join jf_library_episodes e on e."SeriesId"=i."Id" and e.archived=false where i.archived=true and i."Type"='Series'
+  `;
+  const archived_items = await db.query(archived_items_query).then((res) => res.rows.map((row) => row.Id));
+  const archived_seasons_query = `select s."Id" from jf_library_seasons s join jf_library_episodes e on e."SeasonId"=s."Id" and e.archived=false where s.archived=true`;
+  const archived_seasons = await db.query(archived_seasons_query).then((res) => res.rows.map((row) => row.Id));
   if (!(await _sync.updateSingleFieldOnDB("jf_library_seasons", archived_items, "archived", true, "SeriesId"))) {
     syncTask.loggedData.push({ color: "red", Message: "Error archiving library seasons" });
     await logging.updateLog(syncTask.uuid, syncTask.loggedData, taskstate.FAILED);

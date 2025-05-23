@@ -20,16 +20,23 @@ router.post("/login", async (req, res) => {
   try {
     const { username, password } = req.body;
 
-    if (!username || !password || password === CryptoJS.SHA3("").toString()) {
+    const query = "SELECT * FROM app_config";
+    const { rows: login } = await db.query(query);
+
+    if (
+      (!username || !password || password === CryptoJS.SHA3("").toString()) &&
+      login.length > 0 &&
+      login[0].REQUIRE_LOGIN == true
+    ) {
       res.sendStatus(401);
       return;
     }
 
-    const query = 'SELECT * FROM app_config WHERE ("APP_USER" = $1 AND "APP_PASSWORD" = $2) OR "REQUIRE_LOGIN" = false';
-    const values = [username, password];
-    const { rows: login } = await db.query(query, values);
+    const loginUser = login.filter(
+      (user) => (user.APP_USER === username && user.APP_PASSWORD === password) || user.REQUIRE_LOGIN == false
+    );
 
-    if (login.length > 0 || (username === JS_USER && password === CryptoJS.SHA3(JS_PASSWORD).toString())) {
+    if (loginUser.length > 0 || (username === JS_USER && password === CryptoJS.SHA3(JS_PASSWORD).toString())) {
       const user = { id: 1, username: username };
 
       jwt.sign({ user }, JWT_SECRET, (err, token) => {

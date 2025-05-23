@@ -463,7 +463,24 @@ router.post("/setconfig", async (req, res) => {
 
         settings.ServerID = systemInfo?.Id || null;
 
-        let query = 'UPDATE app_config SET settings=$1 where "ID"=1';
+        const query = 'UPDATE app_config SET settings=$1 where "ID"=1';
+
+        await db.query(query, [settings]);
+      }
+    }
+
+    const admins = await API.getAdmins(true);
+    const preferredAdmin = await new configClass().getPreferedAdmin();
+    if (admins && admins.length > 0 && preferredAdmin && !admins.map((item) => item.Id).includes(preferredAdmin)) {
+      const newAdmin = admins[0];
+      const settingsjson = await db.query('SELECT settings FROM app_config where "ID"=1').then((res) => res.rows);
+
+      if (settingsjson.length > 0) {
+        const settings = settingsjson[0].settings || {};
+
+        settings.preferred_admin = { userid: newAdmin.Id, username: newAdmin.Name };
+
+        const query = 'UPDATE app_config SET settings=$1 where "ID"=1';
 
         await db.query(query, [settings]);
       }
