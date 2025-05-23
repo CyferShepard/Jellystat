@@ -19,8 +19,12 @@ class WebhookManager {
             await this.triggerEventWebhooks('playback_started', data);
         });
 
-        this.eventEmitter.on('user_login', async (data) => {
-            await this.triggerEventWebhooks('user_login', data);
+        this.eventEmitter.on('playback_ended', async (data) => {
+            await this.triggerEventWebhooks('playback_ended', data);
+        });
+
+        this.eventEmitter.on('media_recently_added', async (data) => {
+            await this.triggerEventWebhooks('media_recently_added', data);
         });
 
         // If needed, add more event listeners here
@@ -40,11 +44,33 @@ class WebhookManager {
         ).then(res => res.rows);
     }
 
-    async triggerEventWebhooks(eventType, data) {
-        const webhooks = await this.getWebhooksByEventType(eventType);
-
-        for (const webhook of webhooks) {
-            await this.executeWebhook(webhook, data);
+    async triggerEventWebhooks(eventType, data = {}) {
+        try {
+            const webhooks = await this.getWebhooksByEventType(eventType);
+            
+            if (webhooks.length === 0) {
+                console.log(`[WEBHOOK] No webhooks registered for event: ${eventType}`);
+                return;
+            }
+            
+            console.log(`[WEBHOOK] Triggering ${webhooks.length} webhooks for event: ${eventType}`);
+            
+            const enrichedData = {
+                ...data,
+                event: eventType,
+                triggeredAt: new Date().toISOString()
+            };
+            
+            const promises = webhooks.map(webhook => {
+                return this.executeWebhook(webhook, enrichedData);
+            });
+            
+            await Promise.all(promises);
+            
+            return true;
+        } catch (error) {
+            console.error(`[WEBHOOK] Error triggering webhooks for event ${eventType}:`, error);
+            return false;
         }
     }
 
@@ -133,6 +159,31 @@ class WebhookManager {
         }
 
         return template;
+    }
+
+    async triggerEvent(eventType, eventData = {}) {
+        try {
+            const webhooks = this.eventWebhooks?.[eventType] || [];
+            
+            if (webhooks.length === 0) {
+                console.log(`[WEBHOOK] No webhooks registered for event: ${eventType}`);
+                return;
+            }
+            
+            console.log(`[WEBHOOK] Triggering ${webhooks.length} webhooks for event: ${eventType}`);
+            
+            const promises = webhooks.map(webhook => {
+                return this.webhookManager.executeWebhook(webhook, {
+                    ...eventData,
+                    event: eventType,
+                    triggeredAt: new Date().toISOString()
+                });
+            });
+            
+            await Promise.all(promises);
+        } catch (error) {
+            console.error(`[WEBHOOK] Error triggering webhooks for event ${eventType}:`, error);
+        }
     }
 
     emitEvent(eventType, data) {

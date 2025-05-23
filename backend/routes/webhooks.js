@@ -211,4 +211,104 @@ router.post('/:id/trigger-monthly', async (req, res) => {
     }
 });
 
+// Get status of event webhooks
+router.get('/event-status', async (req, res) => {
+    try {
+        const eventTypes = ['playback_started', 'playback_ended', 'media_recently_added'];
+        const result = {};
+        
+        for (const eventType of eventTypes) {
+            const webhooks = await dbInstance.query(
+                'SELECT id, name, enabled FROM webhooks WHERE trigger_type = $1 AND event_type = $2',
+                ['event', eventType]
+            );
+            
+            result[eventType] = {
+                exists: webhooks.rows.length > 0,
+                enabled: webhooks.rows.some(webhook => webhook.enabled),
+                webhooks: webhooks.rows
+            };
+        }
+        
+        res.json(result);
+    } catch (error) {
+        console.error('Error fetching webhook status:', error);
+        res.status(500).json({ error: 'Failed to fetch webhook status' });
+    }
+});
+
+// Toggle all webhooks of a specific event type
+router.post('/toggle-event/:eventType', async (req, res) => {
+    try {
+        const { eventType } = req.params;
+        const { enabled } = req.body;
+        
+        if (!['playback_started', 'playback_ended', 'media_recently_added'].includes(eventType)) {
+            return res.status(400).json({ error: 'Invalid event type' });
+        }
+        
+        if (typeof enabled !== 'boolean') {
+            return res.status(400).json({ error: 'Enabled parameter must be a boolean' });
+        }
+        
+        // Mettre à jour tous les webhooks de ce type d'événement
+        const result = await dbInstance.query(
+            'UPDATE webhooks SET enabled = $1 WHERE trigger_type = $2 AND event_type = $3 RETURNING id',
+            [enabled, 'event', eventType]
+        );
+        
+        // Si aucun webhook n'existe pour ce type, en créer un de base
+        if (result.rows.length === 0 && enabled) {
+            const defaultWebhook = {
+                name: `Webhook pour ${eventType}`,
+                url: req.body.url || '',
+                method: 'POST',
+                trigger_type: 'event',
+                event_type: eventType,
+                enabled: true,
+                headers: '{}',
+                payload: JSON.stringify({
+                    event: `{{event}}`,
+                    data: `{{data}}`,
+                    timestamp: `{{triggeredAt}}`
+                })
+            };
+            
+            if (!defaultWebhook.url) {
+                return res.status(400).json({ 
+                    error: 'URL parameter is required when creating a new webhook',
+                    needsUrl: true
+                });
+            }
+            
+            await dbInstance.query(
+                `INSERT INTO webhooks (name, url, method, trigger_type, event_type, enabled, headers, payload)
+                 VALUES ($1, $2, $3, $4, $5, $6, $7, $8)`,
+                [
+                    defaultWebhook.name,
+                    defaultWebhook.url,
+                    defaultWebhook.method,
+                    defaultWebhook.trigger_type,
+                    defaultWebhook.event_type,
+                    defaultWebhook.enabled,
+                    defaultWebhook.headers,
+                    defaultWebhook.payload
+                ]
+            );
+        }
+        
+        // Rafraîchir le planificateur de webhooks
+        await webhookScheduler.refreshSchedule();
+        
+        res.json({ 
+            success: true, 
+            message: `Webhooks for ${eventType} ${enabled ? 'enabled' : 'disabled'}`,
+            affectedCount: result.rows.length
+        });
+    } catch (error) {
+        console.error('Error toggling webhooks:', error);
+        res.status(500).json({ error: 'Failed to toggle webhooks' });
+    }
+});
+
 module.exports = router;

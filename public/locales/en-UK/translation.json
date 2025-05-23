@@ -226,7 +226,9 @@
     "URL": "URL",
     "TYPE": "Type",
     "TRIGGER": "Trigger",
-    "STATUS":  "Status"
+    "STATUS":  "Status",
+    "EVENT_WEBHOOKS": "Event notifications",
+    "EVENT_WEBHOOKS_TOOLTIP": "Enable or disable event notifications"
   },
   "TASK_TYPE": {
     "JOB": "Job",
