@@ -825,7 +825,7 @@ async function partialSync(triggertype) {
 
   const uuid = randomUUID();
   
-  const newItems = [];
+  const newItems = []; // Array to track newly added items during the sync process
 
   syncTask = { loggedData: [], uuid: uuid, wsKey: "PartialSyncTask", taskName: taskName.partialsync };
   try {
