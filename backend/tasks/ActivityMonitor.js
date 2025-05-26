@@ -238,8 +238,6 @@ async function ActivityMonitor(interval) {
       //delete from db no longer in session data and insert into stats db
       //Bulk delete from db thats no longer on api
 
-      const toDeleteIds = dataToRemove.map((row) => row.ActivityId);
-
       let playbackToInsert = dataToRemove;
 
       if (playbackToInsert.length == 0 && toDeleteIds.length == 0) {
@@ -325,7 +323,9 @@ async function ActivityMonitor(interval) {
       }
 
       ///////////////////////////
-    } catch (error) {
+    } 
+    }
+    catch (error) {
       if (error?.code === "ECONNREFUSED") {
         console.error("Error: Unable to connect to API"); //TO-DO Change this to correct API name
       } else if (error?.code === "ERR_BAD_RESPONSE") {

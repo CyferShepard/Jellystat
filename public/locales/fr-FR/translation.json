@@ -228,7 +228,10 @@
     "TRIGGER": "Déclencheur",
     "STATUS":  "Status",
     "EVENT_WEBHOOKS": "Notifications d'événements",
-    "EVENT_WEBHOOKS_TOOLTIP": "Activez ou désactivez les notifications pour différents événements du système"
+    "EVENT_WEBHOOKS_TOOLTIP": "Activez ou désactivez les notifications pour différents événements du système",
+    "PLAYBACK_STARTED": "Lecture commencée",
+    "PLAYBACK_ENDED": "Lecture arrêtée",
+    "MEDIA_ADDED": "Média ajouté"
   },
   "TASK_TYPE": {
     "JOB": "Job",

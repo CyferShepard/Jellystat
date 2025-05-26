@@ -391,6 +391,28 @@ class WebhookManager {
             return false;
         }
     }
+
+    async executeDiscordWebhook(webhook, data) {
+        try {
+            console.log(`Execution of discord webhook: ${webhook.name}`);
+
+            const response = await axios.post(webhook.url, data, {
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            });
+
+            console.log(`[WEBHOOK] Discord response: ${response.status}`);
+            return response.status >= 200 && response.status < 300;
+        } catch (error) {
+            console.error(`[WEBHOOK] Error with Discord webhook ${webhook.name}:`, error.message);
+            if (error.response) {
+                console.error('[WEBHOOK] Response status:', error.response.status);
+                console.error('[WEBHOOK] Response data:', error.response.data);
+            }
+            return false;
+        }
+    }
 }
 
 module.exports = WebhookManager;

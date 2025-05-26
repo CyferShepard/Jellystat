@@ -3,6 +3,7 @@ import axios from "../../../lib/axios_instance";
 import { Form, Row, Col, Button, Spinner, Alert } from "react-bootstrap";
 import InformationLineIcon from "remixicon-react/InformationLineIcon";
 import { Tooltip } from "@mui/material";
+import PropTypes from 'prop-types';
 
 import Table from '@mui/material/Table';
 import TableBody from '@mui/material/TableBody';
@@ -17,6 +18,7 @@ import ErrorBoundary from "../general/ErrorBoundary";
 
 const token = localStorage.getItem('token');
 
+// Modification du composant WebhookRow pour passer l'objet webhook complet
 function WebhookRow(props) {
     const { webhook, onEdit, onTest } = props;
 
@@ -28,16 +30,16 @@ function WebhookRow(props) {
                 <TableCell>{webhook.webhook_type || 'generic'}</TableCell>
                 <TableCell>{webhook.trigger_type}</TableCell>
                 <TableCell>
-          <span className={`badge ${webhook.enabled ? 'bg-success' : 'bg-secondary'}`}>
-            {webhook.enabled ? <Trans i18nKey={"ENABLED"} /> : <Trans i18nKey={"DISABLED"} />}
-          </span>
+                    <span className={`badge ${webhook.enabled ? 'bg-success' : 'bg-secondary'}`}>
+                        {webhook.enabled ? <Trans i18nKey={"ENABLED"} /> : <Trans i18nKey={"DISABLED"} />}
+                    </span>
                 </TableCell>
                 <TableCell>
                     <div className="d-flex justify-content-end gap-2">
                         <Button size="sm" variant="outline-primary" onClick={() => onEdit(webhook)}>
                             <Trans i18nKey={"EDIT"} />
                         </Button>
-                        <Button size="sm" variant="outline-secondary" onClick={() => onTest(webhook.id)}>
+                        <Button size="sm" variant="outline-secondary" onClick={() => onTest(webhook)}>
                             <Trans i18nKey={"SETTINGS_PAGE.TEST_NOW"} />
                         </Button>
                     </div>
@@ -46,6 +48,19 @@ function WebhookRow(props) {
         </React.Fragment>
     );
 }
+
+WebhookRow.propTypes = {
+    webhook: PropTypes.shape({
+        id: PropTypes.string.isRequired,
+        name: PropTypes.string.isRequired,
+        url: PropTypes.string.isRequired,
+        webhook_type: PropTypes.string,
+        trigger_type: PropTypes.string.isRequired,
+        enabled: PropTypes.bool.isRequired
+    }).isRequired,
+    onEdit: PropTypes.func.isRequired,
+    onTest: PropTypes.func.isRequired
+};
 
 function WebhooksSettings() {
     const [webhooks, setWebhooks] = useState([]);
@@ -63,7 +78,6 @@ function WebhooksSettings() {
         webhook_type: 'discord'
     });
 
-    // État pour suivre les webhooks événementiels
     const [eventWebhooks, setEventWebhooks] = useState({
         playback_started: { exists: false, enabled: false },
         playback_ended: { exists: false, enabled: false },
@@ -82,7 +96,6 @@ function WebhooksSettings() {
 
                 if (response.data !== webhooks) {
                     setWebhooks(response.data);
-                    // Charger l'état des webhooks événementiels une fois les webhooks chargés
                     await loadEventWebhooks();
                 }
       
@@ -120,14 +133,13 @@ function WebhooksSettings() {
             setSuccess(false);
 
             if (!currentWebhook.url) {
-                setError("L'URL du webhook est requise");
+                setError("Webhook URL is required");
                 setSaving(false);
                 return;
             }
 
-            // Si c'est un webhook de type événement, s'assurer que les propriétés nécessaires sont présentes
             if (currentWebhook.trigger_type === 'event' && !currentWebhook.event_type) {
-                setError("Le type d'événement est requis pour un webhook événementiel");
+                setError("Event type is required for an event based webhook");
                 setSaving(false);
                 return;
             }
@@ -150,7 +162,6 @@ function WebhooksSettings() {
                 });
             }
 
-            // Rafraîchir la liste des webhooks
             const webhooksResponse = await axios.get('/webhooks', {
                 headers: {
                     Authorization: `Bearer ${token}`,
@@ -160,10 +171,8 @@ function WebhooksSettings() {
             
             setWebhooks(webhooksResponse.data);
             
-            // Mettre à jour l'état des webhooks événementiels
             await loadEventWebhooks();
 
-            // Réinitialiser le formulaire
             setCurrentWebhook({
                 name: 'New Webhook',
                 url: '',
@@ -174,10 +183,10 @@ function WebhooksSettings() {
                 webhook_type: 'discord'
             });
             
-            setSuccess("Webhook enregistré avec succès!");
+            setSuccess("Webhook saved successfully!");
             setSaving(false);
         } catch (err) {
-            setError("Erreur lors de l'enregistrement du webhook: " + (err.response?.data?.error || err.message));
+            setError("Error while saving webhook " + (err.response?.data?.error || err.message));
             setSaving(false);
         }
     };
@@ -186,9 +195,9 @@ function WebhooksSettings() {
         setCurrentWebhook(webhook);
     };
 
-    const handleTest = async (webhookId) => {
-        if (!webhookId) {
-            setError("Impossible to test the webhook: no ID provided");
+    const handleTest = async (webhook) => {
+        if (!webhook || !webhook.id) {
+            setError("Impossible to test the webhook: no webhook provided");
             return;
         }
 
@@ -196,14 +205,20 @@ function WebhooksSettings() {
             setLoading(true);
             setError(null);
 
-            await axios.post(`/webhooks/${webhookId}/trigger-monthly`, {}, {
+            let endpoint = `/webhooks/${webhook.id}/test`;
+
+            if (webhook.trigger_type === 'scheduled' && webhook.schedule && webhook.schedule.includes('1 * *')) {
+                endpoint = `/webhooks/${webhook.id}/trigger-monthly`;
+            }
+
+            await axios.post(endpoint, {}, {
                 headers: {
                     Authorization: `Bearer ${token}`,
                     "Content-Type": "application/json",
                 }
             });
 
-            setSuccess("Webhook test triggered successfully!");
+            setSuccess(`Webhook ${webhook.name} test triggered successfully!`);
             setLoading(false);
         } catch (err) {
             setError("Error during the test of the webhook: " + (err.response?.data?.message || err.message));
@@ -211,69 +226,61 @@ function WebhooksSettings() {
         }
     };
 
-    // Fonction pour obtenir le statut d'un webhook événementiel
     const getEventWebhookStatus = (eventType) => {
         return eventWebhooks[eventType]?.enabled || false;
     };
 
-    // Fonction pour charger le statut des webhooks événementiels
     const loadEventWebhooks = async () => {
         try {
             const eventTypes = ['playback_started', 'playback_ended', 'media_recently_added'];
             const status = {};
-            
-            // Vérifier chaque type d'événement dans les webhooks actuels
+
             eventTypes.forEach(eventType => {
                 const matchingWebhooks = webhooks.filter(
                     webhook => webhook.trigger_type === 'event' && webhook.event_type === eventType
                 );
-                
+
                 status[eventType] = {
                     exists: matchingWebhooks.length > 0,
                     enabled: matchingWebhooks.some(webhook => webhook.enabled)
                 };
             });
-            
+
             setEventWebhooks(status);
         } catch (error) {
             console.error('Error loading event webhook status:', error);
         }
     };
 
-    // Fonction pour basculer un webhook événementiel
     const toggleEventWebhook = async (eventType) => {
         try {
             setLoading(true);
             setError(null);
-            
+
             const isCurrentlyEnabled = getEventWebhookStatus(eventType);
             const matchingWebhooks = webhooks.filter(
                 webhook => webhook.trigger_type === 'event' && webhook.event_type === eventType
             );
-            
-            // Si aucun webhook n'existe pour cet événement et qu'on veut l'activer
+
             if (matchingWebhooks.length === 0 && !isCurrentlyEnabled) {
-                // Créer un nouveau webhook pour cet événement
                 const newWebhook = {
                     name: `Notification - ${getEventDisplayName(eventType)}`,
-                    url: '', // Demander à l'utilisateur de saisir l'URL
+                    url: '',
                     enabled: true,
                     trigger_type: 'event',
                     event_type: eventType,
                     method: 'POST',
                     webhook_type: 'discord'
                 };
-                
-                // Mettre à jour le webhook actuel pour que l'utilisateur puisse le configurer
+
                 setCurrentWebhook(newWebhook);
                 setLoading(false);
                 return;
             }
-            
-            // Sinon, activer/désactiver tous les webhooks existants pour cet événement
+
             for (const webhook of matchingWebhooks) {
-                await axios.put(`/webhooks/${webhook.id}`, 
-                    { ...webhook, enabled: !isCurrentlyEnabled }, 
+                await axios.put(`/webhooks/${webhook.id}`,
+                    { ...webhook, enabled: !isCurrentlyEnabled },
                     {
                         headers: {
                             Authorization: `Bearer ${token}`,
@@ -282,8 +289,7 @@ function WebhooksSettings() {
                     }
                 );
             }
-            
-            // Mettre à jour l'état local
+
             setEventWebhooks(prev => ({
                 ...prev,
                 [eventType]: {
@@ -291,33 +297,31 @@ function WebhooksSettings() {
                     enabled: !isCurrentlyEnabled
                 }
             }));
-            
-            // Actualiser la liste des webhooks
+
             const response = await axios.get('/webhooks', {
                 headers: {
                     Authorization: `Bearer ${token}`,
                     "Content-Type": "application/json",
                 },
             });
-            
+
             setWebhooks(response.data);
             setLoading(false);
-            setSuccess(`Webhook pour ${getEventDisplayName(eventType)} ${!isCurrentlyEnabled ? 'activé' : 'désactivé'} avec succès!`);
+            setSuccess(`Webhook for ${getEventDisplayName(eventType)} ${!isCurrentlyEnabled ? 'enabled' : 'disabled'} with success!`);
         } catch (error) {
-            setError("Erreur lors de la modification du webhook: " + (error.response?.data?.error || error.message));
+            setError("Error while editing webhook: " + (error.response?.data?.error || error.message));
             setLoading(false);
         }
     };
 
-    // Fonction utilitaire pour obtenir le nom d'affichage d'un type d'événement
     const getEventDisplayName = (eventType) => {
         switch(eventType) {
             case 'playback_started':
-                return 'Lecture démarrée';
+                return 'Playback started';
             case 'playback_ended':
-                return 'Lecture terminée';
+                return 'Playback ended';
             case 'media_recently_added':
-                return 'Nouveaux médias ajoutés';
+                return 'New media added';
             default:
                 return eventType;
         }
@@ -427,12 +431,12 @@ function WebhooksSettings() {
                             </span>
                         </Tooltip>
                     </h3>
-                    
+
                     <Row className="g-4">
                         <Col md={4}>
-                            <div className="border rounded p-3 h-100">
+                            <div className="border rounded p-3 h-25">
                                 <div className="d-flex justify-content-between align-items-center mb-2">
-                                    <h5>Lecture démarrée</h5>
+                                    <h5><Trans i18nKey={"SETTINGS_PAGE.PLAYBACK_STARTED"} /></h5>
                                     <Form.Check
                                         type="switch"
                                         id="playback-started-enabled"
@@ -440,16 +444,16 @@ function WebhooksSettings() {
                                         onChange={() => toggleEventWebhook('playback_started')}
                                     />
                                 </div>
-                                <p className="text-muted small">
-                                    Notification lorsqu'un utilisateur commence à regarder un média
+                                <p className="small">
+                                    Send a webhook notification when a user starts watching a media
                                 </p>
                             </div>
                         </Col>
-                        
+
                         <Col md={4}>
-                            <div className="border rounded p-3 h-100">
+                            <div className="border rounded p-3 h-25">
                                 <div className="d-flex justify-content-between align-items-center mb-2">
-                                    <h5>Lecture terminée</h5>
+                                    <h5><Trans i18nKey={"SETTINGS_PAGE.PLAYBACK_ENDED"} /></h5>
                                     <Form.Check
                                         type="switch"
                                         id="playback-ended-enabled"
@@ -457,16 +461,16 @@ function WebhooksSettings() {
                                         onChange={() => toggleEventWebhook('playback_ended')}
                                     />
                                 </div>
-                                <p className="text-muted small">
-                                    Notification lorsqu'un utilisateur termine de regarder un média
+                                <p className="small">
+                                    Send a webhook notification when a user finishes watching a media
                                 </p>
                             </div>
                         </Col>
-                        
+
                         <Col md={4}>
-                            <div className="border rounded p-3 h-100">
+                            <div className="border rounded p-3 h-25">
                                 <div className="d-flex justify-content-between align-items-center mb-2">
-                                    <h5>Nouveaux médias</h5>
+                                    <h5><Trans i18nKey={"SETTINGS_PAGE.MEDIA_ADDED"} /></h5>
                                     <Form.Check
                                         type="switch"
                                         id="media-recently-added-enabled"
@@ -474,14 +478,14 @@ function WebhooksSettings() {
                                         onChange={() => toggleEventWebhook('media_recently_added')}
                                     />
                                 </div>
-                                <p className="text-muted small">
-                                    Notification lorsque de nouveaux médias sont ajoutés à la bibliothèque
+                                <p className="small">
+                                    Send a webhook notification when new media is added to the library
                                 </p>
                             </div>
                         </Col>
                     </Row>
                 </div>
-                
+
                     <TableContainer className='rounded-2 mt-4'>
                         <Table aria-label="webhooks table">
                             <TableHead>
@@ -513,7 +517,7 @@ function WebhooksSettings() {
                             </TableBody>
                         </Table>
                     </TableContainer>
-               
+
             </ErrorBoundary>
         </div>
     );

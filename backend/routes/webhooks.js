@@ -185,18 +185,129 @@ router.post('/:id/test', async (req, res) => {
         }
 
         const webhook = result.rows[0];
-        const testData = req.body || {};
+        let testData = req.body || {};
+        let success = false;
 
-        const success = await webhookManager.executeWebhook(webhook, testData);
+        // Traitement spécial pour les webhooks Discord
+        if (webhook.url.includes('discord.com/api/webhooks')) {
+            console.log('Discord webhook détecté, préparation du payload spécifique');
+
+            // Format spécifique pour Discord
+            testData = {
+                content: "Test de webhook depuis Jellystat",
+                embeds: [{
+                    title: "Test de notification Discord",
+                    description: "Ceci est un test de notification via webhook Discord",
+                    color: 3447003, // Bleu
+                    fields: [
+                        {
+                            name: "Type de webhook",
+                            value: webhook.trigger_type || "Non spécifié",
+                            inline: true
+                        },
+                        {
+                            name: "ID",
+                            value: webhook.id,
+                            inline: true
+                        }
+                    ],
+                    timestamp: new Date().toISOString()
+                }]
+            };
+
+            // Bypass du traitement normal pour Discord
+            success = await webhookManager.executeDiscordWebhook(webhook, testData);
+        }
+        // Comportement existant pour les autres types de webhook
+        else if (webhook.trigger_type === 'event' && webhook.event_type) {
+            const eventType = webhook.event_type;
+
+            let eventData = {};
+
+            switch (eventType) {
+                case 'playback_started':
+                    eventData = {
+                        sessionInfo: {
+                            userId: "test-user-id",
+                            deviceId: "test-device-id",
+                            deviceName: "Test Device",
+                            clientName: "Test Client",
+                            isPaused: false,
+                            mediaType: "Movie",
+                            mediaName: "Test Movie",
+                            startTime: new Date().toISOString()
+                        },
+                        userData: {
+                            username: "Test User",
+                            userImageTag: "test-image-tag"
+                        },
+                        mediaInfo: {
+                            itemId: "test-item-id",
+                            episodeId: null,
+                            mediaName: "Test Movie",
+                            seasonName: null,
+                            seriesName: null
+                        }
+                    };
+                    success = await webhookManager.triggerEventWebhooks(eventType, eventData, [webhook.id]);
+                    break;
+
+                case 'playback_ended':
+                    eventData = {
+                        sessionInfo: {
+                            userId: "test-user-id",
+                            deviceId: "test-device-id",
+                            deviceName: "Test Device",
+                            clientName: "Test Client",
+                            mediaType: "Movie",
+                            mediaName: "Test Movie",
+                            startTime: new Date(Date.now() - 3600000).toISOString(),
+                            endTime: new Date().toISOString(),
+                            playbackDuration: 3600
+                        },
+                        userData: {
+                            username: "Test User",
+                            userImageTag: "test-image-tag"
+                        },
+                        mediaInfo: {
+                            itemId: "test-item-id",
+                            episodeId: null,
+                            mediaName: "Test Movie",
+                            seasonName: null,
+                            seriesName: null
+                        }
+                    };
+                    success = await webhookManager.triggerEventWebhooks(eventType, eventData, [webhook.id]);
+                    break;
+
+                case 'media_recently_added':
+                    eventData = {
+                        mediaItem: {
+                            id: "test-item-id",
+                            name: "Test Media",
+                            type: "Movie",
+                            overview: "This is a test movie for webhook testing",
+                            addedDate: new Date().toISOString()
+                        }
+                    };
+                    success = await webhookManager.triggerEventWebhooks(eventType, eventData, [webhook.id]);
+                    break;
+
+                default:
+                    success = await webhookManager.executeWebhook(webhook, testData);
+            }
+        } else {
+            success = await webhookManager.executeWebhook(webhook, testData);
+        }
 
         if (success) {
-            res.json({ message: 'Webhook executed successfully' });
+            res.json({ message: 'Webhook exécuté avec succès' });
         } else {
-            res.status(500).json({ error: 'Webhook execution failed' });
+            res.status(500).json({ error: 'Échec de l\'exécution du webhook' });
         }
     } catch (error) {
         console.error('Error testing webhook:', error);
-        res.status(500).json({ error: 'Failed to test webhook' });
+        res.status(500).json({ error: 'Failed to test webhook: ' + error.message });
     }
 });
 
@@ -205,9 +316,9 @@ router.post('/:id/trigger-monthly', async (req, res) => {
     const success = await webhookManager.triggerMonthlySummaryWebhook(req.params.id);
 
     if (success) {
-        res.status(200).json({ message: "Rapport mensuel envoyé avec succès" });
+        res.status(200).json({ message: "Monthly report send with success" });
     } else {
-        res.status(500).json({ message: "Échec de l'envoi du rapport mensuel" });
+        res.status(500).json({ message: "Failed to send monthly report" });
     }
 });
 
