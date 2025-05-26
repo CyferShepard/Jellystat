@@ -7,9 +7,13 @@ const configClass = require("../classes/config");
 const API = require("../classes/api-loader");
 const { sendUpdate } = require("../ws");
 const { isNumber } = require("@mui/x-data-grid/internals");
+const WebhookManager = require("../classes/webhook-manager"); 
+
 const MINIMUM_SECONDS_TO_INCLUDE_PLAYBACK = process.env.MINIMUM_SECONDS_TO_INCLUDE_PLAYBACK
   ? Number(process.env.MINIMUM_SECONDS_TO_INCLUDE_PLAYBACK)
   : 1;
+
+const webhookManager = new WebhookManager();
 
 async function getSessionsInWatchDog(SessionData, WatchdogData) {
   let existingData = await WatchdogData.filter((wdData) => {
@@ -146,6 +150,42 @@ async function ActivityMonitor(interval) {
       //filter fix if table is empty
 
       if (WatchdogDataToInsert.length > 0) {
+        for (const session of WatchdogDataToInsert) {
+          let userData = {};
+          try {
+            const userInfo = await API.getUserById(session.UserId);
+            if (userInfo) {
+              userData = {
+                username: userInfo.Name,
+                userImageTag: userInfo.PrimaryImageTag
+              };
+            }
+          } catch (error) {
+            console.error(`[WEBHOOK] Error fetching user data: ${error.message}`);
+          }
+
+          await webhookManager.triggerEventWebhooks('playback_started', {
+            sessionInfo: {
+              userId: session.UserId,
+              deviceId: session.DeviceId,
+              deviceName: session.DeviceName,
+              clientName: session.ClientName,
+              isPaused: session.IsPaused,
+              mediaType: session.MediaType,
+              mediaName: session.NowPlayingItemName,
+              startTime: session.ActivityDateInserted
+            },
+            userData,
+            mediaInfo: {
+              itemId: session.NowPlayingItemId,
+              episodeId: session.EpisodeId,
+              mediaName: session.NowPlayingItemName,
+              seasonName: session.SeasonName,
+              seriesName: session.SeriesName
+            }
+          });
+        }
+
         //insert new rows where not existing items
         // console.log("Inserted " + WatchdogDataToInsert.length + " wd playback records");
         db.insertBulk("jf_activity_watchdog", WatchdogDataToInsert, jf_activity_watchdog_columns);
@@ -158,10 +198,45 @@ async function ActivityMonitor(interval) {
         console.log("Existing Data Updated: ", WatchdogDataToUpdate.length);
       }
 
+      if (dataToRemove.length > 0) {
+        for (const session of dataToRemove) {
+          let userData = {};
+          try {
+            const userInfo = await API.getUserById(session.UserId);
+            if (userInfo) {
+              userData = {
+                username: userInfo.Name,
+                userImageTag: userInfo.PrimaryImageTag
+              };
+            }
+          } catch (error) {
+            console.error(`[WEBHOOK] Error fetching user data: ${error.message}`);
+          }
+
+          await webhookManager.triggerEventWebhooks('playback_ended', {
+            sessionInfo: {
+              userId: session.UserId,
+              deviceId: session.DeviceId,
+              deviceName: session.DeviceName,
+              clientName: session.ClientName,
+              playbackDuration: session.PlaybackDuration,
+              endTime: session.ActivityDateInserted
+            },
+            userData,
+            mediaInfo: {
+              itemId: session.NowPlayingItemId,
+              episodeId: session.EpisodeId,
+              mediaName: session.NowPlayingItemName,
+              seasonName: session.SeasonName,
+              seriesName: session.SeriesName
+            }
+          });
+        }
+
+        const toDeleteIds = dataToRemove.map((row) => row.ActivityId);
+
       //delete from db no longer in session data and insert into stats db
       //Bulk delete from db thats no longer on api
-
-      const toDeleteIds = dataToRemove.map((row) => row.ActivityId);
 
       let playbackToInsert = dataToRemove;
 
@@ -248,7 +323,9 @@ async function ActivityMonitor(interval) {
       }
 
       ///////////////////////////
-    } catch (error) {
+    } 
+    }
+    catch (error) {
       if (error?.code === "ECONNREFUSED") {
         console.error("Error: Unable to connect to API"); //TO-DO Change this to correct API name
       } else if (error?.code === "ERR_BAD_RESPONSE") {

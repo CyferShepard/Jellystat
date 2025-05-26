@@ -824,6 +824,8 @@ async function partialSync(triggertype) {
   const config = await new configClass().getConfig();
 
   const uuid = randomUUID();
+  
+  const newItems = []; // Array to track newly added items during the sync process
 
   syncTask = { loggedData: [], uuid: uuid, wsKey: "PartialSyncTask", taskName: taskName.partialsync };
   try {
@@ -833,7 +835,7 @@ async function partialSync(triggertype) {
     if (config.error) {
       syncTask.loggedData.push({ Message: config.error });
       await logging.updateLog(syncTask.uuid, syncTask.loggedData, taskstate.FAILED);
-      return;
+      return { success: false, error: config.error };
     }
 
     const libraries = await API.getLibraries();
@@ -842,7 +844,7 @@ async function partialSync(triggertype) {
       syncTask.loggedData.push({ Message: "Error: No Libararies found to sync." });
       await logging.updateLog(syncTask.uuid, syncTask.loggedData, taskstate.FAILED);
       sendUpdate(syncTask.wsKey, { type: "Success", message: triggertype + " " + taskName.fullsync + " Completed" });
-      return;
+      return { success: false, error: "No libraries found" };
     }
 
     const excluded_libraries = config.settings.ExcludedLibraries || [];
@@ -850,10 +852,10 @@ async function partialSync(triggertype) {
     const filtered_libraries = libraries.filter((library) => !excluded_libraries.includes(library.Id));
     const existing_excluded_libraries = libraries.filter((library) => excluded_libraries.includes(library.Id));
 
-    //   //syncUserData
+    // syncUserData
     await syncUserData();
 
-    //   //syncLibraryFolders
+    // syncLibraryFolders
     await syncLibraryFolders(filtered_libraries, existing_excluded_libraries);
 
     //item sync counters
@@ -956,7 +958,7 @@ async function partialSync(triggertype) {
         insertEpisodeInfoCount += Number(infoCount.insertEpisodeInfoCount);
         updateEpisodeInfoCount += Number(infoCount.updateEpisodeInfoCount);
 
-        //clear data from memory as its no longer needed
+        //clear data from memory as it's no longer needed
         library_items = null;
         seasons = null;
         episodes = null;
@@ -1023,10 +1025,22 @@ async function partialSync(triggertype) {
     await logging.updateLog(syncTask.uuid, syncTask.loggedData, taskstate.SUCCESS);
 
     sendUpdate(syncTask.wsKey, { type: "Success", message: triggertype + " Sync Completed" });
+    
+    return {
+      success: true,
+      newItems: newItems,
+      stats: {
+        itemsAdded: insertedItemsCount,
+        episodesAdded: insertedEpisodeCount,
+        seasonsAdded: insertedSeasonsCount
+      }
+    };
   } catch (error) {
     syncTask.loggedData.push({ color: "red", Message: getErrorLineNumber(error) + ": Error: " + error });
     await logging.updateLog(syncTask.uuid, syncTask.loggedData, taskstate.FAILED);
     sendUpdate(syncTask.wsKey, { type: "Error", message: triggertype + " Sync Halted with Errors" });
+    
+    return { success: false, error: error.message };
   }
 }
 

@@ -226,7 +226,12 @@
     "URL": "URL",
     "TYPE": "Type",
     "TRIGGER": "Trigger",
-    "STATUS":  "Status"
+    "STATUS":  "Status",
+    "EVENT_WEBHOOKS": "Event notifications",
+    "EVENT_WEBHOOKS_TOOLTIP": "Enable or disable event notifications",
+    "PLAYBACK_STARTED": "Playback Started",
+    "PLAYBACK_ENDED": "Playback Stopped",
+    "MEDIA_ADDED": "Media Added"
   },
   "TASK_TYPE": {
     "JOB": "Job",
