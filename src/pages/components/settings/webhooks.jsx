@@ -198,6 +198,7 @@ function WebhooksSettings() {
     const handleTest = async (webhook) => {
         if (!webhook || !webhook.id) {
             setError("Impossible to test the webhook: no webhook provided");
+            setLoading(false);
             return;
         }
 
