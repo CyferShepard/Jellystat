@@ -316,7 +316,7 @@ router.post('/:id/trigger-monthly', async (req, res) => {
     const success = await webhookManager.triggerMonthlySummaryWebhook(req.params.id);
 
     if (success) {
-        res.status(200).json({ message: "Monthly report send with success" });
+        res.status(200).json({ message: "Monthly report sent successfully" });
     } else {
         res.status(500).json({ message: "Failed to send monthly report" });
     }
