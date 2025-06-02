@@ -188,21 +188,21 @@ router.post('/:id/test', async (req, res) => {
         let testData = req.body || {};
         let success = false;
 
-        // Traitement spécial pour les webhooks Discord
+        // Discord behaviour
         if (webhook.url.includes('discord.com/api/webhooks')) {
             console.log('Discord webhook détecté, préparation du payload spécifique');
 
-            // Format spécifique pour Discord
+            // Discord specific format
             testData = {
                 content: "Test de webhook depuis Jellystat",
                 embeds: [{
-                    title: "Test de notification Discord",
-                    description: "Ceci est un test de notification via webhook Discord",
-                    color: 3447003, // Bleu
+                    title: "Discord test notification",
+                    description: "This is a test notification of jellystat discord webhook",
+                    color: 3447003,
                     fields: [
                         {
-                            name: "Type de webhook",
-                            value: webhook.trigger_type || "Non spécifié",
+                            name: "Webhook type",
+                            value: webhook.trigger_type || "Not specified",
                             inline: true
                         },
                         {
@@ -215,10 +215,9 @@ router.post('/:id/test', async (req, res) => {
                 }]
             };
 
-            // Bypass du traitement normal pour Discord
+            // Bypass classic method for discord
             success = await webhookManager.executeDiscordWebhook(webhook, testData);
         }
-        // Comportement existant pour les autres types de webhook
         else if (webhook.trigger_type === 'event' && webhook.event_type) {
             const eventType = webhook.event_type;
 
@@ -301,9 +300,9 @@ router.post('/:id/test', async (req, res) => {
         }
 
         if (success) {
-            res.json({ message: 'Webhook exécuté avec succès' });
+            res.json({ message: 'Webhook executed successfully' });
         } else {
-            res.status(500).json({ error: 'Échec de l\'exécution du webhook' });
+            res.status(500).json({ error: 'Error while executing webhook' });
         }
     } catch (error) {
         console.error('Error testing webhook:', error);

@@ -18,7 +18,6 @@ import ErrorBoundary from "../general/ErrorBoundary";
 
 const token = localStorage.getItem('token');
 
-// Modification du composant WebhookRow pour passer l'objet webhook complet
 function WebhookRow(props) {
     const { webhook, onEdit, onTest } = props;
 
