@@ -3,7 +3,7 @@ const fs = require("fs");
 const path = require("path");
 const configClass = require("./config");
 
-const moment = require("moment");
+const dayjs = require("dayjs");
 const Logging = require("./logging");
 
 const taskstate = require("../logging/taskstate");
@@ -50,7 +50,7 @@ async function backup(refLog) {
   // Get data from each table and append it to the backup file
 
   try {
-    let now = moment();
+    let now = dayjs();
     const backuppath = "./" + backupfolder;
 
     if (!fs.existsSync(backuppath)) {
