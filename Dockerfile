@@ -1,5 +1,5 @@
 # Stage 1: Build the application
-FROM node:slim AS builder
+FROM node:lts-slim AS builder
 
 WORKDIR /app
 
