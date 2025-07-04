@@ -2,7 +2,10 @@
 const express = require("express");
 const db = require("../db");
 const dbHelper = require("../classes/db-helper");
+
 const dayjs = require("dayjs");
+const customParseFormat = require("dayjs/plugin/customParseFormat");
+dayjs.extend(customParseFormat);
 
 const router = express.Router();
 
@@ -294,7 +297,7 @@ router.post("/getLibraryItemsPlayMethodStats", async (req, res) => {
     // Validate startDate and endDate using dayjs
     if (
       startDate !== undefined &&
-      (!dayjs(startDate, dayjs.ISO_8601, true).isValid() || !dayjs(endDate, dayjs.ISO_8601, true).isValid())
+      (!dayjs(startDate, "YYYY-MM-DDTHH:mm:ss.SSSZ", true).isValid() || !dayjs(endDate, "YYYY-MM-DDTHH:mm:ss.SSSZ", true).isValid())
     ) {
       return res.status(400).send({ error: "Invalid date format" });
     }

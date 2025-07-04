@@ -11,10 +11,13 @@ const configClass = require("../classes/config");
 const { checkForUpdates } = require("../version-control");
 const API = require("../classes/api-loader");
 const { sendUpdate } = require("../ws");
-const dayjs = require("dayjs");
 const { tables } = require("../global/backup_tables");
 const TaskScheduler = require("../classes/task-scheduler-singleton");
 const TaskManager = require("../classes/task-manager-singleton.js");
+
+const dayjs = require("dayjs");
+const customParseFormat = require("dayjs/plugin/customParseFormat");
+dayjs.extend(customParseFormat);
 
 const router = express.Router();
 
