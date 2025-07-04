@@ -78,8 +78,8 @@ async function backup(refLog) {
       return;
     }
 
-    // const backupPath = `../backup-data/backup_${now.format('yyyy-MM-DD HH-mm-ss')}.json`;
-    const directoryPath = path.join(__dirname, "..", backupfolder, `backup_${now.format("yyyy-MM-DD HH-mm-ss")}.json`);
+    // const backupPath = `../backup-data/backup_${now.format('YYYY-MM-DD HH-mm-ss')}.json`;
+    const directoryPath = path.join(__dirname, "..", backupfolder, `backup_${now.format("YYYY-MM-DD HH-mm-ss")}.json`);
     refLog.logData.push({ color: "yellow", Message: "Begin Backup " + directoryPath });
     const stream = fs.createWriteStream(directoryPath, { flags: "a" });
     stream.on("error", async (error) => {
