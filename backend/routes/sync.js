@@ -39,13 +39,41 @@ function getErrorLineNumber(error) {
   return lineNumber;
 }
 
+function sanitizeNullBytes(obj) {
+  if (typeof obj === 'string') {
+    // Remove various forms of null bytes and control characters that cause Unicode escape sequence errors
+    return obj
+      .replace(/\u0000/g, '') // Remove null bytes
+      .replace(/\\u0000/g, '') // Remove escaped null bytes
+      .replace(/\x00/g, '') // Remove hex null bytes
+      .replace(/[\u0000-\u001F\u007F-\u009F]/g, '') // Remove all control characters
+      .trim(); // Remove leading/trailing whitespace
+  }
+
+  if (Array.isArray(obj)) {
+    return obj.map(sanitizeNullBytes);
+  }
+
+  if (obj && typeof obj === 'object') {
+    const sanitized = {};
+    for (const [key, value] of Object.entries(obj)) {
+      sanitized[key] = sanitizeNullBytes(value);
+    }
+    return sanitized;
+  }
+
+  return obj;
+}
+
 class sync {
   async getExistingIDsforTable(tablename) {
     return await db.query(`SELECT "Id" FROM ${tablename}`).then((res) => res.rows.map((row) => row.Id));
   }
 
   async insertData(tablename, dataToInsert, column_mappings) {
-    let result = await db.insertBulk(tablename, dataToInsert, column_mappings);
+    const sanitizedData = sanitizeNullBytes(dataToInsert);
+
+    let result = await db.insertBulk(tablename, sanitizedData, column_mappings);
     if (result.Result === "SUCCESS") {
       // syncTask.loggedData.push({ color: "dodgerblue", Message: dataToInsert.length + " Rows Inserted." });
     } else {
