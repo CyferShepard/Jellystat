@@ -114,20 +114,70 @@ function getWatchDogNotInSessions(SessionData, WatchdogData) {
   return removedData;
 }
 
-async function ActivityMonitor(interval) {
-  // console.log("Activity Interval: " + interval);
+let currentIntervalId = null;
+let lastHadActiveSessions = false;
+let cachedPollingSettings = {
+  activeSessionsInterval: 1000,
+  idleInterval: 5000
+};
 
-  setInterval(async () => {
+async function ActivityMonitor(defaultInterval) {
+  // console.log("Activity Monitor started with default interval: " + defaultInterval);
+  
+  const runMonitoring = async () => {
     try {
       const config = await new configClass().getConfig();
 
       if (config.error || config.state !== 2) {
         return;
       }
+      
+      // Get adaptive polling settings from config
+      const pollingSettings = config.settings?.ActivityMonitorPolling || {
+        activeSessionsInterval: 1000,
+        idleInterval: 5000
+      };
+      
+      // Check if polling settings have changed
+      const settingsChanged = 
+        cachedPollingSettings.activeSessionsInterval !== pollingSettings.activeSessionsInterval ||
+        cachedPollingSettings.idleInterval !== pollingSettings.idleInterval;
+      
+      if (settingsChanged) {
+        console.log('[ActivityMonitor] Polling settings changed, updating intervals');
+        console.log('Old settings:', cachedPollingSettings);
+        console.log('New settings:', pollingSettings);
+        cachedPollingSettings = { ...pollingSettings };
+      }
+
       const ExcludedUsers = config.settings?.ExcludedUsers || [];
       const apiSessionData = await API.getSessions();
       const SessionData = apiSessionData.filter((row) => row.NowPlayingItem !== undefined && !ExcludedUsers.includes(row.UserId));
       sendUpdate("sessions", apiSessionData);
+      
+      const hasActiveSessions = SessionData.length > 0;
+      
+      // Determine current appropriate interval
+      const currentInterval = hasActiveSessions ? pollingSettings.activeSessionsInterval : pollingSettings.idleInterval;
+      
+      // Check if we need to change the interval (either due to session state change OR settings change)
+      if (hasActiveSessions !== lastHadActiveSessions || settingsChanged) {
+        if (hasActiveSessions !== lastHadActiveSessions) {
+          console.log(`[ActivityMonitor] Switching to ${hasActiveSessions ? 'active' : 'idle'} polling mode (${currentInterval}ms)`);
+          lastHadActiveSessions = hasActiveSessions;
+        }
+        if (settingsChanged) {
+          console.log(`[ActivityMonitor] Applying new ${hasActiveSessions ? 'active' : 'idle'} interval: ${currentInterval}ms`);
+        }
+        
+        // Clear current interval and restart with new timing
+        if (currentIntervalId) {
+          clearInterval(currentIntervalId);
+        }
+        currentIntervalId = setInterval(runMonitoring, currentInterval);
+        return; // Let the new interval handle the next execution
+      }
+      
       /////get data from jf_activity_monitor
       const WatchdogData = await db.query("SELECT * FROM jf_activity_watchdog").then((res) => res.rows);
 
@@ -258,7 +308,50 @@ async function ActivityMonitor(interval) {
       }
       return [];
     }
-  }, interval);
+  };
+  
+  // Get initial configuration to start with the correct interval
+  const initConfig = async () => {
+    try {
+      const config = await new configClass().getConfig();
+      
+      if (config.error || config.state !== 2) {
+        console.log("[ActivityMonitor] Config not ready, starting with default interval:", defaultInterval + "ms");
+        currentIntervalId = setInterval(runMonitoring, defaultInterval);
+        return;
+      }
+      
+      // Get adaptive polling settings from config
+      const pollingSettings = config.settings?.ActivityMonitorPolling || {
+        activeSessionsInterval: 1000,
+        idleInterval: 5000
+      };
+      
+      // Initialize cached settings
+      cachedPollingSettings = { ...pollingSettings };
+      
+      // Start with idle interval since there are likely no active sessions at startup
+      const initialInterval = pollingSettings.idleInterval;
+      console.log("[ActivityMonitor] Starting adaptive polling with idle interval:", initialInterval + "ms");
+      console.log("[ActivityMonitor] Loaded settings:", pollingSettings);
+      currentIntervalId = setInterval(runMonitoring, initialInterval);
+      
+    } catch (error) {
+      console.log("[ActivityMonitor] Error loading config, using default interval:", defaultInterval + "ms");
+      currentIntervalId = setInterval(runMonitoring, defaultInterval);
+    }
+  };
+  
+  // Initialize with proper configuration
+  await initConfig();
+  
+  // Return a cleanup function
+  return () => {
+    if (currentIntervalId) {
+      clearInterval(currentIntervalId);
+      currentIntervalId = null;
+    }
+  };
 }
 
 module.exports = {

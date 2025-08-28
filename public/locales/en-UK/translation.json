@@ -211,6 +211,15 @@
       "1_DAY": "1 Day",
       "1_WEEK": "1 Week"
     },
+    "ACTIVITY_MONITOR": "Activity Monitor",
+    "ACTIVE_SESSIONS_INTERVAL": "Active Sessions Interval (ms)",
+    "ACTIVE_SESSIONS_HELP": "How often to check when users are watching content (recommended: 1000ms)",
+    "IDLE_INTERVAL": "Idle Interval (ms)",
+    "IDLE_HELP": "How often to check when no active sessions (recommended: 5000ms)",
+    "POLLING_INFO_TITLE": "Smart Polling",
+    "POLLING_INFO": "The system automatically adapts monitoring frequency: fast when users are watching content, slower when the server is idle. This reduces CPU load on your Jellyfin server.",
+    "INTERVAL_WARNING": "Active sessions interval should not be greater than idle interval",
+    "REALTIME_UPDATE_INFO": "Changes are applied in real-time without server restart.",
     "SELECT_LIBRARIES_TO_IMPORT": "Select Libraries to Import",
     "SELECT_LIBRARIES_TO_IMPORT_TOOLTIP": "Activity for Items within these libraries are still Tracked - Even when not imported.",
     "DATE_ADDED": "Date Added"

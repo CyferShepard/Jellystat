@@ -909,6 +909,83 @@ router.post("/setTaskSettings", async (req, res) => {
   }
 });
 
+// Get Activity Monitor Polling Settings
+router.get("/getActivityMonitorSettings", async (req, res) => {
+  try {
+    const settingsjson = await db.query('SELECT settings FROM app_config where "ID"=1').then((res) => res.rows);
+    
+    if (settingsjson.length > 0) {
+      const settings = settingsjson[0].settings || {};
+      console.log(settings);
+      const pollingSettings = settings.ActivityMonitorPolling || {
+        activeSessionsInterval: 1000,
+        idleInterval: 5000
+      };
+      res.send(pollingSettings);
+    } else {
+      res.status(404);
+      res.send({ error: "Settings Not Found" });
+    }
+  } catch (error) {
+    res.status(503);
+    res.send({ error: "Error: " + error });
+  }
+});
+
+// Set Activity Monitor Polling Settings  
+router.post("/setActivityMonitorSettings", async (req, res) => {
+  const { activeSessionsInterval, idleInterval } = req.body;
+  
+  if (activeSessionsInterval === undefined || idleInterval === undefined) {
+    res.status(400);
+    res.send("activeSessionsInterval and idleInterval are required");
+    return;
+  }
+  
+  if (!Number.isInteger(activeSessionsInterval) || activeSessionsInterval <= 0) {
+    res.status(400);
+    res.send("A valid activeSessionsInterval(int) which is > 0 milliseconds is required");
+    return;
+  }
+  
+  if (!Number.isInteger(idleInterval) || idleInterval <= 0) {
+    res.status(400);
+    res.send("A valid idleInterval(int) which is > 0 milliseconds is required");
+    return;
+  }
+  
+  if (activeSessionsInterval > idleInterval) {
+    res.status(400);
+    res.send("activeSessionsInterval should be <= idleInterval for optimal performance");
+    return;
+  }
+  
+  try {
+    const settingsjson = await db.query('SELECT settings FROM app_config where "ID"=1').then((res) => res.rows);
+    
+    if (settingsjson.length > 0) {
+      const settings = settingsjson[0].settings || {};
+      
+      settings.ActivityMonitorPolling = {
+        activeSessionsInterval: activeSessionsInterval,
+        idleInterval: idleInterval
+      };
+      
+      let query = 'UPDATE app_config SET settings=$1 where "ID"=1';
+      await db.query(query, [settings]);
+      
+      res.status(200);
+      res.send(settings.ActivityMonitorPolling);
+    } else {
+      res.status(404);  
+      res.send({ error: "Settings Not Found" });
+    }
+  } catch (error) {
+    res.status(503);
+    res.send({ error: "Error: " + error });
+  }
+});
+
 //Jellystat functions
 router.get("/CheckForUpdates", async (req, res) => {
   try {
