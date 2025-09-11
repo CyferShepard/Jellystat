@@ -1,7 +1,7 @@
 const express = require("express");
 const db = require("../db");
 
-const moment = require("moment");
+const dayjs = require("dayjs");
 const { randomUUID } = require("crypto");
 
 const { sendUpdate } = require("../ws");
@@ -558,13 +558,13 @@ async function syncPlaybackPluginData() {
       let query = `SELECT rowid, * FROM PlaybackActivity`;
 
       if (OldestPlaybackActivity && NewestPlaybackActivity) {
-        const formattedDateTimeOld = moment(OldestPlaybackActivity).format("YYYY-MM-DD HH:mm:ss");
-        const formattedDateTimeNew = moment(NewestPlaybackActivity).format("YYYY-MM-DD HH:mm:ss");
+        const formattedDateTimeOld = dayjs(OldestPlaybackActivity).format("YYYY-MM-DD HH:mm:ss");
+        const formattedDateTimeNew = dayjs(NewestPlaybackActivity).format("YYYY-MM-DD HH:mm:ss");
         query = query + ` WHERE (DateCreated < '${formattedDateTimeOld}' or DateCreated > '${formattedDateTimeNew}')`;
       }
 
       if (OldestPlaybackActivity && !NewestPlaybackActivity) {
-        const formattedDateTimeOld = moment(OldestPlaybackActivity).format("YYYY-MM-DD HH:mm:ss");
+        const formattedDateTimeOld = dayjs(OldestPlaybackActivity).format("YYYY-MM-DD HH:mm:ss");
         query = query + ` WHERE DateCreated < '${formattedDateTimeOld}'`;
         if (MaxPlaybackReportingPluginID) {
           query = query + ` AND rowid > ${MaxPlaybackReportingPluginID}`;
@@ -572,7 +572,7 @@ async function syncPlaybackPluginData() {
       }
 
       if (!OldestPlaybackActivity && NewestPlaybackActivity) {
-        const formattedDateTimeNew = moment(NewestPlaybackActivity).format("YYYY-MM-DD HH:mm:ss");
+        const formattedDateTimeNew = dayjs(NewestPlaybackActivity).format("YYYY-MM-DD HH:mm:ss");
         query = query + ` WHERE DateCreated > '${formattedDateTimeNew}'`;
         if (MaxPlaybackReportingPluginID) {
           query = query + ` AND rowid > ${MaxPlaybackReportingPluginID}`;
@@ -899,7 +899,7 @@ async function partialSync(triggertype) {
     let updateItemInfoCount = 0;
     let updateEpisodeInfoCount = 0;
 
-    let lastSyncDate = moment().subtract(24, "hours");
+    let lastSyncDate = dayjs().subtract(24, "hours");
 
     const last_execution = await db
       .query(
@@ -910,7 +910,7 @@ async function partialSync(triggertype) {
       )
       .then((res) => res.rows);
     if (last_execution.length !== 0) {
-      lastSyncDate = moment(last_execution[0].DateCreated);
+      lastSyncDate = dayjs(last_execution[0].DateCreated);
     }
 
     //for each item in library run get item using that id as the ParentId (This gets the children of the parent id)
@@ -937,7 +937,7 @@ async function partialSync(triggertype) {
         },
       });
 
-      libraryItems = libraryItems.filter((item) => moment(item.DateCreated).isAfter(lastSyncDate));
+      libraryItems = libraryItems.filter((item) => dayjs(item.DateCreated).isAfter(lastSyncDate));
 
       while (libraryItems.length != 0) {
         if (libraryItems.length === 0 && startIndex === 0) {
@@ -1002,7 +1002,7 @@ async function partialSync(triggertype) {
           },
         });
 
-        libraryItems = libraryItems.filter((item) => moment(item.DateCreated).isAfter(lastSyncDate));
+        libraryItems = libraryItems.filter((item) => dayjs(item.DateCreated).isAfter(lastSyncDate));
       }
     }
 

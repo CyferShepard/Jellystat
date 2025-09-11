@@ -1,6 +1,6 @@
 const db = require("../db");
 
-const moment = require("moment");
+const dayjs = require("dayjs");
 const { columnsPlayback } = require("../models/jf_playback_activity");
 const { jf_activity_watchdog_columns, jf_activity_watchdog_mapping } = require("../models/jf_activity_watchdog");
 const configClass = require("../classes/config");
@@ -31,8 +31,8 @@ async function getSessionsInWatchDog(SessionData, WatchdogData) {
 
         //if the playstate was paused, calculate the difference in seconds and add to the playback duration
         if (sessionData.PlayState.IsPaused == true) {
-          let startTime = moment(wdData.ActivityDateInserted, "YYYY-MM-DD HH:mm:ss.SSSZ");
-          let lastPausedDate = moment(sessionData.LastPausedDate);
+          let startTime = dayjs(wdData.ActivityDateInserted, "YYYY-MM-DD HH:mm:ss.SSSZ");
+          let lastPausedDate = dayjs(sessionData.LastPausedDate);
 
           let diffInSeconds = lastPausedDate.diff(startTime, "seconds");
 
@@ -40,7 +40,7 @@ async function getSessionsInWatchDog(SessionData, WatchdogData) {
 
           wdData.ActivityDateInserted = `${lastPausedDate.format("YYYY-MM-DD HH:mm:ss.SSSZ")}`;
         } else {
-          wdData.ActivityDateInserted = moment().format("YYYY-MM-DD HH:mm:ss.SSSZ");
+          wdData.ActivityDateInserted = dayjs().format("YYYY-MM-DD HH:mm:ss.SSSZ");
         }
         return true;
       }
@@ -97,8 +97,8 @@ function getWatchDogNotInSessions(SessionData, WatchdogData) {
 
   removedData.map((obj) => {
     obj.Id = obj.ActivityId;
-    let startTime = moment(obj.ActivityDateInserted, "YYYY-MM-DD HH:mm:ss.SSSZ");
-    let endTime = moment();
+    let startTime = dayjs(obj.ActivityDateInserted, "YYYY-MM-DD HH:mm:ss.SSSZ");
+    let endTime = dayjs();
 
     let diffInSeconds = endTime.diff(startTime, "seconds");
 
@@ -212,7 +212,7 @@ async function ActivityMonitor(interval) {
           if (existingrow) {
             playbackData.Id = existingrow.Id;
             playbackData.PlaybackDuration = Number(existingrow.PlaybackDuration) + Number(playbackData.PlaybackDuration);
-            playbackData.ActivityDateInserted = moment().format("YYYY-MM-DD HH:mm:ss.SSSZ");
+            playbackData.ActivityDateInserted = dayjs().format("YYYY-MM-DD HH:mm:ss.SSSZ");
             return true;
           }
           return false;

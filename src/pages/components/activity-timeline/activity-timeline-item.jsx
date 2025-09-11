@@ -13,7 +13,7 @@ import baseUrl from "../../../lib/baseurl";
 import "../../css/timeline/activity-timeline.css";
 
 import { useMediaQuery, useTheme } from "@mui/material";
-import moment from "moment";
+import dayjs from "dayjs";
 import TvLineIcon from "remixicon-react/TvLineIcon.js";
 import FilmLineIcon from "remixicon-react/FilmLineIcon.js";
 import { MEDIA_TYPES } from "./helpers";
@@ -29,8 +29,8 @@ const dateFormatOptions = {
 };
 
 function formatEntryDates(FirstActivityDate, LastActivityDate, MediaType) {
-  const startDate = moment(FirstActivityDate);
-  const endDate = moment(LastActivityDate);
+  const startDate = dayjs(FirstActivityDate);
+  const endDate = dayjs(LastActivityDate);
 
   if (startDate.isSame(endDate, "day") || MediaType === MEDIA_TYPES.Movies) {
     return Intl.DateTimeFormat(localization, dateFormatOptions).format(

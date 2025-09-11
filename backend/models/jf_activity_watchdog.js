@@ -1,4 +1,4 @@
-const moment = require("moment");
+const dayjs = require("dayjs");
 const { randomUUID } = require("crypto");
 
 const jf_activity_watchdog_columns = [
@@ -45,7 +45,7 @@ const jf_activity_watchdog_mapping = (item) => ({
   PlaybackDuration: item.PlaybackDuration !== undefined ? item.PlaybackDuration : 0,
   PlayMethod: item.PlayState.PlayMethod,
   ActivityDateInserted:
-    item.ActivityDateInserted !== undefined ? item.ActivityDateInserted : moment().format("YYYY-MM-DD HH:mm:ss.SSSZ"),
+    item.ActivityDateInserted !== undefined ? item.ActivityDateInserted : dayjs().format("YYYY-MM-DD HH:mm:ss.SSSZ"),
   MediaStreams: item.NowPlayingItem.MediaStreams ? item.NowPlayingItem.MediaStreams : null,
   TranscodingInfo: item.TranscodingInfo ? item.TranscodingInfo : null,
   PlayState: item.PlayState ? item.PlayState : null,
