@@ -12,14 +12,14 @@ const MINIMUM_SECONDS_TO_INCLUDE_PLAYBACK = process.env.MINIMUM_SECONDS_TO_INCLU
   : 1;
 
 async function getSessionsInWatchDog(SessionData, WatchdogData) {
-  let existingData = await WatchdogData.filter((wdData) => {
+  const existingData = await WatchdogData.filter((wdData) => {
     return SessionData.some((sessionData) => {
-      let NowPlayingItemId = sessionData.NowPlayingItem.SeriesId || sessionData.NowPlayingItem.Id;
+      const NowPlayingItemId = sessionData.NowPlayingItem.SeriesId || sessionData.NowPlayingItem.Id;
 
-      let matchesEpisodeId =
+      const matchesEpisodeId =
         sessionData.NowPlayingItem.SeriesId != undefined ? wdData.EpisodeId === sessionData.NowPlayingItem.Id : true;
 
-      let matchingSessionFound =
+      const matchingSessionFound =
         // wdData.Id === sessionData.Id &&
         wdData.UserId === sessionData.UserId &&
         wdData.DeviceId === sessionData.DeviceId &&
@@ -31,10 +31,10 @@ async function getSessionsInWatchDog(SessionData, WatchdogData) {
 
         //if the playstate was paused, calculate the difference in seconds and add to the playback duration
         if (sessionData.PlayState.IsPaused == true) {
-          let startTime = dayjs(wdData.ActivityDateInserted, "YYYY-MM-DD HH:mm:ss.SSSZ");
-          let lastPausedDate = dayjs(sessionData.LastPausedDate);
+          const startTime = dayjs(wdData.ActivityDateInserted);
+          const lastPausedDate = dayjs(sessionData.LastPausedDate, "YYYY-MM-DD HH:mm:ss.SSSZ");
 
-          let diffInSeconds = lastPausedDate.diff(startTime, "seconds");
+          const diffInSeconds = lastPausedDate.diff(startTime, "seconds");
 
           wdData.PlaybackDuration = parseInt(wdData.PlaybackDuration) + diffInSeconds;
 
@@ -52,15 +52,15 @@ async function getSessionsInWatchDog(SessionData, WatchdogData) {
 }
 
 async function getSessionsNotInWatchDog(SessionData, WatchdogData) {
-  let newData = await SessionData.filter((sessionData) => {
+  const newData = await SessionData.filter((sessionData) => {
     if (WatchdogData.length === 0) return true;
     return !WatchdogData.some((wdData) => {
-      let NowPlayingItemId = sessionData.NowPlayingItem.SeriesId || sessionData.NowPlayingItem.Id;
+      const NowPlayingItemId = sessionData.NowPlayingItem.SeriesId || sessionData.NowPlayingItem.Id;
 
-      let matchesEpisodeId =
+      const matchesEpisodeId =
         sessionData.NowPlayingItem.SeriesId != undefined ? wdData.EpisodeId === sessionData.NowPlayingItem.Id : true;
 
-      let matchingSessionFound =
+      const matchingSessionFound =
         // wdData.Id === sessionData.Id &&
         wdData.UserId === sessionData.UserId &&
         wdData.DeviceId === sessionData.DeviceId &&
@@ -75,15 +75,15 @@ async function getSessionsNotInWatchDog(SessionData, WatchdogData) {
 }
 
 function getWatchDogNotInSessions(SessionData, WatchdogData) {
-  let removedData = WatchdogData.filter((wdData) => {
+  const removedData = WatchdogData.filter((wdData) => {
     if (SessionData.length === 0) return true;
     return !SessionData.some((sessionData) => {
-      let NowPlayingItemId = sessionData.NowPlayingItem.SeriesId || sessionData.NowPlayingItem.Id;
+      const NowPlayingItemId = sessionData.NowPlayingItem.SeriesId || sessionData.NowPlayingItem.Id;
 
-      let matchesEpisodeId =
+      const matchesEpisodeId =
         sessionData.NowPlayingItem.SeriesId != undefined ? wdData.EpisodeId === sessionData.NowPlayingItem.Id : true;
 
-      let noMatchingSessionFound =
+      const noMatchingSessionFound =
         // wdData.Id === sessionData.Id &&
         wdData.UserId === sessionData.UserId &&
         wdData.DeviceId === sessionData.DeviceId &&
@@ -97,10 +97,10 @@ function getWatchDogNotInSessions(SessionData, WatchdogData) {
 
   removedData.map((obj) => {
     obj.Id = obj.ActivityId;
-    let startTime = dayjs(obj.ActivityDateInserted, "YYYY-MM-DD HH:mm:ss.SSSZ");
-    let endTime = dayjs();
+    const startTime = dayjs(obj.ActivityDateInserted);
+    const endTime = dayjs();
 
-    let diffInSeconds = endTime.diff(startTime, "seconds");
+    const diffInSeconds = endTime.diff(startTime, "seconds");
 
     if (obj.IsPaused == false) {
       obj.PlaybackDuration = parseInt(obj.PlaybackDuration) + diffInSeconds;
@@ -114,7 +114,7 @@ function getWatchDogNotInSessions(SessionData, WatchdogData) {
   return removedData;
 }
 
-async function ActivityMonitor(interval) {
+function ActivityMonitor(interval) {
   // console.log("Activity Interval: " + interval);
 
   setInterval(async () => {
@@ -137,9 +137,9 @@ async function ActivityMonitor(interval) {
       }
       // New Code
 
-      let WatchdogDataToInsert = await getSessionsNotInWatchDog(SessionData, WatchdogData);
-      let WatchdogDataToUpdate = await getSessionsInWatchDog(SessionData, WatchdogData);
-      let dataToRemove = await getWatchDogNotInSessions(SessionData, WatchdogData);
+      const WatchdogDataToInsert = await getSessionsNotInWatchDog(SessionData, WatchdogData);
+      const WatchdogDataToUpdate = await getSessionsInWatchDog(SessionData, WatchdogData);
+      const dataToRemove = await getWatchDogNotInSessions(SessionData, WatchdogData);
 
       /////////////////
 
@@ -172,7 +172,7 @@ async function ActivityMonitor(interval) {
       /////get data from jf_playback_activity within the last hour with progress of <=80% for current items in session
 
       const ExistingRecords = await db
-        .query(`SELECT * FROM jf_recent_playback_activity(1) limit 0`)
+        .query(`SELECT * FROM jf_recent_playback_activity(1)`)
         .then((res) => {
           if (res.rows && Array.isArray(res.rows) && res.rows.length > 0) {
             return res.rows.filter(
