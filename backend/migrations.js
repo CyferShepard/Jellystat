@@ -12,6 +12,7 @@ module.exports = {
         port:process.env.POSTGRES_PORT,
         database: process.env.POSTGRES_DB || 'jfstat',
         createDatabase: true,
+        ssl: { rejectUnauthorized: process.env.POSTGRES_SSL_REJECT_UNAUTHORIZED === undefined ? true : process.env.POSTGRES_SSL_REJECT_UNAUTHORIZED === "true" }
       },
       migrations: {
         directory: __dirname + '/migrations',
@@ -39,6 +40,7 @@ module.exports = {
         port:process.env.POSTGRES_PORT,
         database: process.env.POSTGRES_DB || 'jfstat',
         createDatabase: true,
+        ssl: { rejectUnauthorized: process.env.POSTGRES_SSL_REJECT_UNAUTHORIZED === undefined ? true : process.env.POSTGRES_SSL_REJECT_UNAUTHORIZED === "true" }
       },
       migrations: {
         directory: __dirname + '/migrations',

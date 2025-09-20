@@ -23,6 +23,8 @@ const postgresPassword = process.env.POSTGRES_PASSWORD;
 const postgresIp = process.env.POSTGRES_IP;
 const postgresPort = process.env.POSTGRES_PORT;
 const postgresDatabase = process.env.POSTGRES_DB || "jfstat";
+const postgresSslRejectUnauthorized = process.env.POSTGRES_SSL_REJECT_UNAUTHORIZED === undefined ? true : process.env.POSTGRES_SSL_REJECT_UNAUTHORIZED === "true";
+
 const backupfolder = "backup-data";
 
 // Restore function
@@ -52,6 +54,7 @@ async function restore(file, refLog) {
     host: postgresIp,
     port: postgresPort,
     database: postgresDatabase,
+    ssl: { rejectUnauthorized: postgresSslRejectUnauthorized },
   });
 
   const backupPath = file;
