@@ -12,7 +12,9 @@ const client = new Client({
   user: _POSTGRES_USER,
   password: _POSTGRES_PASSWORD,
   port: _POSTGRES_PORT,
-  ssl: { rejectUnauthorized: _POSTGRES_SSL_REJECT_UNAUTHORIZED }
+  ...(process.env.POSTGRES_SSL_ENABLED === "true"
+    ? { ssl: { rejectUnauthorized: _POSTGRES_SSL_REJECT_UNAUTHORIZED } }
+    : {})
 });
 
 const createDatabase = async () => {

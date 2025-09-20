@@ -54,7 +54,9 @@ async function restore(file, refLog) {
     host: postgresIp,
     port: postgresPort,
     database: postgresDatabase,
-    ssl: { rejectUnauthorized: postgresSslRejectUnauthorized },
+    ...(process.env.POSTGRES_SSL_ENABLED === "true"
+      ? { ssl: { rejectUnauthorized: postgresSslRejectUnauthorized } }
+      : {}),
   });
 
   const backupPath = file;
