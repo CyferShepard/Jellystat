@@ -11,10 +11,13 @@ const configClass = require("../classes/config");
 const { checkForUpdates } = require("../version-control");
 const API = require("../classes/api-loader");
 const { sendUpdate } = require("../ws");
-const moment = require("moment");
 const { tables } = require("../global/backup_tables");
 const TaskScheduler = require("../classes/task-scheduler-singleton");
 const TaskManager = require("../classes/task-manager-singleton.js");
+
+const dayjs = require("dayjs");
+const customParseFormat = require("dayjs/plugin/customParseFormat");
+dayjs.extend(customParseFormat);
 
 const router = express.Router();
 
@@ -329,11 +332,11 @@ router.get("/getRecentlyAdded", async (req, res) => {
 
       let lastSynctedItemDate;
       if (items.length > 0 && items[0].DateCreated !== undefined && items[0].DateCreated !== null) {
-        lastSynctedItemDate = moment(items[0].DateCreated, "YYYY-MM-DD HH:mm:ss.SSSZ");
+        lastSynctedItemDate = dayjs(items[0].DateCreated, "YYYY-MM-DD HH:mm:ss.SSSZ");
       }
 
       if (episodes.length > 0 && episodes[0].DateCreated !== undefined && episodes[0].DateCreated !== null) {
-        const newLastSynctedItemDate = moment(episodes[0].DateCreated, "YYYY-MM-DD HH:mm:ss.SSSZ");
+        const newLastSynctedItemDate = dayjs(episodes[0].DateCreated, "YYYY-MM-DD HH:mm:ss.SSSZ");
 
         if (lastSynctedItemDate === undefined || newLastSynctedItemDate.isAfter(lastSynctedItemDate)) {
           lastSynctedItemDate = newLastSynctedItemDate;
@@ -342,7 +345,7 @@ router.get("/getRecentlyAdded", async (req, res) => {
 
       if (lastSynctedItemDate !== undefined) {
         recentlyAddedFromJellystatMapped = recentlyAddedFromJellystatMapped.filter((item) =>
-          moment(item.DateCreated, "YYYY-MM-DD HH:mm:ss.SSSZ").isAfter(lastSynctedItemDate)
+          dayjs(item.DateCreated, "YYYY-MM-DD HH:mm:ss.SSSZ").isAfter(lastSynctedItemDate)
         );
       }
 
@@ -354,7 +357,7 @@ router.get("/getRecentlyAdded", async (req, res) => {
       const recentlyAdded = [...recentlyAddedFromJellystatMapped, ...filteredDbRows];
       // Sort recentlyAdded by DateCreated in descending order
       recentlyAdded.sort(
-        (a, b) => moment(b.DateCreated, "YYYY-MM-DD HH:mm:ss.SSSZ") - moment(a.DateCreated, "YYYY-MM-DD HH:mm:ss.SSSZ")
+        (a, b) => dayjs(b.DateCreated, "YYYY-MM-DD HH:mm:ss.SSSZ") - dayjs(a.DateCreated, "YYYY-MM-DD HH:mm:ss.SSSZ")
       );
 
       res.send(recentlyAdded);
@@ -383,11 +386,11 @@ router.get("/getRecentlyAdded", async (req, res) => {
     );
     let lastSynctedItemDate;
     if (items.length > 0 && items[0].DateCreated !== undefined && items[0].DateCreated !== null) {
-      lastSynctedItemDate = moment(items[0].DateCreated, "YYYY-MM-DD HH:mm:ss.SSSZ");
+      lastSynctedItemDate = dayjs(items[0].DateCreated, "YYYY-MM-DD HH:mm:ss.SSSZ");
     }
 
     if (episodes.length > 0 && episodes[0].DateCreated !== undefined && episodes[0].DateCreated !== null) {
-      const newLastSynctedItemDate = moment(episodes[0].DateCreated, "YYYY-MM-DD HH:mm:ss.SSSZ");
+      const newLastSynctedItemDate = dayjs(episodes[0].DateCreated, "YYYY-MM-DD HH:mm:ss.SSSZ");
 
       if (lastSynctedItemDate === undefined || newLastSynctedItemDate.isAfter(lastSynctedItemDate)) {
         lastSynctedItemDate = newLastSynctedItemDate;
@@ -396,7 +399,7 @@ router.get("/getRecentlyAdded", async (req, res) => {
 
     if (lastSynctedItemDate !== undefined) {
       recentlyAddedFromJellystatMapped = recentlyAddedFromJellystatMapped.filter((item) =>
-        moment(item.DateCreated, "YYYY-MM-DD HH:mm:ss.SSSZ").isAfter(lastSynctedItemDate)
+        dayjs(item.DateCreated, "YYYY-MM-DD HH:mm:ss.SSSZ").isAfter(lastSynctedItemDate)
       );
     }
 
@@ -414,7 +417,7 @@ router.get("/getRecentlyAdded", async (req, res) => {
 
     // Sort recentlyAdded by DateCreated in descending order
     recentlyAdded.sort(
-      (a, b) => moment(b.DateCreated, "YYYY-MM-DD HH:mm:ss.SSSZ") - moment(a.DateCreated, "YYYY-MM-DD HH:mm:ss.SSSZ")
+      (a, b) => dayjs(b.DateCreated, "YYYY-MM-DD HH:mm:ss.SSSZ") - dayjs(a.DateCreated, "YYYY-MM-DD HH:mm:ss.SSSZ")
     );
 
     res.send(recentlyAdded);

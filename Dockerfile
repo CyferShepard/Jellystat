@@ -1,5 +1,5 @@
 # Stage 1: Build the application
-FROM node:slim AS builder
+FROM node:lts-slim AS builder
 
 WORKDIR /app
 
@@ -14,7 +14,7 @@ COPY entry.sh ./
 RUN npm run build
 
 # Stage 2: Create the production image
-FROM node:slim
+FROM node:lts-slim
 
 RUN apt-get update && \
     apt-get install -yqq --no-install-recommends wget && \

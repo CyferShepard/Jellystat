@@ -1,12 +1,12 @@
 const db = require("../db");
-const moment = require("moment");
+const dayjs = require("dayjs");
 const taskstate = require("../logging/taskstate");
 
 const { jf_logging_columns, jf_logging_mapping } = require("../models/jf_logging");
 
 async function insertLog(uuid, triggertype, taskType) {
   try {
-    let startTime = moment();
+    let startTime = dayjs();
     const log = {
       Id: uuid,
       Name: taskType,
@@ -32,8 +32,8 @@ async function updateLog(uuid, data, taskstate) {
     if (task.length === 0) {
       console.log("Unable to find task to update");
     } else {
-      let endtime = moment();
-      let startTime = moment(task[0].TimeRun);
+      let endtime = dayjs();
+      let startTime = dayjs(task[0].TimeRun);
       let duration = endtime.diff(startTime, "seconds");
       const log = {
         Id: uuid,
