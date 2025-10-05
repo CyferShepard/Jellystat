@@ -11,10 +11,13 @@ const configClass = require("../classes/config");
 const { checkForUpdates } = require("../version-control");
 const API = require("../classes/api-loader");
 const { sendUpdate } = require("../ws");
-const moment = require("moment");
 const { tables } = require("../global/backup_tables");
 const TaskScheduler = require("../classes/task-scheduler-singleton");
 const TaskManager = require("../classes/task-manager-singleton.js");
+
+const dayjs = require("dayjs");
+const customParseFormat = require("dayjs/plugin/customParseFormat");
+dayjs.extend(customParseFormat);
 
 const router = express.Router();
 
@@ -329,11 +332,11 @@ router.get("/getRecentlyAdded", async (req, res) => {
 
       let lastSynctedItemDate;
       if (items.length > 0 && items[0].DateCreated !== undefined && items[0].DateCreated !== null) {
-        lastSynctedItemDate = moment(items[0].DateCreated, "YYYY-MM-DD HH:mm:ss.SSSZ");
+        lastSynctedItemDate = dayjs(items[0].DateCreated, "YYYY-MM-DD HH:mm:ss.SSSZ");
       }
 
       if (episodes.length > 0 && episodes[0].DateCreated !== undefined && episodes[0].DateCreated !== null) {
-        const newLastSynctedItemDate = moment(episodes[0].DateCreated, "YYYY-MM-DD HH:mm:ss.SSSZ");
+        const newLastSynctedItemDate = dayjs(episodes[0].DateCreated, "YYYY-MM-DD HH:mm:ss.SSSZ");
 
         if (lastSynctedItemDate === undefined || newLastSynctedItemDate.isAfter(lastSynctedItemDate)) {
           lastSynctedItemDate = newLastSynctedItemDate;
@@ -342,7 +345,7 @@ router.get("/getRecentlyAdded", async (req, res) => {
 
       if (lastSynctedItemDate !== undefined) {
         recentlyAddedFromJellystatMapped = recentlyAddedFromJellystatMapped.filter((item) =>
-          moment(item.DateCreated, "YYYY-MM-DD HH:mm:ss.SSSZ").isAfter(lastSynctedItemDate)
+          dayjs(item.DateCreated, "YYYY-MM-DD HH:mm:ss.SSSZ").isAfter(lastSynctedItemDate)
         );
       }
 
@@ -354,7 +357,7 @@ router.get("/getRecentlyAdded", async (req, res) => {
       const recentlyAdded = [...recentlyAddedFromJellystatMapped, ...filteredDbRows];
       // Sort recentlyAdded by DateCreated in descending order
       recentlyAdded.sort(
-        (a, b) => moment(b.DateCreated, "YYYY-MM-DD HH:mm:ss.SSSZ") - moment(a.DateCreated, "YYYY-MM-DD HH:mm:ss.SSSZ")
+        (a, b) => dayjs(b.DateCreated, "YYYY-MM-DD HH:mm:ss.SSSZ") - dayjs(a.DateCreated, "YYYY-MM-DD HH:mm:ss.SSSZ")
       );
 
       res.send(recentlyAdded);
@@ -383,11 +386,11 @@ router.get("/getRecentlyAdded", async (req, res) => {
     );
     let lastSynctedItemDate;
     if (items.length > 0 && items[0].DateCreated !== undefined && items[0].DateCreated !== null) {
-      lastSynctedItemDate = moment(items[0].DateCreated, "YYYY-MM-DD HH:mm:ss.SSSZ");
+      lastSynctedItemDate = dayjs(items[0].DateCreated, "YYYY-MM-DD HH:mm:ss.SSSZ");
     }
 
     if (episodes.length > 0 && episodes[0].DateCreated !== undefined && episodes[0].DateCreated !== null) {
-      const newLastSynctedItemDate = moment(episodes[0].DateCreated, "YYYY-MM-DD HH:mm:ss.SSSZ");
+      const newLastSynctedItemDate = dayjs(episodes[0].DateCreated, "YYYY-MM-DD HH:mm:ss.SSSZ");
 
       if (lastSynctedItemDate === undefined || newLastSynctedItemDate.isAfter(lastSynctedItemDate)) {
         lastSynctedItemDate = newLastSynctedItemDate;
@@ -396,7 +399,7 @@ router.get("/getRecentlyAdded", async (req, res) => {
 
     if (lastSynctedItemDate !== undefined) {
       recentlyAddedFromJellystatMapped = recentlyAddedFromJellystatMapped.filter((item) =>
-        moment(item.DateCreated, "YYYY-MM-DD HH:mm:ss.SSSZ").isAfter(lastSynctedItemDate)
+        dayjs(item.DateCreated, "YYYY-MM-DD HH:mm:ss.SSSZ").isAfter(lastSynctedItemDate)
       );
     }
 
@@ -414,7 +417,7 @@ router.get("/getRecentlyAdded", async (req, res) => {
 
     // Sort recentlyAdded by DateCreated in descending order
     recentlyAdded.sort(
-      (a, b) => moment(b.DateCreated, "YYYY-MM-DD HH:mm:ss.SSSZ") - moment(a.DateCreated, "YYYY-MM-DD HH:mm:ss.SSSZ")
+      (a, b) => dayjs(b.DateCreated, "YYYY-MM-DD HH:mm:ss.SSSZ") - dayjs(a.DateCreated, "YYYY-MM-DD HH:mm:ss.SSSZ")
     );
 
     res.send(recentlyAdded);
@@ -902,6 +905,83 @@ router.post("/setTaskSettings", async (req, res) => {
     } else {
       res.status(404);
       res.send({ error: "Task Settings Not Found" });
+    }
+  } catch (error) {
+    res.status(503);
+    res.send({ error: "Error: " + error });
+  }
+});
+
+// Get Activity Monitor Polling Settings
+router.get("/getActivityMonitorSettings", async (req, res) => {
+  try {
+    const settingsjson = await db.query('SELECT settings FROM app_config where "ID"=1').then((res) => res.rows);
+    
+    if (settingsjson.length > 0) {
+      const settings = settingsjson[0].settings || {};
+      console.log(settings);
+      const pollingSettings = settings.ActivityMonitorPolling || {
+        activeSessionsInterval: 1000,
+        idleInterval: 5000
+      };
+      res.send(pollingSettings);
+    } else {
+      res.status(404);
+      res.send({ error: "Settings Not Found" });
+    }
+  } catch (error) {
+    res.status(503);
+    res.send({ error: "Error: " + error });
+  }
+});
+
+// Set Activity Monitor Polling Settings  
+router.post("/setActivityMonitorSettings", async (req, res) => {
+  const { activeSessionsInterval, idleInterval } = req.body;
+  
+  if (activeSessionsInterval === undefined || idleInterval === undefined) {
+    res.status(400);
+    res.send("activeSessionsInterval and idleInterval are required");
+    return;
+  }
+  
+  if (!Number.isInteger(activeSessionsInterval) || activeSessionsInterval <= 0) {
+    res.status(400);
+    res.send("A valid activeSessionsInterval(int) which is > 0 milliseconds is required");
+    return;
+  }
+  
+  if (!Number.isInteger(idleInterval) || idleInterval <= 0) {
+    res.status(400);
+    res.send("A valid idleInterval(int) which is > 0 milliseconds is required");
+    return;
+  }
+  
+  if (activeSessionsInterval > idleInterval) {
+    res.status(400);
+    res.send("activeSessionsInterval should be <= idleInterval for optimal performance");
+    return;
+  }
+  
+  try {
+    const settingsjson = await db.query('SELECT settings FROM app_config where "ID"=1').then((res) => res.rows);
+    
+    if (settingsjson.length > 0) {
+      const settings = settingsjson[0].settings || {};
+      
+      settings.ActivityMonitorPolling = {
+        activeSessionsInterval: activeSessionsInterval,
+        idleInterval: idleInterval
+      };
+      
+      let query = 'UPDATE app_config SET settings=$1 where "ID"=1';
+      await db.query(query, [settings]);
+      
+      res.status(200);
+      res.send(settings.ActivityMonitorPolling);
+    } else {
+      res.status(404);  
+      res.send({ error: "Settings Not Found" });
     }
   } catch (error) {
     res.status(503);

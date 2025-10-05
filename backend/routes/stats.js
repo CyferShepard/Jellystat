@@ -2,7 +2,10 @@
 const express = require("express");
 const db = require("../db");
 const dbHelper = require("../classes/db-helper");
-const moment = require("moment");
+
+const dayjs = require("dayjs");
+const customParseFormat = require("dayjs/plugin/customParseFormat");
+dayjs.extend(customParseFormat);
 
 const router = express.Router();
 
@@ -11,8 +14,8 @@ function countOverlapsPerHour(records) {
   const hourCounts = {};
 
   records.forEach((record) => {
-    const start = moment(record.StartTime).subtract(1, "hour");
-    const end = moment(record.EndTime).add(1, "hour");
+    const start = dayjs(record.StartTime).subtract(1, "hour");
+    const end = dayjs(record.EndTime).add(1, "hour");
 
     // Iterate through each hour from start to end
     for (let hour = start.clone().startOf("hour"); hour.isBefore(end); hour.add(1, "hour")) {
@@ -289,12 +292,12 @@ router.post("/getLibraryItemsWithStats", async (req, res) => {
 
 router.post("/getLibraryItemsPlayMethodStats", async (req, res) => {
   try {
-    let { libraryid, startDate, endDate = moment(), hours = 24 } = req.body;
+    let { libraryid, startDate, endDate = dayjs(), hours = 24 } = req.body;
 
-    // Validate startDate and endDate using moment
+    // Validate startDate and endDate using dayjs
     if (
       startDate !== undefined &&
-      (!moment(startDate, moment.ISO_8601, true).isValid() || !moment(endDate, moment.ISO_8601, true).isValid())
+      (!dayjs(startDate, "YYYY-MM-DDTHH:mm:ss.SSSZ", true).isValid() || !dayjs(endDate, "YYYY-MM-DDTHH:mm:ss.SSSZ", true).isValid())
     ) {
       return res.status(400).send({ error: "Invalid date format" });
     }
@@ -308,7 +311,7 @@ router.post("/getLibraryItemsPlayMethodStats", async (req, res) => {
     }
 
     if (startDate === undefined) {
-      startDate = moment(endDate).subtract(hours, "hour").format("YYYY-MM-DD HH:mm:ss");
+      startDate = dayjs(endDate).subtract(hours, "hour").format("YYYY-MM-DD HH:mm:ss");
     }
 
     const { rows } = await db.query(
@@ -336,8 +339,8 @@ router.post("/getLibraryItemsPlayMethodStats", async (req, res) => {
         NowPlayingItemName: item.NowPlayingItemName,
         EpisodeId: item.EpisodeId || null,
         SeasonId: item.SeasonId || null,
-        StartTime: moment(item.ActivityDateInserted).subtract(item.PlaybackDuration, "seconds").format("YYYY-MM-DD HH:mm:ss"),
-        EndTime: moment(item.ActivityDateInserted).format("YYYY-MM-DD HH:mm:ss"),
+        StartTime: dayjs(item.ActivityDateInserted).subtract(item.PlaybackDuration, "seconds").format("YYYY-MM-DD HH:mm:ss"),
+        EndTime: dayjs(item.ActivityDateInserted).format("YYYY-MM-DD HH:mm:ss"),
         PlaybackDuration: item.PlaybackDuration,
         PlayMethod: item.PlayMethod,
         TranscodedVideo: item.TranscodingInfo?.IsVideoDirect || false,
@@ -423,6 +426,7 @@ router.get("/getViewsOverTime", async (req, res) => {
     stats.forEach((item) => {
       const library = item.Library;
       const count = item.Count;
+      const duration = item.Duration;
       const date = new Date(item.Date).toLocaleDateString("en-US", {
         year: "numeric",
         month: "short",
@@ -435,7 +439,7 @@ router.get("/getViewsOverTime", async (req, res) => {
         };
       }
 
-      reorganizedData[date] = { ...reorganizedData[date], [library]: count };
+      reorganizedData[date] = { ...reorganizedData[date], [library]: { count, duration } };
     });
     const finalData = { libraries: libraries, stats: Object.values(reorganizedData) };
     res.send(finalData);
@@ -462,6 +466,7 @@ router.get("/getViewsByDays", async (req, res) => {
     stats.forEach((item) => {
       const library = item.Library;
       const count = item.Count;
+      const duration = item.Duration;
       const day = item.Day;
 
       if (!reorganizedData[day]) {
@@ -470,7 +475,7 @@ router.get("/getViewsByDays", async (req, res) => {
         };
       }
 
-      reorganizedData[day] = { ...reorganizedData[day], [library]: count };
+      reorganizedData[day] = { ...reorganizedData[day], [library]: { count, duration } };
     });
     const finalData = { libraries: libraries, stats: Object.values(reorganizedData) };
     res.send(finalData);
@@ -497,6 +502,7 @@ router.get("/getViewsByHour", async (req, res) => {
     stats.forEach((item) => {
       const library = item.Library;
       const count = item.Count;
+      const duration = item.Duration;
       const hour = item.Hour;
 
       if (!reorganizedData[hour]) {
@@ -505,7 +511,7 @@ router.get("/getViewsByHour", async (req, res) => {
         };
       }
 
-      reorganizedData[hour] = { ...reorganizedData[hour], [library]: count };
+      reorganizedData[hour] = { ...reorganizedData[hour], [library]: { count, duration } };
     });
     const finalData = { libraries: libraries, stats: Object.values(reorganizedData) };
     res.send(finalData);

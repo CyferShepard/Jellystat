@@ -3,7 +3,7 @@ const fs = require("fs");
 const path = require("path");
 const configClass = require("./config");
 
-const moment = require("moment");
+const dayjs = require("dayjs");
 const Logging = require("./logging");
 
 const taskstate = require("../logging/taskstate");
@@ -34,7 +34,7 @@ async function backup(refLog) {
   if (config.error) {
     refLog.logData.push({ color: "red", Message: "Backup Failed: Failed to get config" });
     refLog.logData.push({ color: "red", Message: "Backup Failed with errors" });
-    Logging.updateLog(refLog.uuid, refLog.logData, taskstate.FAILED);
+    await Logging.updateLog(refLog.uuid, refLog.logData, taskstate.FAILED);
     return;
   }
 
@@ -50,7 +50,7 @@ async function backup(refLog) {
   // Get data from each table and append it to the backup file
 
   try {
-    let now = moment();
+    let now = dayjs();
     const backuppath = "./" + backupfolder;
 
     if (!fs.existsSync(backuppath)) {
@@ -61,7 +61,7 @@ async function backup(refLog) {
       console.error("No write permissions for the folder:", backuppath);
       refLog.logData.push({ color: "red", Message: "Backup Failed: No write permissions for the folder: " + backuppath });
       refLog.logData.push({ color: "red", Message: "Backup Failed with errors" });
-      Logging.updateLog(refLog.uuid, refLog.logData, taskstate.FAILED);
+      await Logging.updateLog(refLog.uuid, refLog.logData, taskstate.FAILED);
       await pool.end();
       return;
     }
@@ -73,18 +73,18 @@ async function backup(refLog) {
     if (filteredTables.length === 0) {
       refLog.logData.push({ color: "red", Message: "Backup Failed: No tables to backup" });
       refLog.logData.push({ color: "red", Message: "Backup Failed with errors" });
-      Logging.updateLog(refLog.uuid, refLog.logData, taskstate.FAILED);
+      await Logging.updateLog(refLog.uuid, refLog.logData, taskstate.FAILED);
       await pool.end();
       return;
     }
 
-    // const backupPath = `../backup-data/backup_${now.format('yyyy-MM-DD HH-mm-ss')}.json`;
-    const directoryPath = path.join(__dirname, "..", backupfolder, `backup_${now.format("yyyy-MM-DD HH-mm-ss")}.json`);
+    // const backupPath = `../backup-data/backup_${now.format('YYYY-MM-DD HH-mm-ss')}.json`;
+    const directoryPath = path.join(__dirname, "..", backupfolder, `backup_${now.format("YYYY-MM-DD HH-mm-ss")}.json`);
     refLog.logData.push({ color: "yellow", Message: "Begin Backup " + directoryPath });
     const stream = fs.createWriteStream(directoryPath, { flags: "a" });
-    stream.on("error", (error) => {
+    stream.on("error", async (error) => {
       refLog.logData.push({ color: "red", Message: "Backup Failed: " + error });
-      Logging.updateLog(refLog.uuid, refLog.logData, taskstate.FAILED);
+      await Logging.updateLog(refLog.uuid, refLog.logData, taskstate.FAILED);
       return;
     });
     const backup_data = [];
@@ -152,7 +152,7 @@ async function backup(refLog) {
   } catch (error) {
     console.log(error);
     refLog.logData.push({ color: "red", Message: "Backup Failed: " + error });
-    Logging.updateLog(refLog.uuid, refLog.logData, taskstate.FAILED);
+    await Logging.updateLog(refLog.uuid, refLog.logData, taskstate.FAILED);
   }
 
   await pool.end();
