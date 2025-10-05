@@ -322,7 +322,7 @@ router.post('/:id/trigger-monthly', async (req, res) => {
 });
 
 // Get status of event webhooks
-router.get('/event-status', authMiddleware, async (req, res) => {
+router.get('/event-status', async (req, res) => {
     try {
         const eventTypes = ['playback_started', 'playback_ended', 'media_recently_added'];
         const result = {};
