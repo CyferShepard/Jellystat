@@ -28,6 +28,7 @@ export default defineConfig({
       "/socket.io": "http://127.0.0.1:3000",
       "/swagger": "http://127.0.0.1:3000",
       "/utils": "http://127.0.0.1:3000",
+      "/webhooks": "http://127.0.0.1:3000",
     },
   },
   target: ["es2015"],
