@@ -7,6 +7,7 @@ import SecuritySettings from "./components/settings/security";
 import ApiKeys from "./components/settings/apiKeys";
 import WebhooksSettings from "./components/settings/webhooks";
 import LibrarySelector from "./library_selector";
+import ActivityMonitorSettings from "./components/settings/ActivityMonitorSettings";
 
 import Logs from "./components/settings/logs";
 
@@ -33,6 +34,7 @@ export default function Settings() {
         >
           <SettingsConfig />
           <SecuritySettings />
+          <ActivityMonitorSettings />
           <Tasks />
         </Tab>
 

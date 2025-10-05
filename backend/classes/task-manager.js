@@ -45,7 +45,7 @@ class TaskManager {
       if (code !== 0) {
         console.error(`Worker ${task.name} stopped with exit code ${code}`);
       }
-      if (onExit) {
+      if (code !== 0 && onExit) {
         onExit();
       }
       delete this.tasks[task.name];

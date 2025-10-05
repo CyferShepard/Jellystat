@@ -105,8 +105,8 @@ class JellyfinAPI {
 
   //Functions
 
-  async getUsers() {
-    if (!this.configReady) {
+  async getUsers(refreshConfig = false) {
+    if (!this.configReady || refreshConfig) {
       const success = await this.#fetchConfig();
       if (!success) {
         return [];
@@ -133,9 +133,9 @@ class JellyfinAPI {
     }
   }
 
-  async getAdmins() {
+  async getAdmins(refreshConfig = false) {
     try {
-      const users = await this.getUsers();
+      const users = await this.getUsers(refreshConfig);
       return users?.filter((user) => user.Policy.IsAdministrator) || [];
     } catch (error) {
       this.#errorHandler(error);

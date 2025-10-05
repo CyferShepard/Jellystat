@@ -27,10 +27,10 @@ async function runBackupTask(triggerType = triggertype.Automatic) {
 
     console.log("Running Scheduled Backup");
 
-    Logging.insertLog(uuid, triggerType, taskName.backup);
+    await Logging.insertLog(uuid, triggerType, taskName.backup);
 
     await backup(refLog);
-    Logging.updateLog(uuid, refLog.logData, taskstate.SUCCESS);
+    await Logging.updateLog(uuid, refLog.logData, taskstate.SUCCESS);
     sendUpdate("BackupTask", { type: "Success", message: `${triggerType} Backup Completed` });
     console.log("Scheduled Backup Complete");
     parentPort.postMessage({ status: "complete" });
@@ -42,8 +42,9 @@ async function runBackupTask(triggerType = triggertype.Automatic) {
   }
 }
 
-parentPort.on("message", (message) => {
+parentPort.on("message", async (message) => {
   if (message.command === "start") {
-    runBackupTask(message.triggertype);
+    await runBackupTask(message.triggertype);
+    process.exit(0); // Exit the worker after the task is done
   }
 });

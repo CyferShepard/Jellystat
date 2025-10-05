@@ -185,18 +185,128 @@ router.post('/:id/test', async (req, res) => {
         }
 
         const webhook = result.rows[0];
-        const testData = req.body || {};
+        let testData = req.body || {};
+        let success = false;
 
-        const success = await webhookManager.executeWebhook(webhook, testData);
+        // Discord behaviour
+        if (webhook.url.includes('discord.com/api/webhooks')) {
+            console.log('Discord webhook détecté, préparation du payload spécifique');
+
+            // Discord specific format
+            testData = {
+                content: "Test de webhook depuis Jellystat",
+                embeds: [{
+                    title: "Discord test notification",
+                    description: "This is a test notification of jellystat discord webhook",
+                    color: 3447003,
+                    fields: [
+                        {
+                            name: "Webhook type",
+                            value: webhook.trigger_type || "Not specified",
+                            inline: true
+                        },
+                        {
+                            name: "ID",
+                            value: webhook.id,
+                            inline: true
+                        }
+                    ],
+                    timestamp: new Date().toISOString()
+                }]
+            };
+
+            // Bypass classic method for discord
+            success = await webhookManager.executeDiscordWebhook(webhook, testData);
+        }
+        else if (webhook.trigger_type === 'event' && webhook.event_type) {
+            const eventType = webhook.event_type;
+
+            let eventData = {};
+
+            switch (eventType) {
+                case 'playback_started':
+                    eventData = {
+                        sessionInfo: {
+                            userId: "test-user-id",
+                            deviceId: "test-device-id",
+                            deviceName: "Test Device",
+                            clientName: "Test Client",
+                            isPaused: false,
+                            mediaType: "Movie",
+                            mediaName: "Test Movie",
+                            startTime: new Date().toISOString()
+                        },
+                        userData: {
+                            username: "Test User",
+                            userImageTag: "test-image-tag"
+                        },
+                        mediaInfo: {
+                            itemId: "test-item-id",
+                            episodeId: null,
+                            mediaName: "Test Movie",
+                            seasonName: null,
+                            seriesName: null
+                        }
+                    };
+                    success = await webhookManager.triggerEventWebhooks(eventType, eventData, [webhook.id]);
+                    break;
+
+                case 'playback_ended':
+                    eventData = {
+                        sessionInfo: {
+                            userId: "test-user-id",
+                            deviceId: "test-device-id",
+                            deviceName: "Test Device",
+                            clientName: "Test Client",
+                            mediaType: "Movie",
+                            mediaName: "Test Movie",
+                            startTime: new Date(Date.now() - 3600000).toISOString(),
+                            endTime: new Date().toISOString(),
+                            playbackDuration: 3600
+                        },
+                        userData: {
+                            username: "Test User",
+                            userImageTag: "test-image-tag"
+                        },
+                        mediaInfo: {
+                            itemId: "test-item-id",
+                            episodeId: null,
+                            mediaName: "Test Movie",
+                            seasonName: null,
+                            seriesName: null
+                        }
+                    };
+                    success = await webhookManager.triggerEventWebhooks(eventType, eventData, [webhook.id]);
+                    break;
+
+                case 'media_recently_added':
+                    eventData = {
+                        mediaItem: {
+                            id: "test-item-id",
+                            name: "Test Media",
+                            type: "Movie",
+                            overview: "This is a test movie for webhook testing",
+                            addedDate: new Date().toISOString()
+                        }
+                    };
+                    success = await webhookManager.triggerEventWebhooks(eventType, eventData, [webhook.id]);
+                    break;
+
+                default:
+                    success = await webhookManager.executeWebhook(webhook, testData);
+            }
+        } else {
+            success = await webhookManager.executeWebhook(webhook, testData);
+        }
 
         if (success) {
             res.json({ message: 'Webhook executed successfully' });
         } else {
-            res.status(500).json({ error: 'Webhook execution failed' });
+            res.status(500).json({ error: 'Error while executing webhook' });
         }
     } catch (error) {
         console.error('Error testing webhook:', error);
-        res.status(500).json({ error: 'Failed to test webhook' });
+        res.status(500).json({ error: 'Failed to test webhook: ' + error.message });
     }
 });
 
@@ -205,9 +315,109 @@ router.post('/:id/trigger-monthly', async (req, res) => {
     const success = await webhookManager.triggerMonthlySummaryWebhook(req.params.id);
 
     if (success) {
-        res.status(200).json({ message: "Rapport mensuel envoyé avec succès" });
+        res.status(200).json({ message: "Monthly report sent successfully" });
     } else {
-        res.status(500).json({ message: "Échec de l'envoi du rapport mensuel" });
+        res.status(500).json({ message: "Failed to send monthly report" });
+    }
+});
+
+// Get status of event webhooks
+router.get('/event-status', authMiddleware, async (req, res) => {
+    try {
+        const eventTypes = ['playback_started', 'playback_ended', 'media_recently_added'];
+        const result = {};
+        
+        for (const eventType of eventTypes) {
+            const webhooks = await dbInstance.query(
+                'SELECT id, name, enabled FROM webhooks WHERE trigger_type = $1 AND event_type = $2',
+                ['event', eventType]
+            );
+            
+            result[eventType] = {
+                exists: webhooks.rows.length > 0,
+                enabled: webhooks.rows.some(webhook => webhook.enabled),
+                webhooks: webhooks.rows
+            };
+        }
+        
+        res.json(result);
+    } catch (error) {
+        console.error('Error fetching webhook status:', error);
+        res.status(500).json({ error: 'Failed to fetch webhook status' });
+    }
+});
+
+// Toggle all webhooks of a specific event type
+router.post('/toggle-event/:eventType', async (req, res) => {
+    try {
+        const { eventType } = req.params;
+        const { enabled } = req.body;
+        
+        if (!['playback_started', 'playback_ended', 'media_recently_added'].includes(eventType)) {
+            return res.status(400).json({ error: 'Invalid event type' });
+        }
+        
+        if (typeof enabled !== 'boolean') {
+            return res.status(400).json({ error: 'Enabled parameter must be a boolean' });
+        }
+        
+        // Mettre à jour tous les webhooks de ce type d'événement
+        const result = await dbInstance.query(
+            'UPDATE webhooks SET enabled = $1 WHERE trigger_type = $2 AND event_type = $3 RETURNING id',
+            [enabled, 'event', eventType]
+        );
+        
+        // Si aucun webhook n'existe pour ce type, en créer un de base
+        if (result.rows.length === 0 && enabled) {
+            const defaultWebhook = {
+                name: `Webhook pour ${eventType}`,
+                url: req.body.url || '',
+                method: 'POST',
+                trigger_type: 'event',
+                event_type: eventType,
+                enabled: true,
+                headers: '{}',
+                payload: JSON.stringify({
+                    event: `{{event}}`,
+                    data: `{{data}}`,
+                    timestamp: `{{triggeredAt}}`
+                })
+            };
+            
+            if (!defaultWebhook.url) {
+                return res.status(400).json({ 
+                    error: 'URL parameter is required when creating a new webhook',
+                    needsUrl: true
+                });
+            }
+            
+            await dbInstance.query(
+                `INSERT INTO webhooks (name, url, method, trigger_type, event_type, enabled, headers, payload)
+                 VALUES ($1, $2, $3, $4, $5, $6, $7, $8)`,
+                [
+                    defaultWebhook.name,
+                    defaultWebhook.url,
+                    defaultWebhook.method,
+                    defaultWebhook.trigger_type,
+                    defaultWebhook.event_type,
+                    defaultWebhook.enabled,
+                    defaultWebhook.headers,
+                    defaultWebhook.payload
+                ]
+            );
+        }
+        
+        // Rafraîchir le planificateur de webhooks
+        await webhookScheduler.refreshSchedule();
+        
+        res.json({ 
+            success: true, 
+            message: `Webhooks for ${eventType} ${enabled ? 'enabled' : 'disabled'}`,
+            affectedCount: result.rows.length
+        });
+    } catch (error) {
+        console.error('Error toggling webhooks:', error);
+        res.status(500).json({ error: 'Failed to toggle webhooks' });
     }
 });
 

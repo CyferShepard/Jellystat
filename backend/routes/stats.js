@@ -2,7 +2,10 @@
 const express = require("express");
 const db = require("../db");
 const dbHelper = require("../classes/db-helper");
-const moment = require("moment");
+
+const dayjs = require("dayjs");
+const customParseFormat = require("dayjs/plugin/customParseFormat");
+dayjs.extend(customParseFormat);
 
 const router = express.Router();
 
@@ -11,8 +14,8 @@ function countOverlapsPerHour(records) {
   const hourCounts = {};
 
   records.forEach((record) => {
-    const start = moment(record.StartTime).subtract(1, "hour");
-    const end = moment(record.EndTime).add(1, "hour");
+    const start = dayjs(record.StartTime).subtract(1, "hour");
+    const end = dayjs(record.EndTime).add(1, "hour");
 
     // Iterate through each hour from start to end
     for (let hour = start.clone().startOf("hour"); hour.isBefore(end); hour.add(1, "hour")) {
@@ -289,12 +292,12 @@ router.post("/getLibraryItemsWithStats", async (req, res) => {
 
 router.post("/getLibraryItemsPlayMethodStats", async (req, res) => {
   try {
-    let { libraryid, startDate, endDate = moment(), hours = 24 } = req.body;
+    let { libraryid, startDate, endDate = dayjs(), hours = 24 } = req.body;
 
-    // Validate startDate and endDate using moment
+    // Validate startDate and endDate using dayjs
     if (
       startDate !== undefined &&
-      (!moment(startDate, moment.ISO_8601, true).isValid() || !moment(endDate, moment.ISO_8601, true).isValid())
+      (!dayjs(startDate, "YYYY-MM-DDTHH:mm:ss.SSSZ", true).isValid() || !dayjs(endDate, "YYYY-MM-DDTHH:mm:ss.SSSZ", true).isValid())
     ) {
       return res.status(400).send({ error: "Invalid date format" });
     }
@@ -308,7 +311,7 @@ router.post("/getLibraryItemsPlayMethodStats", async (req, res) => {
     }
 
     if (startDate === undefined) {
-      startDate = moment(endDate).subtract(hours, "hour").format("YYYY-MM-DD HH:mm:ss");
+      startDate = dayjs(endDate).subtract(hours, "hour").format("YYYY-MM-DD HH:mm:ss");
     }
 
     const { rows } = await db.query(
@@ -336,8 +339,8 @@ router.post("/getLibraryItemsPlayMethodStats", async (req, res) => {
         NowPlayingItemName: item.NowPlayingItemName,
         EpisodeId: item.EpisodeId || null,
         SeasonId: item.SeasonId || null,
-        StartTime: moment(item.ActivityDateInserted).subtract(item.PlaybackDuration, "seconds").format("YYYY-MM-DD HH:mm:ss"),
-        EndTime: moment(item.ActivityDateInserted).format("YYYY-MM-DD HH:mm:ss"),
+        StartTime: dayjs(item.ActivityDateInserted).subtract(item.PlaybackDuration, "seconds").format("YYYY-MM-DD HH:mm:ss"),
+        EndTime: dayjs(item.ActivityDateInserted).format("YYYY-MM-DD HH:mm:ss"),
         PlaybackDuration: item.PlaybackDuration,
         PlayMethod: item.PlayMethod,
         TranscodedVideo: item.TranscodingInfo?.IsVideoDirect || false,
@@ -407,9 +410,9 @@ router.post("/getLibraryLastPlayed", async (req, res) => {
   }
 });
 
-router.post("/getViewsOverTime", async (req, res) => {
+router.get("/getViewsOverTime", async (req, res) => {
   try {
-    const { days } = req.body;
+    const { days } = req.query;
     let _days = days;
     if (days === undefined) {
       _days = 30;
@@ -423,6 +426,7 @@ router.post("/getViewsOverTime", async (req, res) => {
     stats.forEach((item) => {
       const library = item.Library;
       const count = item.Count;
+      const duration = item.Duration;
       const date = new Date(item.Date).toLocaleDateString("en-US", {
         year: "numeric",
         month: "short",
@@ -435,7 +439,7 @@ router.post("/getViewsOverTime", async (req, res) => {
         };
       }
 
-      reorganizedData[date] = { ...reorganizedData[date], [library]: count };
+      reorganizedData[date] = { ...reorganizedData[date], [library]: { count, duration } };
     });
     const finalData = { libraries: libraries, stats: Object.values(reorganizedData) };
     res.send(finalData);
@@ -446,9 +450,9 @@ router.post("/getViewsOverTime", async (req, res) => {
   }
 });
 
-router.post("/getViewsByDays", async (req, res) => {
+router.get("/getViewsByDays", async (req, res) => {
   try {
-    const { days } = req.body;
+    const { days } = req.query;
     let _days = days;
     if (days === undefined) {
       _days = 30;
@@ -462,6 +466,7 @@ router.post("/getViewsByDays", async (req, res) => {
     stats.forEach((item) => {
       const library = item.Library;
       const count = item.Count;
+      const duration = item.Duration;
       const day = item.Day;
 
       if (!reorganizedData[day]) {
@@ -470,7 +475,7 @@ router.post("/getViewsByDays", async (req, res) => {
         };
       }
 
-      reorganizedData[day] = { ...reorganizedData[day], [library]: count };
+      reorganizedData[day] = { ...reorganizedData[day], [library]: { count, duration } };
     });
     const finalData = { libraries: libraries, stats: Object.values(reorganizedData) };
     res.send(finalData);
@@ -481,9 +486,9 @@ router.post("/getViewsByDays", async (req, res) => {
   }
 });
 
-router.post("/getViewsByHour", async (req, res) => {
+router.get("/getViewsByHour", async (req, res) => {
   try {
-    const { days } = req.body;
+    const { days } = req.query;
     let _days = days;
     if (days === undefined) {
       _days = 30;
@@ -497,6 +502,7 @@ router.post("/getViewsByHour", async (req, res) => {
     stats.forEach((item) => {
       const library = item.Library;
       const count = item.Count;
+      const duration = item.Duration;
       const hour = item.Hour;
 
       if (!reorganizedData[hour]) {
@@ -505,10 +511,45 @@ router.post("/getViewsByHour", async (req, res) => {
         };
       }
 
-      reorganizedData[hour] = { ...reorganizedData[hour], [library]: count };
+      reorganizedData[hour] = { ...reorganizedData[hour], [library]: { count, duration } };
     });
     const finalData = { libraries: libraries, stats: Object.values(reorganizedData) };
     res.send(finalData);
+  } catch (error) {
+    console.log(error);
+    res.status(503);
+    res.send(error);
+  }
+});
+
+router.get("/getViewsByLibraryType", async (req, res) => {
+  try {
+    const { days = 30 } = req.query;
+
+    const { rows } = await db.query(`
+      SELECT COALESCE(i."Type", 'Other') AS type, COUNT(a."NowPlayingItemId") AS count
+      FROM jf_playback_activity a LEFT JOIN jf_library_items i ON i."Id" = a."NowPlayingItemId"
+      WHERE a."ActivityDateInserted" BETWEEN NOW() - CAST($1 || ' days' as INTERVAL) AND NOW()
+      GROUP BY i."Type"
+    `, [days]);
+
+    const supportedTypes = new Set(["Audio", "Movie", "Series", "Other"]);
+    /** @type {Map<string, number>} */
+    const reorganizedData = new Map();
+
+    rows.forEach((item) => {
+      const { type, count } = item;
+
+      if (!supportedTypes.has(type)) return;
+      reorganizedData.set(type, count);
+    });
+
+    supportedTypes.forEach((type) => {
+      if (reorganizedData.has(type)) return;
+      reorganizedData.set(type, 0);
+    });
+
+    res.send(Object.fromEntries(reorganizedData));
   } catch (error) {
     console.log(error);
     res.status(503);
