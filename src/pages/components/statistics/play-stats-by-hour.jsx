@@ -64,12 +64,19 @@ function PlayStatsByHour(props) {
     );
   }
 
+  // Correct the order of the stats to local timezone
+  const date = new Date();
+  const timezoneOffsetHours = date.getTimezoneOffset() / 60; // Returns offset in minutes, convert to hours
+  const timeCorrectedStat = stats.slice(timezoneOffsetHours).concat(stats.slice(0, timezoneOffsetHours));
+  for (let i = 0; i < timeCorrectedStat.length; i++) {
+    timeCorrectedStat[i].Key = i;
+  }
 
   return (
     <div className="statistics-widget">
       <h2 className="text-start my-2"><Trans i18nKey={titleKey}/> <Trans i18nKey={"UNITS.HOUR"}/> - <Trans i18nKey={"LAST"}/> {days} <Trans i18nKey={`UNITS.DAY${days>1 ? 'S':''}`}/></h2>
       <div className="graph small">
-      <Chart libraries={libraries} stats={stats} viewName={viewName}/>
+      <Chart libraries={libraries} stats={timeCorrectedStat} viewName={viewName}/>
       </div>
     </div>
   );
