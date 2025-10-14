@@ -4,8 +4,6 @@ const db = require("../db");
 const dbHelper = require("../classes/db-helper");
 
 const dayjs = require("dayjs");
-const customParseFormat = require("dayjs/plugin/customParseFormat");
-dayjs.extend(customParseFormat);
 
 const router = express.Router();
 
