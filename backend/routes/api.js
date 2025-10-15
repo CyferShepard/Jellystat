@@ -16,8 +16,6 @@ const TaskScheduler = require("../classes/task-scheduler-singleton");
 const TaskManager = require("../classes/task-manager-singleton.js");
 
 const dayjs = require("dayjs");
-const customParseFormat = require("dayjs/plugin/customParseFormat");
-dayjs.extend(customParseFormat);
 
 const router = express.Router();
 
