@@ -164,7 +164,7 @@ function Sessions() {
     }
 
     let transcodeBitRate = "";
-    if (row.TranscodingInfo) {
+    if (row.TranscodingInfo && row.TranscodingInfo.AudioBitrate) {
       transcodeBitRate = " -> " + convertBitrate(row.TranscodingInfo.AudioBitrate);
     }
 
