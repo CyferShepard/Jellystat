@@ -139,7 +139,7 @@ function Sessions() {
     let transcodeCodec = "";
     if (row.TranscodingInfo && !row.TranscodingInfo.IsAudioDirect) {
       transcodeType = i18next.t("SESSIONS.TRANSCODE");
-      transcodeCodec = ` -> ${row.TranscodingInfo.AudioCodec.toUpperCase()}-${row.TranscodingInfo.AudioChannels}Ch}`;
+      transcodeCodec = ` -> ${row.TranscodingInfo.AudioCodec.toUpperCase()}-${row.TranscodingInfo.AudioChannels}Ch`;
     }
 
     let originalCodec = "";
