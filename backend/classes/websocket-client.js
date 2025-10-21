@@ -7,7 +7,9 @@ class WebSocketClient {
   }
 
   connect() {
-    this.socket = new WebSocket(this.url);
+    this.socket = new WebSocket(this.url, {
+      rejectUnauthorized: (process.env.REJECT_SELF_SIGNED_CERTIFICATES || "true").toLowerCase() === "true",
+    });
 
     this.socket.on("open", () => {
       //   console.log("Connected to WebSocket server");
