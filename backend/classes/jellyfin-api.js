@@ -1,5 +1,8 @@
+const { compareVersions } = require("compare-versions");
+
 const configClass = require("./config");
 const { axios } = require("./axios");
+const { getSessionData } = require("./sessions-socket-client");
 
 class JellyfinAPI {
   constructor() {
@@ -7,6 +10,7 @@ class JellyfinAPI {
     this.configReady = false;
     this.#checkReadyStatus();
     this.sessionErrorCounter = 0;
+    this.version = "1.0.0";
   }
   //Helper classes
   #checkReadyStatus() {
@@ -20,9 +24,12 @@ class JellyfinAPI {
 
   async #fetchConfig() {
     const _config = await new configClass().getConfig();
+
     if (!_config.error && _config.state === 2) {
       this.config = _config;
       this.configReady = true;
+      const _latest_version = await this.systemInfo();
+      this.version = _latest_version?.Version || "1.0.0";
       return true;
     }
     return false;
@@ -429,6 +436,17 @@ class JellyfinAPI {
       return [];
     }
     try {
+      if (compareVersions(this.version, "10.11.0") >= 0) {
+        const socketUrl =
+          this.config.JF_HOST.replace(/^http/, "ws").replace(/^https/, "wss") + "/sockett?api_key=" + this.config.JF_API_KEY;
+        const sessionData = await getSessionData(socketUrl);
+        if (sessionData != null) {
+          return sessionData;
+        } else {
+          console.log("[JELLYFIN-API]: getSessions - Falling back to REST API");
+        }
+      }
+
       let url = `${this.config.JF_HOST}/sessions`;
 
       const response = await axios
@@ -569,7 +587,7 @@ class JellyfinAPI {
 
   async systemInfo() {
     if (!this.configReady) {
-      return [];
+      return {};
     }
     let url = `${this.config.JF_HOST}/system/info`;
     try {
@@ -578,7 +596,6 @@ class JellyfinAPI {
           "X-MediaBrowser-Token": this.config.JF_API_KEY,
         },
       });
-
       return response?.data || {};
     } catch (error) {
       this.#errorHandler(error, url);

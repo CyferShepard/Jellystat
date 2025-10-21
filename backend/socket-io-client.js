@@ -20,6 +20,10 @@ class SocketIoClient {
     });
   }
 
+  getClient() {
+    return this.client;
+  }
+
   sendMessage(message) {
     if (this.client && this.client.connected) {
       this.client.emit("message", JSON.stringify(message));
