@@ -12,7 +12,7 @@
 
 .session-details-title {
   color: lightgray !important;
-  min-width: 80px;
+  min-width: 70px;
   padding: 0px !important;
 }
 
@@ -88,7 +88,7 @@
   border-radius: 50%;
   max-width: 30px;
   max-height: 30px;
-  margin-right: 5px;
+  margin-left: 5px;
 }
 
 .card-user-image-default {

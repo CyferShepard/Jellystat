@@ -64,7 +64,6 @@ function PlayStatsByHour(props) {
     );
   }
 
-
   return (
     <div className="statistics-widget">
       <h2 className="text-start my-2"><Trans i18nKey={titleKey}/> <Trans i18nKey={"UNITS.HOUR"}/> - <Trans i18nKey={"LAST"}/> {days} <Trans i18nKey={`UNITS.DAY${days>1 ? 'S':''}`}/></h2>
