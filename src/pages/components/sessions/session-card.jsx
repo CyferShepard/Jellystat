@@ -39,9 +39,10 @@ function getETAFromTicks(ticks) {
   // Calculate ETA
   const etaMillis = currentDate + ticks / 10000;
   const eta = new Date(etaMillis);
+  const twelve_hr = JSON.parse(localStorage.getItem("12hr"));
 
   // Return formated string in user locale
-  return eta.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+  return eta.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit", hour12: twelve_hr });
 }
 
 function SessionCard(props) {
