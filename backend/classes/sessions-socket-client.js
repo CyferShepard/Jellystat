@@ -3,11 +3,30 @@ const WebSocketClient = require("./websocket-client.js");
 let wsClient;
 
 let sessionData = [];
+let errorCount = 0;
+const maxErrorCount = 3;
+const reconnectInterval = 60000;
+let reconnectNextAttempt = null;
+let keepAliveInterval;
 
 function initializeClient(websocketUrl) {
   wsClient = new WebSocketClient(websocketUrl);
   wsClient.onOpen = () => {
-    console.log("[JELLYFIN-WEBSOCKET]: Connected to the server.");
+    console.log(`[JELLYFIN-WEBSOCKET]: Connected to the server.`);
+    errorCount = 0;
+    reconnectNextAttempt = null;
+
+    // Start sending ForceKeepAlive every 30 seconds
+    if (keepAliveInterval) {
+      clearInterval(keepAliveInterval); // Clear any existing interval to avoid duplicates
+    }
+    keepAliveInterval = setInterval(() => {
+      if (wsClient.getConnectionStatus() === "OPEN") {
+        wsClient.send(JSON.stringify({ MessageType: "KeepAlive" }));
+      } else {
+        clearInterval(keepAliveInterval); // Stop sending pings if connection is not open
+      }
+    }, 30000); // 30 seconds interval
   };
 
   wsClient.onMessage = (data) => {
@@ -34,33 +53,55 @@ function initializeClient(websocketUrl) {
   };
 
   wsClient.onClose = () => {
-    console.log("[JELLYFIN-WEBSOCKET]: Disconnected from the server.");
+    console.log(`[JELLYFIN-WEBSOCKET]: Disconnected from the server.`);
     sessionData = [];
   };
 
   wsClient.onError = (error) => {
     console.error("[JELLYFIN-WEBSOCKET]: Error:", error);
+    errorCount++;
     sessionData = [];
   };
 }
 
-function connect(websocketUrl) {
+async function connect(websocketUrl) {
   if (wsClient == null) {
     initializeClient(websocketUrl);
   }
-  wsClient.connect();
+  if (errorCount >= maxErrorCount) {
+    const now = Date.now();
+
+    if (reconnectNextAttempt == null) {
+      reconnectNextAttempt = now + reconnectInterval;
+      sessionData = null;
+      console.log("[JELLYFIN-WEBSOCKET]: Too many errors. Attempting to reconnect after 60 seconds.");
+      console.log("[JELLYFIN-API]: getSessions - Falling back to REST API");
+      return;
+    }
+
+    if (now >= reconnectNextAttempt) {
+      reconnectNextAttempt = now + reconnectInterval; // Reset the next attempt time
+      await wsClient.connect();
+    } else {
+      return;
+    }
+  }
+  await wsClient.connect();
 }
 
 async function getSessionData(websocketUrl) {
   if (wsClient == null || wsClient.getConnectionStatus() != "OPEN") {
-    console.log("[JELLYFIN-WEBSOCKET]: WebSocket not connected. Connecting...");
+    if (errorCount < maxErrorCount) {
+      console.log(`[JELLYFIN-WEBSOCKET]: WebSocket not connected. Connecting... (Attempt ${errorCount + 1} of ${maxErrorCount})`);
+    }
+
     await connect(websocketUrl);
-    if (wsClient.getConnectionStatus() != "OPEN") {
-      console.log("[JELLYFIN-WEBSOCKET]: WebSocket connection failed.");
-      sessionData = [];
-      return null;
-    } else {
-      console.log("[JELLYFIN-WEBSOCKET]: WebSocket connected.");
+    if (errorCount < maxErrorCount) {
+      if (wsClient.getConnectionStatus() != "OPEN") {
+        console.log("[JELLYFIN-WEBSOCKET]: WebSocket connection failed.");
+        sessionData = [];
+        return null;
+      }
     }
   }
   return sessionData;

@@ -444,8 +444,6 @@ class JellyfinAPI {
         const sessionData = await getSessionData(socketUrl);
         if (sessionData != null) {
           return sessionData;
-        } else {
-          console.log("[JELLYFIN-API]: getSessions - Falling back to REST API");
         }
       }
 

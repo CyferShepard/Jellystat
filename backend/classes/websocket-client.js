@@ -7,28 +7,30 @@ class WebSocketClient {
   }
 
   connect() {
-    this.socket = new WebSocket(this.url, {
-      rejectUnauthorized: (process.env.REJECT_SELF_SIGNED_CERTIFICATES || "true").toLowerCase() === "true",
-    });
+    return new Promise((resolve, reject) => {
+      this.socket = new WebSocket(this.url, {
+        rejectUnauthorized: (process.env.REJECT_SELF_SIGNED_CERTIFICATES || "true").toLowerCase() === "true",
+      });
 
-    this.socket.on("open", () => {
-      //   console.log("Connected to WebSocket server");
-      this.onOpen();
-    });
+      this.socket.on("open", () => {
+        // console.log("Connected to WebSocket server");
+        this.onOpen();
+        resolve(); // Resolve the promise when the connection is established
+      });
 
-    this.socket.on("message", (data) => {
-      //   console.log(`Received message: ${data}`);
-      this.onMessage(data);
-    });
+      this.socket.on("error", (error) => {
+        // console.error("WebSocket error:", error);
+        this.onError(error);
+        reject(error); // Reject the promise if an error occurs
+      });
 
-    this.socket.on("close", () => {
-      //   console.log("Disconnected from WebSocket server");
-      this.onClose();
-    });
+      this.socket.on("message", (data) => {
+        this.onMessage(data);
+      });
 
-    this.socket.on("error", (error) => {
-      console.error("WebSocket error:", error);
-      this.onError(error);
+      this.socket.on("close", () => {
+        this.onClose();
+      });
     });
   }
 
