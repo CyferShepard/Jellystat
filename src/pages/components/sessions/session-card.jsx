@@ -408,7 +408,7 @@ function SessionCard(props) {
               </Row>
             )}
           </Col>
-          <Col className="col-auto p-0">
+          <Col className="col-7 p-0">
             {props.data.session.NowPlayingItem.Type === "Episode" ? (
               <Row className="d-flex flex-row justify-content-start p-0">
                 <Card.Text>
