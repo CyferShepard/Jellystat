@@ -56,14 +56,14 @@ export default function Settings() {
           <ApiKeys />
         </Tab>
 
-        <Tab
+        {/* <Tab
           eventKey="tabWebhooks"
           className="bg-transparent  my-2"
           title={<Trans i18nKey={"SETTINGS_PAGE.WEBHOOKS"} />}
           style={{ minHeight: "500px" }}
         >
             <WebhooksSettings />
-        </Tab>
+        </Tab> */}
 
         <Tab
           eventKey="tabBackup"

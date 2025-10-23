@@ -134,7 +134,8 @@
     "INVALID_URL": "Error {STATUS}: The requested URL was not found.",
     "UNAUTHORIZED": "Error {STATUS}: Unauthorized",
     "PASSWORD_LENGTH": "Password Must be at least 6 characters long",
-    "USERNAME_REQUIRED": "Username is required"
+    "USERNAME_REQUIRED": "Username is required",
+    "NO_WEBHOOKS": "No Webhooks Found"
   },
   "SHOW_ARCHIVED_LIBRARIES": "Show Archived Libraries",
   "HIDE_ARCHIVED_LIBRARIES": "Hide Archived Libraries",
@@ -229,6 +230,10 @@
     "DATE_ADDED": "Date Added",
     "WEBHOOKS": "Webhooks",
     "WEBHOOK_TYPE": "Webhook Type",
+    "WEBHOOK_TYPES": {
+      "DISCORD": "Discord",
+      "GENERIC": "Generic"
+    },
     "TEST_NOW": "Test Now",
     "WEBHOOKS_CONFIGURATION": "Webhook Configuration",
     "WEBHOOKS_TOOLTIP": "Webhook URL to send Playback Activity to",
@@ -239,7 +244,7 @@
     "URL": "URL",
     "TYPE": "Type",
     "TRIGGER": "Trigger",
-    "STATUS":  "Status",
+    "STATUS": "Status",
     "EVENT_WEBHOOKS": "Event notifications",
     "EVENT_WEBHOOKS_TOOLTIP": "Enable or disable event notifications",
     "PLAYBACK_STARTED": "Playback Started",
