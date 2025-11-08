@@ -1,5 +1,5 @@
 # Stage 1: Build the application
-FROM node:lts-slim AS builder
+FROM node:22.21.1-bookworm-slim AS builder
 
 WORKDIR /app
 
@@ -14,7 +14,7 @@ COPY entry.sh ./
 RUN npm run build
 
 # Stage 2: Create the production image
-FROM node:lts-slim
+FROM node:22.21.1-bookworm-slim
 
 RUN apt-get update && \
     apt-get install -yqq --no-install-recommends wget && \
