@@ -95,8 +95,7 @@ function SessionCard(props) {
           src={
             baseUrl +
             "/proxy/web/assets/img/devices/?devicename=" +
-            (props.data.session.Client.toLowerCase() === "jellyfin mobile (ios)" &&
-            props.data.session.DeviceName.toLowerCase() === "iphone"
+            (props.data.session.Client.toLowerCase() === "jellyfin ios"
               ? "apple"
               : props.data.session.Client.toLowerCase().includes("web")
               ? clientData.find((item) => props.data.session.DeviceName.toLowerCase().includes(item)) || "other"
