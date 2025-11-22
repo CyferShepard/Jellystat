@@ -123,9 +123,20 @@ function Sessions() {
 
     let transcodeBitrate = "";
     if (row.TranscodingInfo && !row.TranscodingInfo.IsVideoDirect) {
-      transcodeBitrate = ` -> ${convertBitrate(row.TranscodingInfo.Bitrate)}`;
+      if (row.TranscodingInfo.VideoBitrate) {
+        transcodeBitrate = ` -> ${convertBitrate(row.TranscodingInfo.VideoBitrate)}`;
+      }
+      else if (row.TranscodingInfo.Bitrate){
+        transcodeBitrate = ` -> ${convertBitrate(row.TranscodingInfo.Bitrate)}`;
+      }
     }
-    return `${convertBitrate(videoStream.BitRate)}${transcodeBitrate}`;
+
+    let originalBitrate = "";
+    if (videoStream.BitRate) {
+      originalBitrate = convertBitrate(videoStream.BitRate);
+    }
+
+    return `${originalBitrate}${transcodeBitrate}`;
   }
 
   const getAudioStream = (row) => {
@@ -174,7 +185,8 @@ function Sessions() {
     } else if (
       row.NowPlayingItem.MediaStreams &&
       row.NowPlayingItem.MediaStreams.length &&
-      streamIndex < row.NowPlayingItem.MediaStreams.length
+      streamIndex < row.NowPlayingItem.MediaStreams.length &&
+      row.NowPlayingItem.MediaStreams[streamIndex].BitRate
     ) {
       originalBitrate = convertBitrate(row.NowPlayingItem.MediaStreams[streamIndex].BitRate);
     }
