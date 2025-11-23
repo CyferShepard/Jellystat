@@ -172,7 +172,7 @@
   "SETTINGS_PAGE": {
     "SETTINGS": "Paramètres",
     "LANGUAGE": "Language",
-    "SELECT_AN_ADMIN": "Select a Preferred Admin",
+    "SELECT_AN_ADMIN": "Choisir un utilisateur préféré",
     "LIBRARY_SETTINGS": "Paramètres des médiathèques",
     "BACKUP": "Sauvegarde",
     "BACKUPS": "Sauvegardes",
@@ -201,7 +201,7 @@
     "UPDATE": "Mise à jour",
     "REQUIRE_LOGIN": "Connexion obligatoire",
     "TASK": "Tâche",
-    "TASKS": "Tasks",
+    "TASKS": "Tâches",
     "INTERVAL": "Tâches",
     "INTERVALS": {
       "15_MIN": "15 Minutes",
@@ -309,7 +309,7 @@
   "WIDTH": "Largeur",
   "HEIGHT": "Hauteur",
   "FRAMERATE": "Images par seconde",
-  "DYNAMIC_RANGE": "Dynamic Range",
+  "DYNAMIC_RANGE": "Plage dynamique",
   "ASPECT_RATIO": "Format d'image",
   "AUDIO": "Audio",
   "CHANNELS": "Agencement",
