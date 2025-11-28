@@ -36,7 +36,7 @@ function Row(logs) {
     return null;
   }
 
-  const unknownValue = '-';
+  const UNKNOWN_VALUE = '-';
   const videoStream = data?.MediaStreams.find(stream => stream.Type === 'Video');
   const audioStream = data?.MediaStreams.find(stream => stream.Type === 'Audio');
 
@@ -62,7 +62,7 @@ function Row(logs) {
   }
   const overallTranscodeBitrate = convertBitrate(overallTranscodeBitrateRaw);
 
-  let videoTranscodeBitrate = unknownValue;
+  let videoTranscodeBitrate = UNKNOWN_VALUE;
   if (data.TranscodingInfo && data.TranscodingInfo?.IsVideoDirect === false) {
     videoTranscodeBitrate = convertBitrate(data.TranscodingInfo.VideoBitrate ? data.TranscodingInfo.VideoBitrate : data.TranscodingInfo.Bitrate);
   } else if (videoStream) {
@@ -101,8 +101,8 @@ function Row(logs) {
 
         <TableRow>
           <TableCell className="py-0 pb-1" ><Trans i18nKey={"CODEC"}/></TableCell>
-          <TableCell className="py-0 pb-1" >{data.TranscodingInfo ? data.TranscodingInfo.VideoCodec?.toUpperCase() : videoStream ? videoStream?.Codec?.toUpperCase() : unknownValue}</TableCell>
-          <TableCell className="py-0 pb-1" >{videoStream ? videoStream?.Codec?.toUpperCase() : unknownValue}</TableCell>
+          <TableCell className="py-0 pb-1" >{data.TranscodingInfo ? data.TranscodingInfo.VideoCodec?.toUpperCase() : videoStream ? videoStream.Codec?.toUpperCase() : UNKNOWN_VALUE}</TableCell>
+          <TableCell className="py-0 pb-1" >{videoStream ? videoStream?.Codec?.toUpperCase() : UNKNOWN_VALUE}</TableCell>
         </TableRow>
 
         <TableRow>
@@ -113,32 +113,32 @@ function Row(logs) {
 
         <TableRow>
           <TableCell className="py-0 pb-1" ><Trans i18nKey={"WIDTH"}/></TableCell>
-          <TableCell className="py-0 pb-1" >{data.TranscodingInfo ? data.TranscodingInfo.Width : videoStream ? videoStream?.Width : unknownValue}</TableCell>
-          <TableCell className="py-0 pb-1" >{videoStream ? videoStream?.Width : unknownValue}</TableCell>
+          <TableCell className="py-0 pb-1" >{data.TranscodingInfo ? data.TranscodingInfo.Width : videoStream ? videoStream?.Width : UNKNOWN_VALUE}</TableCell>
+          <TableCell className="py-0 pb-1" >{videoStream ? videoStream?.Width : UNKNOWN_VALUE}</TableCell>
         </TableRow>
 
         <TableRow>
           <TableCell className="py-0 pb-3" ><Trans i18nKey={"HEIGHT"}/></TableCell>
-          <TableCell className="py-0 pb-3" >{data.TranscodingInfo ? data.TranscodingInfo?.Height : videoStream ? videoStream?.Height : unknownValue}</TableCell>
-          <TableCell className="py-0 pb-3" >{videoStream ? videoStream?.Height : unknownValue}</TableCell>
+          <TableCell className="py-0 pb-3" >{data.TranscodingInfo ? data.TranscodingInfo?.Height : videoStream ? videoStream?.Height : UNKNOWN_VALUE}</TableCell>
+          <TableCell className="py-0 pb-3" >{videoStream ? videoStream?.Height : UNKNOWN_VALUE}</TableCell>
         </TableRow>
 
         <TableRow>
           <TableCell className="py-0 pb-1" ><Trans i18nKey={"FRAMERATE"}/></TableCell>
-          <TableCell className="py-0 pb-1" >{videoStream ? parseFloat(videoStream.RealFrameRate.toFixed(2)) : unknownValue}</TableCell>
-          <TableCell className="py-0 pb-1" >{videoStream ? parseFloat(videoStream.RealFrameRate.toFixed(2)) : unknownValue}</TableCell>
+          <TableCell className="py-0 pb-1" >{videoStream ? parseFloat(videoStream.RealFrameRate.toFixed(2)) : UNKNOWN_VALUE}</TableCell>
+          <TableCell className="py-0 pb-1" >{videoStream ? parseFloat(videoStream.RealFrameRate.toFixed(2)) : UNKNOWN_VALUE}</TableCell>
         </TableRow>
 
         <TableRow>
           <TableCell className="py-0 pb-1" ><Trans i18nKey={"DYNAMIC_RANGE"}/></TableCell>
-          <TableCell className="py-0 pb-1" >{videoStream ? videoStream?.VideoRange : unknownValue}</TableCell>
-          <TableCell className="py-0 pb-1" >{videoStream ? videoStream?.VideoRange : unknownValue}</TableCell>
+          <TableCell className="py-0 pb-1" >{videoStream ? videoStream?.VideoRange : UNKNOWN_VALUE}</TableCell>
+          <TableCell className="py-0 pb-1" >{videoStream ? videoStream?.VideoRange : UNKNOWN_VALUE}</TableCell>
         </TableRow>
 
         <TableRow>
           <TableCell className="py-0 pb-1" ><Trans i18nKey={"ASPECT_RATIO"}/></TableCell>
-          <TableCell className="py-0 pb-1" >{videoStream ? videoStream?.AspectRatio : unknownValue}</TableCell>
-          <TableCell className="py-0 pb-1" >{videoStream ? videoStream?.AspectRatio : unknownValue}</TableCell>
+          <TableCell className="py-0 pb-1" >{videoStream ? videoStream?.AspectRatio : UNKNOWN_VALUE}</TableCell>
+          <TableCell className="py-0 pb-1" >{videoStream ? videoStream?.AspectRatio : UNKNOWN_VALUE}</TableCell>
         </TableRow>
 
         <TableRow>
@@ -154,26 +154,26 @@ function Row(logs) {
 
         <TableRow>
           <TableCell className="py-0 pb-1" ><Trans i18nKey={"CODEC"}/></TableCell>
-          <TableCell className="py-0 pb-1" >{data.TranscodingInfo ? data.TranscodingInfo.AudioCodec?.toUpperCase() : audioStream ? audioStream?.Codec?.toUpperCase() : unknownValue}</TableCell>
-          <TableCell className="py-0 pb-1" >{audioStream ? audioStream?.Codec?.toUpperCase() : unknownValue}</TableCell>
+          <TableCell className="py-0 pb-1" >{data.TranscodingInfo ? data.TranscodingInfo.AudioCodec?.toUpperCase() : audioStream ? audioStream?.Codec?.toUpperCase() : UNKNOWN_VALUE}</TableCell>
+          <TableCell className="py-0 pb-1" >{audioStream ? audioStream?.Codec?.toUpperCase() : UNKNOWN_VALUE}</TableCell>
         </TableRow>
 
         <TableRow>
           <TableCell className="py-0 pb-1" ><Trans i18nKey={"BITRATE"}/></TableCell>
-          <TableCell className="py-0 pb-1" >{convertBitrate(data.TranscodingInfo ? data.TranscodingInfo.AudioBitrate ? data.TranscodingInfo.AudioBitrate : unknownValue : audioStream ? audioStream?.BitRate : null)}</TableCell>
+          <TableCell className="py-0 pb-1" >{convertBitrate(data.TranscodingInfo ? data.TranscodingInfo.AudioBitrate ? data.TranscodingInfo.AudioBitrate : UNKNOWN_VALUE : audioStream ? audioStream?.BitRate : null)}</TableCell>
           <TableCell className="py-0 pb-1" >{convertBitrate(audioStream ? audioStream?.BitRate : null)}</TableCell>
         </TableRow>
 
         <TableRow>
           <TableCell  className="py-0 pb-1"><Trans i18nKey={"CHANNELS"}/></TableCell>
-          <TableCell  className="py-0 pb-1">{data.TranscodingInfo && data.TranscodingInfo?.IsAudioDirect === false ? data.TranscodingInfo?.AudioChannels : audioStream ? audioStream?.Channels : unknownValue}</TableCell>
+          <TableCell  className="py-0 pb-1">{data.TranscodingInfo && data.TranscodingInfo?.IsAudioDirect === false ? data.TranscodingInfo?.AudioChannels : audioStream ? audioStream?.Channels : UNKNOWN_VALUE}</TableCell>
           <TableCell  className="py-0 pb-1">{audioStream ? audioStream?.Channels : null}</TableCell>
         </TableRow>
 
         <TableRow>
           <TableCell className="py-0 pb-3" ><Trans i18nKey={"LANGUAGE"}/></TableCell>
-          <TableCell className="py-0 pb-3" >{audioStream ? audioStream?.Language?.toUpperCase() : unknownValue}</TableCell>
-          <TableCell className="py-0 pb-3" >{audioStream ? audioStream?.Language?.toUpperCase() : unknownValue}</TableCell>
+          <TableCell className="py-0 pb-3" >{audioStream ? audioStream?.Language?.toUpperCase() : UNKNOWN_VALUE}</TableCell>
+          <TableCell className="py-0 pb-3" >{audioStream ? audioStream?.Language?.toUpperCase() : UNKNOWN_VALUE}</TableCell>
         </TableRow>
 
         {data.TranscodingInfo && data.TranscodingInfo?.TranscodeReasons && data.TranscodingInfo.TranscodeReasons.length > 0 && (
