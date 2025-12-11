@@ -1,16 +1,19 @@
 const WebSocket = require("ws");
 
 class WebSocketClient {
-  constructor(url) {
+  constructor(url, options) {
     this.url = url;
+	this.options = options || {};
     this.socket = null;
   }
 
   connect() {
     return new Promise((resolve, reject) => {
-      this.socket = new WebSocket(this.url, {
+	  const wsOptions = {
         rejectUnauthorized: (process.env.REJECT_SELF_SIGNED_CERTIFICATES || "true").toLowerCase() === "true",
-      });
+        ...this.options
+      };
+      this.socket = new WebSocket(this.url, wsOptions);
 
       this.socket.on("open", () => {
         // console.log("Connected to WebSocket server");

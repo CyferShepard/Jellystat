@@ -9,8 +9,15 @@ const reconnectInterval = 60000;
 let reconnectNextAttempt = null;
 let keepAliveInterval;
 
-function initializeClient(websocketUrl) {
-  wsClient = new WebSocketClient(websocketUrl);
+function initializeClient(websocketUrl, apiKey) {
+  const options = {
+    headers: {
+      "Authorization": 'MediaBrowser Token="' + apiKey + '"'
+    }
+  };
+  
+  wsClient = new WebSocketClient(websocketUrl, options);
+  
   wsClient.onOpen = () => {
     console.log(`[JELLYFIN-WEBSOCKET]: Connected to the server.`);
     errorCount = 0;
@@ -64,9 +71,9 @@ function initializeClient(websocketUrl) {
   };
 }
 
-async function connect(websocketUrl) {
+async function connect(websocketUrl, apiKey) {
   if (wsClient == null) {
-    initializeClient(websocketUrl);
+    initializeClient(websocketUrl, apiKey);
   }
   if (errorCount >= maxErrorCount) {
     const now = Date.now();
@@ -89,13 +96,13 @@ async function connect(websocketUrl) {
   await wsClient.connect();
 }
 
-async function getSessionData(websocketUrl) {
+async function getSessionData(websocketUrl, apikey) {
   if (wsClient == null || wsClient.getConnectionStatus() != "OPEN") {
     if (errorCount < maxErrorCount) {
       console.log(`[JELLYFIN-WEBSOCKET]: WebSocket not connected. Connecting... (Attempt ${errorCount + 1} of ${maxErrorCount})`);
     }
 
-    await connect(websocketUrl);
+    await connect(websocketUrl, apikey);
     if (errorCount < maxErrorCount) {
       if (wsClient.getConnectionStatus() != "OPEN") {
         console.log("[JELLYFIN-WEBSOCKET]: WebSocket connection failed.");
