@@ -35,6 +35,40 @@ function countOverlapsPerHour(records) {
   return sortedHourCounts;
 }
 
+const sortMap = [
+  { field: "UserName", column: "UserName" },
+  { field: "RemoteEndPoint", column: "RemoteEndPoint" },
+  { field: "NowPlayingItemName", column: "NowPlayingItemName" },
+  { field: "Client", column: "Client" },
+  { field: "DeviceName", column: "DeviceName" },
+  { field: "ActivityDateInserted", column: "ActivityDateInserted" },
+  { field: "PlaybackDuration", column: "PlaybackDuration" },
+  { field: "PlayMethod", column: "PlayMethod" },
+];
+
+const filterFields = [
+  { field: "Id", column: "Id", isColumn: true },
+  { field: "IsPaused", column: "IsPaused", isColumn: true },
+  { field: "UserId", column: "UserId", isColumn: true },
+  { field: "UserName", column: "UserName", isColumn: true },
+  { field: "Client", column: "Client", isColumn: true },
+  { field: "DeviceName", column: "DeviceName", isColumn: true },
+  { field: "DeviceId", column: "DeviceId", isColumn: true },
+  { field: "ApplicationVersion", column: "ApplicationVersion", isColumn: true },
+  { field: "NowPlayingItemId", column: "NowPlayingItemId", isColumn: true },
+  { field: "NowPlayingItemName", column: "NowPlayingItemName", isColumn: true },
+  { field: "SeasonId", column: "SeasonId", isColumn: true },
+  { field: "SeriesName", column: "SeriesName", isColumn: true },
+  { field: "EpisodeId", column: "EpisodeId", isColumn: true },
+  { field: "PlaybackDuration", column: "PlaybackDuration", isColumn: true },
+  { field: "ActivityDateInserted", column: "ActivityDateInserted", isColumn: true },
+  { field: "PlayMethod", column: "PlayMethod", isColumn: true },
+  { field: "OriginalContainer", column: "OriginalContainer", isColumn: true },
+  { field: "RemoteEndPoint", column: "RemoteEndPoint", isColumn: true },
+  { field: "ServerId", column: "ServerId", isColumn: true },
+  { field: "imported", column: "imported", isColumn: true },
+];
+
 //endpoints
 
 router.get("/getLibraryOverview", async (req, res) => {
@@ -149,9 +183,91 @@ router.post("/getMostActiveUsers", async (req, res) => {
 });
 
 router.get("/getPlaybackActivity", async (req, res) => {
+  const { size = 50, page = 1, search, sort = "ActivityDateInserted", desc = true, filters } = req.query;
+  let filtersArray = [];
+  if (filters) {
+    try {
+      filtersArray = JSON.parse(filters);
+    } catch (error) {
+      return res.status(400).json({
+        error: "Invalid filters parameter",
+        example: [
+          { field: "UserName", value: "User" },
+          { field: "Client", in: "Android TV,Web" },
+          { field: "PlaybackDuration", min: 1000, max: 5000 },
+          { field: "PlayMethod", value: "DirectPlay" },
+          { field: "ActivityDateInserted", min: "2025-01-01", max: "2025-12-31" },
+          { field: "IsPaused", value: false },
+        ],
+        allowed_fields: [
+          "Id",
+          "IsPaused",
+          "UserId",
+          "UserName",
+          "Client",
+          "DeviceName",
+          "DeviceId",
+          "ApplicationVersion",
+          "NowPlayingItemId",
+          "NowPlayingItemName",
+          "SeasonId",
+          "SeriesName",
+          "EpisodeId",
+          "PlaybackDuration",
+          "ActivityDateInserted",
+          "PlayMethod",
+          "OriginalContainer",
+          "RemoteEndPoint",
+          "ServerId",
+          "imported",
+        ],
+      });
+    }
+  }
+
+  const sortField = sortMap.find((item) => item.field === sort)?.column || "ActivityDateInserted";
+  const values = [];
   try {
-    const { rows } = await db.query("SELECT * FROM jf_playback_activity");
-    res.send(rows);
+    const query = {
+      select: ["*"],
+      table: "jf_playback_activity",
+      alias: "a",
+      order_by: sortField,
+      sort_order: desc ? "desc" : "asc",
+      pageNumber: page,
+      pageSize: size,
+    };
+
+    if (search && search.length > 0) {
+      query.where = [
+        {
+          field: `LOWER(
+          CASE 
+            WHEN a."SeriesName" is null THEN a."NowPlayingItemName"
+            ELSE a."SeriesName"
+          END 
+          )`,
+          operator: "LIKE",
+          value: `$${values.length + 1}`,
+        },
+      ];
+
+      values.push(`%${search.toLowerCase()}%`);
+    }
+
+    query.values = values;
+    dbHelper.buildFilterList(query, filtersArray, filterFields);
+
+    const result = await dbHelper.query(query);
+    const response = { current_page: page, pages: result.pages, size: size, sort: sort, desc: desc, results: result.results };
+    if (search && search.length > 0) {
+      response.search = search;
+    }
+
+    if (filtersArray.length > 0) {
+      response.filters = filtersArray;
+    }
+    res.send(response);
   } catch (error) {
     res.status(503);
     res.send(error);
@@ -295,7 +411,8 @@ router.post("/getLibraryItemsPlayMethodStats", async (req, res) => {
     // Validate startDate and endDate using dayjs
     if (
       startDate !== undefined &&
-      (!dayjs(startDate, "YYYY-MM-DDTHH:mm:ss.SSSZ", true).isValid() || !dayjs(endDate, "YYYY-MM-DDTHH:mm:ss.SSSZ", true).isValid())
+      (!dayjs(startDate, "YYYY-MM-DDTHH:mm:ss.SSSZ", true).isValid() ||
+        !dayjs(endDate, "YYYY-MM-DDTHH:mm:ss.SSSZ", true).isValid())
     ) {
       return res.status(400).send({ error: "Invalid date format" });
     }
@@ -524,12 +641,15 @@ router.get("/getViewsByLibraryType", async (req, res) => {
   try {
     const { days = 30 } = req.query;
 
-    const { rows } = await db.query(`
+    const { rows } = await db.query(
+      `
       SELECT COALESCE(i."Type", 'Other') AS type, COUNT(a."NowPlayingItemId") AS count
       FROM jf_playback_activity a LEFT JOIN jf_library_items i ON i."Id" = a."NowPlayingItemId"
       WHERE a."ActivityDateInserted" BETWEEN NOW() - CAST($1 || ' days' as INTERVAL) AND NOW()
       GROUP BY i."Type"
-    `, [days]);
+    `,
+      [days]
+    );
 
     const supportedTypes = new Set(["Audio", "Movie", "Series", "Other"]);
     /** @type {Map<string, number>} */

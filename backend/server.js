@@ -167,9 +167,9 @@ app.use("/logs", authenticate, logRouter, () => {
 app.use("/utils", authenticate, utilsRouter, () => {
   /*  #swagger.tags = ['Utils']*/
 }); // mount the API router at /utils, with JWT middleware
-app.use("/webhooks", authenticate, webhooksRouter, () => {
-  /*  #swagger.tags = ['Webhooks']*/
-}); // mount the API router at /webhooks, with JWT middleware
+// app.use("/webhooks", authenticate, webhooksRouter, () => {
+//   /*  #swagger.tags = ['Webhooks']*/
+// }); // mount the API router at /webhooks, with JWT middleware
 
 // Swagger
 app.use("/swagger", swaggerUi.serve, swaggerUi.setup(swaggerDocument));
