@@ -14,7 +14,7 @@ import socket from "../../../socket";
 
 function convertBitrate(bitrate) {
   if (!bitrate) {
-    return "N/A";
+    return i18next.t("ERROR_MESSAGES.N/A");
   }
   const kbps = (bitrate / 1000).toFixed(1);
   const mbps = (bitrate / 1000000).toFixed(1);
@@ -189,8 +189,10 @@ function Sessions() {
       row.NowPlayingItem.MediaStreams[streamIndex].BitRate
     ) {
       originalBitrate = convertBitrate(row.NowPlayingItem.MediaStreams[streamIndex].BitRate);
+    } else if (transcodeBitRate)
+    {
+      originalBitrate = i18next.t("ERROR_MESSAGES.N/A");
     }
-
     return `${originalBitrate}${transcodeBitRate}`;
   };
 

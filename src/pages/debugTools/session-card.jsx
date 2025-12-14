@@ -45,7 +45,7 @@ function getETAFromTicks(ticks) {
 
 function convertBitrate(bitrate) {
   if (!bitrate) {
-    return "N/A";
+    return i18next.t("ERROR_MESSAGES.N/A");
   }
   const kbps = (bitrate / 1000).toFixed(1);
   const mbps = (bitrate / 1000000).toFixed(1);
