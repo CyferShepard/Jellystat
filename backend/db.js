@@ -7,7 +7,8 @@ const _POSTGRES_PASSWORD = process.env.POSTGRES_PASSWORD;
 const _POSTGRES_IP = process.env.POSTGRES_IP;
 const _POSTGRES_PORT = process.env.POSTGRES_PORT;
 const _POSTGRES_DATABASE = process.env.POSTGRES_DB || "jfstat";
-const _POSTGRES_SSL_REJECT_UNAUTHORIZED = process.env.POSTGRES_SSL_REJECT_UNAUTHORIZED === undefined ? true : process.env.POSTGRES_SSL_REJECT_UNAUTHORIZED === "true";
+const _POSTGRES_SSL_REJECT_UNAUTHORIZED =
+  process.env.POSTGRES_SSL_REJECT_UNAUTHORIZED === undefined ? true : process.env.POSTGRES_SSL_REJECT_UNAUTHORIZED === "true";
 
 if ([_POSTGRES_USER, _POSTGRES_PASSWORD, _POSTGRES_IP, _POSTGRES_PORT].includes(undefined)) {
   console.log("Error: Postgres details not defined");
@@ -23,9 +24,7 @@ const pool = new Pool({
   max: 20, // Maximum number of connections in the pool
   idleTimeoutMillis: 30000, // Close idle clients after 30 seconds
   connectionTimeoutMillis: 2000, // Return an error after 2 seconds if connection could not be established
-  ...(process.env.POSTGRES_SSL_ENABLED === "true"
-    ? { ssl: { rejectUnauthorized: _POSTGRES_SSL_REJECT_UNAUTHORIZED } }
-    : {})
+  ...(process.env.POSTGRES_SSL_ENABLED === "true" ? { ssl: { rejectUnauthorized: _POSTGRES_SSL_REJECT_UNAUTHORIZED } } : {}),
 });
 
 pool.on("error", (err, client) => {
@@ -108,7 +107,11 @@ async function updateSingleFieldBulk(table_name, data, field_name, new_value, wh
   return { Result: result, message: "" + message };
 }
 
-const materializedViews = ["js_latest_playback_activity", "js_library_stats_overview"];
+const materializedViews = [
+  "js_latest_playback_activity",
+  "js_library_stats_overview",
+  "js_library_items_with_playcount_playtime",
+];
 
 async function refreshMaterializedView(view_name) {
   const client = await pool.connect();

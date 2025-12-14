@@ -395,10 +395,63 @@ router.get("/getLibraryMetadata", async (req, res) => {
 });
 
 router.post("/getLibraryItemsWithStats", async (req, res) => {
+  const { size = 999999999, page = 1, search, sort = "Date", desc = true } = req.query;
+  const { libraryid } = req.body;
+  if (libraryid === undefined) {
+    res.status(400).send({ error: "Invalid Library Id" });
+  }
+
+  const sortMap = [
+    { field: "Date", column: "DateCreated" },
+    { field: "Views", column: "times_played" },
+    { field: "Size", column: "Size" },
+    { field: "WatchTime", column: "total_play_time" },
+    { field: "Title", column: `REGEXP_REPLACE(a."Name", '^(A |An |The )', '', 'i')` },
+  ];
+
+  const sortField = sortMap.find((item) => item.field === sort)?.column || "DateCreated";
+  const values = [];
   try {
-    const { libraryid } = req.body;
-    const { rows } = await db.query(`SELECT * FROM jf_library_items_with_playcount_playtime where "ParentId"=$1`, [libraryid]);
-    res.send(rows);
+    const query = {
+      select: ["*"],
+      table: "js_library_items_with_playcount_playtime",
+      alias: "a",
+      order_by: sortField,
+      sort_order: desc ? "desc" : "asc",
+      pageNumber: page,
+      pageSize: size,
+      where: [
+        {
+          field: `a."ParentId"`,
+          operator: "=",
+          value: `$${values.length + 1}`,
+        },
+      ],
+    };
+
+    values.push(libraryid);
+
+    if (search && search.length > 0) {
+      query.where.push({
+        field: `LOWER(a."Name")`,
+        operator: "LIKE",
+        value: `$${values.length + 1}`,
+      });
+
+      values.push(`%${search.toLowerCase()}%`);
+    }
+
+    query.values = values;
+
+    // const { rows } = await db.query(`SELECT * FROM jf_library_items_with_playcount_playtime where "ParentId"=$1`, [libraryid]);
+    // res.send(rows);
+    const result = await dbHelper.query(query);
+    const response = { current_page: page, pages: result.pages, size: size, sort: sort, desc: desc, results: result.results };
+    if (search && search.length > 0) {
+      response.search = search;
+    }
+
+    res.send(response);
   } catch (error) {
     console.log(error);
   }

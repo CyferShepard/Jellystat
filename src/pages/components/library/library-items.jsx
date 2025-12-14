@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import axios from "../../../lib/axios_instance";
 import { FormControl, FormSelect, Button } from "react-bootstrap";
 import SortAscIcon from "remixicon-react/SortAscIcon";
@@ -18,10 +18,17 @@ function LibraryItems(props) {
   const [data, setData] = useState();
   const [config, setConfig] = useState();
   const [searchQuery, setSearchQuery] = useState("");
+  const [debouncedSearchQuery, setDebouncedSearchQuery] = useState(searchQuery);
   const [sortOrder, setSortOrder] = useState(localStorage.getItem("PREF_sortOrder") ?? "Title");
+  const [currentPage, setCurrentPage] = useState(1);
   const [sortAsc, setSortAsc] = useState(
     localStorage.getItem("PREF_sortAsc") != undefined ? localStorage.getItem("PREF_sortAsc") == "true" : true
   );
+
+  const [isLoadingMore, setIsLoadingMore] = useState(false);
+  const [hasMore, setHasMore] = useState(true);
+
+  const isLoadingMoreRef = useRef(isLoadingMore);
 
   const archive = {
     all: "all",
@@ -31,6 +38,17 @@ function LibraryItems(props) {
   const [showArchived, setShowArchived] = useState(localStorage.getItem("PREF_archiveFilterValue") ?? archive.all);
 
   useEffect(() => {
+    const handler = setTimeout(() => {
+      setDebouncedSearchQuery(searchQuery);
+    }, 300); // Adjust the delay as needed
+
+    return () => {
+      clearTimeout(handler);
+    };
+  }, [searchQuery]);
+
+  // Fetch config and first page
+  useEffect(() => {
     const fetchConfig = async () => {
       try {
         const newConfig = await Config.getConfig();
@@ -39,36 +57,84 @@ function LibraryItems(props) {
         console.log(error);
       }
     };
+    if (!config) fetchConfig();
+  }, [config]);
 
-    const fetchData = async () => {
-      try {
-        const itemData = await axios.post(
-          `/stats/getLibraryItemsWithStats`,
-          {
-            libraryid: props.LibraryId,
+  useEffect(() => {
+    if (!config) return;
+    setCurrentPage(1);
+    setHasMore(true);
+    // setData(undefined);
+    fetchData(1, true);
+    // eslint-disable-next-line
+  }, [config, props.LibraryId, sortOrder, sortAsc, debouncedSearchQuery]);
+
+  // Fetch data function
+  const fetchData = async (page, reset = false) => {
+    try {
+      const itemData = await axios.post(
+        `/stats/getLibraryItemsWithStats`,
+        {
+          libraryid: props.LibraryId,
+        },
+        {
+          params: {
+            size: 50,
+            page: page,
+            search: debouncedSearchQuery,
+            sort: sortOrder,
+            desc: !sortAsc,
           },
-          {
-            headers: {
-              Authorization: `Bearer ${config.token}`,
-              "Content-Type": "application/json",
-            },
-          }
-        );
+          headers: {
+            Authorization: `Bearer ${config.token}`,
+            "Content-Type": "application/json",
+          },
+        }
+      );
+      if (reset) {
         setData(itemData.data);
-      } catch (error) {
-        console.log(error);
+      } else {
+        setData((prev) => ({
+          ...itemData.data,
+          results: [...(prev?.results || []), ...(itemData.data?.results || [])],
+        }));
       }
+      setHasMore(page < (itemData.data?.pages || 0));
+      setIsLoadingMore(false);
+    } catch (error) {
+      setIsLoadingMore(false);
+      setHasMore(false);
+      console.log(error);
+    }
+  };
+
+  useEffect(() => {
+    isLoadingMoreRef.current = isLoadingMore;
+  }, [isLoadingMore]);
+
+  // Infinite scroll handler
+  useEffect(() => {
+    let timeoutId = null;
+    const handleScroll = () => {
+      // Debounce: only run after scroll settles for 100ms
+      if (timeoutId) clearTimeout(timeoutId);
+      timeoutId = setTimeout(() => {
+        if (window.innerHeight + window.scrollY >= document.body.offsetHeight - 100 && !isLoadingMoreRef.current && hasMore) {
+          setIsLoadingMore(true);
+          const nextPage = currentPage + 1;
+          setCurrentPage(nextPage);
+          fetchData(nextPage);
+        }
+      }, 100);
     };
 
-    if (!config) {
-      fetchConfig();
-    } else {
-      fetchData();
-    }
-
-    const intervalId = setInterval(fetchData, 60000 * 5);
-    return () => clearInterval(intervalId);
-  }, [config, props.LibraryId]);
+    window.addEventListener("scroll", handleScroll);
+    return () => {
+      window.removeEventListener("scroll", handleScroll);
+      if (timeoutId) clearTimeout(timeoutId);
+    };
+    // eslint-disable-next-line
+  }, [hasMore, currentPage, config]);
 
   function sortOrderLogic(_sortOrder) {
     if (_sortOrder !== "Title") {
@@ -94,23 +160,18 @@ function LibraryItems(props) {
     localStorage.setItem("PREF_archiveFilterValue", value);
   }
 
-  let filteredData = data;
-  if (data) {
-    filteredData = data.filter((item) => {
+  let filteredData = data?.results;
+  if (filteredData) {
+    filteredData = filteredData.filter((item) => {
       let match = false;
       if (showArchived == archive.all || item.archived == (showArchived == "true")) {
         match = true;
-      }
-      if (searchQuery) {
-        match =
-          item.Name.toLowerCase().includes(searchQuery.toLowerCase()) &&
-          (showArchived == archive.all || item.archived == (showArchived == "true"));
       }
       return match;
     });
   }
 
-  if (!data || !config) {
+  if (!filteredData || !config) {
     return <Loading />;
   }
 
@@ -177,45 +238,13 @@ function LibraryItems(props) {
       </div>
 
       <div className="media-items-container">
-        {filteredData
-          .sort((a, b) => {
-            const titleA = a.Name.replace(/^(A |An |The )/i, "");
-            const titleB = b.Name.replace(/^(A |An |The )/i, "");
-
-            if (sortOrder === "Title") {
-              if (sortAsc) {
-                return titleA.localeCompare(titleB);
-              }
-              return titleB.localeCompare(titleA);
-            } else if (sortOrder === "Date") {
-              if (sortAsc) {
-                return new Date(a.DateCreated || 0) - new Date(b.DateCreated || 0);
-              }
-              return new Date(b.DateCreated || 0) - new Date(a.DateCreated || 0);
-            } else if (sortOrder === "Views") {
-              if (sortAsc) {
-                return a.times_played - b.times_played;
-              }
-              return b.times_played - a.times_played;
-            } else if (sortOrder === "Size") {
-              if (sortAsc) {
-                return a.Size - b.Size;
-              }
-              return b.Size - a.Size;
-            } else {
-              if (sortAsc) {
-                return a.total_play_time - b.total_play_time;
-              }
-              return b.total_play_time - a.total_play_time;
-            }
-          })
-          .map((item) => (
-            <MoreItemCards
-              data={item}
-              base_url={config.settings?.EXTERNAL_URL ?? config.hostUrl}
-              key={item.Id + item.SeasonNumber + item.EpisodeNumber}
-            />
-          ))}
+        {filteredData.map((item) => (
+          <MoreItemCards
+            data={item}
+            base_url={config.settings?.EXTERNAL_URL ?? config.hostUrl}
+            key={item.Id + item.SeasonNumber + item.EpisodeNumber}
+          />
+        ))}
       </div>
     </div>
   );

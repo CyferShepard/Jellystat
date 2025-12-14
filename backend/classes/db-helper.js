@@ -14,7 +14,8 @@ function wrapField(field) {
     field.includes("AVG") ||
     field.includes("DISTINCT") ||
     field.includes("json_agg") ||
-    field.includes("CASE")
+    field.includes("CASE") ||
+    field.includes("REGEXP_REPLACE")
   ) {
     return field;
   }
