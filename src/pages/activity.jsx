@@ -48,23 +48,65 @@ function Activity() {
     localStorage.setItem("PREF_ACTIVITY_ItemCount", limit);
   }
 
+  function setTypeFilterParam(filter) {
+    const type = config?.IS_JELLYFIN ? filter : filter.replace("Play", "Stream");
+    const params = [...filterParams];
+    const playMethodFilterIndex = params.findIndex((filter) => filter.field === "PlayMethod");
+    if (playMethodFilterIndex !== -1) {
+      params[playMethodFilterIndex].value = type;
+    } else {
+      params.push({ field: "PlayMethod", value: type });
+    }
+    if (filter == "All") {
+      const playMethodFilterIndex = params.findIndex((filter) => filter.field === "PlayMethod");
+      if (playMethodFilterIndex !== -1) {
+        params.splice(playMethodFilterIndex, 1);
+      }
+    }
+    setFilterParams(params);
+  }
+
   function setTypeFilter(filter) {
     setStreamTypeFilter(filter);
     localStorage.setItem("PREF_ACTIVITY_StreamTypeFilter", filter);
+    setTypeFilterParam(filter);
   }
+
+  const updateLibraryFilterParams = (libraries) => {
+    const params = [...filterParams];
+    if (libraries.length != 0) {
+      const libraryFilterIndex = params.findIndex((filter) => filter.field === "ParentId");
+      if (libraryFilterIndex !== -1) {
+        params[libraryFilterIndex].in = libraries.join(",");
+      } else {
+        params.push({ field: "ParentId", in: libraries.join(",") });
+      }
+    } else {
+      const libraryFilterIndex = params.findIndex((filter) => filter.field === "ParentId");
+      if (libraryFilterIndex !== -1) {
+        params[libraryFilterIndex].in = "no_libraries";
+      } else {
+        params.push({ field: "ParentId", in: "no_libraries" });
+      }
+    }
+    setFilterParams(params);
+  };
 
   const handleLibraryFilter = (selectedOptions) => {
     setLibraryFilters(selectedOptions);
     localStorage.setItem("PREF_ACTIVITY_libraryFilters", JSON.stringify(selectedOptions));
+    updateLibraryFilterParams(selectedOptions);
   };
 
   const toggleSelectAll = () => {
     if (libraryFilters.length > 0) {
       setLibraryFilters([]);
       localStorage.setItem("PREF_ACTIVITY_libraryFilters", JSON.stringify([]));
+      updateLibraryFilterParams([]);
     } else {
       setLibraryFilters(libraries.map((library) => library.Id));
       localStorage.setItem("PREF_ACTIVITY_libraryFilters", JSON.stringify(libraries.map((library) => library.Id)));
+      updateLibraryFilterParams(libraries.map((library) => library.Id));
     }
   };
 
@@ -95,6 +137,23 @@ function Activity() {
       const url = `/api/getHistory`;
       if (filterParams) {
         console.log(JSON.stringify(filterParams));
+      }
+      if (libraryFilters.length != 0) {
+        const libraryFilterIndex = filterParams.findIndex((filter) => filter.field === "ParentId");
+        if (libraryFilterIndex !== -1) {
+          filterParams[libraryFilterIndex].in = libraryFilters.join(",");
+        } else {
+          filterParams.push({ field: "ParentId", in: libraryFilters.join(",") });
+        }
+      }
+
+      if (streamTypeFilter != "All") {
+        const streamTypeFilterIndex = filterParams.findIndex((filter) => filter.field === "PlayMethod");
+        if (streamTypeFilterIndex !== -1) {
+          filterParams[streamTypeFilterIndex].value = streamTypeFilter;
+        } else {
+          filterParams.push({ field: "PlayMethod", value: streamTypeFilter });
+        }
       }
 
       axios
@@ -164,7 +223,9 @@ function Activity() {
         JSON.stringify(data?.filters ?? []) !== JSON.stringify(filterParams ?? [])
       ) {
         fetchHistory();
-        fetchLibraries();
+        if (libraries && libraries.length == 0) {
+          fetchLibraries();
+        }
       }
     }
 
@@ -196,23 +257,6 @@ function Activity() {
       </div>
     );
   }
-
-  let filteredData = data.results;
-
-  // if (searchQuery) {
-  //   filteredData = data.results.filter((item) =>
-  //     (!item.SeriesName ? item.NowPlayingItemName : item.SeriesName + " - " + item.NowPlayingItemName)
-  //       .toLowerCase()
-  //       .includes(searchQuery.toLowerCase())
-  //   );
-  // }
-  filteredData = filteredData.filter(
-    (item) =>
-      (libraryFilters.includes(item.ParentId) || item.ParentId == null) &&
-      (streamTypeFilter == "All"
-        ? true
-        : item.PlayMethod === (config?.IS_JELLYFIN ? streamTypeFilter : streamTypeFilter.replace("Play", "Stream")))
-  );
 
   return (
     <div className="Activity">
@@ -262,6 +306,9 @@ function Activity() {
               <option value="DirectPlay">
                 <Trans i18nKey="DIRECT" />
               </option>
+              <option value="DirectStream">
+                <Trans i18nKey="DIRECT_STREAM" />
+              </option>
             </FormSelect>
           </div>
 
@@ -293,7 +340,7 @@ function Activity() {
       </div>
       <div className="Activity">
         <ActivityTable
-          data={filteredData}
+          data={data.results}
           itemCount={itemCount}
           onPageChange={handlePageChange}
           onSortChange={onSortChange}

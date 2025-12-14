@@ -61,6 +61,7 @@ const filterFields = [
   { field: "PlaybackDuration", column: `a.PlaybackDuration`, isColumn: true, applyToCTE: true },
   { field: "TotalPlays", column: `COALESCE("TotalPlays",1)` },
   { field: "PlayMethod", column: `LOWER(a."PlayMethod")` },
+  { field: "ParentId", column: "a.ParentId", isColumn: true },
 ];
 
 //Functions
@@ -175,6 +176,34 @@ function buildFilterList(query, filtersArray) {
 
             query.values.push(filter.min);
           }
+        }
+      }
+
+      if (filter.in) {
+        const values = filter.in.split(",");
+        const valuesPlaceholders = values.map((_, i) => `$${query.values.length + i + 1}`).join(", ");
+        query.where.push({
+          column: column,
+          operator: "in",
+          value: `(${valuesPlaceholders})`,
+        });
+
+        if (applyToCTE) {
+          if (query.cte) {
+            if (!query.cte.where) {
+              query.cte.where = [];
+            }
+            const valuesPlaceholdersCTE = values.map((_, i) => `$${query.values.length + values.length + i + 1}`).join(", ");
+            query.cte.where.push({
+              column: column,
+              operator: "in",
+              value: `(${valuesPlaceholdersCTE})`,
+            });
+          }
+        }
+        query.values.push(...values);
+        if (applyToCTE && query.cte) {
+          query.values.push(...values);
         }
       }
 
@@ -914,13 +943,13 @@ router.post("/setTaskSettings", async (req, res) => {
 router.get("/getActivityMonitorSettings", async (req, res) => {
   try {
     const settingsjson = await db.query('SELECT settings FROM app_config where "ID"=1').then((res) => res.rows);
-    
+
     if (settingsjson.length > 0) {
       const settings = settingsjson[0].settings || {};
       console.log(settings);
       const pollingSettings = settings.ActivityMonitorPolling || {
         activeSessionsInterval: 1000,
-        idleInterval: 5000
+        idleInterval: 5000,
       };
       res.send(pollingSettings);
     } else {
@@ -933,52 +962,52 @@ router.get("/getActivityMonitorSettings", async (req, res) => {
   }
 });
 
-// Set Activity Monitor Polling Settings  
+// Set Activity Monitor Polling Settings
 router.post("/setActivityMonitorSettings", async (req, res) => {
   const { activeSessionsInterval, idleInterval } = req.body;
-  
+
   if (activeSessionsInterval === undefined || idleInterval === undefined) {
     res.status(400);
     res.send("activeSessionsInterval and idleInterval are required");
     return;
   }
-  
+
   if (!Number.isInteger(activeSessionsInterval) || activeSessionsInterval <= 0) {
     res.status(400);
     res.send("A valid activeSessionsInterval(int) which is > 0 milliseconds is required");
     return;
   }
-  
+
   if (!Number.isInteger(idleInterval) || idleInterval <= 0) {
     res.status(400);
     res.send("A valid idleInterval(int) which is > 0 milliseconds is required");
     return;
   }
-  
+
   if (activeSessionsInterval > idleInterval) {
     res.status(400);
     res.send("activeSessionsInterval should be <= idleInterval for optimal performance");
     return;
   }
-  
+
   try {
     const settingsjson = await db.query('SELECT settings FROM app_config where "ID"=1').then((res) => res.rows);
-    
+
     if (settingsjson.length > 0) {
       const settings = settingsjson[0].settings || {};
-      
+
       settings.ActivityMonitorPolling = {
         activeSessionsInterval: activeSessionsInterval,
-        idleInterval: idleInterval
+        idleInterval: idleInterval,
       };
-      
+
       let query = 'UPDATE app_config SET settings=$1 where "ID"=1';
       await db.query(query, [settings]);
-      
+
       res.status(200);
       res.send(settings.ActivityMonitorPolling);
     } else {
-      res.status(404);  
+      res.status(404);
       res.send({ error: "Settings Not Found" });
     }
   } catch (error) {

@@ -39,9 +39,28 @@ function LibraryActivity(props) {
     localStorage.setItem("PREF_LIBRARY_ACTIVITY_ItemCount", limit);
   }
 
+  function setTypeFilterParam(filter) {
+    const type = config?.IS_JELLYFIN ? filter : filter.replace("Play", "Stream");
+    const params = [...filterParams];
+    const playMethodFilterIndex = params.findIndex((filter) => filter.field === "PlayMethod");
+    if (playMethodFilterIndex !== -1) {
+      params[playMethodFilterIndex].value = type;
+    } else {
+      params.push({ field: "PlayMethod", value: type });
+    }
+    if (filter == "All") {
+      const playMethodFilterIndex = params.findIndex((filter) => filter.field === "PlayMethod");
+      if (playMethodFilterIndex !== -1) {
+        params.splice(playMethodFilterIndex, 1);
+      }
+    }
+    setFilterParams(params);
+  }
+
   function setTypeFilter(filter) {
     setStreamTypeFilter(filter);
     localStorage.setItem("PREF_LIBRARY_ACTIVITY_StreamTypeFilter", filter);
+    setTypeFilterParam(filter);
   }
 
   useEffect(() => {
@@ -70,6 +89,14 @@ function LibraryActivity(props) {
     const fetchData = async () => {
       try {
         setIsBusy(true);
+        if (streamTypeFilter != "All") {
+          const streamTypeFilterIndex = filterParams.findIndex((filter) => filter.field === "PlayMethod");
+          if (streamTypeFilterIndex !== -1) {
+            filterParams[streamTypeFilterIndex].value = streamTypeFilter;
+          } else {
+            filterParams.push({ field: "PlayMethod", value: streamTypeFilter });
+          }
+        }
         const libraryData = await axios.post(
           `/api/getLibraryHistory`,
           {
@@ -117,22 +144,6 @@ function LibraryActivity(props) {
     return <></>;
   }
 
-  let filteredData = data.results;
-
-  // if (searchQuery) {
-  //   filteredData = data.results.filter((item) =>
-  //     (!item.SeriesName ? item.NowPlayingItemName : item.SeriesName + " - " + item.NowPlayingItemName)
-  //       .toLowerCase()
-  //       .includes(searchQuery.toLowerCase())
-  //   );
-  // }
-
-  filteredData = filteredData.filter((item) =>
-    streamTypeFilter == "All"
-      ? true
-      : item.PlayMethod === (config?.IS_JELLYFIN ? streamTypeFilter : streamTypeFilter.replace("Play", "Stream"))
-  );
-
   return (
     <div className="Activity">
       <div className="d-md-flex justify-content-between">
@@ -160,6 +171,9 @@ function LibraryActivity(props) {
               </option>
               <option value="DirectPlay">
                 <Trans i18nKey="DIRECT" />
+              </option>
+              <option value="DirectStream">
+                <Trans i18nKey="DIRECT_STREAM" />
               </option>
             </FormSelect>
           </div>
@@ -193,7 +207,7 @@ function LibraryActivity(props) {
 
       <div className="Activity">
         <ActivityTable
-          data={filteredData}
+          data={data.results}
           itemCount={itemCount}
           onPageChange={handlePageChange}
           onSortChange={onSortChange}
