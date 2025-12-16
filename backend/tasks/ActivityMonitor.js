@@ -6,7 +6,7 @@ const { jf_activity_watchdog_columns, jf_activity_watchdog_mapping } = require("
 const configClass = require("../classes/config");
 const API = require("../classes/api-loader");
 const { sendUpdate } = require("../ws");
-const { isNumber } = require("@mui/x-data-grid/internals");
+const { isNumber } = require("../utils/typeValidation");
 // const WebhookManager = require("../classes/webhook-manager");
 
 const MINIMUM_SECONDS_TO_INCLUDE_PLAYBACK = process.env.MINIMUM_SECONDS_TO_INCLUDE_PLAYBACK

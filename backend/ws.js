@@ -16,7 +16,6 @@ const setupWebSocketServer = (server, namespacePath) => {
 
   io.use((socket, next) => {
     const token = socket.handshake.auth?.token || socket.handshake.query?.token;
-    console.log("WebSocket connection attempt with token:", token);
     if (!token) {
       return next(new Error("Authentication error: No token provided"));
     }
@@ -55,10 +54,10 @@ const sendToAllClients = (message) => {
 };
 
 const sendUpdate = async (tag, message) => {
-  const ignoredTags = ["task-list", "sessions"];
-  if (!ignoredTags.includes(tag)) {
-    console.log(`Sending update - Tag: ${tag}, Message: ${JSON.stringify(message)}`);
-  }
+  // const ignoredTags = ["task-list", "sessions"];
+  // if (!ignoredTags.includes(tag)) {
+  //   console.log(`Sending update - Tag: ${tag}, Message: ${JSON.stringify(message)}`);
+  // }
   const ioInstance = webSocketServerSingleton.getInstance();
   if (ioInstance) {
     ioInstance.emit(tag, message);
