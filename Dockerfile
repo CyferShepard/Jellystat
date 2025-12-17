@@ -1,5 +1,6 @@
 # Stage 1: Build the application
 FROM node:slim AS builder
+LABEL org.opencontainers.image.source="https://github.com/CyferShepard/Jellystat"
 
 WORKDIR /app
 
