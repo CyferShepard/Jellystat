@@ -59,15 +59,56 @@ function UserActivity(props) {
     return () => clearInterval(intervalId);
   }, [config]);
 
+  const updateLibraryFilterParams = (libraries) => {
+    const params = [...filterParams];
+    if (libraries.length != 0) {
+      const libraryFilterIndex = params.findIndex((filter) => filter.field === "ParentId");
+      if (libraryFilterIndex !== -1) {
+        params[libraryFilterIndex].in = libraries.join(",");
+      } else {
+        params.push({ field: "ParentId", in: libraries.join(",") });
+      }
+    } else {
+      const libraryFilterIndex = params.findIndex((filter) => filter.field === "ParentId");
+      if (libraryFilterIndex !== -1) {
+        params[libraryFilterIndex].in = "no_libraries";
+      } else {
+        params.push({ field: "ParentId", in: "no_libraries" });
+      }
+    }
+    setFilterParams(params);
+  };
+
+  function setTypeFilterParam(filter) {
+    const type = config?.IS_JELLYFIN ? filter : filter.replace("Play", "Stream");
+    const params = [...filterParams];
+    const playMethodFilterIndex = params.findIndex((filter) => filter.field === "PlayMethod");
+    if (playMethodFilterIndex !== -1) {
+      params[playMethodFilterIndex].value = type;
+    } else {
+      params.push({ field: "PlayMethod", value: type });
+    }
+    if (filter == "All") {
+      const playMethodFilterIndex = params.findIndex((filter) => filter.field === "PlayMethod");
+      if (playMethodFilterIndex !== -1) {
+        params.splice(playMethodFilterIndex, 1);
+      }
+    }
+    setFilterParams(params);
+  }
+
   const handleLibraryFilter = (selectedOptions) => {
     setLibraryFilters(selectedOptions);
+    updateLibraryFilterParams(selectedOptions);
   };
 
   const toggleSelectAll = () => {
     if (libraryFilters.length > 0) {
       setLibraryFilters([]);
+      updateLibraryFilterParams([]);
     } else {
       setLibraryFilters(libraries.map((library) => library.Id));
+      updateLibraryFilterParams(libraries.map((library) => library.Id));
     }
   };
 
@@ -151,8 +192,9 @@ function UserActivity(props) {
       fetchHistory();
     }
 
-    fetchLibraries();
-
+    if (libraries && libraries.length == 0) {
+      fetchLibraries();
+    }
     const intervalId = setInterval(fetchHistory, 60000 * 5);
     return () => clearInterval(intervalId);
   }, [props.UserId, token, itemCount, currentPage, debouncedSearchQuery, sorting, filterParams]);
@@ -161,23 +203,6 @@ function UserActivity(props) {
     return <></>;
   }
 
-  let filteredData = data.results;
-
-  // if (searchQuery) {
-  //   filteredData = data.results.filter((item) =>
-  //     (!item.SeriesName ? item.NowPlayingItemName : item.SeriesName + " - " + item.NowPlayingItemName)
-  //       .toLowerCase()
-  //       .includes(searchQuery.toLowerCase())
-  //   );
-  // }
-
-  filteredData = filteredData.filter(
-    (item) =>
-      (libraryFilters.includes(item.ParentId) || item.ParentId == null) &&
-      (streamTypeFilter == "All"
-        ? true
-        : item.PlayMethod === (config?.IS_JELLYFIN ? streamTypeFilter : streamTypeFilter.replace("Play", "Stream")))
-  );
   return (
     <div className="Activity">
       <Modal show={showLibraryFilters} onHide={() => setShowLibraryFilters(false)}>
@@ -213,6 +238,7 @@ function UserActivity(props) {
             <FormSelect
               onChange={(event) => {
                 setStreamTypeFilter(event.target.value);
+                setTypeFilterParam(event.target.value);
               }}
               value={streamTypeFilter}
               className="w-md-75 rounded-0 rounded-end"
@@ -261,7 +287,7 @@ function UserActivity(props) {
 
       <div className="Activity">
         <ActivityTable
-          data={filteredData}
+          data={data.results}
           itemCount={itemCount}
           onPageChange={handlePageChange}
           onSortChange={onSortChange}

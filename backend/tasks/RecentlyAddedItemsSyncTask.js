@@ -1,6 +1,7 @@
 const { parentPort } = require("worker_threads");
 const triggertype = require("../logging/triggertype");
 const sync = require("../routes/sync");
+// const WebhookManager = require("../classes/webhook-manager");
 
 async function runPartialSyncTask(triggerType = triggertype.Automatic) {
   try {
@@ -17,12 +18,25 @@ async function runPartialSyncTask(triggerType = triggertype.Automatic) {
       });
       parentPort.postMessage({ type: "log", message: formattedArgs.join(" ") });
     };
-    await sync.partialSync(triggerType);
+
+    const syncResults = await sync.partialSync(triggerType);
+
+    // const webhookManager = new WebhookManager();
+
+    // const newMediaCount = syncResults?.newItems?.length || 0;
+
+    // if (newMediaCount > 0) {
+    //   await webhookManager.triggerEventWebhooks('media_recently_added', {
+    //     count: newMediaCount,
+    //     items: syncResults.newItems,
+    //     syncDate: new Date().toISOString(),
+    //     triggerType: triggerType
+    //   });
+    // }
 
     parentPort.postMessage({ status: "complete" });
   } catch (error) {
     parentPort.postMessage({ status: "error", message: error.message });
-
     console.log(error);
     return [];
   }

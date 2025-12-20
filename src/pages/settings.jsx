@@ -5,7 +5,9 @@ import SettingsConfig from "./components/settings/settingsConfig";
 import Tasks from "./components/settings/Tasks";
 import SecuritySettings from "./components/settings/security";
 import ApiKeys from "./components/settings/apiKeys";
+import WebhooksSettings from "./components/settings/webhooks";
 import LibrarySelector from "./library_selector";
+import ActivityMonitorSettings from "./components/settings/ActivityMonitorSettings";
 
 import Logs from "./components/settings/logs";
 
@@ -32,6 +34,7 @@ export default function Settings() {
         >
           <SettingsConfig />
           <SecuritySettings />
+          <ActivityMonitorSettings />
           <Tasks />
         </Tab>
 
@@ -52,6 +55,15 @@ export default function Settings() {
         >
           <ApiKeys />
         </Tab>
+
+        {/* <Tab
+          eventKey="tabWebhooks"
+          className="bg-transparent  my-2"
+          title={<Trans i18nKey={"SETTINGS_PAGE.WEBHOOKS"} />}
+          style={{ minHeight: "500px" }}
+        >
+            <WebhooksSettings />
+        </Tab> */}
 
         <Tab
           eventKey="tabBackup"

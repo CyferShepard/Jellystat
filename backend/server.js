@@ -25,11 +25,13 @@ const statsRouter = require("./routes/stats");
 const backupRouter = require("./routes/backup");
 const logRouter = require("./routes/logging");
 const utilsRouter = require("./routes/utils");
+// const webhooksRouter = require("./routes/webhooks");
 
 // tasks
 const ActivityMonitor = require("./tasks/ActivityMonitor");
 const TaskManager = require("./classes/task-manager-singleton");
 const TaskScheduler = require("./classes/task-scheduler-singleton");
+// const WebhookScheduler = require("./classes/webhook-scheduler");
 // const tasks = require("./tasks/tasks");
 
 // websocket
@@ -165,6 +167,9 @@ app.use("/logs", authenticate, logRouter, () => {
 app.use("/utils", authenticate, utilsRouter, () => {
   /*  #swagger.tags = ['Utils']*/
 }); // mount the API router at /utils, with JWT middleware
+// app.use("/webhooks", authenticate, webhooksRouter, () => {
+//   /*  #swagger.tags = ['Webhooks']*/
+// }); // mount the API router at /webhooks, with JWT middleware
 
 // Swagger
 app.use("/swagger", swaggerUi.serve, swaggerUi.setup(swaggerDocument));
@@ -243,6 +248,7 @@ try {
         ActivityMonitor.ActivityMonitor(1000);
         new TaskManager();
         new TaskScheduler();
+        // new WebhookScheduler();
       });
     });
   });

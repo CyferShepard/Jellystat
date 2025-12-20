@@ -134,7 +134,8 @@
     "INVALID_URL": "Error {STATUS}: The requested URL was not found.",
     "UNAUTHORIZED": "Error {STATUS}: Unauthorized",
     "PASSWORD_LENGTH": "Password Must be at least 6 characters long",
-    "USERNAME_REQUIRED": "Username is required"
+    "USERNAME_REQUIRED": "Username is required",
+    "NO_WEBHOOKS": "No Webhooks Found"
   },
   "SHOW_ARCHIVED_LIBRARIES": "Show Archived Libraries",
   "HIDE_ARCHIVED_LIBRARIES": "Hide Archived Libraries",
@@ -167,7 +168,11 @@
   "STAT_PAGE": {
     "STATISTICS": "Statistics",
     "DAILY_PLAY_PER_LIBRARY": "Daily Play Count Per Library",
-    "PLAY_COUNT_BY": "Play Count By"
+    "DAILY_DURATION_PER_LIBRARY": "Daily Play Duration Per Library",
+    "PLAY_COUNT_BY": "Play Count By",
+    "PLAY_DURATION_BY": "Play Duration By",
+    "COUNT_VIEW": "Count",
+    "DURATION_VIEW": "Duration"
   },
   "SETTINGS_PAGE": {
     "SETTINGS": "Settings",
@@ -211,9 +216,40 @@
       "1_DAY": "1 Day",
       "1_WEEK": "1 Week"
     },
+    "ACTIVITY_MONITOR": "Activity Monitor",
+    "ACTIVE_SESSIONS_INTERVAL": "Active Sessions Interval (ms)",
+    "ACTIVE_SESSIONS_HELP": "How often to check when users are watching content (recommended: 1000ms)",
+    "IDLE_INTERVAL": "Idle Interval (ms)",
+    "IDLE_HELP": "How often to check when no active sessions (recommended: 5000ms)",
+    "POLLING_INFO_TITLE": "Smart Polling",
+    "POLLING_INFO": "The system automatically adapts monitoring frequency: fast when users are watching content, slower when the server is idle. This reduces CPU load on your Jellyfin server.",
+    "INTERVAL_WARNING": "Active sessions interval should not be greater than idle interval",
+    "REALTIME_UPDATE_INFO": "Changes are applied in real-time without server restart.",
     "SELECT_LIBRARIES_TO_IMPORT": "Select Libraries to Import",
     "SELECT_LIBRARIES_TO_IMPORT_TOOLTIP": "Activity for Items within these libraries are still Tracked - Even when not imported.",
-    "DATE_ADDED": "Date Added"
+    "DATE_ADDED": "Date Added",
+    "WEBHOOKS": "Webhooks",
+    "WEBHOOK_TYPE": "Webhook Type",
+    "WEBHOOK_TYPES": {
+      "DISCORD": "Discord",
+      "GENERIC": "Generic"
+    },
+    "TEST_NOW": "Test Now",
+    "WEBHOOKS_CONFIGURATION": "Webhook Configuration",
+    "WEBHOOKS_TOOLTIP": "Webhook URL to send Playback Activity to",
+    "WEBHOOK_SAVED": "Webhook Saved",
+    "WEBHOOK_NAME": "Webhook Name",
+    "DISCORD_WEBHOOK_URL": "Discord Webhook URL",
+    "ENABLE_WEBHOOK": "Enable Webhook",
+    "URL": "URL",
+    "TYPE": "Type",
+    "TRIGGER": "Trigger",
+    "STATUS": "Status",
+    "EVENT_WEBHOOKS": "Event notifications",
+    "EVENT_WEBHOOKS_TOOLTIP": "Enable or disable event notifications",
+    "PLAYBACK_STARTED": "Playback Started",
+    "PLAYBACK_ENDED": "Playback Stopped",
+    "MEDIA_ADDED": "Media Added"
   },
   "TASK_TYPE": {
     "JOB": "Job",

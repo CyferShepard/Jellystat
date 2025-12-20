@@ -1,3 +1,4 @@
+import { Tabs, Tab } from "react-bootstrap";
 import { useState } from "react";
 
 import "./css/stats.css";
@@ -19,6 +20,13 @@ function Statistics() {
     setInput(event.target.value);
     localStorage.setItem("PREF_STATISTICS_STAT_DAYS_INPUT", event.target.value);
   };
+
+  const [activeTab, setActiveTab] = useState(localStorage.getItem(`PREF_STATISTICS_LAST_SELECTED_TAB`) ?? "tabCount");
+
+  function setTab(tabName) {
+    setActiveTab(tabName);
+    localStorage.setItem(`PREF_STATISTICS_LAST_SELECTED_TAB`, tabName);
+  }
 
   const handleKeyDown = (event) => {
     if (event.key === "Enter") {
@@ -43,6 +51,26 @@ function Statistics() {
         <h1>
           <Trans i18nKey={"STAT_PAGE.STATISTICS"} />
         </h1>
+        <div className="stats-tab-nav">
+          <Tabs
+            defaultActiveKey={activeTab}
+            activeKey={activeTab}
+            onSelect={setTab}
+            variant="pills"
+          >
+            <Tab
+              eventKey="tabCount"
+              className="bg-transparent"
+              title={<Trans i18nKey="STAT_PAGE.COUNT_VIEW" />} 
+            />
+          
+            <Tab
+              eventKey="tabDuration"
+              className="bg-transparent"
+              title={<Trans i18nKey="STAT_PAGE.DURATION_VIEW" />}
+            />
+          </Tabs>
+        </div>
         <div className="date-range">
           <div className="header">
             <Trans i18nKey={"LAST"} />
@@ -55,14 +83,26 @@ function Statistics() {
           </div>
         </div>
       </div>
-      <div>
-        <DailyPlayStats days={days} />
 
-        <div className="statistics-graphs">
-          <PlayStatsByDay days={days} />
-          <PlayStatsByHour days={days} />
+      {activeTab === "tabCount" && (
+        <div>
+          <DailyPlayStats days={days} viewName="count" />
+          <div className="statistics-graphs">
+            <PlayStatsByDay days={days} viewName="count" />
+            <PlayStatsByHour days={days} viewName="count" />
+          </div>
         </div>
-      </div>
+      )}
+
+      {activeTab === "tabDuration" && (
+        <div>
+          <DailyPlayStats days={days} viewName="duration" />
+          <div className="statistics-graphs">
+            <PlayStatsByDay days={days} viewName="duration" />
+            <PlayStatsByHour days={days} viewName="duration" />
+          </div>
+        </div>
+      )}
     </div>
   );
 }

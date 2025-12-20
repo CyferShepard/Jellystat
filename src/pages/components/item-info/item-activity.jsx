@@ -36,6 +36,24 @@ function ItemActivity(props) {
     localStorage.setItem("PREF_ACTIVITY_ItemCount", limit);
   }
 
+  function setTypeFilterParam(filter) {
+    const type = config?.IS_JELLYFIN ? filter : filter.replace("Play", "Stream");
+    const params = [...filterParams];
+    const playMethodFilterIndex = params.findIndex((filter) => filter.field === "PlayMethod");
+    if (playMethodFilterIndex !== -1) {
+      params[playMethodFilterIndex].value = type;
+    } else {
+      params.push({ field: "PlayMethod", value: type });
+    }
+    if (filter == "All") {
+      const playMethodFilterIndex = params.findIndex((filter) => filter.field === "PlayMethod");
+      if (playMethodFilterIndex !== -1) {
+        params.splice(playMethodFilterIndex, 1);
+      }
+    }
+    setFilterParams(params);
+  }
+
   useEffect(() => {
     const handler = setTimeout(() => {
       setDebouncedSearchQuery(searchQuery);
@@ -110,23 +128,6 @@ function ItemActivity(props) {
     return <></>;
   }
 
-  let filteredData = data.results;
-
-  // if (searchQuery) {
-  //   filteredData = data.results.filter(
-  //     (item) =>
-  //       (!item.SeriesName ? item.NowPlayingItemName : item.SeriesName + " - " + item.NowPlayingItemName)
-  //         .toLowerCase()
-  //         .includes(searchQuery.toLowerCase()) || item.UserName.toLowerCase().includes(searchQuery.toLowerCase())
-  //   );
-  // }
-
-  filteredData = filteredData.filter((item) =>
-    streamTypeFilter === "All"
-      ? true
-      : item.PlayMethod === (config?.IS_JELLYFIN ? streamTypeFilter : streamTypeFilter.replace("Play", "Stream"))
-  );
-
   return (
     <div className="Activity">
       <div className="d-md-flex justify-content-between">
@@ -142,6 +143,7 @@ function ItemActivity(props) {
             <FormSelect
               onChange={(event) => {
                 setStreamTypeFilter(event.target.value);
+                setTypeFilterParam(event.target.value);
               }}
               value={streamTypeFilter}
               className="w-md-75 rounded-0 rounded-end"
@@ -156,7 +158,7 @@ function ItemActivity(props) {
                 <Trans i18nKey="DIRECT" />
               </option>
               <option value="DirectStream">
-                <Trans i18nKey="DirectStream" /> (<Trans i18nKey="DirectStream" />)
+                <Trans i18nKey="DIRECT_STREAM" />
               </option>
             </FormSelect>
           </div>
@@ -190,7 +192,7 @@ function ItemActivity(props) {
 
       <div className="Activity">
         <ActivityTable
-          data={filteredData}
+          data={data.results}
           itemCount={itemCount}
           onPageChange={handlePageChange}
           onSortChange={onSortChange}

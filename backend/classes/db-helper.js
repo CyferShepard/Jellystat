@@ -14,7 +14,8 @@ function wrapField(field) {
     field.includes("AVG") ||
     field.includes("DISTINCT") ||
     field.includes("json_agg") ||
-    field.includes("CASE")
+    field.includes("CASE") ||
+    field.includes("REGEXP_REPLACE")
   ) {
     return field;
   }
@@ -203,6 +204,124 @@ async function query({
     client.release();
   }
 }
+
+function buildFilterList(query, filtersArray, filterFields) {
+  if (filtersArray.length > 0) {
+    query.where = query.where || [];
+    filtersArray.forEach((filter) => {
+      const findField = filterFields.find((item) => item.field === filter.field);
+      const column = findField?.column || "a.ActivityDateInserted";
+      const isColumn = findField?.isColumn || false;
+      const applyToCTE = findField?.applyToCTE || false;
+      if (filter.min) {
+        query.where.push({
+          column: column,
+          operator: ">=",
+          value: `$${query.values.length + 1}`,
+        });
+
+        query.values.push(filter.min);
+
+        if (applyToCTE) {
+          if (query.cte) {
+            if (!query.cte.where) {
+              query.cte.where = [];
+            }
+            query.cte.where.push({
+              column: column,
+              operator: ">=",
+              value: `$${query.values.length + 1}`,
+            });
+
+            query.values.push(filter.min);
+          }
+        }
+      }
+
+      if (filter.in) {
+        const values = filter.in.split(",");
+        const valuesPlaceholders = values.map((_, i) => `$${query.values.length + i + 1}`).join(", ");
+        query.where.push({
+          column: column,
+          operator: "in",
+          value: `(${valuesPlaceholders})`,
+        });
+
+        if (applyToCTE) {
+          if (query.cte) {
+            if (!query.cte.where) {
+              query.cte.where = [];
+            }
+            const valuesPlaceholdersCTE = values.map((_, i) => `$${query.values.length + values.length + i + 1}`).join(", ");
+            query.cte.where.push({
+              column: column,
+              operator: "in",
+              value: `(${valuesPlaceholdersCTE})`,
+            });
+          }
+        }
+        query.values.push(...values);
+        if (applyToCTE && query.cte) {
+          query.values.push(...values);
+        }
+      }
+
+      if (filter.max) {
+        query.where.push({
+          column: column,
+          operator: "<=",
+          value: `$${query.values.length + 1}`,
+        });
+
+        query.values.push(filter.max);
+
+        if (applyToCTE) {
+          if (query.cte) {
+            if (!query.cte.where) {
+              query.cte.where = [];
+            }
+            query.cte.where.push({
+              column: column,
+              operator: "<=",
+              value: `$${query.values.length + 1}`,
+            });
+
+            query.values.push(filter.max);
+          }
+        }
+      }
+
+      if (filter.value) {
+        const whereClause = {
+          operator: "LIKE",
+          value: `$${query.values.length + 1}`,
+        };
+
+        query.values.push(`%${filter.value.toLowerCase()}%`);
+
+        if (isColumn) {
+          whereClause.column = column;
+        } else {
+          whereClause.field = column;
+        }
+        query.where.push(whereClause);
+
+        if (applyToCTE) {
+          if (query.cte) {
+            if (!query.cte.where) {
+              query.cte.where = [];
+            }
+            whereClause.value = `$${query.values.length + 1}`;
+            query.cte.where.push(whereClause);
+
+            query.values.push(`%${filter.value.toLowerCase()}%`);
+          }
+        }
+      }
+    });
+  }
+}
 module.exports = {
   query,
+  buildFilterList,
 };

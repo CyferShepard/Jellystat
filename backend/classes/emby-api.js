@@ -143,6 +143,23 @@ class EmbyAPI {
     }
   }
 
+  async getUserById(userid) {
+    if (!this.configReady) {
+      const success = await this.#fetchConfig();
+      if (!success) {
+        return null;
+      }
+    }
+
+    try {
+      const users = await this.getUsers();
+      return users.find((user) => user.Id === userid) || null;
+    } catch (error) {
+      this.#errorHandler(error);
+      return null;
+    }
+  }
+
   async getItemsByID({ ids, params }) {
     if (!this.configReady) {
       return [];

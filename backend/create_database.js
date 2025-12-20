@@ -5,12 +5,16 @@ const _POSTGRES_PASSWORD = process.env.POSTGRES_PASSWORD;
 const _POSTGRES_IP = process.env.POSTGRES_IP;
 const _POSTGRES_PORT = process.env.POSTGRES_PORT;
 const _POSTGRES_DATABASE = process.env.POSTGRES_DB || 'jfstat';
+const _POSTGRES_SSL_REJECT_UNAUTHORIZED = process.env.POSTGRES_SSL_REJECT_UNAUTHORIZED === undefined ? true : process.env.POSTGRES_SSL_REJECT_UNAUTHORIZED === "true";
 
 const client = new Client({
   host: _POSTGRES_IP,
   user: _POSTGRES_USER,
   password: _POSTGRES_PASSWORD,
   port: _POSTGRES_PORT,
+  ...(process.env.POSTGRES_SSL_ENABLED === "true"
+    ? { ssl: { rejectUnauthorized: _POSTGRES_SSL_REJECT_UNAUTHORIZED } }
+    : {})
 });
 
 const createDatabase = async () => {

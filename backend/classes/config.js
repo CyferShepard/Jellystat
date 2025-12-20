@@ -15,14 +15,17 @@ class Config {
         return { state: 0, error: "Config Details Not Found" };
       }
 
+      const _config = config[0];
+
       return {
-        JF_HOST: process.env.JF_HOST ?? config[0].JF_HOST,
-        JF_API_KEY: process.env.JF_API_KEY ?? config[0].JF_API_KEY,
-        APP_USER: config[0].APP_USER,
-        APP_PASSWORD: config[0].APP_PASSWORD,
-        REQUIRE_LOGIN: config[0].REQUIRE_LOGIN,
-        settings: config[0].settings,
-        api_keys: config[0].api_keys,
+        JF_HOST: process.env.JF_HOST ?? _config.JF_HOST,
+        JF_EXTERNAL_HOST: _config.settings?.EXTERNAL_URL,
+        JF_API_KEY: process.env.JF_API_KEY ?? _config.JF_API_KEY,
+        APP_USER: _config.APP_USER,
+        APP_PASSWORD: _config.APP_PASSWORD,
+        REQUIRE_LOGIN: _config.REQUIRE_LOGIN,
+        settings: _config.settings,
+        api_keys: _config.api_keys,
         state: state,
         IS_JELLYFIN: (process.env.IS_EMBY_API || "false").toLowerCase() === "false",
       };

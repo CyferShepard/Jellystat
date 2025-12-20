@@ -2,7 +2,7 @@ version: '3'
 
 services:
   jellystat-db:
-    image: postgres:15.2
+    image: postgres:15.14
     shm_size: '1gb'
     container_name: jellystat-db
     restart: unless-stopped

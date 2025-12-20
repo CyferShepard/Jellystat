@@ -2,7 +2,8 @@
 const express = require("express");
 const db = require("../db");
 const dbHelper = require("../classes/db-helper");
-const moment = require("moment");
+
+const dayjs = require("dayjs");
 
 const router = express.Router();
 
@@ -11,8 +12,8 @@ function countOverlapsPerHour(records) {
   const hourCounts = {};
 
   records.forEach((record) => {
-    const start = moment(record.StartTime).subtract(1, "hour");
-    const end = moment(record.EndTime).add(1, "hour");
+    const start = dayjs(record.StartTime).subtract(1, "hour");
+    const end = dayjs(record.EndTime).add(1, "hour");
 
     // Iterate through each hour from start to end
     for (let hour = start.clone().startOf("hour"); hour.isBefore(end); hour.add(1, "hour")) {
@@ -33,6 +34,40 @@ function countOverlapsPerHour(records) {
 
   return sortedHourCounts;
 }
+
+const sortMap = [
+  { field: "UserName", column: "UserName" },
+  { field: "RemoteEndPoint", column: "RemoteEndPoint" },
+  { field: "NowPlayingItemName", column: "NowPlayingItemName" },
+  { field: "Client", column: "Client" },
+  { field: "DeviceName", column: "DeviceName" },
+  { field: "ActivityDateInserted", column: "ActivityDateInserted" },
+  { field: "PlaybackDuration", column: "PlaybackDuration" },
+  { field: "PlayMethod", column: "PlayMethod" },
+];
+
+const filterFields = [
+  { field: "Id", column: "Id", isColumn: true },
+  { field: "IsPaused", column: "IsPaused", isColumn: true },
+  { field: "UserId", column: "UserId", isColumn: true },
+  { field: "UserName", column: "UserName", isColumn: true },
+  { field: "Client", column: "Client", isColumn: true },
+  { field: "DeviceName", column: "DeviceName", isColumn: true },
+  { field: "DeviceId", column: "DeviceId", isColumn: true },
+  { field: "ApplicationVersion", column: "ApplicationVersion", isColumn: true },
+  { field: "NowPlayingItemId", column: "NowPlayingItemId", isColumn: true },
+  { field: "NowPlayingItemName", column: "NowPlayingItemName", isColumn: true },
+  { field: "SeasonId", column: "SeasonId", isColumn: true },
+  { field: "SeriesName", column: "SeriesName", isColumn: true },
+  { field: "EpisodeId", column: "EpisodeId", isColumn: true },
+  { field: "PlaybackDuration", column: "PlaybackDuration", isColumn: true },
+  { field: "ActivityDateInserted", column: "ActivityDateInserted", isColumn: true },
+  { field: "PlayMethod", column: "PlayMethod", isColumn: true },
+  { field: "OriginalContainer", column: "OriginalContainer", isColumn: true },
+  { field: "RemoteEndPoint", column: "RemoteEndPoint", isColumn: true },
+  { field: "ServerId", column: "ServerId", isColumn: true },
+  { field: "imported", column: "imported", isColumn: true },
+];
 
 //endpoints
 
@@ -148,9 +183,91 @@ router.post("/getMostActiveUsers", async (req, res) => {
 });
 
 router.get("/getPlaybackActivity", async (req, res) => {
+  const { size = 50, page = 1, search, sort = "ActivityDateInserted", desc = true, filters } = req.query;
+  let filtersArray = [];
+  if (filters) {
+    try {
+      filtersArray = JSON.parse(filters);
+    } catch (error) {
+      return res.status(400).json({
+        error: "Invalid filters parameter",
+        example: [
+          { field: "UserName", value: "User" },
+          { field: "Client", in: "Android TV,Web" },
+          { field: "PlaybackDuration", min: 1000, max: 5000 },
+          { field: "PlayMethod", value: "DirectPlay" },
+          { field: "ActivityDateInserted", min: "2025-01-01", max: "2025-12-31" },
+          { field: "IsPaused", value: false },
+        ],
+        allowed_fields: [
+          "Id",
+          "IsPaused",
+          "UserId",
+          "UserName",
+          "Client",
+          "DeviceName",
+          "DeviceId",
+          "ApplicationVersion",
+          "NowPlayingItemId",
+          "NowPlayingItemName",
+          "SeasonId",
+          "SeriesName",
+          "EpisodeId",
+          "PlaybackDuration",
+          "ActivityDateInserted",
+          "PlayMethod",
+          "OriginalContainer",
+          "RemoteEndPoint",
+          "ServerId",
+          "imported",
+        ],
+      });
+    }
+  }
+
+  const sortField = sortMap.find((item) => item.field === sort)?.column || "ActivityDateInserted";
+  const values = [];
   try {
-    const { rows } = await db.query("SELECT * FROM jf_playback_activity");
-    res.send(rows);
+    const query = {
+      select: ["*"],
+      table: "jf_playback_activity",
+      alias: "a",
+      order_by: sortField,
+      sort_order: desc ? "desc" : "asc",
+      pageNumber: page,
+      pageSize: size,
+    };
+
+    if (search && search.length > 0) {
+      query.where = [
+        {
+          field: `LOWER(
+          CASE 
+            WHEN a."SeriesName" is null THEN a."NowPlayingItemName"
+            ELSE a."SeriesName"
+          END 
+          )`,
+          operator: "LIKE",
+          value: `$${values.length + 1}`,
+        },
+      ];
+
+      values.push(`%${search.toLowerCase()}%`);
+    }
+
+    query.values = values;
+    dbHelper.buildFilterList(query, filtersArray, filterFields);
+
+    const result = await dbHelper.query(query);
+    const response = { current_page: page, pages: result.pages, size: size, sort: sort, desc: desc, results: result.results };
+    if (search && search.length > 0) {
+      response.search = search;
+    }
+
+    if (filtersArray.length > 0) {
+      response.filters = filtersArray;
+    }
+    res.send(response);
   } catch (error) {
     res.status(503);
     res.send(error);
@@ -278,10 +395,63 @@ router.get("/getLibraryMetadata", async (req, res) => {
 });
 
 router.post("/getLibraryItemsWithStats", async (req, res) => {
+  const { size = 999999999, page = 1, search, sort = "Date", desc = true } = req.query;
+  const { libraryid } = req.body;
+  if (libraryid === undefined) {
+    res.status(400).send({ error: "Invalid Library Id" });
+  }
+
+  const sortMap = [
+    { field: "Date", column: "DateCreated" },
+    { field: "Views", column: "times_played" },
+    { field: "Size", column: "Size" },
+    { field: "WatchTime", column: "total_play_time" },
+    { field: "Title", column: `REGEXP_REPLACE(a."Name", '^(A |An |The )', '', 'i')` },
+  ];
+
+  const sortField = sortMap.find((item) => item.field === sort)?.column || "DateCreated";
+  const values = [];
   try {
-    const { libraryid } = req.body;
-    const { rows } = await db.query(`SELECT * FROM jf_library_items_with_playcount_playtime where "ParentId"=$1`, [libraryid]);
-    res.send(rows);
+    const query = {
+      select: ["*"],
+      table: "js_library_items_with_playcount_playtime",
+      alias: "a",
+      order_by: sortField,
+      sort_order: desc ? "desc" : "asc",
+      pageNumber: page,
+      pageSize: size,
+      where: [
+        {
+          field: `a."ParentId"`,
+          operator: "=",
+          value: `$${values.length + 1}`,
+        },
+      ],
+    };
+
+    values.push(libraryid);
+
+    if (search && search.length > 0) {
+      query.where.push({
+        field: `LOWER(a."Name")`,
+        operator: "LIKE",
+        value: `$${values.length + 1}`,
+      });
+
+      values.push(`%${search.toLowerCase()}%`);
+    }
+
+    query.values = values;
+
+    // const { rows } = await db.query(`SELECT * FROM jf_library_items_with_playcount_playtime where "ParentId"=$1`, [libraryid]);
+    // res.send(rows);
+    const result = await dbHelper.query(query);
+    const response = { current_page: page, pages: result.pages, size: size, sort: sort, desc: desc, results: result.results };
+    if (search && search.length > 0) {
+      response.search = search;
+    }
+
+    res.send(response);
   } catch (error) {
     console.log(error);
   }
@@ -289,12 +459,13 @@ router.post("/getLibraryItemsWithStats", async (req, res) => {
 
 router.post("/getLibraryItemsPlayMethodStats", async (req, res) => {
   try {
-    let { libraryid, startDate, endDate = moment(), hours = 24 } = req.body;
+    let { libraryid, startDate, endDate = dayjs(), hours = 24 } = req.body;
 
-    // Validate startDate and endDate using moment
+    // Validate startDate and endDate using dayjs
     if (
       startDate !== undefined &&
-      (!moment(startDate, moment.ISO_8601, true).isValid() || !moment(endDate, moment.ISO_8601, true).isValid())
+      (!dayjs(startDate, "YYYY-MM-DDTHH:mm:ss.SSSZ", true).isValid() ||
+        !dayjs(endDate, "YYYY-MM-DDTHH:mm:ss.SSSZ", true).isValid())
     ) {
       return res.status(400).send({ error: "Invalid date format" });
     }
@@ -308,7 +479,7 @@ router.post("/getLibraryItemsPlayMethodStats", async (req, res) => {
     }
 
     if (startDate === undefined) {
-      startDate = moment(endDate).subtract(hours, "hour").format("YYYY-MM-DD HH:mm:ss");
+      startDate = dayjs(endDate).subtract(hours, "hour").format("YYYY-MM-DD HH:mm:ss");
     }
 
     const { rows } = await db.query(
@@ -336,8 +507,8 @@ router.post("/getLibraryItemsPlayMethodStats", async (req, res) => {
         NowPlayingItemName: item.NowPlayingItemName,
         EpisodeId: item.EpisodeId || null,
         SeasonId: item.SeasonId || null,
-        StartTime: moment(item.ActivityDateInserted).subtract(item.PlaybackDuration, "seconds").format("YYYY-MM-DD HH:mm:ss"),
-        EndTime: moment(item.ActivityDateInserted).format("YYYY-MM-DD HH:mm:ss"),
+        StartTime: dayjs(item.ActivityDateInserted).subtract(item.PlaybackDuration, "seconds").format("YYYY-MM-DD HH:mm:ss"),
+        EndTime: dayjs(item.ActivityDateInserted).format("YYYY-MM-DD HH:mm:ss"),
         PlaybackDuration: item.PlaybackDuration,
         PlayMethod: item.PlayMethod,
         TranscodedVideo: item.TranscodingInfo?.IsVideoDirect || false,
@@ -423,6 +594,7 @@ router.get("/getViewsOverTime", async (req, res) => {
     stats.forEach((item) => {
       const library = item.Library;
       const count = item.Count;
+      const duration = item.Duration;
       const date = new Date(item.Date).toLocaleDateString("en-US", {
         year: "numeric",
         month: "short",
@@ -435,7 +607,7 @@ router.get("/getViewsOverTime", async (req, res) => {
         };
       }
 
-      reorganizedData[date] = { ...reorganizedData[date], [library]: count };
+      reorganizedData[date] = { ...reorganizedData[date], [library]: { count, duration } };
     });
     const finalData = { libraries: libraries, stats: Object.values(reorganizedData) };
     res.send(finalData);
@@ -462,6 +634,7 @@ router.get("/getViewsByDays", async (req, res) => {
     stats.forEach((item) => {
       const library = item.Library;
       const count = item.Count;
+      const duration = item.Duration;
       const day = item.Day;
 
       if (!reorganizedData[day]) {
@@ -470,7 +643,7 @@ router.get("/getViewsByDays", async (req, res) => {
         };
       }
 
-      reorganizedData[day] = { ...reorganizedData[day], [library]: count };
+      reorganizedData[day] = { ...reorganizedData[day], [library]: { count, duration } };
     });
     const finalData = { libraries: libraries, stats: Object.values(reorganizedData) };
     res.send(finalData);
@@ -497,6 +670,7 @@ router.get("/getViewsByHour", async (req, res) => {
     stats.forEach((item) => {
       const library = item.Library;
       const count = item.Count;
+      const duration = item.Duration;
       const hour = item.Hour;
 
       if (!reorganizedData[hour]) {
@@ -505,7 +679,7 @@ router.get("/getViewsByHour", async (req, res) => {
         };
       }
 
-      reorganizedData[hour] = { ...reorganizedData[hour], [library]: count };
+      reorganizedData[hour] = { ...reorganizedData[hour], [library]: { count, duration } };
     });
     const finalData = { libraries: libraries, stats: Object.values(reorganizedData) };
     res.send(finalData);
@@ -520,12 +694,15 @@ router.get("/getViewsByLibraryType", async (req, res) => {
   try {
     const { days = 30 } = req.query;
 
-    const { rows } = await db.query(`
+    const { rows } = await db.query(
+      `
       SELECT COALESCE(i."Type", 'Other') AS type, COUNT(a."NowPlayingItemId") AS count
       FROM jf_playback_activity a LEFT JOIN jf_library_items i ON i."Id" = a."NowPlayingItemId"
       WHERE a."ActivityDateInserted" BETWEEN NOW() - CAST($1 || ' days' as INTERVAL) AND NOW()
       GROUP BY i."Type"
-    `, [days]);
+    `,
+      [days]
+    );
 
     const supportedTypes = new Set(["Audio", "Movie", "Series", "Other"]);
     /** @type {Map<string, number>} */

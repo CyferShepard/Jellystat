@@ -9,13 +9,13 @@ import Container from "react-bootstrap/Container";
 import AccountCircleFillIcon from "remixicon-react/AccountCircleFillIcon";
 import PlayFillIcon from "remixicon-react/PlayFillIcon";
 import PauseFillIcon from "remixicon-react/PauseFillIcon";
+import TvLineIcon from "remixicon-react/TvLineIcon";
 
 import { clientData } from "../../../lib/devices";
 import Tooltip from "@mui/material/Tooltip";
 import IpInfoModal from "../ip-info";
 import { Trans } from "react-i18next";
 import baseUrl from "../../../lib/baseurl";
-import { lineHeight } from "@mui/system";
 
 function ticksToTimeString(ticks) {
   // Convert ticks to seconds
@@ -39,9 +39,10 @@ function getETAFromTicks(ticks) {
   // Calculate ETA
   const etaMillis = currentDate + ticks / 10000;
   const eta = new Date(etaMillis);
+  const twelve_hr = JSON.parse(localStorage.getItem("12hr"));
 
   // Return formated string in user locale
-  return eta.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+  return eta.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit", hour12: twelve_hr });
 }
 
 function SessionCard(props) {
@@ -94,8 +95,7 @@ function SessionCard(props) {
           src={
             baseUrl +
             "/proxy/web/assets/img/devices/?devicename=" +
-            (props.data.session.Client.toLowerCase() === "jellyfin mobile (ios)" &&
-            props.data.session.DeviceName.toLowerCase() === "iphone"
+            (props.data.session.Client.toLowerCase() === "jellyfin ios"
               ? "apple"
               : props.data.session.Client.toLowerCase().includes("web")
               ? clientData.find((item) => props.data.session.DeviceName.toLowerCase().includes(item)) || "other"
@@ -128,8 +128,8 @@ function SessionCard(props) {
           <Col className="w-100 h-100 m-0 px-0">
             <Card.Body className="w-100 h-100 p-1 pb-2">
               <Container className="h-100 d-flex flex-column justify-content-between g-0">
-                <Row className="d-flex justify-content-start session-details" style={{ fontSize: "smaller" }}>
-                  <Col className="col-10">
+                <Row className="mt-2 d-flex justify-content-start session-details" style={{ fontSize: "0.7em" }}>
+                  <Col className="col-auto">
                     <Row>
                       <Col className="col-auto session-details-title text-end text-uppercase">
                         <Trans i18nKey="ACTIVITY_TABLE.DEVICE" />
@@ -176,6 +176,31 @@ function SessionCard(props) {
                         </Tooltip>
                       </Col>
                     </Row>
+                    {props.data.session.NowPlayingItem.ContainerStream !== "" && (
+                      <Row className="mt-2">
+                        <Col className="col-auto session-details-title text-end text-uppercase">
+                          <Trans i18nKey="CONTAINER" />
+                        </Col>
+                        <Col
+                          className="col-auto ellipse"
+                          style={{
+                            maxWidth: "270px",
+                          }}
+                        >
+                          <Tooltip title={props.data.session.NowPlayingItem.ContainerStream}>
+                            <span
+                              style={{
+                                display: "-webkit-box",
+                                WebkitBoxOrient: "vertical",
+                                WebkitLineClamp: 1,
+                              }}
+                            >
+                              {props.data.session.NowPlayingItem.ContainerStream}
+                            </span>
+                          </Tooltip>
+                        </Col>
+                      </Row>
+                    )}
                     {props.data.session.NowPlayingItem.VideoStream !== "" && (
                       <Row>
                         <Col className="col-auto session-details-title text-end text-uppercase">
@@ -184,7 +209,7 @@ function SessionCard(props) {
                         <Col
                           className="col-auto ellipse"
                           style={{
-                            maxWidth: "200px",
+                            maxWidth: "270px",
                           }}
                         >
                           <Tooltip title={props.data.session.NowPlayingItem.VideoStream}>
@@ -201,6 +226,29 @@ function SessionCard(props) {
                         </Col>
                       </Row>
                     )}
+                    {props.data.session.NowPlayingItem.VideoBitrateStream !== "" && (
+                      <Row>
+                        <Col className="col-auto session-details-title text-end text-uppercase" />
+                        <Col
+                          className="col-auto ellipse"
+                          style={{
+                            maxWidth: "270px",
+                          }}
+                        >
+                          <Tooltip title={props.data.session.NowPlayingItem.VideoBitrateStream}>
+                            <span
+                              style={{
+                                display: "-webkit-box",
+                                WebkitBoxOrient: "vertical",
+                                WebkitLineClamp: 1,
+                              }}
+                            >
+                              {props.data.session.NowPlayingItem.VideoBitrateStream}
+                            </span>
+                          </Tooltip>
+                        </Col>
+                      </Row>
+                    )}
                     {props.data.session.NowPlayingItem.AudioStream !== "" && (
                       <Row>
                         <Col className="col-auto session-details-title text-end text-uppercase">
@@ -209,7 +257,7 @@ function SessionCard(props) {
                         <Col
                           className="col-auto ellipse"
                           style={{
-                            maxWidth: "200px",
+                            maxWidth: "270px",
                           }}
                         >
                           <Tooltip title={props.data.session.NowPlayingItem.AudioStream}>
@@ -226,6 +274,29 @@ function SessionCard(props) {
                         </Col>
                       </Row>
                     )}
+                    {props.data.session.NowPlayingItem.AudioBitrateStream !== "" && (
+                      <Row>
+                        <Col className="col-auto session-details-title text-end text-uppercase" />
+                        <Col
+                          className="col-auto ellipse"
+                          style={{
+                            maxWidth: "270px",
+                          }}
+                        >
+                          <Tooltip title={props.data.session.NowPlayingItem.AudioBitrateStream}>
+                            <span
+                              style={{
+                                display: "-webkit-box",
+                                WebkitBoxOrient: "vertical",
+                                WebkitLineClamp: 1,
+                              }}
+                            >
+                              {props.data.session.NowPlayingItem.AudioBitrateStream}
+                            </span>
+                          </Tooltip>
+                        </Col>
+                      </Row>
+                    )}
                     {props.data.session.NowPlayingItem.SubtitleStream !== "" && (
                       <Row>
                         <Col className="col-auto session-details-title text-end text-uppercase">
@@ -234,7 +305,7 @@ function SessionCard(props) {
                         <Col
                           className="col-auto ellipse"
                           style={{
-                            maxWidth: "200px",
+                            maxWidth: "270px",
                           }}
                         >
                           <Tooltip title={props.data.session.NowPlayingItem.SubtitleStream}>
@@ -252,11 +323,16 @@ function SessionCard(props) {
                       </Row>
                     )}
 
-                    <Row>
+                    <Row className="mt-2">
                       <Col className="col-auto session-details-title text-end text-uppercase">
                         <Trans i18nKey="ACTIVITY_TABLE.IP_ADDRESS" />
                       </Col>
-                      <Col className="col-auto ellipse">
+                      <Col
+                        className="col-auto ellipse"
+                        style={{
+                          maxWidth: "270px",
+                        }}
+                      >
                         {isRemoteSession(props.data.session.RemoteEndPoint) &&
                         (window.env.JS_GEOLITE_ACCOUNT_ID ?? import.meta.env.JS_GEOLITE_ACCOUNT_ID) ? (
                           <Link
@@ -274,103 +350,28 @@ function SessionCard(props) {
                     <Row>
                       <Col className="col-auto session-details-title text-end text-uppercase">ETA</Col>
                       <Col className="col-auto ellipse">
-                        {getETAFromTicks(
-                          props.data.session.NowPlayingItem.RunTimeTicks - props.data.session.PlayState.PositionTicks
-                        )}
+                        {props.data.session.NowPlayingItem.RunTimeTicks ? getETAFromTicks(props.data.session.NowPlayingItem.RunTimeTicks - props.data.session.PlayState.PositionTicks) : <Trans i18nKey="ERROR_MESSAGES.N/A" />}
                       </Col>
                     </Row>
                   </Col>
                 </Row>
 
                 <Row className="p-0 m-0">
-                  {props.data.session.NowPlayingItem.Type === "Episode" ? (
-                    <Row className="d-flex flex-row justify-content-between p-0">
-                      <Card.Text>
-                        <Link
-                          to={`/libraries/item/${props.data.session.NowPlayingItem.Id}`}
-                          target="_blank"
-                          className="item-name"
-                        >
-                          {props.data.session.NowPlayingItem.SeriesName
-                            ? props.data.session.NowPlayingItem.SeriesName + " - " + props.data.session.NowPlayingItem.Name
-                            : props.data.session.NowPlayingItem.Name}
-                        </Link>
-                      </Card.Text>
-                    </Row>
-                  ) : props.data.session.NowPlayingItem.Type === "Audio" &&
-                    props.data.session.NowPlayingItem.Artists.length > 0 ? (
-                    <Col className="col-auto p-0">
-                      <Card.Text>{props.data.session.NowPlayingItem.Artists[0]}</Card.Text>
-                    </Col>
-                  ) : (
-                    <></>
-                  )}
-                  <Row className="d-flex flex-row justify-content-between p-0 m-0">
-                    {props.data.session.NowPlayingItem.Type === "Episode" ? (
-                      <Col className="col-auto p-0">
-                        <Card.Text>
-                          {"S" +
-                            props.data.session.NowPlayingItem.ParentIndexNumber +
-                            " - E" +
-                            props.data.session.NowPlayingItem.IndexNumber}
-                        </Card.Text>
-                      </Col>
-                    ) : (
-                      <Col className="p-0">
-                        <Card.Text>
-                          <Link
-                            to={`/libraries/item/${props.data.session.NowPlayingItem.Id}`}
-                            target="_blank"
-                            className="item-name"
-                          >
-                            {props.data.session.NowPlayingItem.SeriesName
-                              ? props.data.session.NowPlayingItem.SeriesName + " - " + props.data.session.NowPlayingItem.Name
-                              : props.data.session.NowPlayingItem.Name}
-                          </Link>
-                        </Card.Text>
-                      </Col>
-                    )}
-
-                    <Col className="d-flex flex-row justify-content-end text-end col-auto">
-                      {props.data.session.UserPrimaryImageTag !== undefined ? (
-                        <img
-                          className="session-card-user-image"
-                          src={baseUrl + "/proxy/Users/Images/Primary?id=" + props.data.session.UserId + "&quality=50"}
-                          alt=""
-                        />
-                      ) : (
-                        <AccountCircleFillIcon className="session-card-user-image" />
-                      )}
-                      <Card.Text>
-                        <Tooltip title={props.data.session.UserName}>
-                          <Link to={`/users/${props.data.session.UserId}`} className="item-name" style={{ maxWidth: "15ch" }}>
-                            {props.data.session.UserName}
-                          </Link>
-                        </Tooltip>
-                      </Card.Text>
-                    </Col>
-                  </Row>
-
-                  <Row className="p-0 m-0">
-                    <Col className="col-auto p-0">
-                      {props.data.session.PlayState.IsPaused ? <PauseFillIcon /> : <PlayFillIcon />}
-                    </Col>
-
-                    <Col>
-                      <Card.Text className="text-end">
-                        <Tooltip
-                          title={`Ends at ${getETAFromTicks(
-                            props.data.session.NowPlayingItem.RunTimeTicks - props.data.session.PlayState.PositionTicks
-                          )}`}
-                        >
-                          <span>
-                            {ticksToTimeString(props.data.session.PlayState.PositionTicks)}/
-                            {ticksToTimeString(props.data.session.NowPlayingItem.RunTimeTicks)}
-                          </span>
-                        </Tooltip>
-                      </Card.Text>
-                    </Col>
-                  </Row>
+                  <Col>
+                    <Card.Text className="text-end">
+                      <Tooltip
+                        title={`Ends at ${props.data.session.NowPlayingItem.RunTimeTicks 
+                          ? getETAFromTicks(props.data.session.NowPlayingItem.RunTimeTicks - props.data.session.PlayState.PositionTicks)
+                          : <Trans i18nKey="ERROR_MESSAGES.N/A" />
+                        }`}
+                      >
+                        <span>
+                          {ticksToTimeString(props.data.session.PlayState.PositionTicks)}
+                          {props.data.session.NowPlayingItem.RunTimeTicks ? "/" + ticksToTimeString(props.data.session.NowPlayingItem.RunTimeTicks) : ""}
+                        </span>
+                      </Tooltip>
+                    </Card.Text>
+                  </Col>
                 </Row>
               </Container>
             </Card.Body>
@@ -388,6 +389,77 @@ function SessionCard(props) {
                 }}
               ></div>
             </div>
+          </Col>
+        </Row>
+        <Row className="p-0 m-0 mt-1">
+          <Col
+            className="col-1 p-0"
+            style={{
+              maxWidth: "20px",
+              marginRight: "10px",
+            }}
+          >
+            <Row>{props.data.session.PlayState.IsPaused ? <PauseFillIcon /> : <PlayFillIcon />}</Row>
+            {props.data.session.NowPlayingItem.Type === "Episode" && (
+              <Row>
+                <TvLineIcon color="white" />
+              </Row>
+            )}
+          </Col>
+          <Col className="col-7 p-0">
+            {props.data.session.NowPlayingItem.Type === "Episode" ? (
+              <Row className="d-flex flex-row justify-content-start p-0">
+                <Card.Text>
+                  <Link to={`/libraries/item/${props.data.session.NowPlayingItem.Id}`} target="_blank" className="item-name">
+                    {props.data.session.NowPlayingItem.SeriesName
+                      ? props.data.session.NowPlayingItem.SeriesName + " - " + props.data.session.NowPlayingItem.Name
+                      : props.data.session.NowPlayingItem.Name}
+                  </Link>
+                </Card.Text>
+              </Row>
+            ) : props.data.session.NowPlayingItem.Type === "Audio" && props.data.session.NowPlayingItem.Artists.length > 0 ? (
+              <Col className="col-auto p-0">
+                <Card.Text>{props.data.session.NowPlayingItem.Artists[0]}</Card.Text>
+              </Col>
+            ) : (
+              <></>
+            )}
+            <Row className="d-flex flex-row justify-content-start p-0">
+              {props.data.session.NowPlayingItem.Type === "Episode" ? (
+                <Card.Text>
+                  {"S" +
+                    props.data.session.NowPlayingItem.ParentIndexNumber +
+                    " - E" +
+                    props.data.session.NowPlayingItem.IndexNumber}
+                </Card.Text>
+              ) : (
+                <Card.Text>
+                  <Link to={`/libraries/item/${props.data.session.NowPlayingItem.Id}`} target="_blank" className="item-name">
+                    {props.data.session.NowPlayingItem.SeriesName
+                      ? props.data.session.NowPlayingItem.SeriesName + " - " + props.data.session.NowPlayingItem.Name
+                      : props.data.session.NowPlayingItem.Name}
+                  </Link>
+                </Card.Text>
+              )}
+            </Row>
+          </Col>
+          <Col className="d-flex justify-content-end text-end me-0 pe-0">
+            <Card.Text>
+              <Tooltip title={props.data.session.UserName}>
+                <Link to={`/users/${props.data.session.UserId}`} className="item-name" style={{ maxWidth: "15ch" }}>
+                  {props.data.session.UserName}
+                </Link>
+              </Tooltip>
+            </Card.Text>
+            {props.data.session.UserPrimaryImageTag !== undefined ? (
+              <img
+                className="session-card-user-image"
+                src={baseUrl + "/proxy/Users/Images/Primary?id=" + props.data.session.UserId + "&quality=50"}
+                alt=""
+              />
+            ) : (
+              <AccountCircleFillIcon className="session-card-user-image" />
+            )}
           </Col>
         </Row>
       </div>
