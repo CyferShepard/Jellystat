@@ -62,7 +62,7 @@ const filterFields = [
   { field: "EpisodeId", column: "EpisodeId", isColumn: true },
   { field: "PlaybackDuration", column: "PlaybackDuration", isColumn: true },
   { field: "ActivityDateInserted", column: "ActivityDateInserted", isColumn: true },
-  { field: "PlayMethod", column: "PlayMethod", isColumn: true },
+  { field: "PlayMethod", column: `LOWER(a."PlayMethod")` },
   { field: "OriginalContainer", column: "OriginalContainer", isColumn: true },
   { field: "RemoteEndPoint", column: "RemoteEndPoint", isColumn: true },
   { field: "ServerId", column: "ServerId", isColumn: true },
