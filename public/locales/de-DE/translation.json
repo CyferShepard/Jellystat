@@ -134,7 +134,8 @@
     "INVALID_URL": "Fehler {STATUS}: Die angeforderte URL wurde nicht gefunden.",
     "UNAUTHORIZED": "Fehler {STATUS}: Nicht autorisiert",
     "PASSWORD_LENGTH": "Passwort muss mindestens 6 Zeichen lang sein",
-    "USERNAME_REQUIRED": "Benutzername ist erforderlich"
+    "USERNAME_REQUIRED": "Benutzername ist erforderlich",
+    "NO_WEBHOOKS": "Keine Webhooks gefunden"
   },
   "SHOW_ARCHIVED_LIBRARIES": "Archivierte Bibliotheken anzeigen",
   "HIDE_ARCHIVED_LIBRARIES": "Archivierte Bibliotheken ausblenden",
@@ -167,7 +168,11 @@
   "STAT_PAGE": {
     "STATISTICS": "Statistiken",
     "DAILY_PLAY_PER_LIBRARY": "Tägliche Wiedergabezahl pro Bibliothek",
-    "PLAY_COUNT_BY": "Wiedergabezahl nach"
+    "DAILY_DURATION_PER_LIBRARY": "Tägliche Spieldauer pro Bibliothek",
+    "PLAY_COUNT_BY": "Wiedergabezahl nach",
+    "PLAY_DURATION_BY": "Spieldauer von",
+    "COUNT_VIEW": "Anzahl",
+    "DURATION_VIEW": "Dauer"
   },
   "SETTINGS_PAGE": {
     "SETTINGS": "Allgemein",
@@ -211,9 +216,40 @@
       "1_DAY": "1 Tag",
       "1_WEEK": "1 Woche"
     },
-    "SELECT_LIBRARIES_TO_IMPORT": "Bibliotheken zum Importieren auswählen",
-    "SELECT_LIBRARIES_TO_IMPORT_TOOLTIP": "Die Aktivität für Elemente innerhalb dieser Bibliotheken wird weiterhin verfolgt - auch wenn sie nicht importiert werden.",
-    "DATE_ADDED": "Hinzugefügt am"
+    "ACTIVITY_MONITOR": "Aktivitätsmonitor",
+    "ACTIVE_SESSIONS_INTERVAL": "Intervall bei aktiven Sitzungen (ms)",
+    "ACTIVE_SESSIONS_HELP": "Wie oft wird die Aktivität überprüft, wenn Benutzer Inhalte ansehen (empfohlen: 1000 ms)",
+    "IDLE_INTERVAL": "Intervall im Leerlauf (ms)",
+    "IDLE_HELP": "Wie oft wird die Aktivität überprüft, wenn keine Sitzungen aktiv sind (empfohlen: 5000 ms)",
+    "POLLING_INFO_TITLE": "Intelligentes Abfragen",
+    "POLLING_INFO": "Das System passt den Intervall der Abfragen automatisch an: schneller, wenn Benutzer Inhalte ansehen, langsamer, wenn der Server im Leerlauf ist. Dadurch wird die CPU-Auslastung Ihres Jellyfin-Servers reduziert.",
+    "INTERVAL_WARNING": "Das Intervall für aktive Sitzungen sollte nicht größer sein als das Intervall im Leerlauf",
+    "REALTIME_UPDATE_INFO": "Änderungen werden ohne Neustart des Servers übernommen.",
+    "SELECT_LIBRARIES_TO_IMPORT": "Zu importierende Bibliotheken auswählen",
+    "SELECT_LIBRARIES_TO_IMPORT_TOOLTIP": "Aktivitäten für Elemente innerhalb dieser Bibliotheken werden weiterhin verfolgt - auch wenn sie nicht importiert wurden.",
+    "DATE_ADDED": "Hinzugefügt am",
+    "WEBHOOKS": "Webhooks",
+    "WEBHOOK_TYPE": "Webhook Typ",
+    "WEBHOOK_TYPES": {
+      "DISCORD": "Discord",
+      "GENERIC": "Generic"
+    },
+    "TEST_NOW": "Jetzt testen",
+    "WEBHOOKS_CONFIGURATION": "Webhook-Konfiguration",
+    "WEBHOOKS_TOOLTIP": "Empfänger der Wiedergabeaktivität",
+    "WEBHOOK_SAVED": "Webhook gespeichert",
+    "WEBHOOK_NAME": "Webhook Name",
+    "DISCORD_WEBHOOK_URL": "Discord Webhook URL",
+    "ENABLE_WEBHOOK": "Aktiviere Webhook",
+    "URL": "URL",
+    "TYPE": "Typ",
+    "TRIGGER": "Trigger",
+    "STATUS": "Status",
+    "EVENT_WEBHOOKS": "Benachrichtigungen",
+    "EVENT_WEBHOOKS_TOOLTIP": "Aktiviere oder deaktiviere Benachrichtigungen",
+    "PLAYBACK_STARTED": "Wiedergabe gestartet",
+    "PLAYBACK_ENDED": "Wiedergabe gestoppt",
+    "MEDIA_ADDED": "Medien hinzugefügt"
   },
   "TASK_TYPE": {
     "JOB": "Job",
