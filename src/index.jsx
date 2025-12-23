@@ -1,5 +1,5 @@
 import React, { Suspense } from "react";
-import ReactDOM from "react-dom/client";
+import { createRoot } from "react-dom/client";
 import { BrowserRouter } from "react-router-dom";
 
 import App from "./App.jsx";
@@ -20,7 +20,7 @@ i18n
   .use(LanguageDetector)
   .use(initReactI18next)
   .init({
-    fallbackLng: "en-UK",
+    fallbackLng: "en-GB",
     debug: false,
     backend: {
       loadPath: `${baseUrl}/locales/{{lng}}/{{ns}}.json`,
@@ -34,12 +34,13 @@ i18n
     },
   })
   .then(() => {
-    ReactDOM.createRoot(document.getElementById("root")).render(
+    createRoot(document.getElementById("root")).render(
       <React.StrictMode>
-        <Suspense fallback={<Loading />} />
-        <BrowserRouter basename={baseUrl}>
-          <App />
-        </BrowserRouter>
+        <Suspense fallback={<Loading />}>
+          <BrowserRouter basename={baseUrl}>
+            <App />
+          </BrowserRouter>
+        </Suspense>
       </React.StrictMode>
     );
   });
