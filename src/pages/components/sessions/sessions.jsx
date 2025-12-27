@@ -26,31 +26,24 @@ function convertBitrate(bitrate) {
   }
 }
 
-function getVideoResolution(videoHeight)
-{
+function getVideoResolution(videoHeight) {
   let videoResolution = "";
-    if (videoHeight > 2160) {
-      videoResolution = "8K";
-    }
-    else if (videoHeight > 1080) {
-      videoResolution = "4K";
-    }
-    else if (videoHeight > 720) {
-      videoResolution = "1080p";
-    }
-    else if (videoHeight > 480) {
-      videoResolution = "720p";
-    }
-    else if (videoHeight > 360) {
-      videoResolution = "480p";
-    }
-    else if (videoHeight > 240) {
-      videoResolution = "360p";
-    }
-    else {
-      videoResolution = "240p";
-    }
-    return videoResolution;
+  if (videoHeight > 2160) {
+    videoResolution = "8K";
+  } else if (videoHeight > 1080) {
+    videoResolution = "4K";
+  } else if (videoHeight > 720) {
+    videoResolution = "1080p";
+  } else if (videoHeight > 480) {
+    videoResolution = "720p";
+  } else if (videoHeight > 360) {
+    videoResolution = "480p";
+  } else if (videoHeight > 240) {
+    videoResolution = "360p";
+  } else {
+    videoResolution = "240p";
+  }
+  return videoResolution;
 }
 
 function Sessions() {
@@ -88,9 +81,17 @@ function Sessions() {
 
   const getContainerStream = (row) => {
     let transcodeContainer = "";
-    if (row.TranscodingInfo)
-      transcodeContainer = ` -> ${row.TranscodingInfo.Container.toUpperCase()}`;
-    return `${row.NowPlayingItem.Container.toUpperCase()}${transcodeContainer}`;
+    if (row.TranscodingInfo) transcodeContainer = ` -> ${row.TranscodingInfo.Container.toUpperCase()}`;
+
+    let NowPlayingItemContainer = "";
+    if (row.NowPlayingItem.Container == undefined) {
+      if (row.NowPlayingItem.Type != undefined && row.NowPlayingItem.Type == "TvChannel") {
+        NowPlayingItemContainer = "LiveTV";
+      }
+    } else {
+      NowPlayingItemContainer = row.NowPlayingItem.Container;
+    }
+    return `${NowPlayingItemContainer.toUpperCase()}${transcodeContainer}`;
   };
 
   const getVideoStream = (row) => {
@@ -106,7 +107,7 @@ function Sessions() {
     if (row.TranscodingInfo && !row.TranscodingInfo.IsVideoDirect) {
       transcodeType = i18next.t("SESSIONS.TRANSCODE");
       transcodeVideoResolution = getVideoResolution(row.TranscodingInfo.Height);
-      transcodeVideoCodec = ` -> ${row.TranscodingInfo.VideoCodec.toUpperCase()}-${transcodeVideoResolution}`; 
+      transcodeVideoCodec = ` -> ${row.TranscodingInfo.VideoCodec.toUpperCase()}-${transcodeVideoResolution}`;
     }
 
     const originalVideoCodec = videoStream.Codec.toUpperCase();
@@ -125,8 +126,7 @@ function Sessions() {
     if (row.TranscodingInfo && !row.TranscodingInfo.IsVideoDirect) {
       if (row.TranscodingInfo.VideoBitrate) {
         transcodeBitrate = ` -> ${convertBitrate(row.TranscodingInfo.VideoBitrate)}`;
-      }
-      else if (row.TranscodingInfo.Bitrate){
+      } else if (row.TranscodingInfo.Bitrate) {
         transcodeBitrate = ` -> ${convertBitrate(row.TranscodingInfo.Bitrate)}`;
       }
     }
@@ -137,7 +137,7 @@ function Sessions() {
     }
 
     return `${originalBitrate}${transcodeBitrate}`;
-  }
+  };
 
   const getAudioStream = (row) => {
     let mediaTypeAudio = row.NowPlayingItem.Type === "Audio";
@@ -161,7 +161,9 @@ function Sessions() {
       row.NowPlayingItem.MediaStreams.length &&
       streamIndex < row.NowPlayingItem.MediaStreams.length
     ) {
-      originalCodec = `${row.NowPlayingItem.MediaStreams[streamIndex].Codec.toUpperCase()}-${row.NowPlayingItem.MediaStreams[streamIndex].Channels}Ch`;
+      originalCodec = `${row.NowPlayingItem.MediaStreams[streamIndex].Codec.toUpperCase()}-${
+        row.NowPlayingItem.MediaStreams[streamIndex].Channels
+      }Ch`;
     }
 
     return originalCodec != "" ? `${transcodeType} (${originalCodec}${transcodeCodec})` : `${transcodeType}`;
@@ -189,8 +191,7 @@ function Sessions() {
       row.NowPlayingItem.MediaStreams[streamIndex].BitRate
     ) {
       originalBitrate = convertBitrate(row.NowPlayingItem.MediaStreams[streamIndex].BitRate);
-    } else if (transcodeBitRate)
-    {
+    } else if (transcodeBitRate) {
       originalBitrate = i18next.t("ERROR_MESSAGES.N/A");
     }
     return `${originalBitrate}${transcodeBitRate}`;
