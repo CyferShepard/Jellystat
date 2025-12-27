@@ -220,6 +220,8 @@
     "POLLING_INFO": "Le système adapte automatiquement la fréquence de surveillance : rapide quand des utilisateurs regardent du contenu, plus lent quand le serveur est inactif. Cela réduit la charge CPU sur votre serveur Jellyfin.",
     "INTERVAL_WARNING": "L'intervalle actif ne devrait pas être supérieur à l'intervalle de veille",
     "REALTIME_UPDATE_INFO": "Les modifications sont appliquées en temps réel sans redémarrage du serveur.",
+    "ACTIVITY_MONITOR_SETTINGS_SUCCESS": "Paramètres de surveillance mis à jour avec succès",
+    "ACTIVITY_MONITOR_SETTINGS_ERROR": "Erreur lors de la mise à jour des paramètres",
     "SELECT_LIBRARIES_TO_IMPORT": "Sélectionner les médiathèques à importer",
     "SELECT_LIBRARIES_TO_IMPORT_TOOLTIP": "L'activité du contenu de ces médiathèques est toujours suivie, même s'ils ne sont pas importés.",
     "DATE_ADDED": "Date d'ajout",
