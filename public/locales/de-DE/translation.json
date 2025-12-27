@@ -225,6 +225,8 @@
     "POLLING_INFO": "Das System passt das Abfrageintervall automatisch an: schneller, wenn Benutzer Inhalte ansehen, langsamer, wenn der Server im Leerlauf ist. Dadurch wird die CPU-Auslastung Ihres Jellyfin-Servers reduziert.",
     "INTERVAL_WARNING": "Das Intervall für aktive Sitzungen sollte nicht größer sein als das Intervall im Leerlauf.",
     "REALTIME_UPDATE_INFO": "Änderungen werden ohne Neustart des Servers übernommen.",
+    "ACTIVITY_MONITOR_SETTINGS_SUCCESS": "Aktivitätsmonitor-Einstellungen erfolgreich aktualisiert",
+    "ACTIVITY_MONITOR_SETTINGS_ERROR": "Fehler beim Aktualisieren der Aktivitätsmonitor-Einstellungen",
     "SELECT_LIBRARIES_TO_IMPORT": "Zu importierende Bibliotheken auswählen",
     "SELECT_LIBRARIES_TO_IMPORT_TOOLTIP": "Aktivitäten für Elemente innerhalb dieser Bibliotheken werden weiterhin verfolgt - auch wenn sie nicht importiert wurden.",
     "DATE_ADDED": "Hinzugefügt am",
