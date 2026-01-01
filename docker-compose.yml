@@ -2,7 +2,7 @@ version: '3'
 
 services:
   jellystat-db:
-    image: postgres:15.14
+    image: postgres:18.1
     shm_size: '1gb'
     container_name: jellystat-db
     restart: unless-stopped
@@ -15,7 +15,14 @@ services:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: mypassword
     volumes:
-      - postgres-data:/var/lib/postgresql/data
+      - postgres-data:/var/lib/postgresql
+    healthcheck:
+      test:
+        - CMD-SHELL
+        - pg_isready --dbname=postgres --username=postgres
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
   jellystat:
     image: cyfershepard/jellystat:latest
@@ -38,8 +45,15 @@ services:
     ports:
       - "3000:3000"
     depends_on:
-      - jellystat-db
-      
+      jellystat-db:
+        condition: service_healthy
+    healthcheck:
+      test: wget --no-verbose --tries=1 --spider http://localhost:3000/auth/isConfigured || exit 1
+      interval: 60s
+      timeout: 30s
+      retries: 5
+      start_period: 30s
+
 networks:
   default:
 
