@@ -453,7 +453,9 @@ class JellyfinAPI {
       return [];
     }
     try {
-      if (compareVersions(this.version, "10.11.0") >= 0) {
+      if (compareVersions(this.version, "10.11.0") >= 0  &&
+       ( process.env.JF_USE_WEBSOCKETS === undefined ||
+        process.env.JF_USE_WEBSOCKETS.toLowerCase() !== "false")) {
         const socketUrl =
           (this.config.JF_EXTERNAL_HOST ?? this.config.JF_HOST).replace(/^http/, "ws").replace(/^https/, "wss") + "/socket";
         const sessionData = await getSessionData(socketUrl, this.config.JF_API_KEY);
