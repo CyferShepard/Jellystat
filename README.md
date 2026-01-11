@@ -45,6 +45,7 @@
 | MINIMUM_SECONDS_TO_INCLUDE_PLAYBACK | `1`       | `10`                            | The minimum time (in seconds) to include a playback record, which can be used to exclude short playbacks                                 |
 | IS_EMBY_API                         | `false`   | `true`                          | Set to true if using Emby instead of Jellyfin                                                                                            |
 | JF_USE_WEBSOCKETS                   | `true`    | `false`                         | Enables using Jellyfins websocket connection for session data (No effect on Emby)                                                        |
+| JS_USE_EXTERNAL_HOST                | `false`   | `true`                          | Prioritises using External host value for some internal communications and processes                                                     |
 
 ## Getting Started with Development
 
