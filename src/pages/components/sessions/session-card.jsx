@@ -32,6 +32,20 @@ function ticksToTimeString(ticks) {
   return timeString;
 }
 
+function getETA(NowPlayingItem, PlayState) {
+  if (NowPlayingItem.ChannelType && NowPlayingItem.ChannelType === "TV") {
+    return NowPlayingItem.CurrentProgram.EndDate
+      ? new Date(NowPlayingItem.CurrentProgram.EndDate).toLocaleTimeString([], {
+          hour: "2-digit",
+          minute: "2-digit",
+          hour12: JSON.parse(localStorage.getItem("12hr")),
+        })
+      : "";
+  }
+  let ticks = NowPlayingItem.RunTimeTicks - PlayState.PositionTicks;
+  return getETAFromTicks(ticks);
+}
+
 function getETAFromTicks(ticks) {
   // Get current date
   const currentDate = Date.now();
@@ -350,7 +364,12 @@ function SessionCard(props) {
                     <Row>
                       <Col className="col-auto session-details-title text-end text-uppercase">ETA</Col>
                       <Col className="col-auto ellipse">
-                        {props.data.session.NowPlayingItem.RunTimeTicks ? getETAFromTicks(props.data.session.NowPlayingItem.RunTimeTicks - props.data.session.PlayState.PositionTicks) : <Trans i18nKey="ERROR_MESSAGES.N/A" />}
+                        {props.data.session.NowPlayingItem.RunTimeTicks ||
+                        props.data.session.NowPlayingItem.ChannelType === "TV" ? (
+                          getETA(props.data.session.NowPlayingItem, props.data.session.PlayState)
+                        ) : (
+                          <Trans i18nKey="ERROR_MESSAGES.N/A" />
+                        )}
                       </Col>
                     </Row>
                   </Col>
@@ -360,14 +379,20 @@ function SessionCard(props) {
                   <Col>
                     <Card.Text className="text-end">
                       <Tooltip
-                        title={`Ends at ${props.data.session.NowPlayingItem.RunTimeTicks 
-                          ? getETAFromTicks(props.data.session.NowPlayingItem.RunTimeTicks - props.data.session.PlayState.PositionTicks)
-                          : <Trans i18nKey="ERROR_MESSAGES.N/A" />
+                        title={`Ends at ${
+                          props.data.session.NowPlayingItem.RunTimeTicks ||
+                          props.data.session.NowPlayingItem.ChannelType === "TV" ? (
+                            getETA(props.data.session.NowPlayingItem, props.data.session.PlayState)
+                          ) : (
+                            <Trans i18nKey="ERROR_MESSAGES.N/A" />
+                          )
                         }`}
                       >
                         <span>
                           {ticksToTimeString(props.data.session.PlayState.PositionTicks)}
-                          {props.data.session.NowPlayingItem.RunTimeTicks ? "/" + ticksToTimeString(props.data.session.NowPlayingItem.RunTimeTicks) : ""}
+                          {props.data.session.NowPlayingItem.RunTimeTicks
+                            ? "/" + ticksToTimeString(props.data.session.NowPlayingItem.RunTimeTicks)
+                            : ""}
                         </span>
                       </Tooltip>
                     </Card.Text>

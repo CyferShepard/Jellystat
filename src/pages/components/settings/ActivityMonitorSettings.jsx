@@ -1,10 +1,11 @@
 import { useState, useEffect } from "react";
 import axios from "../../../lib/axios_instance";
 import { Row, Col, Form, Button, Alert } from "react-bootstrap";
-import { Trans } from "react-i18next";
+import { Trans, useTranslation } from "react-i18next";
 import Loading from "../general/loading";
 
 export default function ActivityMonitorSettings() {
+  const { t } = useTranslation();
   const [settings, setSettings] = useState({
     activeSessionsInterval: 1000,
     idleInterval: 5000
@@ -55,12 +56,12 @@ export default function ActivityMonitorSettings() {
         },
       });
       setIsSubmitted("Success");
-      setSubmissionMessage("Paramètres de surveillance mis à jour avec succès - Appliqués en temps réel");
+      setSubmissionMessage(t("SETTINGS_PAGE.ACTIVITY_MONITOR_SETTINGS_SUCCESS"));
     } catch (error) {
       console.error("Error updating Activity Monitor settings:", error);
       setIsSubmitted("Failed");
       setSubmissionMessage(
-        error.response?.data || "Erreur lors de la mise à jour des paramètres"
+        error.response?.data || t("SETTINGS_PAGE.ACTIVITY_MONITOR_SETTINGS_ERROR")
       );
     }
   };
@@ -72,14 +73,14 @@ export default function ActivityMonitorSettings() {
   return (
     <div>
       <h1>
-        <Trans i18nKey={"SETTINGS_PAGE.ACTIVITY_MONITOR"} defaults="Surveillance d'activité" />
+        <Trans i18nKey={"SETTINGS_PAGE.ACTIVITY_MONITOR"} defaults="Activity Monitor" />
       </h1>
       
       <div className="mb-3 text-muted">
         <small>
-            <Trans 
-              i18nKey={"SETTINGS_PAGE.REALTIME_UPDATE_INFO"} 
-              defaults="Les modifications sont appliquées en temps réel sans redémarrage du serveur."
+            <Trans
+              i18nKey={"SETTINGS_PAGE.REALTIME_UPDATE_INFO"}
+              defaults="Changes are applied in real-time without server restart."
             />
         </small>
       </div>
@@ -87,9 +88,9 @@ export default function ActivityMonitorSettings() {
       <Form onSubmit={handleSubmit} className="settings-form">
         <Form.Group as={Row} className="mb-3">
           <Form.Label column className="">
-            <Trans 
-              i18nKey={"SETTINGS_PAGE.ACTIVE_SESSIONS_INTERVAL"} 
-              defaults="Intervalle avec sessions actives (ms)"
+            <Trans
+              i18nKey={"SETTINGS_PAGE.ACTIVE_SESSIONS_INTERVAL"}
+              defaults="Active Sessions Interval (ms)"
             />
           </Form.Label>
           <Col sm="10">
@@ -105,9 +106,9 @@ export default function ActivityMonitorSettings() {
               autoComplete="off"
             />
             <Form.Text className="text-muted">
-              <Trans 
-                i18nKey={"SETTINGS_PAGE.ACTIVE_SESSIONS_HELP"} 
-                defaults="Fréquence de vérification quand des utilisateurs regardent du contenu (recommandé: 1000ms)"
+              <Trans
+                i18nKey={"SETTINGS_PAGE.ACTIVE_SESSIONS_HELP"}
+                defaults="How often to check when users are watching content (recommended: 1000ms)"
               />
             </Form.Text>
           </Col>
@@ -115,9 +116,9 @@ export default function ActivityMonitorSettings() {
 
         <Form.Group as={Row} className="mb-3">
           <Form.Label column className="">
-            <Trans 
-              i18nKey={"SETTINGS_PAGE.IDLE_INTERVAL"} 
-              defaults="Intervalle en veille (ms)"
+            <Trans
+              i18nKey={"SETTINGS_PAGE.IDLE_INTERVAL"}
+              defaults="Idle Interval (ms)"
             />
           </Form.Label>
           <Col sm="10">
@@ -133,9 +134,9 @@ export default function ActivityMonitorSettings() {
               autoComplete="off"
             />
             <Form.Text className="text-muted">
-              <Trans 
-                i18nKey={"SETTINGS_PAGE.IDLE_HELP"} 
-                defaults="Fréquence de vérification quand aucune session active (recommandé: 5000ms)"
+              <Trans
+                i18nKey={"SETTINGS_PAGE.IDLE_HELP"}
+                defaults="How often to check when no active sessions (recommended: 5000ms)"
               />
             </Form.Text>
           </Col>
@@ -143,9 +144,9 @@ export default function ActivityMonitorSettings() {
 
         {settings.activeSessionsInterval > settings.idleInterval && (
           <Alert bg="dark" data-bs-theme="dark" variant="warning" className="mb-3">
-            <Trans 
-              i18nKey={"SETTINGS_PAGE.INTERVAL_WARNING"} 
-              defaults="L'intervalle actif ne devrait pas être supérieur à l'intervalle de veille"
+            <Trans
+              i18nKey={"SETTINGS_PAGE.INTERVAL_WARNING"}
+              defaults="Active sessions interval should not be greater than idle interval"
             />
           </Alert>
         )}

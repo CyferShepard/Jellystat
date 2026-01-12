@@ -30,6 +30,7 @@ class Config {
         IS_JELLYFIN: (process.env.IS_EMBY_API || "false").toLowerCase() === "false",
       };
     } catch (error) {
+      console.log("Error fetching config:", error);
       return { error: "Config Details Not Found" };
     }
   }
