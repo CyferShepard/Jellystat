@@ -28,6 +28,10 @@ export const languages = [
     description: "Deutsch",
   },
   {
+    id: "pl-PL",
+    description: "Polski",
+  },
+  {
     id: "es-ES",
     description: "Español",
   },
