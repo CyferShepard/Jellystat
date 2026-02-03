@@ -225,6 +225,8 @@
     "POLLING_INFO": "The system automatically adapts monitoring frequency: fast when users are watching content, slower when the server is idle. This reduces CPU load on your Jellyfin server.",
     "INTERVAL_WARNING": "Active sessions interval should not be greater than idle interval",
     "REALTIME_UPDATE_INFO": "Changes are applied in real-time without server restart.",
+    "ACTIVITY_MONITOR_SETTINGS_SUCCESS": "Activity Monitor settings updated successfully",
+    "ACTIVITY_MONITOR_SETTINGS_ERROR": "Error updating Activity Monitor settings",
     "SELECT_LIBRARIES_TO_IMPORT": "Select Libraries to Import",
     "SELECT_LIBRARIES_TO_IMPORT_TOOLTIP": "Activity for Items within these libraries are still Tracked - Even when not imported.",
     "DATE_ADDED": "Date Added",

@@ -1,6 +1,6 @@
 export const languages = [
   {
-    id: "en-UK",
+    id: "en-GB",
     description: "English",
   },
   {
@@ -26,5 +26,13 @@ export const languages = [
   {
     id: "de-DE",
     description: "Deutsch",
+  },
+  {
+    id: "pl-PL",
+    description: "Polski",
+  },
+  {
+    id: "es-ES",
+    description: "Español",
   },
 ];

@@ -13,6 +13,10 @@ const MINIMUM_SECONDS_TO_INCLUDE_PLAYBACK = process.env.MINIMUM_SECONDS_TO_INCLU
   ? Number(process.env.MINIMUM_SECONDS_TO_INCLUDE_PLAYBACK)
   : 1;
 
+const NEW_WATCH_EVENT_THRESHOLD_HOURS = process.env.NEW_WATCH_EVENT_THRESHOLD_HOURS
+  ? Math.max(Math.min(Number(process.env.NEW_WATCH_EVENT_THRESHOLD_HOURS), 12), 1)
+  : 1;
+
 // const webhookManager = new WebhookManager();
 
 async function getSessionsInWatchDog(SessionData, WatchdogData) {
@@ -168,7 +172,7 @@ async function ActivityMonitor(defaultInterval) {
       if (hasActiveSessions !== lastHadActiveSessions || settingsChanged) {
         if (hasActiveSessions !== lastHadActiveSessions) {
           console.log(
-            `[ActivityMonitor] Switching to ${hasActiveSessions ? "active" : "idle"} polling mode (${currentInterval}ms)`
+            `[ActivityMonitor] Switching to ${hasActiveSessions ? "active" : "idle"} polling mode (${currentInterval}ms)`,
           );
           lastHadActiveSessions = hasActiveSessions;
         }
@@ -299,14 +303,14 @@ async function ActivityMonitor(defaultInterval) {
         /////get data from jf_playback_activity within the last hour with progress of <=80% for current items in session
 
         const ExistingRecords = await db
-          .query(`SELECT * FROM jf_recent_playback_activity(1)`)
+          .query(`SELECT * FROM jf_recent_playback_activity(${NEW_WATCH_EVENT_THRESHOLD_HOURS})`)
           .then((res) => {
             if (res.rows && Array.isArray(res.rows) && res.rows.length > 0) {
               return res.rows.filter(
                 (row) =>
                   playbackToInsert.some(
-                    (pbi) => pbi.NowPlayingItemId === row.NowPlayingItemId && pbi.EpisodeId === row.EpisodeId
-                  ) && row.Progress <= 80.0
+                    (pbi) => pbi.NowPlayingItemId === row.NowPlayingItemId && pbi.EpisodeId === row.EpisodeId,
+                  ) && row.Progress <= 80.0,
               );
             } else {
               return [];
@@ -351,8 +355,8 @@ async function ActivityMonitor(defaultInterval) {
           (pb) =>
             pb.PlaybackDuration >= MINIMUM_SECONDS_TO_INCLUDE_PLAYBACK &&
             !ExistingRecords.some(
-              (er) => er.NowPlayingItemId === pb.NowPlayingItemId && er.EpisodeId === pb.EpisodeId && er.UserId === pb.UserId
-            )
+              (er) => er.NowPlayingItemId === pb.NowPlayingItemId && er.EpisodeId === pb.EpisodeId && er.UserId === pb.UserId,
+            ),
         );
 
         //remove items where PlaybackDuration===0

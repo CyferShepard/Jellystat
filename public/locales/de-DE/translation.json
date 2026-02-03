@@ -42,11 +42,11 @@
   },
   "LIBRARY_CARD": {
     "LIBRARY": "Bibliothek",
-    "TOTAL_TIME": "Gesamtlaufzeit",
-    "TOTAL_FILES": "Gesamtzahl der Dateien",
-    "LIBRARY_SIZE": "Größe der Bibliothek",
-    "TOTAL_PLAYBACK": "Gesamtwiedergabezeit",
-    "LAST_PLAYED": "Zuletzt gespielt",
+    "TOTAL_TIME": "Laufzeit",
+    "TOTAL_FILES": "Dateien",
+    "LIBRARY_SIZE": "Größe",
+    "TOTAL_PLAYBACK": "Wiedergabezeit",
+    "LAST_PLAYED": "Zuletzt abgespielt",
     "LAST_ACTIVITY": "Letzte Aktivität",
     "TRACKED": "Daten-Tracking"
   },
@@ -90,7 +90,7 @@
     "CLIENT": "Client",
     "DEVICE": "Gerät",
     "PLAYBACK_DURATION": "Wiedergabedauer",
-    "TOTAL_PLAYBACK": "Gesamtwiedergabezeit",
+    "TOTAL_PLAYBACK": "Wiedergabezeit",
     "EXPAND": "Erweitern",
     "COLLAPSE": "Reduzieren",
     "SORT_BY": "Sortieren nach",
@@ -102,8 +102,8 @@
     "COLUMN_ACTIONS": "Spaltenaktionen",
     "TOGGLE_SELECT_ROW": "Zeile auswählen/abwählen",
     "TOGGLE_SELECT_ALL": "Alle auswählen/abwählen",
-    "MIN": "Min",
-    "MAX": "Max"
+    "MIN": "Min.",
+    "MAX": "Max."
   },
   "TABLE_NAV_BUTTONS": {
     "FIRST": "Erste",
@@ -128,13 +128,14 @@
     "NO_STATS": "Keine Statistiken zum Anzeigen",
     "NO_BACKUPS": "Keine Sicherungen gefunden",
     "NO_LOGS": "Keine Protokolle gefunden",
-    "NO_API_KEYS": "Keine Schlüssel gefunden",
+    "NO_API_KEYS": "Kein API-Schlüssel gefunden",
     "NETWORK_ERROR": "Verbindung zum Jellyfin-Server nicht möglich",
     "INVALID_LOGIN": "Ungültiger Benutzername oder Passwort",
     "INVALID_URL": "Fehler {STATUS}: Die angeforderte URL wurde nicht gefunden.",
     "UNAUTHORIZED": "Fehler {STATUS}: Nicht autorisiert",
     "PASSWORD_LENGTH": "Passwort muss mindestens 6 Zeichen lang sein",
-    "USERNAME_REQUIRED": "Benutzername ist erforderlich"
+    "USERNAME_REQUIRED": "Benutzername ist erforderlich",
+    "NO_WEBHOOKS": "Keine Webhooks gefunden"
   },
   "SHOW_ARCHIVED_LIBRARIES": "Archivierte Bibliotheken anzeigen",
   "HIDE_ARCHIVED_LIBRARIES": "Archivierte Bibliotheken ausblenden",
@@ -166,8 +167,12 @@
   },
   "STAT_PAGE": {
     "STATISTICS": "Statistiken",
-    "DAILY_PLAY_PER_LIBRARY": "Tägliche Wiedergabezahl pro Bibliothek",
-    "PLAY_COUNT_BY": "Wiedergabezahl nach"
+    "DAILY_PLAY_PER_LIBRARY": "Tägliche Wiedergaben pro Bibliothek",
+    "DAILY_DURATION_PER_LIBRARY": "Tägliche Spieldauer pro Bibliothek",
+    "PLAY_COUNT_BY": "Wiedergaben nach",
+    "PLAY_DURATION_BY": "Spieldauer nach",
+    "COUNT_VIEW": "Anzahl",
+    "DURATION_VIEW": "Dauer"
   },
   "SETTINGS_PAGE": {
     "SETTINGS": "Allgemein",
@@ -179,8 +184,8 @@
     "CHOOSE_FILE": "Datei auswählen",
     "LOGS": "Protokolle",
     "SIZE": "Größe",
-    "JELLYFIN_URL": "Jellyfin URL",
-    "EMBY_URL": "Emby URL",
+    "JELLYFIN_URL": "Jellyfin-URL",
+    "EMBY_URL": "Emby-URL",
     "EXTERNAL_URL": "Externe URL",
     "API_KEY": "API-Schlüssel",
     "API_KEYS": "API-Schlüssel",
@@ -211,9 +216,42 @@
       "1_DAY": "1 Tag",
       "1_WEEK": "1 Woche"
     },
-    "SELECT_LIBRARIES_TO_IMPORT": "Bibliotheken zum Importieren auswählen",
-    "SELECT_LIBRARIES_TO_IMPORT_TOOLTIP": "Die Aktivität für Elemente innerhalb dieser Bibliotheken wird weiterhin verfolgt - auch wenn sie nicht importiert werden.",
-    "DATE_ADDED": "Hinzugefügt am"
+    "ACTIVITY_MONITOR": "Aktivitätsmonitor",
+    "ACTIVE_SESSIONS_INTERVAL": "Intervall bei aktiven Sitzungen (ms)",
+    "ACTIVE_SESSIONS_HELP": "Wie oft die Aktivität überprüft wird, wenn Benutzer Inhalte ansehen (empfohlen: 1000 ms)",
+    "IDLE_INTERVAL": "Intervall im Leerlauf (ms)",
+    "IDLE_HELP": "Wie oft die Aktivität überprüft wird, wenn keine Sitzungen aktiv sind (empfohlen: 5000 ms)",
+    "POLLING_INFO_TITLE": "Intelligentes Abfragen",
+    "POLLING_INFO": "Das System passt das Abfrageintervall automatisch an: schneller, wenn Benutzer Inhalte ansehen, langsamer, wenn der Server im Leerlauf ist. Dadurch wird die CPU-Auslastung Ihres Jellyfin-Servers reduziert.",
+    "INTERVAL_WARNING": "Das Intervall für aktive Sitzungen sollte nicht größer sein als das Intervall im Leerlauf.",
+    "REALTIME_UPDATE_INFO": "Änderungen werden ohne Neustart des Servers übernommen.",
+    "ACTIVITY_MONITOR_SETTINGS_SUCCESS": "Aktivitätsmonitor-Einstellungen erfolgreich aktualisiert",
+    "ACTIVITY_MONITOR_SETTINGS_ERROR": "Fehler beim Aktualisieren der Aktivitätsmonitor-Einstellungen",
+    "SELECT_LIBRARIES_TO_IMPORT": "Zu importierende Bibliotheken auswählen",
+    "SELECT_LIBRARIES_TO_IMPORT_TOOLTIP": "Aktivitäten für Elemente innerhalb dieser Bibliotheken werden weiterhin verfolgt - auch wenn sie nicht importiert wurden.",
+    "DATE_ADDED": "Hinzugefügt am",
+    "WEBHOOKS": "Webhooks",
+    "WEBHOOK_TYPE": "Webhook-Typ",
+    "WEBHOOK_TYPES": {
+      "DISCORD": "Discord",
+      "GENERIC": "Generic"
+    },
+    "TEST_NOW": "Jetzt testen",
+    "WEBHOOKS_CONFIGURATION": "Webhook-Konfiguration",
+    "WEBHOOKS_TOOLTIP": "Empfänger der Wiedergabeaktivität",
+    "WEBHOOK_SAVED": "Webhook gespeichert",
+    "WEBHOOK_NAME": "Webhook-Name",
+    "DISCORD_WEBHOOK_URL": "Discord Webhook-URL",
+    "ENABLE_WEBHOOK": "Webhook aktivieren",
+    "URL": "URL",
+    "TYPE": "Typ",
+    "TRIGGER": "Trigger",
+    "STATUS": "Status",
+    "EVENT_WEBHOOKS": "Benachrichtigungen",
+    "EVENT_WEBHOOKS_TOOLTIP": "Aktiviere oder deaktiviere Benachrichtigungen",
+    "PLAYBACK_STARTED": "Wiedergabe gestartet",
+    "PLAYBACK_ENDED": "Wiedergabe gestoppt",
+    "MEDIA_ADDED": "Medien hinzugefügt"
   },
   "TASK_TYPE": {
     "JOB": "Job",
@@ -223,14 +261,14 @@
     "PartialJellyfinSync": "Synchronisierung kürzlich hinzugefügter Elemente",
     "JellyfinSync": "Vollständige Synchronisierung mit Jellyfin",
     "Jellyfin_Playback_Reporting_Plugin_Sync": "Import von Wiedergabeberichts-Plugin-Daten",
-    "Backup": "Jellystat Sicherung"
+    "Backup": "Jellystat-Sicherung"
   },
   "ABOUT_PAGE": {
     "ABOUT_JELLYSTAT": "Über Jellystat",
     "VERSION": "Version",
     "UPDATE_AVAILABLE": "Update verfügbar",
-    "GITHUB": "Github",
-    "Backup": "Jellystat Sicherung"
+    "GITHUB": "GitHub",
+    "Backup": "Jellystat-Sicherung"
   },
   "TIMELINE_PAGE": {
     "TIMELINE": "Zeitleiste",
@@ -258,7 +296,7 @@
   "NOT_ARCHIVED": "Nicht archiviert",
   "ALL": "Alle",
   "CLOSE": "Schließen",
-  "TOTAL_PLAYS": "Gesamtwiedergaben",
+  "TOTAL_PLAYS": "Wiedergaben",
   "TITLE": "Titel",
   "VIEWS": "Ansichten",
   "WATCH_TIME": "Wiedergabezeit",
@@ -270,7 +308,7 @@
   "FILE_NAME": "Dateiname",
   "DATE": "Datum",
   "START": "Start",
-  "STOP": "Stop",
+  "STOP": "Stopp",
   "DOWNLOAD": "Herunterladen",
   "RESTORE": "Wiederherstellen",
   "ACTIONS": "Aktionen",
@@ -287,7 +325,7 @@
   "AUDIO": "Audio",
   "CHANNELS": "Kanäle",
   "LANGUAGE": "Sprache",
-  "STREAM_DETAILS": "Stream Details",
+  "STREAM_DETAILS": "Stream-Details",
   "SOURCE_DETAILS": "Details zur Videoquelle",
   "DIRECT": "Direkt",
   "TRANSCODE": "Transkodieren",

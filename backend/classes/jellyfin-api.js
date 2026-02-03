@@ -125,7 +125,7 @@ class JellyfinAPI {
 
       const response = await axios.get(url, {
         headers: {
-          "Authorization": 'MediaBrowser Token="' + this.config.JF_API_KEY + '"',
+          Authorization: 'MediaBrowser Token="' + this.config.JF_API_KEY + '"',
           "User-Agent": this.userAgent,
         },
       });
@@ -185,7 +185,7 @@ class JellyfinAPI {
       while (startIndex < total || total === undefined) {
         const response = await axios.get(url, {
           headers: {
-            "Authorization": 'MediaBrowser Token="' + this.config.JF_API_KEY + '"',
+            Authorization: 'MediaBrowser Token="' + this.config.JF_API_KEY + '"',
             "User-Agent": this.userAgent,
           },
           params: {
@@ -227,17 +227,17 @@ class JellyfinAPI {
     }
     try {
       let url = `${this.config.JF_HOST}/Items?ParentId=${id}`;
-      let userid;
-      if (!userid || userid == null) {
-        await new configClass().getPreferedAdmin().then(async (adminid) => {
-          if (!adminid || adminid == null) {
-            userid = (await this.getAdmins())[0].Id;
-          } else {
-            userid = adminid;
-          }
-        });
-      }
-      url += `&userId=${userid}`;
+      // let userid;
+      // if (!userid || userid == null) {
+      //   await new configClass().getPreferedAdmin().then(async (adminid) => {
+      //     if (!adminid || adminid == null) {
+      //       userid = (await this.getAdmins())[0].Id;
+      //     } else {
+      //       userid = adminid;
+      //     }
+      //   });
+      // }
+      // url += `&userId=${userid}`;
       if (itemid && itemid != null) {
         url += `&Ids=${itemid}`;
       }
@@ -252,7 +252,7 @@ class JellyfinAPI {
       while (startIndex < total || total === undefined) {
         const response = await axios.get(url, {
           headers: {
-            "Authorization": 'MediaBrowser Token="' + this.config.JF_API_KEY + '"',
+            Authorization: 'MediaBrowser Token="' + this.config.JF_API_KEY + '"',
             "User-Agent": this.userAgent,
           },
           params: {
@@ -321,7 +321,7 @@ class JellyfinAPI {
 
       const response = await axios.get(url, {
         headers: {
-          "Authorization": 'MediaBrowser Token="' + this.config.JF_API_KEY + '"',
+          Authorization: 'MediaBrowser Token="' + this.config.JF_API_KEY + '"',
           "User-Agent": this.userAgent,
         },
       });
@@ -345,7 +345,7 @@ class JellyfinAPI {
 
       const response = await axios.get(url, {
         headers: {
-          "Authorization": 'MediaBrowser Token="' + this.config.JF_API_KEY + '"',
+          Authorization: 'MediaBrowser Token="' + this.config.JF_API_KEY + '"',
           "User-Agent": this.userAgent,
         },
       });
@@ -371,7 +371,7 @@ class JellyfinAPI {
     try {
       const response = await axios.get(url, {
         headers: {
-          "Authorization": 'MediaBrowser Token="' + this.config.JF_API_KEY + '"',
+          Authorization: 'MediaBrowser Token="' + this.config.JF_API_KEY + '"',
           "User-Agent": this.userAgent,
         },
       });
@@ -395,7 +395,7 @@ class JellyfinAPI {
 
       const response = await axios.get(url, {
         headers: {
-          "Authorization": 'MediaBrowser Token="' + this.config.JF_API_KEY + '"',
+          Authorization: 'MediaBrowser Token="' + this.config.JF_API_KEY + '"',
           "User-Agent": this.userAgent,
         },
       });
@@ -440,7 +440,7 @@ class JellyfinAPI {
 
       const response = await axios.get(url, {
         headers: {
-          "Authorization": 'MediaBrowser Token="' + this.config.JF_API_KEY + '"',
+          Authorization: 'MediaBrowser Token="' + this.config.JF_API_KEY + '"',
           "User-Agent": this.userAgent,
         },
         params: {
@@ -462,9 +462,16 @@ class JellyfinAPI {
       return [];
     }
     try {
-      if (compareVersions(this.version, "10.11.0") >= 0) {
-        const socketUrl =
-          (this.config.JF_EXTERNAL_HOST ?? this.config.JF_HOST).replace(/^http/, "ws").replace(/^https/, "wss") + "/socket";
+      if (
+        compareVersions(this.version, "10.11.0") >= 0 &&
+        (process.env.JF_USE_WEBSOCKETS === undefined || process.env.JF_USE_WEBSOCKETS.toLowerCase() !== "false")
+      ) {
+        const hostUrl =
+          process.env.JS_USE_EXTERNAL_HOST === undefined || process.env.JS_USE_EXTERNAL_HOST.toLowerCase() !== "false"
+            ? this.config.JF_HOST
+            : this.config.JF_EXTERNAL_HOST ?? this.config.JF_HOST;
+
+        const socketUrl = hostUrl.replace(/^http/, "ws").replace(/^https/, "wss") + "/socket";
         const sessionData = await getSessionData(socketUrl, this.config.JF_API_KEY);
         if (sessionData != null) {
           return sessionData;
@@ -476,7 +483,7 @@ class JellyfinAPI {
       const response = await axios
         .get(url, {
           headers: {
-            "Authorization": 'MediaBrowser Token="' + this.config.JF_API_KEY + '"',
+            Authorization: 'MediaBrowser Token="' + this.config.JF_API_KEY + '"',
             "User-Agent": this.userAgent,
           },
         })
@@ -523,7 +530,7 @@ class JellyfinAPI {
 
       const response = await axios.get(url, {
         headers: {
-          "Authorization": 'MediaBrowser Token="' + this.config.JF_API_KEY + '"',
+          Authorization: 'MediaBrowser Token="' + this.config.JF_API_KEY + '"',
           "User-Agent": this.userAgent,
         },
       });
@@ -551,7 +558,7 @@ class JellyfinAPI {
         },
         {
           headers: {
-            "Authorization": 'MediaBrowser Token="' + this.config.JF_API_KEY + '"',
+            Authorization: 'MediaBrowser Token="' + this.config.JF_API_KEY + '"',
             "User-Agent": this.userAgent,
           },
         }
@@ -593,7 +600,7 @@ class JellyfinAPI {
 
       const response = await axios.get(validation_url, {
         headers: {
-          "Authorization": 'MediaBrowser Token="' + apikey + '"',
+          Authorization: 'MediaBrowser Token="' + apikey + '"',
           "User-Agent": this.userAgent,
         },
       });
@@ -621,7 +628,7 @@ class JellyfinAPI {
     try {
       const response = await axios.get(url, {
         headers: {
-          "Authorization": 'MediaBrowser Token="' + this.config.JF_API_KEY + '"',
+          Authorization: 'MediaBrowser Token="' + this.config.JF_API_KEY + '"',
           "User-Agent": this.userAgent,
         },
       });
