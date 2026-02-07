@@ -11,6 +11,7 @@ class JellyfinAPI {
     this.#checkReadyStatus();
     this.sessionErrorCounter = 0;
     this.version = "1.0.0";
+    this.userAgent = "Jellystat/" + this.version;
   }
   //Helper classes
   #checkReadyStatus() {
@@ -125,6 +126,7 @@ class JellyfinAPI {
       const response = await axios.get(url, {
         headers: {
           Authorization: 'MediaBrowser Token="' + this.config.JF_API_KEY + '"',
+          "User-Agent": this.userAgent,
         },
       });
       if (Array.isArray(response?.data)) {
@@ -184,6 +186,7 @@ class JellyfinAPI {
         const response = await axios.get(url, {
           headers: {
             Authorization: 'MediaBrowser Token="' + this.config.JF_API_KEY + '"',
+            "User-Agent": this.userAgent,
           },
           params: {
             fields: "MediaSources,DateCreated,Genres",
@@ -250,6 +253,7 @@ class JellyfinAPI {
         const response = await axios.get(url, {
           headers: {
             Authorization: 'MediaBrowser Token="' + this.config.JF_API_KEY + '"',
+            "User-Agent": this.userAgent,
           },
           params: {
             fields: "MediaSources,DateCreated,Genres",
@@ -318,6 +322,7 @@ class JellyfinAPI {
       const response = await axios.get(url, {
         headers: {
           Authorization: 'MediaBrowser Token="' + this.config.JF_API_KEY + '"',
+          "User-Agent": this.userAgent,
         },
       });
 
@@ -341,6 +346,7 @@ class JellyfinAPI {
       const response = await axios.get(url, {
         headers: {
           Authorization: 'MediaBrowser Token="' + this.config.JF_API_KEY + '"',
+          "User-Agent": this.userAgent,
         },
       });
 
@@ -366,6 +372,7 @@ class JellyfinAPI {
       const response = await axios.get(url, {
         headers: {
           Authorization: 'MediaBrowser Token="' + this.config.JF_API_KEY + '"',
+          "User-Agent": this.userAgent,
         },
       });
 
@@ -389,6 +396,7 @@ class JellyfinAPI {
       const response = await axios.get(url, {
         headers: {
           Authorization: 'MediaBrowser Token="' + this.config.JF_API_KEY + '"',
+          "User-Agent": this.userAgent,
         },
       });
 
@@ -433,6 +441,7 @@ class JellyfinAPI {
       const response = await axios.get(url, {
         headers: {
           Authorization: 'MediaBrowser Token="' + this.config.JF_API_KEY + '"',
+          "User-Agent": this.userAgent,
         },
         params: {
           fields: "MediaSources,DateCreated,Genres",
@@ -475,6 +484,7 @@ class JellyfinAPI {
         .get(url, {
           headers: {
             Authorization: 'MediaBrowser Token="' + this.config.JF_API_KEY + '"',
+            "User-Agent": this.userAgent,
           },
         })
         .then((response) => {
@@ -521,6 +531,7 @@ class JellyfinAPI {
       const response = await axios.get(url, {
         headers: {
           Authorization: 'MediaBrowser Token="' + this.config.JF_API_KEY + '"',
+          "User-Agent": this.userAgent,
         },
       });
       return response.data;
@@ -548,6 +559,7 @@ class JellyfinAPI {
         {
           headers: {
             Authorization: 'MediaBrowser Token="' + this.config.JF_API_KEY + '"',
+            "User-Agent": this.userAgent,
           },
         }
       );
@@ -589,6 +601,7 @@ class JellyfinAPI {
       const response = await axios.get(validation_url, {
         headers: {
           Authorization: 'MediaBrowser Token="' + apikey + '"',
+          "User-Agent": this.userAgent,
         },
       });
       result.isValid = response.status == 200;
@@ -616,6 +629,7 @@ class JellyfinAPI {
       const response = await axios.get(url, {
         headers: {
           Authorization: 'MediaBrowser Token="' + this.config.JF_API_KEY + '"',
+          "User-Agent": this.userAgent,
         },
       });
       return response?.data || {};
