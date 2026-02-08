@@ -7,6 +7,7 @@ const jwt = require("jsonwebtoken");
 const token = jwt.sign({ user: "internal" }, process.env.JWT_SECRET);
 const socketClient = new SocketIoClient("http://127.0.0.1:3000", { auth: { token } });
 let io; // Store the socket.io server instance
+let shuttingDown = false;
 const JWT_SECRET = process.env.JWT_SECRET;
 
 const setupWebSocketServer = (server, namespacePath) => {
@@ -46,6 +47,24 @@ const setupWebSocketServer = (server, namespacePath) => {
   webSocketServerSingleton.setInstance(io);
 };
 
+const shutdownWebSocketServer = async (signal) => {
+  if (!io) return;
+
+  try {
+    io.emit("server_shutdown", { reason: signal });
+
+    socketClient?.disconnect();
+
+    return new Promise((resolve) => {
+      io.close(() => {
+        resolve();
+      });
+    });
+  } catch (err) {
+    console.error("[JELLYSTAT] WebSocket shutdown error. ", err);
+  }
+}
+
 const sendToAllClients = (message) => {
   const ioInstance = webSocketServerSingleton.getInstance();
   if (ioInstance) {
@@ -71,4 +90,4 @@ const sendUpdate = async (tag, message) => {
   }
 };
 
-module.exports = { setupWebSocketServer, sendToAllClients, sendUpdate };
+module.exports = { setupWebSocketServer, sendToAllClients, sendUpdate, shutdownWebSocketServer };
