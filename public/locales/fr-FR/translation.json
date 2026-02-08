@@ -19,8 +19,8 @@
   },
   "SESSIONS": {
     "NO_SESSIONS": "Aucune lecture en cours n'a été trouvée",
-    "DIRECT_PLAY": "",
-    "TRANSCODE": ""
+    "DIRECT_PLAY": "Lecture directe",
+    "TRANSCODE": "Transcodage"
   },
   "STAT_CARDS": {
     "MOST_VIEWED_MOVIES": "FILMS LES PLUS VUS",
@@ -121,7 +121,7 @@
     "PURGE_ACTIVITY": "Êtes-vous sûr de vouloir supprimer l'activité de lecture sélectionnée ?"
   },
   "ERROR_MESSAGES": {
-    "FETCH_THIS_ITEM": "Fetch this item from Jellyfin",
+    "FETCH_THIS_ITEM": "Récupérez cet élément depuis Jellyfin",
     "NO_ACTIVITY": "Aucune activité trouvée",
     "NEVER": "Jamais",
     "N/A": "N/A",
@@ -171,7 +171,7 @@
   },
   "SETTINGS_PAGE": {
     "SETTINGS": "Paramètres",
-    "LANGUAGE": "Language",
+    "LANGUAGE": "Langue",
     "SELECT_AN_ADMIN": "Choisir un utilisateur préféré",
     "LIBRARY_SETTINGS": "Paramètres des médiathèques",
     "BACKUP": "Sauvegarde",
@@ -202,7 +202,7 @@
     "REQUIRE_LOGIN": "Connexion obligatoire",
     "TASK": "Tâche",
     "TASKS": "Tâches",
-    "INTERVAL": "Tâches",
+    "INTERVAL": "Planification",
     "INTERVALS": {
       "15_MIN": "15 Minutes",
       "30_MIN": "30 Minutes",
@@ -220,6 +220,8 @@
     "POLLING_INFO": "Le système adapte automatiquement la fréquence de surveillance : rapide quand des utilisateurs regardent du contenu, plus lent quand le serveur est inactif. Cela réduit la charge CPU sur votre serveur Jellyfin.",
     "INTERVAL_WARNING": "L'intervalle actif ne devrait pas être supérieur à l'intervalle de veille",
     "REALTIME_UPDATE_INFO": "Les modifications sont appliquées en temps réel sans redémarrage du serveur.",
+    "ACTIVITY_MONITOR_SETTINGS_SUCCESS": "Paramètres de surveillance mis à jour avec succès",
+    "ACTIVITY_MONITOR_SETTINGS_ERROR": "Erreur lors de la mise à jour des paramètres",
     "SELECT_LIBRARIES_TO_IMPORT": "Sélectionner les médiathèques à importer",
     "SELECT_LIBRARIES_TO_IMPORT_TOOLTIP": "L'activité du contenu de ces médiathèques est toujours suivie, même s'ils ne sont pas importés.",
     "DATE_ADDED": "Date d'ajout",

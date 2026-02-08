@@ -12,7 +12,8 @@ let keepAliveInterval;
 function initializeClient(websocketUrl, apiKey) {
   const options = {
     headers: {
-      "Authorization": 'MediaBrowser Token="' + apiKey + '"'
+      "Authorization": 'MediaBrowser Token="' + apiKey + '"',
+      "User-Agent": "Jellystat/1.0.0"
     }
   };
   
