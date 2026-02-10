@@ -18,7 +18,7 @@ exports.up = async function (knex) {
                   null "DeviceId",
                   null "ApplicationVersion",
                   CASE WHEN e."EpisodeId"=pb."ItemId" THEN e."SeriesId" ELSE "ItemId" END "NowPlayingItemId",
-                  "ItemName" "NowPlayingItemName",
+                  CASE WHEN e."EpisodeId"=pb."ItemId" THEN e."Name" ELSE "ItemName" END "NowPlayingItemName",
                   CASE WHEN e."EpisodeId"=pb."ItemId" THEN e."SeasonId" ELSE null END  "SeasonId",
                   CASE WHEN i."Id"=e."SeriesId" THEN i."Name" ELSE null END  "SeriesName",
                   CASE WHEN e."EpisodeId"=pb."ItemId" THEN e."EpisodeId" ELSE null END "EpisodeId",
@@ -60,6 +60,7 @@ exports.up = async function (knex) {
     `);
 
     // Update all existing playback plugin data to have the correct NowPlayingItemId=SeriesId
+    // and set the NowPlayingItemName to the jf_library_episode."Name"
     await knex.raw(`
         MERGE INTO jf_playback_activity a
         USING jf_library_episodes e
@@ -68,7 +69,7 @@ exports.up = async function (knex) {
             AND a."NowPlayingItemId" = a."EpisodeId"
             AND a."imported" = true
             AND position('-' in a."Id") = 0
-        THEN UPDATE SET "NowPlayingItemId" = e."SeriesId";
+        THEN UPDATE SET "NowPlayingItemId" = e."SeriesId", "NowPlayingItemName" = e."Name";
     `);
   } catch (error) {
     console.error(error);
@@ -96,7 +97,7 @@ exports.down = async function (knex) {
                   null "ApplicationVersion",
                   "ItemId" "NowPlayingItemId",
                   "ItemName" "NowPlayingItemName",
-                  CASE WHEN e."EpisodeId"=pb."ItemId" THEN e."SeasonId" ELSE null END  "SeasonId",
+                  CASE WHEN e."EpisodeId"=pb."ItemId" THEN e."SeasonId" ELSE null END "SeasonId",
                   CASE WHEN i."Id"=e."SeriesId" THEN i."Name" ELSE null END  "SeriesName",
                   CASE WHEN e."EpisodeId"=pb."ItemId" THEN e."EpisodeId" ELSE null END "EpisodeId",
                   "PlayDuration" "PlaybackDuration",
@@ -137,13 +138,17 @@ exports.down = async function (knex) {
     `);
 
     // revert only the Playback plugin records back to the old NowPlayingId=EpisodeId
+    // and reset the NowPlayingItemName to the original playback reporting name
     await knex.raw(`
-        UPDATE jf_playback_activity
-        SET "NowPlayingItemId" = "EpisodeId"
-        WHERE "EpisodeId" IS NOT NULL
-        AND "NowPlayingItemId" != "EpisodeId"
-        AND position('-' in "Id") = 0
-        AND "imported" = true;
+        MERGE INTO jf_playback_activity a
+        USING jf_playback_reporting_plugin_data p
+        ON a."Id"=p."rowid"::TEXT
+        WHEN MATCHED
+            AND a."EpisodeId" IS NOT NULL
+            AND a."NowPlayingItemId" != a."EpisodeId"
+            AND position('-' in a."Id") = 0
+            AND "imported" = true
+        THEN UPDATE SET "NowPlayingItemId" = a."EpisodeId", "NowPlayingItemName" = p."ItemName";
     `);
   } catch (error) {
     console.error(error);
