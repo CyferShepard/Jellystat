@@ -42,6 +42,39 @@ function readFile(path) {
   });
 }
 
+function getBirthtimeFallback(fileStats, fileName) {
+  // Try to get birthtime metadata
+  if (fileStats.birthtime && fileStats.birthtime.getTime() > 0) {
+    return fileStats.birthtime;
+  }
+
+  // Fallback to changetime
+  if (fileStats.ctime && fileStats.ctime.getTime() > 0) {
+    return fileStats.ctime;
+  }
+
+  // Fallback to modified time
+  if (fileStats.mtime && fileStats.mtime.getTime() > 0) {
+    return fileStats.mtime;
+  }
+
+  // Fallback to filename parsing
+  // format is 4digits-2digis-2digits(' ' or '_' or 'T')
+  // 2digits('-' or ':')2digits('-' or ':')2digits
+  const regexp = /(\d{4})-(\d{2})-(\d{2})[ _T](\d{2})[-:](\d{2})[-:](\d{2})/;
+  const matches = fileName.match(regexp);
+  if (!matches)
+    return null;
+
+  // Verify that each regex match is a valid number
+  for (var i=1; i<7; i++) {
+    if (Number.isNaN(Number(matches[i])))
+      return null;
+  }
+
+  return new Date(matches[1], matches[2]-1, matches[3], matches[4], matches[5], matches[6]);
+}
+
 async function restore(file, refLog) {
   refLog.logData.push({ color: "lawngreen", Message: "Starting Restore" });
   refLog.logData.push({
@@ -182,7 +215,7 @@ router.get("/files", (req, res) => {
             return {
               name: file,
               size: stats.size,
-              datecreated: stats.birthtime,
+              datecreated: getBirthtimeFallback(stats, file),
             };
           });
         res.json(fileData);
