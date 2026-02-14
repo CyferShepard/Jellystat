@@ -31,4 +31,4 @@ load_secrets() {
 # Load secrets
 load_secrets
 # Launch Jellystat
-npm run start
+exec "$@"

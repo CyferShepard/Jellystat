@@ -35,7 +35,7 @@ const TaskScheduler = require("./classes/task-scheduler-singleton");
 // const tasks = require("./tasks/tasks");
 
 // websocket
-const { setupWebSocketServer } = require("./ws");
+const { setupWebSocketServer, shutdownWebSocketServer } = require("./ws");
 const writeEnvVariables = require("./classes/env");
 
 process.env.POSTGRES_USER = process.env.POSTGRES_USER ?? "postgres";
@@ -231,6 +231,7 @@ async function authenticate(req, res, next) {
 }
 
 // start server
+let server;
 try {
   createdb.createDatabase().then((result) => {
     if (result) {
@@ -240,7 +241,7 @@ try {
     }
 
     db.migrate.latest().then(() => {
-      const server = http.createServer(app);
+      server = http.createServer(app);
 
       setupWebSocketServer(server, BASE_NAME);
       server.listen(PORT, LISTEN_IP, async () => {
@@ -255,3 +256,89 @@ try {
 } catch (error) {
   console.log("[JELLYSTAT] An error has occured on startup: " + error);
 }
+
+function runStep(name, fn) {
+  return (async () => {
+    console.log(`[JELLYSTAT] Beginnging shutdown step ${name}`);
+    try {
+      await fn();
+      console.log(`[JELLYSTAT] Shutdown step ${name} complete.`);
+    } catch (err) {
+      console.error(`[JELLYSTAT] Shutdown step ${name} failed.`, err);
+      throw err;
+    }
+  })();
+}
+
+function shutdownKnex() {
+  if (db && typeof db.destroy === "function") {
+    console.info("[JELLYSTAT] Destroying knex connection.");
+    return db.destroy();
+  }
+  
+  return Promise.resolve();
+}
+
+function shutdownHttpServer() {
+  return new Promise((resolve, reject) => {
+    // Stop new connections
+    server.close((err) => {
+      if (err) return reject(err);
+      resolve();
+    });
+
+    if (typeof server.closeIdleConnections === "function") {
+      console.info(`[JELLYSTAT] Closing idle HTTP connections`);
+      server.closeIdleConnections();
+    }
+  });
+}
+
+function withTimeout(promise, ms, label = "shutdown") {
+  let timeoutId;
+
+  const timeoutPromise = new Promise((_, reject) => {
+    timeoutId = setTimeout(() => {
+      reject(new Error(`[JELLYSTAT] ${label} timed out after ${ms}ms`));
+    }, ms);
+  });
+
+  return Promise.race([promise, timeoutPromise]).finally(() => {
+    clearTimeout(timeoutId);
+  });
+}
+
+// shutdown server
+let shuttingDown = false;
+async function shutdown(signal) {
+  if (shuttingDown) return;
+  shuttingDown = true;
+
+  console.log(`[JELLYSTAT] Recieved ${signal}, beginning shutdown process`);
+
+  const timeLimit = 9000;
+
+  const shutdownTasks = [
+    runStep("httpServer", async () => shutdownHttpServer(signal)),
+    runStep("webSocketServer", async () => shutdownWebSocketServer(signal)),
+    runStep("database", async () => shutdownKnex()),
+  ];
+
+  try {
+    await withTimeout(
+      Promise.allSettled(shutdownTasks), 
+      timeLimit, 
+      "graceful shutdown"
+    );
+
+    console.log("[JELLYSTAT] Graceful shutdown complete");
+    process.exit(0);
+  } catch (err) {
+    console.error(`[JELLYSTAT] Error occurred while attempting to gracefully shut down.`, err);
+    process.exit(1);
+  }
+}
+
+// register signal handlers
+process.on("SIGTERM", shutdown);
+process.on("SIGINT", shutdown);
