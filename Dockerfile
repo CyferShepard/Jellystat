@@ -1,5 +1,5 @@
 # Stage 1: Build the application
-FROM node:22.21.1-bookworm-slim AS builder
+FROM node:22.21.1-alpine3.23 AS builder
 
 WORKDIR /app
 
@@ -14,13 +14,9 @@ COPY entry.sh ./
 RUN npm run build
 
 # Stage 2: Create the production image
-FROM node:22.21.1-bookworm-slim
+FROM node:22.21.1-alpine3.23
 
-RUN apt-get update && \
-    apt-get install -yqq --no-install-recommends wget && \
-    apt-get autoremove && \
-    apt-get clean && \
-    rm -rf /var/lib/apt/lists/*
+RUN apk add --no-cache wget
 
 WORKDIR /app
 
@@ -35,4 +31,5 @@ HEALTHCHECK --interval=30s \
 
 EXPOSE 3000
 
-CMD ["/entry.sh"]
+CMD ["npm", "run", "start"]
+ENTRYPOINT ["/entry.sh"]

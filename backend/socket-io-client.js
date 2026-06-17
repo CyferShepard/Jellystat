@@ -11,6 +11,10 @@ class SocketIoClient {
     this.client = io(this.serverUrl, this.options); // Pass options to io()
   }
 
+  disconnect() {
+    this.client?.disconnect();
+  }
+
   waitForConnection() {
     return new Promise((resolve) => {
       if (this.client && this.client.connected) {
