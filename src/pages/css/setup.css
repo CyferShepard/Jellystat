@@ -12,6 +12,7 @@
   border: 0 !important;
 }
 
+.login-page,
 section {
   display: flex;
   justify-content: center;
@@ -21,10 +22,26 @@ section {
   background-position: center;
   background-size: cover;
 }
+
+.login-page.has-server-splash {
+  position: relative;
+}
+
+.login-page.has-server-splash::before {
+  background: rgba(20, 18, 24, 0.68);
+  content: "";
+  inset: 0;
+  position: absolute;
+}
+
+.login-page.has-server-splash .login-card {
+  position: relative;
+}
 .form-box {
   position: relative;
   width: 400px;
-  height: 600px;
+  min-height: 600px;
+  padding: 32px 0;
   background: var(--secondary-background-color);
   /* border: 2px solid rgba(255,255,255,0.5); */
   border-radius: 20px;
@@ -33,6 +50,168 @@ section {
   justify-content: center;
   align-items: center;
 }
+
+.login-card {
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 16px;
+  box-shadow: 0 24px 70px rgba(0, 0, 0, 0.28);
+  justify-content: flex-start;
+  min-height: auto;
+  padding: 56px 0 48px;
+  width: min(400px, calc(100vw - 32px));
+}
+
+.login-brand {
+  align-items: center;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  margin-bottom: 36px;
+}
+
+.login-brand img {
+  height: 96px;
+  width: 96px;
+}
+
+.login-brand .login-server-icon {
+  border-radius: 12px;
+  height: 96px;
+  object-fit: contain;
+  width: 96px;
+}
+
+.login-brand .login-jellyfin-logo {
+  height: 96px;
+  object-fit: contain;
+  width: 96px;
+}
+
+.login-brand h1 {
+  font-size: 38px;
+  line-height: 1;
+}
+
+.login-form {
+  width: 310px;
+}
+
+.login-provider-toggle {
+  background: var(--background-color);
+  border-radius: 40px;
+  display: flex;
+  gap: 4px;
+  margin-bottom: 28px;
+  padding: 4px;
+  width: 100%;
+}
+
+.login-provider-toggle .btn {
+  background: transparent !important;
+  border: 0 !important;
+  border-radius: 40px !important;
+  color: white !important;
+  flex: 1;
+  height: 36px;
+}
+
+.login-provider-toggle .btn.active,
+.login-provider-toggle .btn:hover {
+  background: var(--primary-color) !important;
+}
+
+.login-card .inputbox {
+  margin: 24px 0 28px;
+  width: 100%;
+}
+
+.login-card .inputbox .form-label {
+  font-size: 15px;
+}
+
+.login-card .setup-button {
+  margin-top: 4px;
+}
+
+.quick-connect-panel {
+  align-items: center;
+  display: flex;
+  flex-direction: column;
+  margin-top: 16px;
+  min-height: 44px;
+  width: 100%;
+}
+
+.quick-connect-button {
+  background: transparent !important;
+  border: 1px solid var(--secondary-color) !important;
+  border-radius: 40px !important;
+  color: white !important;
+  height: 40px;
+  width: 100%;
+}
+
+.quick-connect-button:hover,
+.quick-connect-button:focus {
+  background: rgba(0, 164, 220, 0.16) !important;
+}
+
+.quick-connect-copy {
+  background: var(--primary-color) !important;
+  border: 0 !important;
+  border-radius: 40px !important;
+  color: white !important;
+  height: 34px;
+  margin-top: 8px;
+  width: 100%;
+}
+
+.quick-connect-copy:hover,
+.quick-connect-copy:focus {
+  background: var(--secondary-color) !important;
+  color: black !important;
+}
+
+.quick-connect-link {
+  background: transparent !important;
+  border: 0 !important;
+  color: var(--secondary-color) !important;
+  font-size: 13px !important;
+  margin-top: 4px;
+  padding: 0 !important;
+}
+
+.quick-connect-link:hover,
+.quick-connect-link:focus {
+  text-decoration: underline;
+}
+
+.quick-connect-code {
+  background: var(--background-color);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 8px;
+  color: white;
+  font-size: 30px;
+  font-weight: 700;
+  letter-spacing: 4px;
+  line-height: 1;
+  padding: 14px 18px;
+  text-align: center;
+  width: 100%;
+}
+
+.quick-connect-status,
+.quick-connect-error {
+  color: #c9c9c9;
+  font-size: 13px;
+  margin-top: 8px;
+  min-height: 18px;
+}
+
+.quick-connect-error {
+  color: #ff8e8e;
+}
+
 h2 {
   font-size: 2em;
   color: #fff;

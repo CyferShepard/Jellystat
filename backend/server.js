@@ -113,7 +113,7 @@ app.use((req, res, next) => {
     return res.redirect(BASE_NAME);
   }
   // Ignore requests containing 'socket.io'
-  if (req.url.includes("socket.io") || req.url.includes("swagger") || req.url.startsWith("/backup")) {
+  if (req.url.includes("socket.io") || req.url.includes("swagger") || req.url.startsWith("/backup") || req.url.startsWith("/proxy")) {
     return next();
   }
 

@@ -9,9 +9,10 @@ class Config {
           Authorization: `Bearer ${token}`,
         },
       });
-      const { JF_HOST, APP_USER, REQUIRE_LOGIN, settings, IS_JELLYFIN } = response.data;
+      const { JF_HOST, SERVER_NAME, APP_USER, REQUIRE_LOGIN, settings, IS_JELLYFIN } = response.data;
       return {
         hostUrl: JF_HOST,
+        serverName: SERVER_NAME,
         username: APP_USER,
         token: token,
         requireLogin: REQUIRE_LOGIN,
@@ -36,10 +37,15 @@ class Config {
   async getConfig(refreshConfig) {
     let config = localStorage.getItem("config");
     if (config != undefined && !refreshConfig) {
-      return JSON.parse(config);
+      const cachedConfig = JSON.parse(config);
+      if (cachedConfig.serverName !== undefined) {
+        return cachedConfig;
+      }
     } else {
       return await this.setConfig();
     }
+
+    return await this.setConfig();
   }
 }
 

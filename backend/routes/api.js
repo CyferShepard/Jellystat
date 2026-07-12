@@ -10,6 +10,7 @@ const { randomUUID } = require("crypto");
 const configClass = require("../classes/config");
 const { checkForUpdates } = require("../version-control");
 const API = require("../classes/api-loader");
+const { axios } = require("../classes/axios");
 const { sendUpdate } = require("../ws");
 const { tables } = require("../global/backup_tables");
 const TaskScheduler = require("../classes/task-scheduler-singleton");
@@ -158,9 +159,21 @@ router.get("/getconfig", async (req, res) => {
       res.send({ error: config.error });
       return;
     }
+    let systemInfo = {};
+    try {
+      const systemInfoResponse = await axios.get(`${config.JF_HOST}/system/info`, {
+        headers: {
+          Authorization: 'MediaBrowser Token="' + config.JF_API_KEY + '"',
+        },
+      });
+      systemInfo = systemInfoResponse?.data || {};
+    } catch (error) {
+      console.log("[JELLYSTAT] Unable to fetch server name", error?.response?.status || error?.code || error?.message);
+    }
 
     const payload = {
       JF_HOST: config.JF_HOST,
+      SERVER_NAME: systemInfo?.ServerName || systemInfo?.Name || null,
       APP_USER: config.APP_USER,
       settings: config.settings,
       REQUIRE_LOGIN: config.REQUIRE_LOGIN,

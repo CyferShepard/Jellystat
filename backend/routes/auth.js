@@ -5,6 +5,7 @@ const jwt = require("jsonwebtoken");
 const configClass = require("../classes/config");
 const packageJson = require("../../package.json");
 const API = require("../classes/api-loader");
+const { axios } = require("../classes/axios");
 
 const JWT_SECRET = process.env.JWT_SECRET;
 const JS_USER = process.env.JS_USER;
@@ -15,6 +16,50 @@ if (JWT_SECRET === undefined) {
 }
 
 const router = express.Router();
+
+function createJellystatToken(user, res) {
+  jwt.sign({ user }, JWT_SECRET, (err, token) => {
+    if (err) {
+      console.log(err);
+      res.sendStatus(500);
+    } else {
+      res.json({ token });
+    }
+  });
+}
+
+function jellyfinAuthorizationHeader() {
+  return `MediaBrowser Client="Jellystat", Device="Jellystat Web", DeviceId="jellystat-web", Version="${packageJson.version}"`;
+}
+
+function jellyfinQuickConnectUrl(jellyfinHost) {
+  return `${jellyfinHost.replace(/\/$/, "")}/web/index.html#!/quickconnect.html`;
+}
+
+async function getConfiguredJellyfinHost(res) {
+  const config = await new configClass().getConfig();
+
+  if (config.state !== 2 || !config.JF_HOST) {
+    res.sendStatus(400);
+    return null;
+  }
+
+  return config.JF_HOST;
+}
+
+function createJellyfinUserToken(authenticationResult, res) {
+  if (!authenticationResult?.User?.Policy?.IsAdministrator) {
+    return res.sendStatus(403);
+  }
+
+  const user = {
+    id: authenticationResult.User.Id,
+    username: authenticationResult.User.Name,
+    provider: "jellyfin",
+  };
+
+  createJellystatToken(user, res);
+}
 
 router.post("/login", async (req, res) => {
   try {
@@ -38,20 +83,164 @@ router.post("/login", async (req, res) => {
 
     if (loginUser.length > 0 || (username === JS_USER && password === CryptoJS.SHA3(JS_PASSWORD).toString())) {
       const user = { id: 1, username: username };
-
-      jwt.sign({ user }, JWT_SECRET, (err, token) => {
-        if (err) {
-          console.log(err);
-          res.sendStatus(500);
-        } else {
-          res.json({ token });
-        }
-      });
+      createJellystatToken(user, res);
     } else {
       res.sendStatus(401);
     }
   } catch (error) {
     console.log(error);
+  }
+});
+
+router.post("/jellyfinLogin", async (req, res) => {
+  try {
+    const { username, password } = req.body;
+    const jellyfinHost = await getConfiguredJellyfinHost(res);
+
+    if (!jellyfinHost) {
+      return;
+    }
+
+    if (!username || !password) {
+      return res.sendStatus(401);
+    }
+
+    const response = await axios.post(
+      `${jellyfinHost}/Users/AuthenticateByName`,
+      {
+        Username: username,
+        Pw: password,
+      },
+      {
+        headers: {
+          "Content-Type": "application/json",
+          "X-Emby-Authorization": jellyfinAuthorizationHeader(),
+        },
+      }
+    );
+
+    createJellyfinUserToken(response.data, res);
+  } catch (error) {
+    if (error.response?.status === 401 || error.response?.status === 403) {
+      return res.sendStatus(error.response.status);
+    }
+    console.log(error);
+    res.sendStatus(500);
+  }
+});
+
+router.get("/jellyfinQuickConnect/enabled", async (req, res) => {
+  try {
+    const jellyfinHost = await getConfiguredJellyfinHost(res);
+    if (!jellyfinHost) {
+      return;
+    }
+
+    const response = await axios.get(`${jellyfinHost}/QuickConnect/Enabled`, {
+      headers: {
+        "X-Emby-Authorization": jellyfinAuthorizationHeader(),
+      },
+    });
+
+    res.json({ enabled: response.data === true });
+  } catch (error) {
+    if (error.response?.status === 401 || error.response?.status === 403) {
+      return res.json({ enabled: false });
+    }
+    console.log(error);
+    res.sendStatus(500);
+  }
+});
+
+router.post("/jellyfinQuickConnect/initiate", async (req, res) => {
+  try {
+    const jellyfinHost = await getConfiguredJellyfinHost(res);
+    if (!jellyfinHost) {
+      return;
+    }
+
+    const response = await axios.post(`${jellyfinHost}/QuickConnect/Initiate`, null, {
+      headers: {
+        "X-Emby-Authorization": jellyfinAuthorizationHeader(),
+      },
+    });
+
+    res.json({
+      ...response.data,
+      AuthorizeUrl: jellyfinQuickConnectUrl(jellyfinHost),
+    });
+  } catch (error) {
+    if (error.response?.status === 401 || error.response?.status === 403) {
+      return res.sendStatus(error.response.status);
+    }
+    console.log(error);
+    res.sendStatus(500);
+  }
+});
+
+router.get("/jellyfinQuickConnect/status", async (req, res) => {
+  try {
+    const jellyfinHost = await getConfiguredJellyfinHost(res);
+    const { secret } = req.query;
+
+    if (!jellyfinHost) {
+      return;
+    }
+
+    if (!secret) {
+      return res.sendStatus(400);
+    }
+
+    const response = await axios.get(`${jellyfinHost}/QuickConnect/Connect`, {
+      params: { secret },
+      headers: {
+        "X-Emby-Authorization": jellyfinAuthorizationHeader(),
+      },
+    });
+
+    res.json(response.data);
+  } catch (error) {
+    if (error.response?.status === 401 || error.response?.status === 403 || error.response?.status === 404) {
+      return res.sendStatus(error.response.status);
+    }
+    console.log(error);
+    res.sendStatus(500);
+  }
+});
+
+router.post("/jellyfinQuickConnect/login", async (req, res) => {
+  try {
+    const jellyfinHost = await getConfiguredJellyfinHost(res);
+    const { secret } = req.body;
+
+    if (!jellyfinHost) {
+      return;
+    }
+
+    if (!secret) {
+      return res.sendStatus(400);
+    }
+
+    const response = await axios.post(
+      `${jellyfinHost}/Users/AuthenticateWithQuickConnect`,
+      {
+        Secret: secret,
+      },
+      {
+        headers: {
+          "Content-Type": "application/json",
+          "X-Emby-Authorization": jellyfinAuthorizationHeader(),
+        },
+      }
+    );
+
+    createJellyfinUserToken(response.data, res);
+  } catch (error) {
+    if (error.response?.status === 401 || error.response?.status === 403 || error.response?.status === 404) {
+      return res.sendStatus(error.response.status);
+    }
+    console.log(error);
+    res.sendStatus(500);
   }
 });
 
@@ -79,15 +268,7 @@ router.post("/createuser", async (req, res) => {
       }
 
       await db.query(query, [username, password]);
-
-      jwt.sign({ user }, JWT_SECRET, (err, token) => {
-        if (err) {
-          console.log(err);
-          res.sendStatus(500);
-        } else {
-          res.json({ token });
-        }
-      });
+      createJellystatToken(user, res);
     } else {
       res.sendStatus(403);
     }

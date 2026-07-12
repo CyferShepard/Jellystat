@@ -6,6 +6,91 @@ const API = require("../classes/api-loader");
 
 const router = express.Router();
 
+router.get("/Branding/Configuration", async (req, res) => {
+  const config = await new configClass().getConfig();
+
+  if (config.error) {
+    res.send({ error: config.error });
+    return;
+  }
+
+  axios
+    .get(`${config.JF_HOST}/Branding/Configuration`)
+    .then((response) => {
+      res.send(response.data);
+    })
+    .catch((error) => {
+      res.status(error?.response?.status || 500).send("Error fetching branding configuration: " + error);
+    });
+});
+
+router.get("/Branding/Splashscreen", async (req, res) => {
+  const { format, foregroundLayer } = req.query;
+  const config = await new configClass().getConfig();
+
+  if (config.error) {
+    res.send({ error: config.error });
+    return;
+  }
+
+  axios
+    .get(`${config.JF_HOST}/Branding/Splashscreen`, {
+      params: {
+        format: format || "jpg",
+        foregroundLayer: foregroundLayer || 20,
+      },
+      responseType: "arraybuffer",
+    })
+    .then((response) => {
+      res.set("Content-Type", response.headers["content-type"] || "image/jpeg");
+      res.status(200);
+
+      if (response.headers["content-type"]?.startsWith("image/")) {
+        res.send(response.data);
+      } else {
+        res.status(500).send("Error fetching splashscreen");
+      }
+    })
+    .catch((error) => {
+      res.status(error?.response?.status || 500).send("Error fetching splashscreen: " + error);
+    });
+});
+
+async function proxyJellyfinImage(req, res, jellyfinPath, fallbackContentType) {
+  const config = await new configClass().getConfig();
+
+  if (config.error) {
+    res.send({ error: config.error });
+    return;
+  }
+
+  axios
+    .get(`${config.JF_HOST}${jellyfinPath}`, {
+      responseType: "arraybuffer",
+    })
+    .then((response) => {
+      res.set("Content-Type", response.headers["content-type"] || fallbackContentType);
+      res.status(200);
+
+      if (response.headers["content-type"]?.startsWith("image/")) {
+        res.send(response.data);
+      } else {
+        res.status(500).send("Error fetching image");
+      }
+    })
+    .catch((error) => {
+      res.status(error?.response?.status || 500).send("Error fetching image: " + error);
+    });
+}
+
+router.get("/web/favicon.ico", async (req, res) => {
+  proxyJellyfinImage(req, res, "/web/favicon.ico", "image/x-icon");
+});
+
+router.get("/web/icon-transparent.png", async (req, res) => {
+  proxyJellyfinImage(req, res, "/web/icon-transparent.png", "image/png");
+});
+
 router.get("/web/assets/img/devices/", async (req, res) => {
   const { devicename } = req.query; // Get the image URL from the query string
   const config = await new configClass().getConfig();

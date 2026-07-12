@@ -6,11 +6,18 @@
     color: white !important;
     position: fixed !important;
     bottom: 0;
-    max-width: 200px;
+    left: 0;
+    margin: 0 8px;
+    max-width: 184px;
     text-align: center;
-    width: 100%;
+    width: calc(200px - 16px);
 
   
+}
+
+.version .card-body {
+    font-size: 16px;
+    padding: 14px 8px;
 }
 
 
