@@ -185,9 +185,7 @@ async function syncLibraryFolders(data, existing_excluded_libraries) {
     }
   }
 
-  for (const view of db.materializedViews) {
-    await db.refreshMaterializedView(view);
-  }
+  await db.refreshMaterializedViews();
   syncTask.loggedData.push({ color: "yellow", Message: "Library Sync Complete" });
 }
 async function syncLibraryItems(data) {
@@ -615,9 +613,7 @@ async function syncPlaybackPluginData() {
 
     PlaybacksyncTask.loggedData.push({ color: "lawngreen", Message: `Playback Reporting Plugin Sync Complete` });
 
-    for (const view of db.materializedViews) {
-      await db.refreshMaterializedView(view);
-    }
+    await db.refreshMaterializedViews();
     await logging.updateLog(PlaybacksyncTask.uuid, PlaybacksyncTask.loggedData, taskstate.SUCCESS);
   } catch (error) {
     PlaybacksyncTask.loggedData.push({ color: "red", Message: `Error: ${error}` });
