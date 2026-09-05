@@ -629,7 +629,7 @@ async function syncPlaybackPluginData() {
 async function updateLibraryStatsData() {
   syncTask.loggedData.push({ color: "yellow", Message: "Updating Library Stats" });
 
-  await db.query("CALL ju_update_library_stats_data()");
+  await db.query("CALL ju_update_library_stats_data()", undefined, true);
 
   syncTask.loggedData.push({ color: "dodgerblue", Message: "Library Stats Updated." });
 }
