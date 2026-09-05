@@ -1,4 +1,5 @@
 const { Pool } = require("pg");
+const QueryStream = require("pg-query-stream");
 const fs = require("fs");
 const path = require("path");
 const configClass = require("./config");
@@ -16,6 +17,35 @@ const postgresIp = process.env.POSTGRES_IP;
 const postgresPort = process.env.POSTGRES_PORT;
 const postgresDatabase = process.env.POSTGRES_DB || "jfstat";
 const backupfolder = "backup-data";
+
+function writeToStream(stream, value) {
+  return new Promise((resolve, reject) => {
+    const onError = (error) => {
+      stream.removeListener("drain", onDrain);
+      reject(error);
+    };
+    const onDrain = () => {
+      stream.removeListener("error", onError);
+      resolve();
+    };
+
+    stream.once("error", onError);
+    if (stream.write(value)) {
+      stream.removeListener("error", onError);
+      resolve();
+    } else {
+      stream.once("drain", onDrain);
+    }
+  });
+}
+
+function finishStream(stream) {
+  return new Promise((resolve, reject) => {
+    stream.once("error", reject);
+    stream.once("finish", resolve);
+    stream.end();
+  });
+}
 
 function checkFolderWritePermission(folderPath) {
   try {
@@ -51,10 +81,10 @@ async function backup(refLog) {
 
   try {
     let now = dayjs();
-    const backuppath = "./" + backupfolder;
+    const backuppath = path.join(__dirname, "..", backupfolder);
 
     if (!fs.existsSync(backuppath)) {
-      fs.mkdirSync(backuppath);
+      fs.mkdirSync(backuppath, { recursive: true });
       console.log("Directory created successfully!");
     }
     if (!checkFolderWritePermission(backuppath)) {
@@ -78,28 +108,47 @@ async function backup(refLog) {
       return;
     }
 
-    // const backupPath = `../backup-data/backup_${now.format('YYYY-MM-DD HH-mm-ss')}.json`;
-    const directoryPath = path.join(__dirname, "..", backupfolder, `backup_${now.format("YYYY-MM-DD HH-mm-ss")}.json`);
+    const directoryPath = path.join(__dirname, "..", backupfolder, `backup_${now.format("YYYY-MM-DD HH-mm-ss")}.jsonl`);
     refLog.logData.push({ color: "yellow", Message: "Begin Backup " + directoryPath });
-    const stream = fs.createWriteStream(directoryPath, { flags: "a" });
-    stream.on("error", async (error) => {
-      refLog.logData.push({ color: "red", Message: "Backup Failed: " + error });
-      await Logging.updateLog(refLog.uuid, refLog.logData, taskstate.FAILED);
-      return;
+    const stream = fs.createWriteStream(directoryPath, { flags: "wx" });
+    const client = await pool.connect();
+    let backupComplete = false;
+    let streamError;
+    const streamErrorPromise = new Promise((resolve, reject) => {
+      stream.once("error", (error) => {
+        streamError = error;
+        reject(error);
+      });
     });
-    const backup_data = [];
 
-    for (let table of filteredTables) {
-      const query = `SELECT * FROM ${table.value}`;
+    try {
+      for (let table of filteredTables) {
+        await writeToStream(stream, JSON.stringify({ type: "table", table: table.value }) + "\n");
 
-      const { rows } = await pool.query(query);
-      refLog.logData.push({ color: "dodgerblue", Message: `Saving ${rows.length} rows for table ${table.value}` });
+        let rowCount = 0;
+        const queryStream = client.query(new QueryStream(`SELECT * FROM ${table.value}`));
 
-      backup_data.push({ [table.value]: rows });
+        for await (const row of queryStream) {
+          await writeToStream(stream, JSON.stringify({ type: "row", table: table.value, data: row }) + "\n");
+          rowCount += 1;
+        }
+
+        refLog.logData.push({ color: "dodgerblue", Message: `Saving ${rowCount} rows for table ${table.value}` });
+      }
+
+      await Promise.race([finishStream(stream), streamErrorPromise]);
+      if (streamError) throw streamError;
+      backupComplete = true;
+    } catch (error) {
+      await new Promise((resolve) => stream.destroy(resolve));
+      if (!backupComplete) {
+        await fs.promises.unlink(directoryPath).catch(() => {});
+      }
+      throw error;
+    } finally {
+      client.release();
     }
 
-    await stream.write(JSON.stringify(backup_data));
-    stream.end();
     refLog.logData.push({ color: "lawngreen", Message: "Backup Complete" });
     refLog.logData.push({ color: "dodgerblue", Message: "Removing old backups" });
 
@@ -118,7 +167,7 @@ async function backup(refLog) {
     });
 
     let fileData = files
-      .filter((file) => file.endsWith(".json"))
+      .filter((file) => file.endsWith(".json") || file.endsWith(".jsonl"))
       .map((file) => {
         const filePath = path.join(directoryPathDelete, file);
         const stats = fs.statSync(filePath);

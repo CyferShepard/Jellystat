@@ -1,6 +1,7 @@
 const express = require("express");
 const { Pool } = require("pg");
 const fs = require("fs");
+const readline = require("readline");
 const path = require("path");
 const { randomUUID } = require("crypto");
 const multer = require("multer");
@@ -205,6 +206,71 @@ async function restore(file, refLog) {
   refLog.logData.push({ color: "lawngreen", Message: "Restore Complete" });
 }
 
+async function restoreJsonl(file, refLog) {
+  const allowList = tables.map((table) => table.value);
+  const batchSize = 500;
+  const input = fs.createReadStream(file, { encoding: "utf8" });
+  const lines = readline.createInterface({ input, crlfDelay: Infinity });
+  let currentTable = null;
+  let currentRows = [];
+  let restoredRows = 0;
+
+  const restoreBatch = async (tableName, rows) => {
+    if (!tableName || rows.length === 0) return;
+
+    const tableColumns = getTableColumns(tableName);
+    const result = await db.insertBulk(tableName, formatData(rows), tableColumns);
+    if (result.Result !== "SUCCESS") {
+      throw new Error(`Failed to restore ${tableName}: ${result.message}`);
+    }
+
+    restoredRows += rows.length;
+  };
+
+  const flushRows = async () => {
+    await restoreBatch(currentTable, currentRows);
+    currentRows = [];
+  };
+
+  try {
+    for await (const line of lines) {
+      if (!line.trim()) continue;
+
+      let record;
+      try {
+        record = JSON.parse(line);
+      } catch (error) {
+        throw new Error(`Invalid JSONL record: ${error.message}`);
+      }
+
+      if (record.type === "table") {
+        if (!allowList.includes(record.table)) {
+          throw new Error(`Table ${record.table} is not allowed to be restored`);
+        }
+        await flushRows();
+        currentTable = record.table;
+        refLog.logData.push({ color: "dodgerblue", key: currentTable, Message: `Restoring ${currentTable}` });
+        continue;
+      }
+
+      if (record.type !== "row" || record.table !== currentTable || !record.data || typeof record.data !== "object") {
+        throw new Error("Invalid JSONL backup record");
+      }
+
+      currentRows.push(record.data);
+      if (currentRows.length >= batchSize) {
+        await flushRows();
+      }
+    }
+
+    await flushRows();
+    refLog.logData.push({ color: "lawngreen", Message: `${restoredRows} rows restored` });
+    refLog.logData.push({ color: "lawngreen", Message: "Restore Complete" });
+  } finally {
+    input.destroy();
+  }
+}
+
 // Route handler for backup endpoint
 router.get("/beginBackup", async (req, res) => {
   try {
@@ -245,7 +311,11 @@ router.get("/restore/:filename", async (req, res) => {
     const filename = sanitizeFilename(req.params.filename);
     const filePath = path.join(__dirname, "..", backupfolder, filename);
 
-    await restore(filePath, refLog);
+    if (filename.endsWith(".jsonl")) {
+      await restoreJsonl(filePath, refLog);
+    } else {
+      await restore(filePath, refLog);
+    }
     Logging.updateLog(uuid, refLog.logData, taskstate.SUCCESS);
 
     res.send("Restore completed successfully");
@@ -264,7 +334,7 @@ router.get("/files", (req, res) => {
         res.status(500).send("Unable to read directory");
       } else {
         const fileData = files
-          .filter((file) => file.endsWith(".json"))
+          .filter((file) => file.endsWith(".json") || file.endsWith(".jsonl"))
           .map((file) => {
             const filePath = path.join(directoryPath, file);
             const stats = fs.statSync(filePath);

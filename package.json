@@ -45,6 +45,7 @@
     "node-cron": "^4.2.1",
     "pg": "^8.9.0",
     "pg-promise": "^11.3.0",
+    "pg-query-stream": "^4.17.0",
     "react": "^18.2.0",
     "react-blurhash": "^0.3.0",
     "react-bootstrap": "^2.7.2",
