@@ -195,6 +195,7 @@ class JellyfinAPI {
             limit: limit,
             isMissing: false,
             excludeLocationTypes: "Virtual",
+            collapseBoxSetItems: false,
           },
         });
 
@@ -262,6 +263,7 @@ class JellyfinAPI {
             limit: limit,
             isMissing: false,
             excludeLocationTypes: "Virtual",
+            collapseBoxSetItems: false,
             sortBy: "DateCreated",
             sortOrder: "Descending",
           },
