@@ -152,6 +152,7 @@ export default function ActivityTable(props) {
   const columns = [
     {
       accessorKey: "UserName",
+      muiFilterTextFieldProps: { placeholder: i18next.t("ACTIVITY_TABLE.FILTER_EXCLUDE_HINT") },
       header: i18next.t("USER"),
       Cell: ({ row }) => {
         row = row.original;
@@ -164,6 +165,7 @@ export default function ActivityTable(props) {
     },
     {
       accessorKey: "RemoteEndPoint",
+      muiFilterTextFieldProps: { placeholder: i18next.t("ACTIVITY_TABLE.FILTER_EXCLUDE_HINT") },
       header: i18next.t("ACTIVITY_TABLE.IP_ADDRESS"),
 
       Cell: ({ row }) => {
@@ -190,6 +192,7 @@ export default function ActivityTable(props) {
             : row.SeriesName + " : S" + row.SeasonNumber + "E" + row.EpisodeNumber + " - " + row.NowPlayingItemName
         }`,
       field: "NowPlayingItemName",
+      muiFilterTextFieldProps: { placeholder: i18next.t("ACTIVITY_TABLE.FILTER_EXCLUDE_HINT") },
       header: i18next.t("TITLE"),
       minSize: 300,
       Cell: ({ row }) => {
@@ -205,6 +208,7 @@ export default function ActivityTable(props) {
     },
     {
       accessorKey: "Client",
+      muiFilterTextFieldProps: { placeholder: i18next.t("ACTIVITY_TABLE.FILTER_EXCLUDE_HINT") },
       header: i18next.t("ACTIVITY_TABLE.CLIENT"),
       Cell: ({ row }) => {
         row = row.original;
@@ -217,6 +221,7 @@ export default function ActivityTable(props) {
     },
     {
       accessorKey: "PlayMethod",
+      muiFilterTextFieldProps: { placeholder: i18next.t("ACTIVITY_TABLE.FILTER_EXCLUDE_HINT") },
       header: i18next.t("TRANSCODE"),
       Cell: ({ row }) => {
         row = row.original;
@@ -259,6 +264,7 @@ export default function ActivityTable(props) {
     },
     {
       accessorKey: "DeviceName",
+      muiFilterTextFieldProps: { placeholder: i18next.t("ACTIVITY_TABLE.FILTER_EXCLUDE_HINT") },
       header: i18next.t("ACTIVITY_TABLE.DEVICE"),
     },
     {
