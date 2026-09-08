@@ -143,7 +143,7 @@ async function insertBulk(table_name, data, columns) {
   if (Array.isArray(data)) {
     data = data.reduce((accumulator, currentItem) => {
       const isNotDuplicate = !accumulator.some((item) =>
-        currentItem.Id ? item.Id === currentItem.Id : item.rowid === currentItem.rowid
+        currentItem.Id ? item.Id === currentItem.Id : item.rowid === currentItem.rowid,
       );
 
       if (isNotDuplicate) {
@@ -194,7 +194,7 @@ async function query(text, params, refreshViews = false) {
 
     if (refreshViews) {
       for (const view of materializedViews) {
-        refreshMaterializedView(view);
+        await refreshMaterializedView(view);
       }
     }
 
