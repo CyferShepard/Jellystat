@@ -231,9 +231,7 @@ async function query(text, params, refreshViews = false) {
     const result = await pool.query(text, params);
 
     if (refreshViews) {
-      for (const view of materializedViews) {
-        await refreshMaterializedView(view);
-      }
+      await refreshMaterializedViews();
     }
 
     const skippedColumns = [
