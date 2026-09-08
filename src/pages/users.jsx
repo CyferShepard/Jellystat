@@ -313,61 +313,30 @@ function Users() {
     setPage((prevPage) => prevPage - 1);
   };
 
-  function formatLastSeenTime(time) {
-    if (!time) {
-      return " never";
-    }
-    const units = {
-      days: [i18next.t("UNITS.DAY"), i18next.t("UNITS.DAYS")],
-      hours: [i18next.t("UNITS.HOUR"), i18next.t("UNITS.HOUR")],
-      minutes: [i18next.t("UNITS.MINUTE"), i18next.t("UNITS.MINUTES")],
-      seconds: [i18next.t("UNITS.SECOND"), i18next.t("UNITS.SECONDS")],
-    };
-
-    let formattedTime = "";
-
-    for (const unit in units) {
-      if (time[unit]) {
-        const unitName = units[unit][time[unit] > 1 ? 1 : 0];
-        formattedTime += `${time[unit]} ${unitName} `;
-      }
-    }
-
-    return `${formattedTime}`;
+  function getTimeInSeconds(time) {
+    if (!time) return 0;
+    const secondsPerMinute = 60;
+    const secondsPerHour = secondsPerMinute * 60;
+    const secondsPerDay = secondsPerHour * 24;
+    return (time.days || 0) * secondsPerDay + (time.hours || 0) * secondsPerHour + (time.minutes || 0) * secondsPerMinute + (time.seconds || 0);
   }
 
   function descendingComparator(a, b, orderBy) {
+    let valA = a[orderBy];
+    let valB = b[orderBy];
+
     if (orderBy === "LastSeen") {
-      let order_a = formatLastSeenTime(a[orderBy]);
-      let order_b = formatLastSeenTime(b[orderBy]);
-      if (order_b > order_a) {
-        return -1;
-      }
-      if (order_a < order_b) {
-        return 1;
-      }
-      return 0;
+      valA = getTimeInSeconds(valA);
+      valB = getTimeInSeconds(valB);
+      if (valA == 0 || valB == 0) return -1;
+    } else if (orderBy === "TotalPlays" || orderBy === "TotalWatchTime") {
+      valA = parseInt(valA ?? 0);
+      valB = parseInt(valB ?? 0);
     }
-
-    if (orderBy === "TotalPlays" || orderBy === "TotalWatchTime") {
-      let order_a = parseInt(a[orderBy]);
-      let order_b = parseInt(b[orderBy]);
-
-      if (order_a < order_b) {
-        return -1;
-      }
-      if (order_a > order_b) {
-        return 1;
-      }
-      return 0;
-    }
-
-    if (b[orderBy] < a[orderBy]) {
-      return -1;
-    }
-    if (b[orderBy] > a[orderBy]) {
-      return 1;
-    }
+    if (typeof valA === "string") valA = valA.toLowerCase();
+    if (typeof valB === "string") valB = valB.toLowerCase();
+    if (valB < valA) return -1;
+    if (valB > valA) return 1;
     return 0;
   }
 

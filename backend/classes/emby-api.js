@@ -184,6 +184,7 @@ class EmbyAPI {
             recursive: recursive,
             limit: limit,
             isMissing: false,
+            GroupItemsIntoCollections: false,
             excludeLocationTypes: "Virtual",
           },
         });
@@ -252,6 +253,7 @@ class EmbyAPI {
             recursive: recursive,
             limit: limit,
             isMissing: false,
+            GroupItemsIntoCollections: false,
             excludeLocationTypes: "Virtual",
             sortBy: "DateCreated",
             sortOrder: "Descending",
@@ -477,7 +479,7 @@ class EmbyAPI {
           (session) =>
             session.NowPlayingItem !== undefined &&
             session.NowPlayingItem.Type != "Trailer" &&
-            session.NowPlayingItem.ProviderIds["prerolls.video"] == undefined
+            session.NowPlayingItem.ProviderIds["prerolls.video"] == undefined,
         );
       }
       return result;
@@ -528,7 +530,7 @@ class EmbyAPI {
           headers: {
             "X-MediaBrowser-Token": this.config.JF_API_KEY,
           },
-        }
+        },
       );
       return response.data.results;
     } catch (error) {
@@ -584,8 +586,8 @@ class EmbyAPI {
         error?.response != null
           ? this.#httpErrorMessageHandler(error)
           : error.code == "ENOTFOUND"
-          ? "Unable to connect. Please check the URL and your network connection."
-          : error.message;
+            ? "Unable to connect. Please check the URL and your network connection."
+            : error.message;
       return result;
     }
   }

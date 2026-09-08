@@ -1,9 +1,9 @@
-version: '3'
+version: "3"
 
 services:
   jellystat-db:
     image: postgres:18.1
-    shm_size: '1gb'
+    shm_size: "1gb"
     container_name: jellystat-db
     restart: unless-stopped
     logging:
@@ -38,7 +38,7 @@ services:
       POSTGRES_PASSWORD: mypassword
       POSTGRES_IP: jellystat-db
       POSTGRES_PORT: 5432
-      JWT_SECRET: "my-secret-jwt-key"
+      JWT_SECRET: #eg: "my-secret-jwt-key" -  please set this to a random string for security purposes
       TZ: mytimezone # timezone (ex: Europe/Paris)
     volumes:
       - jellystat-backup-data:/app/backend/backup-data

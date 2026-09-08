@@ -52,9 +52,7 @@ async function deleteBulk(table_name, data, pkName) {
     message = data.length + " Rows removed.";
 
     if (table_name === "jf_playback_activity") {
-      for (const view of materializedViews) {
-        refreshMaterializedView(view);
-      }
+      void refreshMaterializedViews();
     }
   } catch (error) {
     await client.query("ROLLBACK");
@@ -113,28 +111,70 @@ const materializedViews = [
   "js_library_items_with_playcount_playtime",
 ];
 
-async function refreshMaterializedView(view_name) {
-  const client = await pool.connect();
+const concurrentMaterializedViews = new Set([
+  "js_latest_playback_activity",
+  "js_library_items_with_playcount_playtime",
+]);
+
+const refreshesInFlight = new Map();
+let allMaterializedViewsRefresh;
+
+async function runMaterializedViewRefresh(view_name) {
+  let client;
   let result = "SUCCESS";
   let message = "";
+
   try {
+    client = await pool.connect();
     await client.query("BEGIN");
 
-    const refreshQuery = {
-      text: `REFRESH MATERIALIZED VIEW ${view_name}`,
-    };
-    await client.query(refreshQuery);
+    const refreshMode = concurrentMaterializedViews.has(view_name) ? " CONCURRENTLY" : "";
+    await client.query({
+      text: `REFRESH MATERIALIZED VIEW${refreshMode} ${view_name}`,
+    });
 
     await client.query("COMMIT");
     message = view_name + " refreshed.";
   } catch (error) {
-    await client.query("ROLLBACK");
+    if (client) {
+      await client.query("ROLLBACK").catch(() => {});
+    }
     message = "Refresh materialized view error: " + error;
     result = "ERROR";
   } finally {
-    client.release();
+    client?.release();
   }
+
   return { Result: result, message: "" + message };
+}
+
+function refreshMaterializedView(view_name) {
+  const existingRefresh = refreshesInFlight.get(view_name);
+  if (existingRefresh) {
+    return existingRefresh;
+  }
+
+  const refresh = runMaterializedViewRefresh(view_name).finally(() => {
+    refreshesInFlight.delete(view_name);
+  });
+  refreshesInFlight.set(view_name, refresh);
+  return refresh;
+}
+
+function refreshMaterializedViews() {
+  if (allMaterializedViewsRefresh) {
+    return allMaterializedViewsRefresh;
+  }
+
+  allMaterializedViewsRefresh = (async () => {
+    for (const view of materializedViews) {
+      await refreshMaterializedView(view);
+    }
+  })().finally(() => {
+    allMaterializedViewsRefresh = undefined;
+  });
+
+  return allMaterializedViewsRefresh;
 }
 
 async function insertBulk(table_name, data, columns) {
@@ -143,7 +183,7 @@ async function insertBulk(table_name, data, columns) {
   if (Array.isArray(data)) {
     data = data.reduce((accumulator, currentItem) => {
       const isNotDuplicate = !accumulator.some((item) =>
-        currentItem.Id ? item.Id === currentItem.Id : item.rowid === currentItem.rowid
+        currentItem.Id ? item.Id === currentItem.Id : item.rowid === currentItem.rowid,
       );
 
       if (isNotDuplicate) {
@@ -167,9 +207,7 @@ async function insertBulk(table_name, data, columns) {
     await client.query("COMMIT");
 
     if (table_name === "jf_playback_activity") {
-      for (const view of materializedViews) {
-        refreshMaterializedView(view);
-      }
+      void refreshMaterializedViews();
     }
   } catch (error) {
     await client.query("ROLLBACK");
@@ -193,9 +231,7 @@ async function query(text, params, refreshViews = false) {
     const result = await pool.query(text, params);
 
     if (refreshViews) {
-      for (const view of materializedViews) {
-        refreshMaterializedView(view);
-      }
+      await refreshMaterializedViews();
     }
 
     const skippedColumns = [
@@ -268,6 +304,7 @@ module.exports = {
   updateSingleFieldBulk: updateSingleFieldBulk,
   querySingle: querySingle,
   refreshMaterializedView: refreshMaterializedView,
+  refreshMaterializedViews: refreshMaterializedViews,
   materializedViews: materializedViews,
 
   // initDB: initDB,

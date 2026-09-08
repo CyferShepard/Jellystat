@@ -350,18 +350,20 @@ async function ActivityMonitor(defaultInterval) {
           });
         }
 
-        //remove items from playbackToInsert that already exists in the recent playback activity so it doesnt duplicate or where PlaybackDuration===0
+        ExistingDataToUpdate = ExistingDataToUpdate.filter((pb) => pb.PlaybackDuration >= MINIMUM_SECONDS_TO_INCLUDE_PLAYBACK);
+
+        const mergedIds = new Set(ExistingDataToUpdate.map((pb) => pb.Id));
+
+        //remove items from playbackToInsert that were successfully merged, and keep minimum duration validation for inserts
         playbackToInsert = playbackToInsert.filter(
-          (pb) =>
-            pb.PlaybackDuration >= MINIMUM_SECONDS_TO_INCLUDE_PLAYBACK &&
-            !ExistingRecords.some(
-              (er) => er.NowPlayingItemId === pb.NowPlayingItemId && er.EpisodeId === pb.EpisodeId && er.UserId === pb.UserId,
-            ),
+          (pb) => pb.PlaybackDuration >= MINIMUM_SECONDS_TO_INCLUDE_PLAYBACK && !mergedIds.has(pb.Id),
         );
 
-        //remove items where PlaybackDuration===0
-
-        ExistingDataToUpdate = ExistingDataToUpdate.filter((pb) => pb.PlaybackDuration >= MINIMUM_SECONDS_TO_INCLUDE_PLAYBACK);
+        if (ExistingRecords.length > 0 && dataToRemove.length > 0) {
+          console.debug(
+            `[ActivityMonitor] Flush merge summary: candidates=${dataToRemove.length}, existing=${ExistingRecords.length}, merged=${ExistingDataToUpdate.length}, insertFallback=${playbackToInsert.length}`,
+          );
+        }
 
         if (toDeleteIds.length > 0) {
           await db.deleteBulk("jf_activity_watchdog", toDeleteIds, "ActivityId");

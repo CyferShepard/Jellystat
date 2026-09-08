@@ -3,8 +3,6 @@ const express = require("express");
 
 const db = require("../db");
 const dbHelper = require("../classes/db-helper");
-
-const pgp = require("pg-promise")();
 const { randomUUID } = require("crypto");
 
 const configClass = require("../classes/config");
@@ -136,17 +134,30 @@ async function purgeLibraryItems(id, withActivity, purgeAll = false) {
   await db.query(items_query, [id]);
 
   if (withActivity) {
+    const whereClauses = [];
+    const values = [];
+
+    if (episodeIds.length > 0) {
+      values.push(episodeIds);
+      whereClauses.push(`"EpisodeId" = ANY($${values.length})`);
+    }
+
+    if (seasonIds.length > 0) {
+      values.push(seasonIds);
+      whereClauses.push(`"SeasonId" = ANY($${values.length})`);
+    }
+
+    values.push(id);
+    whereClauses.push(`"NowPlayingItemId" = $${values.length}`);
+
     const deleteQuery = {
-      text: `DELETE FROM jf_playback_activity WHERE${
-        episodeIds.length > 0 ? ` "EpisodeId" IN (${pgp.as.csv(episodeIds)})  OR` : ""
-      }${seasonIds.length > 0 ? ` "SeasonId" IN (${pgp.as.csv(seasonIds)}) OR` : ""} "NowPlayingItemId"='${id}'`,
+      text: `DELETE FROM jf_playback_activity WHERE ${whereClauses.join(" OR ")}`,
+      values,
       refreshViews: true,
     };
     await db.query(deleteQuery);
   }
-  for (const view of db.materializedViews) {
-    await db.refreshMaterializedView(view);
-  }
+  await db.refreshMaterializedViews();
 }
 
 //////////////////////////////
@@ -1123,21 +1134,34 @@ router.delete("/item/purge", async (req, res) => {
         await db.query(`delete from jf_library_items where "Id"=$1`, [id]);
       }
       if (withActivity) {
+        const whereClauses = [];
+        const values = [];
+        const episodeActivityIds = episodes.map((item) => item.EpisodeId);
+        const seasonActivityIds = seasons.map((item) => item.Id);
+
+        if (episodeActivityIds.length > 0) {
+          values.push(episodeActivityIds);
+          whereClauses.push(`"EpisodeId" = ANY($${values.length})`);
+        }
+
+        if (seasonActivityIds.length > 0) {
+          values.push(seasonActivityIds);
+          whereClauses.push(`"SeasonId" = ANY($${values.length})`);
+        }
+
+        values.push(id);
+        whereClauses.push(`"NowPlayingItemId" = $${values.length}`);
+
         const deleteQuery = {
-          text: `DELETE FROM jf_playback_activity WHERE${
-            episodes.length > 0 ? ` "EpisodeId" IN (${pgp.as.csv(episodes.map((item) => item.EpisodeId))})  OR` : ""
-          }${
-            seasons.length > 0 ? ` "SeasonId" IN (${pgp.as.csv(seasons.map((item) => item.SeasonId))}) OR` : ""
-          } "NowPlayingItemId"='${id}'`,
+          text: `DELETE FROM jf_playback_activity WHERE ${whereClauses.join(" OR ")}`,
+          values,
           refreshViews: true,
         };
         await db.query(deleteQuery);
       }
     }
 
-    for (const view of db.materializedViews) {
-      await db.refreshMaterializedView(view);
-    }
+    await db.refreshMaterializedViews();
 
     sendUpdate("GeneralAlert", {
       type: "Success",
