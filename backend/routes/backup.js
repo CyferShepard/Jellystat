@@ -28,7 +28,9 @@ const postgresDatabase = process.env.POSTGRES_DB || "jfstat";
 const postgresSslRejectUnauthorized =
   process.env.POSTGRES_SSL_REJECT_UNAUTHORIZED === undefined ? true : process.env.POSTGRES_SSL_REJECT_UNAUTHORIZED === "true";
 
-const backupfolder = "backup-data";
+const backupfolder = process.env.JS_BACKUP_DIR
+    ? path.resolve(process.env.JS_BACKUP_DIR)
+    : path.join(__dirname, "..", "backup-data");
 
 // table mappers
 const jf_libraries = require("../models/jf_libraries");
@@ -309,7 +311,7 @@ router.get("/restore/:filename", async (req, res) => {
     Logging.insertLog(uuid, triggertype.Manual, taskName.restore);
 
     const filename = sanitizeFilename(req.params.filename);
-    const filePath = path.join(__dirname, "..", backupfolder, filename);
+    const filePath = path.join(backupfolder, filename);
 
     if (filename.endsWith(".jsonl")) {
       await restoreJsonl(filePath, refLog);
@@ -328,7 +330,7 @@ router.get("/restore/:filename", async (req, res) => {
 
 router.get("/files", (req, res) => {
   try {
-    const directoryPath = path.join(__dirname, "..", backupfolder);
+    const directoryPath = backupfolder;
     fs.readdir(directoryPath, (err, files) => {
       if (err) {
         res.status(500).send("Unable to read directory");
@@ -355,7 +357,7 @@ router.get("/files", (req, res) => {
 //download backup file
 router.get("/files/:filename", (req, res) => {
   const filename = sanitizeFilename(req.params.filename);
-  const filePath = path.join(__dirname, "..", backupfolder, filename);
+  const filePath = path.join(backupfolder, filename);
   res.download(filePath);
 });
 
@@ -363,7 +365,7 @@ router.get("/files/:filename", (req, res) => {
 router.delete("/files/:filename", (req, res) => {
   try {
     const filename = sanitizeFilename(req.params.filename);
-    const filePath = path.join(__dirname, "..", backupfolder, filename);
+    const filePath = path.join(backupfolder, filename);
 
     fs.unlink(filePath, (err) => {
       if (err) {
@@ -382,7 +384,7 @@ router.delete("/files/:filename", (req, res) => {
 
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
-    cb(null, path.join(__dirname, "..", backupfolder)); // Set the destination folder for uploaded files
+    cb(null, backupfolder); // Set the destination folder for uploaded files
   },
   filename: function (req, file, cb) {
     cb(null, file.originalname); // Set the file name
