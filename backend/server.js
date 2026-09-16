@@ -87,6 +87,14 @@ function typeInferenceMiddleware(req, res, next) {
 
 app.use(typeInferenceMiddleware);
 
+// When JS_ENV_DIR is set, env.js is written outside of `root` (e.g. because `root` lives on a read-only filesystem), so serve it explicitly from there instead of relying on the findFile() lookup below, which only searches under `root`.
+if (process.env.JS_ENV_DIR) {
+  const envDir = path.resolve(process.env.JS_ENV_DIR);
+  app.get(/\/env\.js$/, (req, res) => {
+    res.sendFile(path.join(envDir, "env.js"));
+  });
+}
+
 const findFile = (dir, fileName) => {
   const files = fs.readdirSync(dir);
   for (const file of files) {

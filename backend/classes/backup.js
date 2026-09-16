@@ -16,7 +16,9 @@ const postgresPassword = process.env.POSTGRES_PASSWORD;
 const postgresIp = process.env.POSTGRES_IP;
 const postgresPort = process.env.POSTGRES_PORT;
 const postgresDatabase = process.env.POSTGRES_DB || "jfstat";
-const backupfolder = "backup-data";
+const backupfolder = process.env.JS_BACKUP_DIR
+    ? path.resolve(process.env.JS_BACKUP_DIR)
+    : path.join(__dirname, "..", "backup-data");
 
 function writeToStream(stream, value) {
   return new Promise((resolve, reject) => {
@@ -81,7 +83,7 @@ async function backup(refLog) {
 
   try {
     let now = dayjs();
-    const backuppath = path.join(__dirname, "..", backupfolder);
+    const backuppath = backupfolder;
 
     if (!fs.existsSync(backuppath)) {
       fs.mkdirSync(backuppath, { recursive: true });
@@ -108,7 +110,7 @@ async function backup(refLog) {
       return;
     }
 
-    const directoryPath = path.join(__dirname, "..", backupfolder, `backup_${now.format("YYYY-MM-DD HH-mm-ss")}.jsonl`);
+    const directoryPath = path.join(backupfolder, `backup_${now.format("YYYY-MM-DD HH-mm-ss")}.jsonl`);
     refLog.logData.push({ color: "yellow", Message: "Begin Backup " + directoryPath });
     const stream = fs.createWriteStream(directoryPath, { flags: "wx" });
     const client = await pool.connect();
@@ -154,7 +156,7 @@ async function backup(refLog) {
 
     //Cleanup excess backups
     let deleteCount = 0;
-    const directoryPathDelete = path.join(__dirname, "..", backupfolder);
+    const directoryPathDelete = backupfolder;
 
     const files = await new Promise((resolve, reject) => {
       fs.readdir(directoryPathDelete, (err, files) => {
@@ -181,7 +183,7 @@ async function backup(refLog) {
     fileData = fileData.sort((a, b) => new Date(b.datecreated) - new Date(a.datecreated)).slice(5);
 
     for (var oldBackup of fileData) {
-      const oldBackupFile = path.join(__dirname, "..", backupfolder, oldBackup.name);
+      const oldBackupFile = path.join(backupfolder, oldBackup.name);
 
       await new Promise((resolve, reject) => {
         fs.unlink(oldBackupFile, (err) => {
