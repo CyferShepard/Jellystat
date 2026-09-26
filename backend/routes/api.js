@@ -1387,7 +1387,7 @@ router.get("/getHistory", async (req, res) => {
           alias: "ar",
           conditions: [
             { first: "a.NowPlayingItemId", operator: "=", second: "ar.NowPlayingItemId" },
-            { first: "a.EpisodeId", operator: "=", second: "ar.EpisodeId", type: "and" },
+            { first: `COALESCE(a."EpisodeId", '1')`, operator: "=", second: "ar.EpisodeId", type: "and" },
             { first: "a.UserId", operator: "=", second: "ar.UserId", type: "and" },
           ],
         },
@@ -1552,7 +1552,7 @@ router.post("/getLibraryHistory", async (req, res) => {
           alias: "ar",
           conditions: [
             { first: "a.NowPlayingItemId", operator: "=", second: "ar.NowPlayingItemId" },
-            { first: "a.EpisodeId", operator: "=", second: "ar.EpisodeId", type: "and" },
+            { first: `COALESCE(a."EpisodeId", '1')`, operator: "=", second: "ar.EpisodeId", type: "and" },
             { first: "a.UserId", operator: "=", second: "ar.UserId", type: "and" },
           ],
         },
