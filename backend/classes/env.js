@@ -16,7 +16,14 @@ async function writeEnvVariables() {
   const envContent = `window.env = ${JSON.stringify(envVariables, null, 2)};`;
 
   // Define the output file path
-  const outputPath = path.join(__dirname, "..", "..", "dist", "env.js");
+  const envDir = process.env.JS_ENV_DIR
+      ? path.resolve(process.env.JS_ENV_DIR)
+      : path.join(__dirname, "..", "..", "dist");
+  const outputPath = path.join(envDir, "env.js");
+
+  if (process.env.JS_ENV_DIR) {
+      fs.mkdirSync(envDir, { recursive: true });
+  }
 
   // Write the environment variables to the file
   fs.writeFile(outputPath, envContent, "utf8", (err) => {
