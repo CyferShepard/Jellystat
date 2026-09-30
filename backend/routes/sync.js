@@ -238,7 +238,7 @@ async function syncSeasons(seasons) {
 
   for (const show of shows) {
     const existingIdsSeasons = await db
-      .query(`SELECT *	FROM public.jf_library_seasons where "SeriesId" = '${show}'`)
+      .query(`SELECT *	FROM public.jf_library_seasons where "SeriesId" = $1`, [show])
       .then((res) => res.rows.map((row) => row.Id));
 
     let seasonsToInsert = [];
@@ -276,7 +276,7 @@ async function syncEpisodes(episodes) {
 
   for (const show of shows) {
     const existingIdsEpisodes = await db
-      .query(`SELECT "EpisodeId"	FROM public.jf_library_episodes where "SeriesId" = '${show}'`)
+      .query(`SELECT "EpisodeId"	FROM public.jf_library_episodes where "SeriesId" = $1`, [show])
       .then((res) => res.rows.map((row) => row.EpisodeId));
 
     let episodesToInsert = [];
@@ -358,7 +358,7 @@ async function syncItemInfo(seasons_and_episodes, library_items) {
   //loop for each Movie
   for (const Item of Items) {
     const existingItemInfo = await db
-      .query(`SELECT *	FROM public.jf_item_info where "Id" = '${Item.Id}'`)
+      .query(`SELECT *	FROM public.jf_item_info where "Id" = $1`, [Item.Id])
       .then((res) => res.rows.map((row) => row.Id));
 
     if ((existingItemInfo.length == 0 && syncTask.taskName === taskName.partialsync) || syncTask.taskName === taskName.fullsync) {
@@ -376,7 +376,7 @@ async function syncItemInfo(seasons_and_episodes, library_items) {
   //loop for each Episode
   for (const Episode of Episodes) {
     const existingEpisodeItemInfo = await db
-      .query(`SELECT *	FROM public.jf_item_info where "Id" = '${Episode.Id}'`)
+      .query(`SELECT *	FROM public.jf_item_info where "Id" = $1`, [Episode.Id])
       .then((res) => res.rows.map((row) => row.Id));
 
     if (
