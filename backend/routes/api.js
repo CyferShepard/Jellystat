@@ -1400,20 +1400,19 @@ router.get("/getHistory", async (req, res) => {
     };
 
     if (search && search.length > 0) {
-      query.where = [
-        {
-          field: `LOWER(
+      const searchCondition = dbHelper.buildSearchCondition(
+        `LOWER(
           CASE 
             WHEN a."SeriesName" is null THEN a."NowPlayingItemName"
             ELSE CONCAT(a."SeriesName" , ' : S' , a."SeasonNumber" , 'E' , a."EpisodeNumber" , ' - ' , a."NowPlayingItemName")
           END 
           )`,
-          operator: "LIKE",
-          value: `$${values.length + 1}`,
-        },
-      ];
-
-      values.push(`%${search.toLowerCase()}%`);
+        search,
+        values
+      );
+      if (searchCondition) {
+        query.where = [searchCondition];
+      }
     }
 
     query.values = values;
@@ -1567,20 +1566,19 @@ router.post("/getLibraryHistory", async (req, res) => {
     values.push(libraryid);
 
     if (search && search.length > 0) {
-      query.where = [
-        {
-          field: `LOWER(
+      const searchCondition = dbHelper.buildSearchCondition(
+        `LOWER(
           CASE 
             WHEN a."SeriesName" is null THEN a."NowPlayingItemName"
             ELSE CONCAT(a."SeriesName" , ' : S' , a."SeasonNumber" , 'E' , a."EpisodeNumber" , ' - ' , a."NowPlayingItemName")
           END 
           )`,
-          operator: "LIKE",
-          value: `$${values.length + 1}`,
-        },
-      ];
-
-      values.push(`%${search.toLowerCase()}%`);
+        search,
+        values
+      );
+      if (searchCondition) {
+        query.where = [searchCondition];
+      }
     }
 
     query.values = values;
@@ -1704,19 +1702,19 @@ router.post("/getItemHistory", async (req, res) => {
     values.push(itemid);
 
     if (search && search.length > 0) {
-      query.where = [
-        {
-          field: `LOWER(
+      const searchCondition = dbHelper.buildSearchCondition(
+        `LOWER(
           CASE 
             WHEN a."SeriesName" is null THEN a."NowPlayingItemName"
             ELSE CONCAT(a."SeriesName" , ' : S' , a."SeasonNumber" , 'E' , a."EpisodeNumber" , ' - ' , a."NowPlayingItemName")
           END 
           )`,
-          operator: "LIKE",
-          value: `$${values.length + 1}`,
-        },
-      ];
-      values.push(`%${search.toLowerCase()}%`);
+        search,
+        values
+      );
+      if (searchCondition) {
+        query.where = [searchCondition];
+      }
     }
 
     query.values = values;
@@ -1828,19 +1826,19 @@ router.post("/getUserHistory", async (req, res) => {
     values.push(userid);
 
     if (search && search.length > 0) {
-      query.where = [
-        {
-          field: `LOWER(
+      const searchCondition = dbHelper.buildSearchCondition(
+        `LOWER(
           CASE 
             WHEN a."SeriesName" is null THEN a."NowPlayingItemName"
             ELSE CONCAT(a."SeriesName" , ' : S' , a."SeasonNumber" , 'E' , a."EpisodeNumber" , ' - ' , a."NowPlayingItemName")
           END 
           )`,
-          operator: "LIKE",
-          value: `$${values.length + 1}`,
-        },
-      ];
-      values.push(`%${search.toLowerCase()}%`);
+        search,
+        values
+      );
+      if (searchCondition) {
+        query.where = [searchCondition];
+      }
     }
 
     query.values = values;

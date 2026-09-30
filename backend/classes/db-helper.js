@@ -44,10 +44,12 @@ function buildWhereClause(conditions) {
       } else if (typeof condition === "object") {
         const { column, field, operator, value, type } = condition;
         const conjunction = index === 0 ? "" : type ? type.toUpperCase() : "AND";
-        if (operator == "LIKE") {
-          return `${conjunction} ${column ? wrapField(column) : field} ${operator} ${value}`;
+        const target = column ? wrapField(column) : field;
+        if (operator == "NOT LIKE") {
+          // NULL NOT LIKE '%x%' evaluates to NULL (row dropped); an exclusion filter should keep NULL rows
+          return `${conjunction} (${target} IS NULL OR ${target} NOT LIKE ${value})`;
         }
-        return `${conjunction} ${column ? wrapField(column) : field} ${operator} ${value}`;
+        return `${conjunction} ${target} ${operator} ${value}`;
       }
       return "";
     })
@@ -205,6 +207,43 @@ async function query({
   }
 }
 
+// Parses a free-text filter/search term. A leading "!" negates the match (LIKE -> NOT LIKE).
+// Returns null when there is nothing to match on: non-string values (booleans, numbers), an empty
+// term, or a bare "!". Non-string values can't be used with LIKE and are ignored, as before.
+function parseTextFilter(rawValue) {
+  if (typeof rawValue !== "string") {
+    return null;
+  }
+  let term = rawValue;
+  let negate = false;
+  if (term.startsWith("!")) {
+    negate = true;
+    term = term.slice(1);
+  }
+  if (term.length === 0) {
+    return null;
+  }
+  return {
+    operator: negate ? "NOT LIKE" : "LIKE",
+    pattern: `%${term.toLowerCase()}%`,
+  };
+}
+
+// Builds a where condition for a free-text search against a (pre-lowercased) field expression.
+// Pushes the bound value onto `values` and returns the condition, or null if the search is empty.
+function buildSearchCondition(field, search, values) {
+  const parsed = parseTextFilter(search);
+  if (!parsed) {
+    return null;
+  }
+  values.push(parsed.pattern);
+  return {
+    field: field,
+    operator: parsed.operator,
+    value: `$${values.length}`,
+  };
+}
+
 function buildFilterList(query, filtersArray, filterFields) {
   if (filtersArray.length > 0) {
     query.where = query.where || [];
@@ -291,13 +330,14 @@ function buildFilterList(query, filtersArray, filterFields) {
         }
       }
 
-      if (filter.value) {
+      const textFilter = parseTextFilter(filter.value);
+      if (textFilter) {
         const whereClause = {
-          operator: "LIKE",
+          operator: textFilter.operator,
           value: `$${query.values.length + 1}`,
         };
 
-        query.values.push(`%${filter.value.toLowerCase()}%`);
+        query.values.push(textFilter.pattern);
 
         if (isColumn) {
           whereClause.column = column;
@@ -311,10 +351,10 @@ function buildFilterList(query, filtersArray, filterFields) {
             if (!query.cte.where) {
               query.cte.where = [];
             }
-            whereClause.value = `$${query.values.length + 1}`;
-            query.cte.where.push(whereClause);
+            // push a copy: mutating whereClause here would also change the placeholder already in query.where
+            query.cte.where.push({ ...whereClause, value: `$${query.values.length + 1}` });
 
-            query.values.push(`%${filter.value.toLowerCase()}%`);
+            query.values.push(textFilter.pattern);
           }
         }
       }
@@ -324,4 +364,6 @@ function buildFilterList(query, filtersArray, filterFields) {
 module.exports = {
   query,
   buildFilterList,
+  buildSearchCondition,
+  parseTextFilter,
 };

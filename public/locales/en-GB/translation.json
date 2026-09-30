@@ -99,6 +99,7 @@
     "CLEAR_SORT": "Clear Sort",
     "CLEAR_FILTER": "Clear Filter",
     "FILTER_BY": "Filter by",
+    "FILTER_EXCLUDE_HINT": "Type to filter, prefix with ! to exclude",
     "COLUMN_ACTIONS": "Column Actions",
     "TOGGLE_SELECT_ROW": "Toggle Select Row",
     "TOGGLE_SELECT_ALL": "Toggle Select All",

@@ -239,20 +239,19 @@ router.get("/getPlaybackActivity", async (req, res) => {
     };
 
     if (search && search.length > 0) {
-      query.where = [
-        {
-          field: `LOWER(
+      const searchCondition = dbHelper.buildSearchCondition(
+        `LOWER(
           CASE 
             WHEN a."SeriesName" is null THEN a."NowPlayingItemName"
             ELSE a."SeriesName"
           END 
           )`,
-          operator: "LIKE",
-          value: `$${values.length + 1}`,
-        },
-      ];
-
-      values.push(`%${search.toLowerCase()}%`);
+        search,
+        values
+      );
+      if (searchCondition) {
+        query.where = [searchCondition];
+      }
     }
 
     query.values = values;
@@ -432,13 +431,10 @@ router.post("/getLibraryItemsWithStats", async (req, res) => {
     values.push(libraryid);
 
     if (search && search.length > 0) {
-      query.where.push({
-        field: `LOWER(a."Name")`,
-        operator: "LIKE",
-        value: `$${values.length + 1}`,
-      });
-
-      values.push(`%${search.toLowerCase()}%`);
+      const searchCondition = dbHelper.buildSearchCondition(`LOWER(a."Name")`, search, values);
+      if (searchCondition) {
+        query.where.push(searchCondition);
+      }
     }
 
     query.values = values;
