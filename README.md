@@ -62,7 +62,7 @@
 - Run `npm run build` to build local files ready to run
 - Run `npm run start-server` to only run the backend nodejs server
 - Run `npm run start-client` to only run the frontend React UI
-- Run `npm run start-app` to run both backend and frontend at the same time
+- Run `npm run start-dev` to run both backend and frontend at the same time
 
 When contributing please ensure to log a pull request on the `unstable` branch
 
