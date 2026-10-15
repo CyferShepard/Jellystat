@@ -16,7 +16,7 @@ function countOverlapsPerHour(records) {
     const end = dayjs(record.EndTime).add(1, "hour");
 
     // Iterate through each hour from start to end
-    for (let hour = start.clone().startOf("hour"); hour.isBefore(end); hour.add(1, "hour")) {
+    for (let hour = start.clone().startOf("hour"); hour.isBefore(end); hour = hour.add(1, "hour")) {
       const hourKey = hour.format("MMM DD, YY HH:00");
       if (!hourCounts[hourKey]) {
         hourCounts[hourKey] = { Transcodes: 0, DirectPlays: 0 };
