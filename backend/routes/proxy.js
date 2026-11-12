@@ -6,6 +6,24 @@ const API = require("../classes/api-loader");
 
 const router = express.Router();
 
+// The image endpoints are public, so only let their parameters into the Jellyfin URL in a safe form
+// (otherwise e.g. an "id" containing "../" or "?" could be used to reach other Jellyfin endpoints).
+const ID_RE = /^[0-9a-fA-F-]{32,36}$/;
+const NAME_RE = /^[A-Za-z0-9_.\-]{1,64}$/;
+const toBoundedInt = (value, fallback, max = 4000) => {
+  const n = parseInt(value);
+  return Number.isFinite(n) && n >= 0 && n <= max ? n : fallback;
+};
+router.use(["/web/assets/img/devices", "/Items/Images", "/Users/Images"], (req, res, next) => {
+  const { id, devicename } = req.query;
+  if (id !== undefined && !ID_RE.test(String(id))) return res.status(400).send("Invalid id");
+  if (devicename !== undefined && !NAME_RE.test(String(devicename))) return res.status(400).send("Invalid device name");
+  req.query.fillWidth = toBoundedInt(req.query.fillWidth, undefined);
+  req.query.quality = toBoundedInt(req.query.quality, undefined, 100);
+  req.query.blur = toBoundedInt(req.query.blur, undefined, 100);
+  next();
+});
+
 router.get("/web/assets/img/devices/", async (req, res) => {
   const { devicename } = req.query; // Get the image URL from the query string
   const config = await new configClass().getConfig();
