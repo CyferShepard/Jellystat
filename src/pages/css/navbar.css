@@ -79,7 +79,12 @@
   margin-left: 10px;
 }
 
-
-
-
-
+/* Installed PWA on iOS (fullscreen): keep the menu out from under the status bar / notch */
+.navbar.sticky-top {
+  padding-top: env(safe-area-inset-top, 0px) !important;
+  padding-left: env(safe-area-inset-left, 0px) !important;
+}
+body {
+  padding-right: env(safe-area-inset-right, 0px);
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}

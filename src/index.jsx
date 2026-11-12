@@ -18,6 +18,13 @@ import { initReactI18next } from "react-i18next";
 import Loading from "./pages/components/general/loading.jsx";
 import baseUrl from "./lib/baseurl.jsx";
 
+// PWA: register the service worker (only available on HTTPS or localhost)
+if ("serviceWorker" in navigator && window.isSecureContext) {
+  window.addEventListener("load", () => {
+    navigator.serviceWorker.register(`${baseUrl}/sw.js`, { scope: `${baseUrl}/` }).catch((e) => console.log("SW:", e));
+  });
+}
+
 i18n
   .use(Backend)
   .use(LanguageDetector)
