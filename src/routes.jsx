@@ -10,6 +10,7 @@ import TestingRoutes from "./pages/testing";
 import Activity from "./pages/activity";
 import Statistics from "./pages/statistics";
 import ActivityTimeline from "./pages/activity_time_line";
+import Events from "./pages/events";
 
 const routes = [
   { path: "/", element: <Home />, exact: true },
@@ -22,6 +23,7 @@ const routes = [
   { path: "/statistics", element: <Statistics />, exact: true },
   { path: "/activity", element: <Activity />, exact: true },
   { path: "/timeline", element: <ActivityTimeline />, exact: true },
+  { path: "/events", element: <Events />, exact: true },
   { path: "/about", element: <About />, exact: true },
   { path: "/testing/*", element: <TestingRoutes />, exact: true },
 ];

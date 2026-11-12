@@ -1941,6 +1941,60 @@ router.get("/stopTask", async (req, res) => {
   }
 });
 
+// Jellyfin activity log (downloads, logins, devices, playback events) - see tasks/ActivityLogSync.js
+router.get("/getActivityLog", async (req, res) => {
+  try {
+    const size = Math.min(Math.max(parseInt(req.query.size) || 50, 1), 500);
+    const page = Math.max(parseInt(req.query.page) || 1, 1);
+    const type = req.query.type != null ? String(req.query.type) : "";
+    const userId = req.query.userid != null ? String(req.query.userid) : "";
+    const search = req.query.search != null ? String(req.query.search).trim() : "";
+
+    const where = [];
+    const params = [];
+    if (type && type !== "All") {
+      params.push(type.split(","));
+      where.push(`a."Type" = ANY(${params.length})`);
+    }
+    if (userId) {
+      params.push(userId);
+      where.push(`a."UserId" = ${params.length}`);
+    }
+    if (search) {
+      params.push(`%${search}%`);
+      const p = `${params.length}`;
+      where.push(
+        `(a."Name" ILIKE ${p} OR a."ItemName" ILIKE ${p} OR a."Client" ILIKE ${p} OR a."DeviceName" ILIKE ${p} OR a."RemoteAddress" ILIKE ${p} OR u."Name" ILIKE ${p})`
+      );
+    }
+    const whereSql = where.length ? `WHERE ${where.join(" AND ")}` : "";
+
+    const from = `FROM jf_activity_log a
+      LEFT JOIN jf_users u ON u."Id" = a."UserId"
+      LEFT JOIN jf_library_items i ON i."Id" = a."ItemId"
+      LEFT JOIN jf_libraries l ON l."Id" = i."ParentId"`;
+
+    const { rows: countRows } = await db.query(`SELECT count(*)::int AS n ${from} ${whereSql}`, params);
+    const total = countRows[0].n;
+
+    const { rows } = await db.query(
+      `SELECT a.*, u."Name" AS "UserName", i."Type" AS "ItemType", l."Name" AS "LibraryName", l."Id" AS "LibraryId",
+              (i."Id" IS NOT NULL) AS "ItemKnown"
+       ${from} ${whereSql}
+       ORDER BY a."Date" DESC
+       LIMIT ${size} OFFSET ${(page - 1) * size}`,
+      params
+    );
+
+    const { rows: types } = await db.query(`SELECT "Type", count(*)::int AS n FROM jf_activity_log GROUP BY 1 ORDER BY 2 DESC`);
+
+    res.send({ current_page: page, pages: Math.max(Math.ceil(total / size), 1), size, total, results: rows, types });
+  } catch (error) {
+    console.log(error);
+    res.status(503).send("Error fetching activity log");
+  }
+});
+
 // Handle other routes
 router.use((req, res) => {
   res.status(404).send({ error: "Not Found" });

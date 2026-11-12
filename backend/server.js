@@ -29,6 +29,7 @@ const utilsRouter = require("./routes/utils");
 
 // tasks
 const ActivityMonitor = require("./tasks/ActivityMonitor");
+const { startActivityLogSync } = require("./tasks/ActivityLogSync");
 const TaskManager = require("./classes/task-manager-singleton");
 const TaskScheduler = require("./classes/task-scheduler-singleton");
 // const WebhookScheduler = require("./classes/webhook-scheduler");
@@ -248,6 +249,7 @@ try {
         ActivityMonitor.ActivityMonitor(1000);
         new TaskManager();
         new TaskScheduler();
+        startActivityLogSync(60000);
         // new WebhookScheduler();
       });
     });
