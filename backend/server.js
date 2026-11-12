@@ -146,6 +146,11 @@ app.use((req, res, next) => {
 app.use(`/auth`, authRouter, () => {
   /*  #swagger.tags = ['Auth'] */
 }); // mount the API router at /auth
+// Image endpoints are loaded via <img src> and cannot send a token, so they stay public
+// (their parameters are validated in routes/proxy.js). Everything else under /proxy
+// (sessions, admin users, recently added, validateSettings) requires authentication.
+const PUBLIC_PROXY_ROUTES = /^\/(web\/assets\/img\/devices\/?|Items\/Images\/(Backdrop|Primary)\/?|Users\/Images\/Primary\/?)$/;
+app.use("/proxy", (req, res, next) => (PUBLIC_PROXY_ROUTES.test(req.path) ? next() : authenticate(req, res, next)));
 app.use("/proxy", proxyRouter, () => {
   /*  #swagger.tags = ['Proxy']*/
 }); // mount the API router at /proxy

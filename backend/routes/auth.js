@@ -16,7 +16,40 @@ if (JWT_SECRET === undefined) {
 
 const router = express.Router();
 
+// Tokens used to never expire. The frontend already sends the user back to the login page on 401.
+const JWT_EXPIRES_IN = process.env.JWT_EXPIRES_IN || "30d";
+
+// Basic brute-force protection: at most MAX_FAILED_LOGINS failed attempts per IP per window.
+const FAILED_LOGIN_WINDOW_MS = 15 * 60 * 1000;
+const MAX_FAILED_LOGINS = 8;
+const failedLogins = new Map();
+
+function isLoginLocked(ip) {
+  const entry = failedLogins.get(ip);
+  if (!entry) return false;
+  if (Date.now() - entry.first > FAILED_LOGIN_WINDOW_MS) {
+    failedLogins.delete(ip);
+    return false;
+  }
+  return entry.count >= MAX_FAILED_LOGINS;
+}
+
+function registerFailedLogin(ip) {
+  const entry = failedLogins.get(ip);
+  if (!entry || Date.now() - entry.first > FAILED_LOGIN_WINDOW_MS) {
+    failedLogins.set(ip, { first: Date.now(), count: 1 });
+  } else {
+    entry.count++;
+  }
+  console.log(`[JELLYSTAT] Failed login attempt from ${ip} (${failedLogins.get(ip).count}/${MAX_FAILED_LOGINS})`);
+}
+
 router.post("/login", async (req, res) => {
+  const ip = String(req.ip || "unknown");
+  if (isLoginLocked(ip)) {
+    res.status(429).send("Too many failed login attempts, try again later");
+    return;
+  }
   try {
     const { username, password } = req.body;
 
@@ -28,6 +61,7 @@ router.post("/login", async (req, res) => {
       login.length > 0 &&
       login[0].REQUIRE_LOGIN == true
     ) {
+      registerFailedLogin(ip);
       res.sendStatus(401);
       return;
     }
@@ -38,8 +72,9 @@ router.post("/login", async (req, res) => {
 
     if (loginUser.length > 0 || (username === JS_USER && password === CryptoJS.SHA3(JS_PASSWORD).toString())) {
       const user = { id: 1, username: username };
+      failedLogins.delete(ip);
 
-      jwt.sign({ user }, JWT_SECRET, (err, token) => {
+      jwt.sign({ user }, JWT_SECRET, { expiresIn: JWT_EXPIRES_IN }, (err, token) => {
         if (err) {
           console.log(err);
           res.sendStatus(500);
@@ -48,10 +83,12 @@ router.post("/login", async (req, res) => {
         }
       });
     } else {
+      registerFailedLogin(ip);
       res.sendStatus(401);
     }
   } catch (error) {
     console.log(error);
+    res.sendStatus(500);
   }
 });
 
