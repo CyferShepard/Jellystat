@@ -363,7 +363,8 @@ async function syncItemInfo(seasons_and_episodes, library_items) {
 
     if ((existingItemInfo.length == 0 && syncTask.taskName === taskName.partialsync) || syncTask.taskName === taskName.fullsync) {
       //dont update item info if it already exists and running a partial sync
-      const mapped_data = await Item.MediaSources.map((item) => jf_item_info_mapping(item, "Item"));
+      // Books (and some other item types) have no MediaSources
+      const mapped_data = (Item.MediaSources ?? []).map((item) => jf_item_info_mapping(item, "Item"));
       data_to_insert.push(...mapped_data);
 
       if (mapped_data.length !== 0) {
@@ -384,7 +385,7 @@ async function syncItemInfo(seasons_and_episodes, library_items) {
       syncTask.taskName === taskName.fullsync
     ) {
       //dont update item info if it already exists and running a partial sync
-      const mapped_data = await Episode.MediaSources.map((item) => jf_item_info_mapping(item, "Episode"));
+      const mapped_data = (Episode.MediaSources ?? []).map((item) => jf_item_info_mapping(item, "Episode"));
       data_to_insert.push(...mapped_data);
 
       //filter fix if jf_libraries is empty
@@ -722,7 +723,7 @@ async function fullSync(triggertype) {
           ...{ ParentId: item.Id },
         }));
 
-        let library_items = libraryItemsWithParent.filter((item) => ["Movie", "Audio", "Series"].includes(item.Type));
+        let library_items = libraryItemsWithParent.filter((item) => ["Movie", "Audio", "Series", "Book", "AudioBook"].includes(item.Type));
 
         let seasons = libraryItemsWithParent.filter((item) => ["Season"].includes(item.Type));
         let episodes = libraryItemsWithParent.filter((item) => ["Episode"].includes(item.Type));
@@ -948,7 +949,7 @@ async function partialSync(triggertype) {
           ...{ ParentId: library.Id },
         }));
 
-        let library_items = libraryItemsWithParent.filter((item) => ["Movie", "Audio", "Series"].includes(item.Type));
+        let library_items = libraryItemsWithParent.filter((item) => ["Movie", "Audio", "Series", "Book", "AudioBook"].includes(item.Type));
 
         let seasons = libraryItemsWithParent.filter((item) => ["Season"].includes(item.Type));
         let episodes = libraryItemsWithParent.filter((item) => ["Episode"].includes(item.Type));
