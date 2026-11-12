@@ -7,6 +7,7 @@ import SettingsFillIcon from 'remixicon-react/SettingsFillIcon';
 import GalleryFillIcon from 'remixicon-react/GalleryFillIcon';
 import UserFillIcon from 'remixicon-react/UserFillIcon';
 import InformationFillIcon from 'remixicon-react/InformationFillIcon';
+import DownloadCloudFillIcon from 'remixicon-react/DownloadCloudFillIcon';
 import { Trans } from 'react-i18next';
 
 
@@ -34,6 +35,12 @@ export const navData = [
         icon: <HistoryFillIcon />,
         text: <Trans i18nKey="MENU_TABS.ACTIVITY" />,
         link: "activity"
+    },
+    {
+        id: 8,
+        icon: <DownloadCloudFillIcon />,
+        text: <Trans i18nKey="MENU_TABS.EVENTS" />,
+        link: "events"
     },
     {
         id: 5,

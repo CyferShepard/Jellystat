@@ -9,7 +9,8 @@
     "SETTINGS": "Settings",
     "ABOUT": "About",
     "LOGOUT": "Logout",
-    "TIMELINE": "Timeline"
+    "TIMELINE": "Timeline",
+    "EVENTS": "Events"
   },
   "HOME_PAGE": {
     "SESSIONS": "Sessions",
@@ -135,7 +136,8 @@
     "UNAUTHORIZED": "Error {STATUS}: Unauthorized",
     "PASSWORD_LENGTH": "Password Must be at least 6 characters long",
     "USERNAME_REQUIRED": "Username is required",
-    "NO_WEBHOOKS": "No Webhooks Found"
+    "NO_WEBHOOKS": "No Webhooks Found",
+    "NO_EVENTS": "No Events Found"
   },
   "SHOW_ARCHIVED_LIBRARIES": "Show Archived Libraries",
   "HIDE_ARCHIVED_LIBRARIES": "Hide Archived Libraries",
@@ -274,6 +276,23 @@
     "TIMELINE": "Timeline",
     "EPISODES_one": "Episode",
     "EPISODES_other": "Episodes"
+  },
+  "EVENTS_PAGE": {
+    "INFO": "Events from the Jellyfin activity log: who downloaded what and when (including books sent to e-readers), logins and connected devices. Updated every minute.",
+    "EVENT": "Event",
+    "ITEM": "Item",
+    "LIBRARY": "Library",
+    "TYPES": {
+      "UserDownloadingContent": "Download",
+      "AuthenticationSucceeded": "Login",
+      "AuthenticationFailed": "Failed login",
+      "SessionStarted": "Device connected",
+      "SessionEnded": "Device disconnected",
+      "VideoPlayback": "Playback started",
+      "VideoPlaybackStopped": "Playback stopped",
+      "AudioPlayback": "Audio started",
+      "AudioPlaybackStopped": "Audio stopped"
+    }
   },
   "SEARCH": "Search",
   "TOTAL": "Total",
